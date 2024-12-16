@@ -18,22 +18,24 @@ public class CouponType {
     @Column(name = "coupon_type_id")
     private Long couponTypeId;
 
-    @Column(name = "coupon_type_name")
+    @Column(name = "coupon_type_name", length = 40, nullable = false)
     private String couponTypeName;
 
+    @Column(name = "period")
     private Integer period;
 
+    @Column(name = "deadline")
     private LocalDateTime deadline;
 
-    @Column(name = "coupon_stacking")
+    @Column(name = "coupon_stacking",nullable = false)
     private Boolean couponStacking;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "coupon_policy_id")
+    @JoinColumn(name = "coupon_policy_id",nullable = false)
     private CouponPolicy couponPolicy;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "coupon_target_type")
+    @Column(name = "coupon_target_type",nullable = false)
     private CouponTargetType couponTargetType;
 
     @Builder

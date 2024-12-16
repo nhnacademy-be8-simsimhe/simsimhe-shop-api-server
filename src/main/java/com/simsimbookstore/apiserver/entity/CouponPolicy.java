@@ -18,11 +18,11 @@ public class CouponPolicy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long couponPolicyId;
 
-    @Column(name = "coupon_policy_name",length = 100)
+    @Column(name = "coupon_policy_name",length = 100,nullable = false)
     private String couponPolicyName;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "discount_type")
+    @Column(name = "discount_type", nullable = false)
     private DiscountType discountType;
 
     @Column(name = "discount_price")
@@ -37,7 +37,7 @@ public class CouponPolicy {
     @Column(name = "min_order_amount")
     private BigDecimal minOrderAmount;
 
-    @Column(name = "policy_description")
+    @Column(name = "policy_description", nullable = false)
     private String policyDescription;
 
     @Builder
