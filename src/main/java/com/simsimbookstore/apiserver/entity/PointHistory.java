@@ -20,21 +20,21 @@ public class PointHistory {
     private Long pointHistoryId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "point_type")
+    @Column(name = "point_type", nullable = false)
     private PointType pointType;
 
-    @Column(name = "amount")
+    @Column(name = "amount", nullable = false)
     private Integer amount;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime created_at;
 
 //    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id")
+//    @JoinColumn(name = "user_id", nullable = false)
 //    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "point_policy_id")
+    @JoinColumn(name = "point_policy_id", nullable = false)
     private PointPolicy pointPolicy;
 
     @Builder
