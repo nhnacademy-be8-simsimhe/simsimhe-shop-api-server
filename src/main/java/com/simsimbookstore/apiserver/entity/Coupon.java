@@ -16,24 +16,25 @@ public class Coupon {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long couponId;
 
-    @Column(name = "issue_date")
+    @Column(name = "issue_date",nullable = false)
     private LocalDateTime issueDate;
 
+    @Column(name = "deadline", nullable = false)
     private LocalDateTime deadline;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "coupon_status")
+    @Column(name = "coupon_status", nullable = false)
     private CouponStatus couponStatus;
 
     @Column(name = "use_date")
     private LocalDateTime useDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "coupon_type_id")
+    @JoinColumn(name = "coupon_type_id", nullable = false)
     private CouponType couponType;
 
 //    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id")
+//    @JoinColumn(name = "user_id",nullable = false)
 //    private User user;
 
     public enum CouponStatus {

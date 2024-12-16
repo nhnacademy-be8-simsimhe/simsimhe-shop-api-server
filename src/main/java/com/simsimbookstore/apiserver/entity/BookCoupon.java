@@ -16,12 +16,12 @@ public class BookCoupon {
 
     @MapsId("couponTypeId")
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "coupon_type_id")
+    @JoinColumn(name = "coupon_type_id",nullable = false)
     private CouponType couponType;
 
 //    @MapsId("bookId")
 //    @ManyToOne
-//    @JoinColumn(name = "book_id")
+//    @JoinColumn(name = "book_id",nullable = false)
 //    private Book book;
 
     @Builder
