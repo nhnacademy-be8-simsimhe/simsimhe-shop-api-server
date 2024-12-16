@@ -25,8 +25,8 @@ public class Coupon {
     @Column(name = "coupon_status")
     private CouponStatus couponStatus;
 
-    @Column(name = "coupon_status")
-    private LocalDateTime userDate;
+    @Column(name = "use_date")
+    private LocalDateTime useDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coupon_type_id")
@@ -40,14 +40,14 @@ public class Coupon {
         USED, EXPIRED, UNUSED
     }
     @Builder
-    public Coupon(Long couponId, LocalDateTime issueDate, LocalDateTime deadline, CouponStatus couponStatus, LocalDateTime userDate, CouponType couponType
+    public Coupon(Long couponId, LocalDateTime issueDate, LocalDateTime deadline, CouponStatus couponStatus, LocalDateTime useDate, CouponType couponType
 //            , User user
             ) {
         this.couponId = couponId;
         this.issueDate = issueDate;
         this.deadline = deadline;
         this.couponStatus = couponStatus;
-        this.userDate = userDate;
+        this.useDate = useDate;
         this.couponType = couponType;
 //        this.user = user;
     }
