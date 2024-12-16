@@ -17,11 +17,11 @@ public class OrderPointManage {
     private Long orderPointId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "point_history_id")
+    @JoinColumn(name = "point_history_id", nullable = false)
     private PointHistory pointHistory;
 
 //    @OneToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "order_id")
+//    @JoinColumn(name = "order_id", nullable = false)
 //    private Order order;
 
     @Builder

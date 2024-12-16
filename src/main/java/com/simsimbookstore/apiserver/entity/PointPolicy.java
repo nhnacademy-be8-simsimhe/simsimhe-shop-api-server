@@ -20,7 +20,7 @@ public class PointPolicy {
     private Long pointPolicyId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "earning_type")
+    @Column(name = "earning_type" , length = 20, nullable = false)
     private EarningType earningType;
 
     @Column(name = "fix_points")
@@ -29,14 +29,14 @@ public class PointPolicy {
     @Column(name = "rating")
     private BigDecimal rating;
 
-    @Column(name = "description")
+    @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "earning_form")
+    @Column(name = "earning_form", nullable = false)
     private EarningForm earningForm;
 
     public enum EarningForm {
