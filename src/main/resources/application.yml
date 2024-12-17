@@ -1,1 +1,11 @@
-spring.application.name=api-server
+spring:
+  application:
+    name: api-server
+
+
+server:
+  shutdown: graceful
+
+
+
+
