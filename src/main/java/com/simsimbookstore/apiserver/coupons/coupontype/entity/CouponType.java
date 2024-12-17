@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "ALL")
+@DiscriminatorColumn(name = "coupon_type")
 @Entity
 @Getter
 @Setter
