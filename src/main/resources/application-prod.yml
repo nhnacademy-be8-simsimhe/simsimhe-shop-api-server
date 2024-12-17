@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    type: org.apache.commons.dbcp2.BasicDataSource
+    username: project_be8_simsimhe
+    password: Tevroz4D$uFN2tYQ
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://133.186.241.167:3306/${database_name}?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+    dbcp2:
+      initial-size: 20
+      max-idle: 30
+      min-idle: 10
+      max-total: 50
+      max-wait-millis: 3000
+      test-on-borrow: true
+      test-while-idle: true
+      validation-query: select 1
+
+  # jpa 설정
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+      base-path: /management
+      path-mapping:
+        health: health_check
+  endpoint:
+    health:
+      show-details: never
