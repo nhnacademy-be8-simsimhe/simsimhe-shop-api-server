@@ -11,8 +11,29 @@ spring:
         eureka, jpa, dbcp2, actuator
       dev:
         jpa, dbcp2
-
+      servlet:
+        multipart:
+          enabled: true
+          max-file-size: 10MB
+          max-request-size: 10MB
 # 서버 포트 설정
 server:
   port: 8020
   shutdown: graceful
+
+secure-key-manager:
+  password: simsimbook
+  url: https://api-keymanager.nhncloudservice.com
+  path: /keymanager/v1.0/appkey/{appkey}/secrets/{keyid}
+  appKey: qTQNj7LyHhdAazH3
+
+object-storage:
+  auth-url: b9d98b2722e34ea09a48babd26dedb8a
+  password: 413f34b377e14d2b857c1441dab08606
+  storage-url: 6253409e99ad4847814ae3e2d30306ea
+  tenant-id: ebe2292c911d4f8aa4cfeda67ef067d9
+  username: 32c6d1c4cef44e2789f387f9391962ac
+
+database:
+  username: 97f78245ad8446ce9267b29b075f80a7
+  password: f2880bd868cd445c9f1c16e13b977f04
