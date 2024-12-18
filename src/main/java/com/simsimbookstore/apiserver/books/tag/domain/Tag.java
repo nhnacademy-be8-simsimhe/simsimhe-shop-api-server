@@ -4,8 +4,6 @@ package com.simsimbookstore.apiserver.books.tag.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -19,7 +17,7 @@ public class Tag {
     @Column(name = "tag_id")
     private Long tagId;
 
-    @Column(name = "tag_name", nullable = false, length = 10, unique = true)
+    @Column(name = "tag_name", nullable = false, length = 10)
     private String tagName;
 
 }

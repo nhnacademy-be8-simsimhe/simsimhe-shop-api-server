@@ -4,8 +4,6 @@ package com.simsimbookstore.apiserver.books.contributor.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-
-@Builder
 @Entity
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor
@@ -19,12 +17,10 @@ public class Contributor {
     @Column(name = "contributor_id")
     private Long contributorId;
 
-    @Column(name = "contributor_name", nullable = false, length = 50)
+    @Column(name = "contributor_name", nullable = false, length = 10)
     private String contributorName;
 
-    //    @Enumerated(EnumType.STRING)
-//    @Column(name = "contributor_role", nullable = false)
-//    private ContributorRole contributorRole;
-    @Column(name = "contributor_role", nullable = false, length = 20)
-    private String contributorRole;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "contributor_role", nullable = false)
+    private ContributorRole contributorRole;
 }

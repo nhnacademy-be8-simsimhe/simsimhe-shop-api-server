@@ -6,8 +6,6 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -25,11 +23,11 @@ public class Book {
     private String title;
 
     @Lob
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false)
     private String description;
 
     @Lob
-    @Column(name = "book_index", nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false)
     private String index;
 
     @Column(nullable = false, length = 50)
@@ -39,7 +37,7 @@ public class Book {
     private String isbn;
 
     @Column(nullable = false)
-    private int quantity = 100;
+    private int quantity;
 
     // 정가
     @Column(nullable = false, precision = 10, scale = 2)
@@ -53,7 +51,7 @@ public class Book {
     private LocalDate publicationDate;
 
     @Column(name = "gift_packaging", nullable = false)
-    private boolean giftPackaging = true;
+    private boolean giftPackaging = false;
 
     @Column(nullable = false)
     private int pages;
@@ -62,6 +60,6 @@ public class Book {
     @Column(nullable = false)
     private BookStatus bookStatus;
 
-    @Column(name = "view_count", nullable = false)
-    private Long viewCount = 0L;
+    @Column(name = "view_count", nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    private Long viewCount;
 }
