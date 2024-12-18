@@ -6,7 +6,6 @@ import com.simsimbookstore.apiserver.books.tag.domain.Tag;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
