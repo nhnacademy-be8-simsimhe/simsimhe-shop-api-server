@@ -16,7 +16,7 @@ public class EurekaPauseHandler {
         RestTemplate restTemplate = new RestTemplate();
         try {
             // /actuator/pause 엔드포인트 호출
-            String response = restTemplate.postForObject("http://localhost:"+port+"/management/pause", null, String.class);
+            String response = restTemplate.postForObject("http://localhost:"+port+"/management/actuator/pause", null, String.class);
 
             if ("PAUSED".equals(response)) {
                 return true; // 정상적으로 서비스가 `PAUSED` 상태로 전환됨
