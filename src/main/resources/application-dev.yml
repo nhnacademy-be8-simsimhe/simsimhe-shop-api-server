@@ -1,37 +1,19 @@
 spring:
-  h2:
-    console:
-      enabled: true # 개발 환경에서만 H2 콘솔 활성화
-      path: /h2-console # H2 콘솔 접근 경로
-
   datasource:
-    url: jdbc:h2:tcp://localhost/~/${database_name}
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: ${password}
-    type: org.apache.commons.dbcp2.BasicDataSource
+    url: jdbc:mysql://133.186.241.167:3306/project_be8_simsimhe_test?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: project_be8_simsimhe
+    password: Tevroz4D$uFN2tYQ
+#    dbcp2:
+#      initial-size: 2
+#      max-idle: 5
+#      min-idle: 1
+#      max-total: 10
+#      max-wait-millis: 5000
+#      test-on-borrow: true
+#      test-while-idle: true
+#      validation-query: select 1
 
-  # jpa 설정
-  jpa:
-    hibernate:
-        ddl-auto: update
-
-# eureka 설정
 eureka:
   client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://eureka-server:8761/eureka
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health, beans, conditions, loggers, info, shutdown
-      base-path: /management
-      path-mapping:
-        health: health_check
-  endpoint:
-    health:
-      show-details: always
+    enabled: false # eureka 사용시 true로 변경
