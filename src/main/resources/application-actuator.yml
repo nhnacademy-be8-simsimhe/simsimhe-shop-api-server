@@ -2,8 +2,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: beans, conditions, configprops, env, health, httpexchanges, info, loggers, metrics, mappings, threaddump, shutdown
+        include: beans, conditions, configprops, env, health, httpexchanges, info, loggers, metrics, mappings, threaddump, shutdown, pause
       base-path: /management
-
+  endpoint:
+    pause:
+      enabled: true
     health:
       show-details: never

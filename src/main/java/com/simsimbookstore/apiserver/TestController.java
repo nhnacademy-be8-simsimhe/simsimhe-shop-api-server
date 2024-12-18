@@ -12,6 +12,6 @@ public class TestController {
 
     @GetMapping("/hello")
     public String hello(){
-        return "aaaㄴㅇㅁㄹㅇㄴㅁㄹㄴㅇㄹㄴㅁㅇㄹㄴㅁㅇㄴㅁㅇㄹa";
+        return "무중단 배포 테스트";
     }
 }
