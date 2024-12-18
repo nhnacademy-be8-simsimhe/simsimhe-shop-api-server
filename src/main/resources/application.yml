@@ -1,11 +1,19 @@
 spring:
   application:
     name: api-server
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
 
 
 server:
   shutdown: graceful
+  port: 8020
 
 
 
-
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka
