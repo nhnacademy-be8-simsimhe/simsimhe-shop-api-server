@@ -3,17 +3,16 @@ spring:
     name: api-server
   lifecycle:
     timeout-per-shutdown-phase: 30s
+  profiles:
+    active: dev
+    # 마지막에 실행되는 파일이 앞의 설정을 덮어쓰기 때문에 사용에 주의가 필요
+    group:
+      prod:
+        eureka, jpa, dbcp2, actuator
+      dev:
+        jpa, dbcp2
 
-
+# 서버 포트 설정
 server:
-  shutdown: graceful
   port: 8020
-
-
-
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://127.0.0.1:8761/eureka
+  shutdown: graceful
