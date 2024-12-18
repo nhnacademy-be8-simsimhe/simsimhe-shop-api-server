@@ -1,4 +1,4 @@
-package com.simsimbookstore.apiserver.users.oauthuser.entity;
+package com.simsimbookstore.apiserver.users.socialuser.entity;
 
 
 import com.simsimbookstore.apiserver.users.user.entity.User;
@@ -9,14 +9,17 @@ import jakarta.persistence.Table;
 import lombok.*;
 
 @Entity
-@Table(name = "oauth_users")
+@Table(name = "social_users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
 @Setter
-@DiscriminatorValue("OauthUser")
-public class OauthUser extends User {
+@DiscriminatorValue("SocialUser")
+public class SocialUser extends User {
 
     @Column(name = "oauth_id", nullable = false, length = 50, unique = true)
     private String oauthId;
+
+    @Column(name = "provider", nullable = false, length = 20)
+    private String provider;
 }
