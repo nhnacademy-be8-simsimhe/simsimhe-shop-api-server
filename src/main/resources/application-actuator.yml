@@ -5,6 +5,5 @@ management:
         include: beans, conditions, configprops, env, health, httpexchanges, info, loggers, metrics, mappings, threaddump, shutdown
       base-path: /management
 
-  endpoint:
     health:
       show-details: never
