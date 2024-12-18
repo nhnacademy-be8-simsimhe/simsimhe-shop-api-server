@@ -1,4 +1,4 @@
-package com.simsimbookstore.apiserver.entity;
+package com.simsimbookstore.apiserver.orders.delivery.entity;
 
 
 import jakarta.persistence.Column;
@@ -8,11 +8,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Builder
 @Entity
+@Getter
 @Table(name = "delivery_policies")
 @NoArgsConstructor
+@AllArgsConstructor
 public class DeliveryPolicy {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,4 +34,15 @@ public class DeliveryPolicy {
 
     @Column(name = "standard_policy")
     private boolean standardPolicy;
+
+
+
+    public void changeStandardPolicy() {
+        this.standardPolicy = !this.standardPolicy;
+    }
+
+    public void changePolicyToFalse() {
+        this.standardPolicy = false;
+    }
+
 }

@@ -1,4 +1,4 @@
-package com.simsimbookstore.apiserver.entity;
+package com.simsimbookstore.apiserver.orders.order;
 
 
 import jakarta.persistence.Column;
