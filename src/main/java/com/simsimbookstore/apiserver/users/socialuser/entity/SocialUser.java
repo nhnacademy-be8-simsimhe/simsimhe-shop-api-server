@@ -22,4 +22,5 @@ public class SocialUser extends User {
 
     @Column(name = "provider", nullable = false, length = 20)
     private String provider;
+
 }
