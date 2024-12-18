@@ -1,4 +1,4 @@
-package com.simsimbookstore.apiserver.users.socialuser.entity;
+package com.simsimbookstore.apiserver.users.socialuser;
 
 
 import com.simsimbookstore.apiserver.users.user.entity.User;
