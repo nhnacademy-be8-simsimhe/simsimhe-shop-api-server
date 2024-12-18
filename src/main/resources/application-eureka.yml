@@ -5,9 +5,6 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://127.0.0.1:8761/eureka
-    registry-fetch-interval-seconds: 5
   instance:
-    lease-renewal-interval-in-seconds: 1
-    lease-expiration-duration-in-seconds: 3
-    appname: api-server
+    appname: API-SERVER
 
