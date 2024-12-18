@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    type: org.apache.commons.dbcp2.BasicDataSource
+    dbcp2:
+      test-on-borrow: true
+      validation-query: select 1
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+    hibernate:
+      ddl-auto: none
+    open-in-view: false

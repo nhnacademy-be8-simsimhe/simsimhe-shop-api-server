@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    username: project_be8_simsimhe
+    password: Tevroz4D$uFN2tYQ
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://133.186.241.167:3306/project_be8_simsimhe_book_store?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+#    dbcp2:
+#      initial-size: 20
+#      max-idle: 30
+#      min-idle: 10
+#      max-total: 50
+#      max-wait-millis: 3000
+#      test-on-borrow: true
+#      test-while-idle: true
+#      validation-query: select 1
