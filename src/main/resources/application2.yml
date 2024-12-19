@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: api-server
+  profiles:
+    active: dev # 배포시 prod로 변경
+
+  data:
+    redis:
+      host: localhost
+      password: ${your-redis-password}
+      port: 6379
+
+  eureka:
+    client:
+      fetch-registry: 'true'
+      register-with-eureka: 'true'
+
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+
+  # jpa 설정
+  jpa:
+    properties:
+      database-platform: org.hibernate.dialect.MySQLDialect
+      hibernate:
+        format_sql: true # SQL 포맷팅
+        show-sql: true # SQL log 출력
+    open-in-view: false
+
+# 서버 포트 설정
+server:
+  port: 8020
