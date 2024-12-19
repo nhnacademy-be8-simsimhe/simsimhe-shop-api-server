@@ -1,7 +1,9 @@
 package com.simsimbookstore.apiserver.storage.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,6 +12,10 @@ import com.simsimbookstore.apiserver.storage.config.ObjectStorageConfig;
 import com.simsimbookstore.apiserver.storage.exception.ObjectStorageException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +23,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -212,6 +219,58 @@ class ObjectServiceImplTest {
         verify(successFile, times(1)).getInputStream();
 
         verify(failFile, times(1)).getInputStream();
+    }
+
+    @Test
+    @DisplayName("유효한 URL 업로드 성공 테스트")
+    void uploadValidUrlSuccess() throws IOException, InterruptedException {
+        String validUrl = "https://example.com/testFile.png";
+        String mockTokenResponse = validTokenResponse();
+        InputStream mockInputStream = new ByteArrayInputStream("mock file content".getBytes());
+
+        when(authService.requestToken()).thenReturn(mockTokenResponse);
+        try (MockedStatic<HttpClient> mockedHttpClient = mockStatic(HttpClient.class)) {
+            HttpClient httpClientMock = mock(HttpClient.class);
+            HttpResponse responseMock = mock(HttpResponse.class);
+
+            mockedHttpClient.when(HttpClient::newHttpClient).thenReturn(httpClientMock);
+            when(httpClientMock.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
+                    .thenReturn(responseMock);
+
+            when(responseMock.statusCode()).thenReturn(200);
+            when(responseMock.body()).thenReturn(mockInputStream);
+
+            String result = objectService.uploadObjects(validUrl);
+
+            assertTrue(result.endsWith(".png"));
+            verify(authService, times(1)).requestToken();
+        }
+    }
+
+    @Test
+    @DisplayName("빈 URL 입력 시 예외 발생 테스트")
+    void uploadEmptyUrl() {
+        String emptyUrl = "";
+
+        ObjectStorageException exception = assertThrows(
+                ObjectStorageException.class,
+                () -> objectService.uploadObjects(emptyUrl)
+        );
+
+        assertEquals("No URLs provided for upload.", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("잘못된 URL 업로드 시 예외 발생 테스트")
+    void uploadInvalidUrl() {
+        String invalidUrl = "invalid-url";
+
+        ObjectStorageException exception = assertThrows(
+                ObjectStorageException.class,
+                () -> objectService.uploadObjects(invalidUrl)
+        );
+
+        assertTrue(exception.getMessage().contains("Failed to create InputStream from URL"));
     }
 
     private String validTokenResponse() {
