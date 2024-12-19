@@ -3,6 +3,17 @@ spring:
     name: api-server
   lifecycle:
     timeout-per-shutdown-phase: 30s
+  datasource:
+    url: jdbc:mysql://localhost:3306/shopserver
+    username: root
+    password: iamjjang9!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
 
 
 server:
