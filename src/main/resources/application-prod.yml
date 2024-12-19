@@ -1,9 +1,6 @@
 spring:
   datasource:
-    username: project_be8_simsimhe
-    password: Tevroz4D$uFN2tYQ
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://133.186.241.167:3306/project_be8_simsimhe_book_store?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
 #    dbcp2:
 #      initial-size: 20
 #      max-idle: 30
@@ -13,3 +10,8 @@ spring:
 #      test-on-borrow: true
 #      test-while-idle: true
 #      validation-query: select 1
+object-storage:
+  container-name: 9dcd20ed0e9841929870ec167eb03518
+
+database:
+  url: ffad5418272e4efeb469f91a7b2c288e
