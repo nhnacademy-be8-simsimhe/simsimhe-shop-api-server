@@ -3,6 +3,9 @@ spring:
     name: api-server
   lifecycle:
     timeout-per-shutdown-phase: 30s
+
+
+
   profiles:
     active: dev
     # 마지막에 실행되는 파일이 앞의 설정을 덮어쓰기 때문에 사용에 주의가 필요
@@ -17,6 +20,7 @@ spring:
           max-file-size: 10MB
           max-request-size: 10MB
 # 서버 포트 설정
+
 server:
   port: 8020
   shutdown: graceful

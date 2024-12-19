@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
@@ -26,6 +27,11 @@ public class BookImagePath {
 
     @Column(name = "image_path", nullable = false)
     private String imagePath;
+
+
+    //false면 썸내일(커버) 이미지 true면 상세내용에 있는 이미지
+    @Column(name = "thumbnail", nullable = false)
+    private boolean thumbnail = false;
 
 
 }

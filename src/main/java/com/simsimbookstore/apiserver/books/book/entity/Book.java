@@ -21,7 +21,8 @@ public class Book {
     @Column(name = "book_id")
     private Long bookId;
 
-    @Column(nullable = false, length = 100)
+    @Lob
+    @Column(nullable = false,columnDefinition = "TEXT")
     private String title;
 
     @Lob
@@ -30,7 +31,7 @@ public class Book {
 
     @Lob
     @Column(name = "book_index", nullable = false, columnDefinition = "TEXT")
-    private String index;
+    private String bookIndex;
 
     @Column(nullable = false, length = 50)
     private String publisher;
@@ -55,6 +56,7 @@ public class Book {
     @Column(name = "gift_packaging", nullable = false)
     private boolean giftPackaging = true;
 
+    //넣을지말지 고민 일일이 넣어야함
     @Column(nullable = false)
     private int pages;
 

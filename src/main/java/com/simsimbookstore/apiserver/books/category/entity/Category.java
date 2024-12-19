@@ -6,11 +6,17 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Builder
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
 @Setter
+@Table(
+        name = "category",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"category_name", "parent_id"})
+)
+
 public class Category {
 
     @Id
@@ -18,7 +24,7 @@ public class Category {
     @Column(name = "category_id")
     private Long categoryId;
 
-    @Column(name = "category_name", nullable = false, length = 30)
+    @Column(name = "category_name", nullable = false, length = 50)
     private String categoryName;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -26,5 +32,11 @@ public class Category {
     private Category parent;
 
     @OneToMany(mappedBy = "parent")
-    private List<Category> children  = new ArrayList<>(); // 자식 카테고리 목록
+    @ToString.Exclude
+    private List<Category> children = new ArrayList<>(); // 자식 카테고리 목록
+
+    public void addChildCategory(Category child) {
+        this.children.add(child);
+        child.setParent(this);
+    }
 }
