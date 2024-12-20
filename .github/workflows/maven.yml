@@ -15,11 +15,6 @@ on:
       - completed
     status: success
 
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
 jobs:
   build:
     runs-on: ubuntu-latest
