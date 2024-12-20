@@ -14,7 +14,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -76,8 +75,7 @@ public class TagController {
      * @return
      */
     @DeleteMapping("/tags/{tagId}")
-    private ResponseEntity<?> deleteTag(@PathVariable(name = "tagId") Long tagId){
-
+    public ResponseEntity<?> deleteTag(@PathVariable(name = "tagId") Long tagId){
         tagService.deleteTag(tagId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
