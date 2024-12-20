@@ -1,6 +1,5 @@
 package com.simsimbookstore.apiserver.orders.packages.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.simsimbookstore.apiserver.orders.packages.dto.WrapTypeResponseDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
