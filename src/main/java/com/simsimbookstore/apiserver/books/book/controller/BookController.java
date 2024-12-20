@@ -16,16 +16,25 @@ public class BookController {
 
     /**
      * 알라딘 api로 데이터베이스에 삽입
-     * @param query 현재 작가이름으로 검색쿼리 구현으로 작가로 검색하면 검색내용이 DB에 들어감
+     *  현재 작가이름으로 검색쿼리 구현으로 작가로 검색하면 검색내용이 DB에 들어감
      * @return
      */
-    @GetMapping("/api/books/fetch")
-    public String fetchBooks(@RequestParam String query) {
+    @GetMapping("/api/books/aladin")
+    public String fetchBooks() {
         try {
-            aladinApiService.fetchAndSaveBooks(query);
+            aladinApiService.fetchAndSaveBestsellerBooks();
             return "Books have been fetched and saved successfully.";
         } catch (Exception e) {
             return "Error occurred: " + e.getMessage();
         }
     }
+//    @GetMapping("/api/books/fetch")
+//    public String fetchBooks(@RequestParam String query) {
+//        try {
+//            aladinApiService.fetchAndSaveBestsellerBooks();
+//            return "Books have been fetched and saved successfully.";
+//        } catch (Exception e) {
+//            return "Error occurred: " + e.getMessage();
+//        }
+//    }
 }

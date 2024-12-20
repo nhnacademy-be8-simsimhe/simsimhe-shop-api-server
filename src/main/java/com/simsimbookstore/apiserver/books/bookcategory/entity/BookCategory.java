@@ -5,6 +5,8 @@ import com.simsimbookstore.apiserver.books.category.entity.Category;
 import jakarta.persistence.*;
 import lombok.*;
 
+
+@Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor
 @Setter
