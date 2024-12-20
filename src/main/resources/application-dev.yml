@@ -1,6 +1,9 @@
 spring:
   datasource:
+    url: jdbc:mysql://133.186.241.167:3306/project_be8_simsimhe_test?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
     driver-class-name: com.mysql.cj.jdbc.Driver
+    username: project_be8_simsimhe
+    password: Tevroz4D$uFN2tYQ
 #    dbcp2:
 #      initial-size: 2
 #      max-idle: 5
@@ -10,10 +13,16 @@ spring:
 #      test-on-borrow: true
 #      test-while-idle: true
 #      validation-query: select 1
-
 eureka:
   client:
     enabled: false # eureka 사용시 true로 변경
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: debug
+        type: trace
 
 object-storage:
   container-name: 6781cafa4fe14ae1ac55305ac102bddf

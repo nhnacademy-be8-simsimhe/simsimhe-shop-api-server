@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
+@Builder
 @Entity
 @Table(name = "grades")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -19,8 +20,9 @@ public class Grade {
     @Column(name = "grade_id")
     private Long gradeId;
 
-    @Column(nullable = false, length = 10)
-    private String tier;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10, unique = true)
+    private Tier tier;
 
     @Column(name = "min_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal minAmount;
