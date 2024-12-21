@@ -84,6 +84,7 @@ public class ContributorController {
 
     /**
      * 기여자 단건 조회
+     *
      * @param contributorId
      * @return
      */
@@ -92,6 +93,19 @@ public class ContributorController {
         Contributor contributor = contributorService.findById(contributorId);
         ContributorResponseDto response = ContributorMapper.toResponse(contributor);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+
+    }
+
+    @PutMapping("/contributors/{contributorId}")
+    public ResponseEntity<?> update(@PathVariable("contributorId") Long contributorId,
+                                    @RequestBody @Valid ContributorRequestDto contributorRequestDto,
+                                    BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bindingResult.getAllErrors());
+        }
+        ContributorResponseDto responseDto = contributorService.updateContributor(contributorId, contributorRequestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+
 
     }
 

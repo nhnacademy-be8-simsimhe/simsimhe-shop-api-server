@@ -102,4 +102,19 @@ public class ContributorServiceImpl implements ContributorService {
             throw new ContributorNotFoundException("찾는 기여자가없습니다");
         }
     }
+
+    /**
+     * 기여자 수정
+     * @param contributorId
+     * @param contributorRequestDto
+     * @return
+     */
+    @Transactional
+    @Override
+    public ContributorResponseDto updateContributor(Long contributorId, ContributorRequestDto contributorRequestDto) {
+        Contributor contributor = this.findById(contributorId);
+        contributor.setContributorName(contributorRequestDto.getContributorName());
+        contributor.setContributorRole(contributorRequestDto.getContributorRole());
+        return ContributorMapper.toResponse(contributor);
+    }
 }

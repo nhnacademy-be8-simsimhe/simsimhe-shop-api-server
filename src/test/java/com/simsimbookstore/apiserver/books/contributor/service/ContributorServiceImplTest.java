@@ -167,4 +167,22 @@ class ContributorServiceImplTest {
 
     }
 
+    @Test
+    @DisplayName("기여자 수정")
+    void update() {
+        ContributorRequestDto requestDto = new ContributorRequestDto("임채환", "옮긴이");
+        ContributorResponseDto responseDto = contributorService.updateContributor(1L, requestDto);
+
+        // then
+        Assertions.assertNotNull(responseDto);
+        Assertions.assertEquals("임채환", responseDto.getContributorName());
+        Assertions.assertEquals("옮긴이", responseDto.getContributorRole());
+
+        // 데이터베이스에서 수정된 값 확인
+        Contributor updatedContributor = contributorService.findById(responseDto.getContributorId());
+        Assertions.assertEquals("임채환", updatedContributor.getContributorName());
+        Assertions.assertEquals("옮긴이", updatedContributor.getContributorRole());
+
+    }
+
 }
