@@ -37,6 +37,12 @@ class ContributorServiceImplTest {
         contributorService.saveContributor(requestDto);
     }
 
+    @BeforeEach
+    void cleanDatabase() {
+        contributorRepositroy.deleteAll();
+    }
+
+
     @Test
     @DisplayName("DB에 등록되어 있지 않은 기여자 등록하기")
     void saveNewContribitor() {
@@ -170,19 +176,32 @@ class ContributorServiceImplTest {
     @Test
     @DisplayName("기여자 수정")
     void update() {
-        ContributorRequestDto requestDto = new ContributorRequestDto("임채환", "옮긴이");
-        ContributorResponseDto responseDto = contributorService.updateContributor(1L, requestDto);
+        // 데이터 생성
+        ContributorRequestDto saveDto = new ContributorRequestDto("임시 데이터", "저자");
+        ContributorResponseDto savedContributor = contributorService.saveContributor(saveDto);
 
-        // then
-        Assertions.assertNotNull(responseDto);
-        Assertions.assertEquals("임채환", responseDto.getContributorName());
-        Assertions.assertEquals("옮긴이", responseDto.getContributorRole());
+        // ID 가져오기
+        Long contributorId = savedContributor.getContributorId();
 
-        // 데이터베이스에서 수정된 값 확인
-        Contributor updatedContributor = contributorService.findById(responseDto.getContributorId());
-        Assertions.assertEquals("임채환", updatedContributor.getContributorName());
-        Assertions.assertEquals("옮긴이", updatedContributor.getContributorRole());
+        // 수정 요청
+        ContributorRequestDto updateDto = new ContributorRequestDto("임채환", "옮긴이");
+        ContributorResponseDto updatedResponse = contributorService.updateContributor(contributorId, updateDto);
 
+        // 검증
+        Assertions.assertNotNull(updatedResponse);
+        Assertions.assertEquals("임채환", updatedResponse.getContributorName());
+        Assertions.assertEquals("옮긴이", updatedResponse.getContributorRole());
     }
+
+
+    @Test
+    @DisplayName("존재하지 않는 기여자 수정 시 예외 발생")
+    void updateContributor_NotFound() {
+        ContributorRequestDto updateDto = new ContributorRequestDto("임채환", "옮긴이");
+
+        Assertions.assertThrows(ContributorNotFoundException.class,
+                () -> contributorService.updateContributor(999L, updateDto));
+    }
+
 
 }
