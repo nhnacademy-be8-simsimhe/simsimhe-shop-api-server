@@ -1,6 +1,5 @@
 package com.simsimbookstore.apiserver.orders.delivery.dto;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
 import jakarta.validation.constraints.*;
 
