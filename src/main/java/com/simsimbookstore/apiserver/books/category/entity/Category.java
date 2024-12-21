@@ -35,8 +35,4 @@ public class Category {
     @ToString.Exclude
     private List<Category> children = new ArrayList<>(); // 자식 카테고리 목록
 
-    public void addChildCategory(Category child) {
-        this.children.add(child);
-        child.setParent(this);
-    }
 }

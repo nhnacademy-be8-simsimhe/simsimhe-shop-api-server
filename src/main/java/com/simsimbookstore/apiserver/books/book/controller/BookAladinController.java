@@ -2,15 +2,14 @@ package com.simsimbookstore.apiserver.books.book.controller;
 
 import com.simsimbookstore.apiserver.books.book.aladin.AladinApiService;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class BookController {
+public class BookAladinController {
 
     private final AladinApiService aladinApiService;
 
-    public BookController(AladinApiService aladinApiService) {
+    public BookAladinController(AladinApiService aladinApiService) {
         this.aladinApiService = aladinApiService;
     }
 
