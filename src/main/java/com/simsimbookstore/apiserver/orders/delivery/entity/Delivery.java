@@ -1,5 +1,8 @@
 package com.simsimbookstore.apiserver.orders.delivery.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.simsimbookstore.apiserver.orders.delivery.exception.DeliveryStateUpdateException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,9 +13,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.util.EnumSet;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Builder
+@Getter
+@AllArgsConstructor
 @Table(name = "deliveries")
 @NoArgsConstructor
 public class Delivery {
@@ -22,15 +32,11 @@ public class Delivery {
     @Column(name = "delivery_id")
     private Long deliveryId;
 
-    @OneToOne
-    @JoinColumn(name = "delivery_policy_id")
-    private DeliveryPolicy deliveryPolicy;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "delivery_state", nullable = false)
     private DeliveryState deliveryState;
 
-    @Column(name = "delivery", nullable = false, length = 20)
+    @Column(name = "delivery_receiver", nullable = false, length = 20)
     private String deliveryReceiver;
 
     @Column(name = "receiver_phone_number", nullable = false, length = 20)
@@ -52,6 +58,8 @@ public class Delivery {
     @Column(name = "reference", nullable = true, length = 30)
     private String reference;
 
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     public enum DeliveryState {
         PENDING,        // 배송대기
         READY,          // 배송준비
@@ -59,5 +67,18 @@ public class Delivery {
         COMPLETED,      // 배송완료
         RETURNED,       // 반품
         ERROR           // 배송오류
+    }
+
+    @JsonCreator
+    public static DeliveryState fromValue(String value) {
+        try {
+            return DeliveryState.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid delivery state: " + value);
+        }
+    }
+
+    public void updateDeliveryState(DeliveryState newDeliveryState) {
+        this.deliveryState = newDeliveryState;
     }
 }
