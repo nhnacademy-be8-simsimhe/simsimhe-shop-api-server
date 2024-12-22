@@ -5,7 +5,6 @@ import com.simsimbookstore.apiserver.books.contributor.dto.ContributorResponseDt
 import com.simsimbookstore.apiserver.books.contributor.entity.Contributor;
 import com.simsimbookstore.apiserver.books.contributor.error.ContributorNotFoundException;
 import com.simsimbookstore.apiserver.books.contributor.repository.ContributorRepositroy;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,10 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
