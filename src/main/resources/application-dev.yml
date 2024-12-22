@@ -15,6 +15,13 @@ eureka:
   client:
     enabled: false # eureka 사용시 true로 변경
 
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: debug
+        type: trace
+
 object-storage:
   container-name: 6781cafa4fe14ae1ac55305ac102bddf
 

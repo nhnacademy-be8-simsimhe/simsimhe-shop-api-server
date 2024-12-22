@@ -4,6 +4,7 @@ package com.simsimbookstore.apiserver.users.role.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+@Builder
 @Entity
 @Table(name = "roles")
 @AllArgsConstructor
