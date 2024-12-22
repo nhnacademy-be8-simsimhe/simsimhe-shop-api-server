@@ -3,28 +3,41 @@ spring:
     name: api-server
   lifecycle:
     timeout-per-shutdown-phase: 30s
-  datasource:
-    url: jdbc:mysql://localhost:3306/shopserver
-    username: root
-    password: iamjjang9!
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: create
-    properties:
-      hibernate:
-        format_sql: true
 
+
+
+  profiles:
+    active: dev
+    # 마지막에 실행되는 파일이 앞의 설정을 덮어쓰기 때문에 사용에 주의가 필요
+    group:
+      prod:
+        eureka, jpa, dbcp2, actuator
+      dev:
+        jpa, dbcp2
+      servlet:
+        multipart:
+          enabled: true
+          max-file-size: 10MB
+          max-request-size: 10MB
+# 서버 포트 설정
 
 server:
-  shutdown: graceful
   port: 8020
+  shutdown: graceful
 
+secure-key-manager:
+  password: simsimbook
+  url: https://api-keymanager.nhncloudservice.com
+  path: /keymanager/v1.0/appkey/{appkey}/secrets/{keyid}
+  appKey: qTQNj7LyHhdAazH3
 
+object-storage:
+  auth-url: b9d98b2722e34ea09a48babd26dedb8a
+  password: 413f34b377e14d2b857c1441dab08606
+  storage-url: 6253409e99ad4847814ae3e2d30306ea
+  tenant-id: ebe2292c911d4f8aa4cfeda67ef067d9
+  username: 32c6d1c4cef44e2789f387f9391962ac
 
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://127.0.0.1:8761/eureka
+database:
+  username: 97f78245ad8446ce9267b29b075f80a7
+  password: f2880bd868cd445c9f1c16e13b977f04

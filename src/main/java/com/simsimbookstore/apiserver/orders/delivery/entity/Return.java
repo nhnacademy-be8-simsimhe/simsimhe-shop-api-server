@@ -1,6 +1,7 @@
-package com.simsimbookstore.apiserver.entity;
+package com.simsimbookstore.apiserver.orders.delivery.entity;
 
 
+import com.simsimbookstore.apiserver.orders.order.OrderBook;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
