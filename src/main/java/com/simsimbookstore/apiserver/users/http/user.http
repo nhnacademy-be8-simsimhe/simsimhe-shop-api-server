@@ -1,0 +1,16 @@
+### 유저 등록
+POST http://localhost:8020/api/users/localUsers
+Content-Type: application/json
+
+{
+  "userName": "John Doe",
+  "mobileNumber": "01051278121",
+  "email": "johndoe@example.com",
+  "birth": "19950309",
+  "gender": "MALE",
+  "userStatus": "ACTIVE",
+  "tier": "STANDARD",
+  "roleName": "USER",
+  "loginId": "test",
+  "password": "test"
+}

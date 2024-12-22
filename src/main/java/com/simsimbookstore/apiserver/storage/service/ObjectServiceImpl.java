@@ -7,6 +7,10 @@ import com.simsimbookstore.apiserver.storage.exception.ObjectStorageException;
 import com.simsimbookstore.apiserver.storage.exception.ObjectStorageTokenException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -95,13 +99,36 @@ public class ObjectServiceImpl {
         return uploadedFileNames;
     }
 
+    public String uploadObjects(String fileUrl) {
+        if (fileUrl == null || fileUrl.isEmpty()) {
+            throw new ObjectStorageException("No URLs provided for upload.");
+        }
 
+        String requestToken = authService.requestToken();
+        List<String> uploadedFileNames = new ArrayList<>();
+        String name = "";
+
+        try (InputStream inputStream = createInputStreamFromUrl(fileUrl)) {
+            // URL에서 파일 이름 추출 또는 고유 이름 생성
+            String fileName = createUniqueFileName(getFileNameFromUrl(fileUrl));
+            String tokenId = extractTokenId(requestToken);
+            String url = getUrl(fileName);
+            name = fileName;
+            // 파일 업로드
+            uploadFileToStorage(url, inputStream, tokenId);
+            uploadedFileNames.add(fileName);
+        } catch (IOException e) {
+            throw new ObjectStorageException("Failed to upload file from URL: " + fileUrl);
+        }
+
+        return name;
+    }
     /*
-        주어진 MultipartFile의 확장자가 허용된 이미지 확장자인지 검증
+        - 주어진 MultipartFile의 확장자가 허용된 이미지 확장자인지 검증
      */
     private void validateImageFile(MultipartFile file) {
         String fileName = file.getOriginalFilename();
-        if (fileName == null || fileName.isEmpty()) {
+        if (fileName.isEmpty()) {
             throw new ObjectStorageException("File name is invalid");
         }
 
@@ -112,7 +139,7 @@ public class ObjectServiceImpl {
     }
 
     /*
-        파일 이름에서 확장자를 추출
+        - 파일 이름에서 확장자를 추출
         - '.' 이후의 문자열을 확장자로 반환
      */
     private String getFileExtension(String fileName) {
@@ -121,7 +148,7 @@ public class ObjectServiceImpl {
     }
 
     /*
-        파일의 고유한 이름을 생성
+        - 파일의 고유한 이름을 생성
         - UUID를 사용
      */
     private String createUniqueFileName(String originalFileName) {
@@ -132,7 +159,7 @@ public class ObjectServiceImpl {
     }
 
     /*
-        인증서비스에서 반환된 JSON에서 토큰 ID 추출
+        - 인증서비스에서 반환된 JSON에서 토큰 ID 추출
         - "access.token.id" 경로에서 ID를 가져옴
      */
     private String extractTokenId(String json) {
@@ -148,6 +175,41 @@ public class ObjectServiceImpl {
             return tokenId;
         } catch (IOException e) {
             throw new ObjectStorageTokenException("Failed to extract token ID");
+        }
+    }
+
+    // URL에서 파일 이름 추출
+    private String getFileNameFromUrl(String urlString) {
+        try {
+            URI uri = URI.create(urlString);
+            String path = uri.getPath();
+            return path.substring(path.lastIndexOf('/') + 1);
+        } catch (Exception e) {
+            throw new ObjectStorageException("Invalid URL: " + urlString);
+        }
+    }
+
+    // URL로부터 InputStream 생성
+    private InputStream createInputStreamFromUrl(String fileUrl) {
+        try {
+            HttpClient httpClient = HttpClient.newHttpClient();
+
+            // HTTP GET 요청 생성
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(fileUrl))
+                    .GET()
+                    .build();
+
+            // HTTP 응답에서 InputStream 가져오기
+            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+            if (response.statusCode() != 200) {
+                throw new IOException("Failed to fetch resource: HTTP " + response.statusCode());
+            }
+
+            return response.body();
+        } catch (Exception e) {
+            throw new ObjectStorageException("Failed to create InputStream from URL: " + fileUrl);
         }
     }
 

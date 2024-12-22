@@ -2,18 +2,24 @@ package com.simsimbookstore.apiserver.users.user.entity;
 
 
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
+import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+@SuperBuilder
 @Entity
 @Table(name = "users")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Setter
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn
 public class User {
@@ -23,35 +29,47 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "user_name", nullable = false, length = 20)
+    @Column(name = "user_name", length = 50)
     private String userName;
 
-    @Column(name = "mobile_number", nullable = false, length = 15, unique = true)
+    @Column(name = "mobile_number", length = 15, unique = true)
     private String mobileNumber;
 
     @Column(nullable = false, length = 20, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column
     private LocalDate birth;
 
-    @Column(nullable = false, length = 6)
-    private String gender;
+    @Column(length = 6)
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "user_status", nullable = false)
     private UserStatus userStatus = UserStatus.ACTIVE;
 
-    private LocalDateTime created_at;
+    @Column(nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    private LocalDateTime latest_login_date;
+    private LocalDateTime latestLoginDate;
 
     @Column(name = "is_social_login", nullable = false)
-    private boolean isSocialLogin;
+    private boolean isSocialLogin = false;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "grade_id", nullable = false)
     private Grade grade;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<UserRole> userRoleList = new HashSet<>();
 
+    public void addUserRole(UserRole userRole) {
+        userRoleList.add(userRole);
+        userRole.setUser(this);
+    }
+
+    public void assignGrade(Grade grade){
+        this.grade = grade;
+    }
 }
