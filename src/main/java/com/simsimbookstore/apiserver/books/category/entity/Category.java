@@ -37,6 +37,8 @@ public class Category {
 
     public void addChildCategory(Category child) {
         this.children.add(child);
-        child.setParent(this);
+        child.setParent(this); // 자식의 부모도 설정
     }
+
+
 }
