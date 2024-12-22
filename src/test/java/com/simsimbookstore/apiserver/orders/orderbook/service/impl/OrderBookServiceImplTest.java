@@ -46,7 +46,7 @@ public class OrderBookServiceImplTest {
                 .bookIndex("Index 1")
                 .publisher("Test Publisher 1")
                 .isbn("1234567890123")
-                .quantity(10) // 초기 재고
+                .quantity(10)
                 .price(new BigDecimal("10000.00"))
                 .saleprice(new BigDecimal("8000.00"))
                 .publicationDate(LocalDate.now())
@@ -62,7 +62,7 @@ public class OrderBookServiceImplTest {
                 .bookIndex("Index 2")
                 .publisher("Test Publisher 2")
                 .isbn("1234567890456")
-                .quantity(5) // 초기 재고
+                .quantity(5)
                 .price(new BigDecimal("12000.00"))
                 .saleprice(new BigDecimal("9000.00"))
                 .publicationDate(LocalDate.now())
@@ -86,11 +86,20 @@ public class OrderBookServiceImplTest {
                 .orderState(Order.OrderState.PENDING)
                 .build();
         orderRepository.save(order);
+
+        OrderBook orderBook = OrderBook.builder()
+                .book(book1)
+                .order(order)
+                .quantity(2)
+                .salePrice(new BigDecimal("8000.00"))
+                .discountPrice(new BigDecimal("2000.00"))
+                .orderBookState(OrderBook.OrderBookState.PENDING)
+                .build();
+        orderBookRepository.save(orderBook);
     }
 
     @Test
     void testCreateOrderBooks_Success() {
-
         List<OrderBookRequestDto> requestDtos = List.of(
                 OrderBookRequestDto.builder()
                         .orderId(orderRepository.findAll().getFirst().getOrderId())
@@ -149,6 +158,36 @@ public class OrderBookServiceImplTest {
         Book book1 = bookRepository.findById(bookRepository.findAll().getFirst().getBookId()).orElseThrow();
         assertEquals(10, book1.getQuantity());
     }
+
+    @Test
+    void testGetOrderBook_Success() {
+        Long orderBookId = orderBookRepository.findAll().getFirst().getOrderBookId();
+
+        OrderBook orderBook = orderBookService.getOrderBook(orderBookId);
+
+        assertNotNull(orderBook);
+        assertEquals(orderBookId, orderBook.getOrderBookId());
+    }
+
+    @Test
+    void testUpdateOrderBook_Success() {
+        Long orderBookId = orderBookRepository.findAll().getFirst().getOrderBookId();
+
+        OrderBook updatedOrderBook = orderBookService.updateOrderBook(orderBookId, OrderBook.OrderBookState.COMPLETED);
+
+        assertNotNull(updatedOrderBook);
+        assertEquals(OrderBook.OrderBookState.COMPLETED, updatedOrderBook.getOrderBookState());
+    }
+
+    @Test
+    void testDeleteOrderBook_Success() {
+        Long orderBookId = orderBookRepository.findAll().getFirst().getOrderBookId();
+
+        orderBookService.deleteOrderBook(orderBookId);
+
+        assertFalse(orderBookRepository.findById(orderBookId).isPresent());
+    }
 }
+
 
 
