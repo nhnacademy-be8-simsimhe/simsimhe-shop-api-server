@@ -4,6 +4,7 @@ import com.simsimbookstore.apiserver.books.category.dto.CategoryRequestDto;
 import com.simsimbookstore.apiserver.books.category.dto.CategoryResponseDto;
 import com.simsimbookstore.apiserver.books.category.entity.Category;
 import com.simsimbookstore.apiserver.books.category.exception.CategoryNotFoundException;
+import com.simsimbookstore.apiserver.books.category.exception.ChildCategoryExistException;
 import com.simsimbookstore.apiserver.books.category.mapper.CategoryMapper;
 import com.simsimbookstore.apiserver.books.category.repository.CategoryRepository;
 import org.springframework.data.domain.Page;
@@ -62,9 +63,9 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CategoryNotFoundException("카테고리를 찾을 수 없습니다"));
 
-        // 자식 카테고리가 있는 경우 예외 발생
-        if (!category.getChildren().isEmpty()) {
-            throw new RuntimeException("자식 카테고리가 존재하여 삭제할 수 없습니다.");
+        // 자식 카테고리가 없는 경우만 삭제 가능
+        if (category.getChildren() != null && !category.getChildren().isEmpty()) {
+            throw new ChildCategoryExistException("자식 카테고리가 존재하여 삭제할 수 없습니다.");
         }
 
         // 삭제
