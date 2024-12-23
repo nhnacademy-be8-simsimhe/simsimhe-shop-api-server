@@ -10,21 +10,24 @@ import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
 import com.simsimbookstore.apiserver.orders.orderbook.exception.OrderBookNotFoundException;
 import com.simsimbookstore.apiserver.orders.orderbook.repository.OrderBookRepository;
+import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
+import com.simsimbookstore.apiserver.orders.packages.entity.Packages;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-@AllArgsConstructor
-public class OrderBookServiceImpl {
+@RequiredArgsConstructor
+public class OrderBookServiceImpl implements OrderBookService {
 
     private final OrderBookRepository orderBookRepository;
     private final BookRepository bookRepository;
     private final OrderRepository orderRepository;
 
+    @Override
     public List<OrderBook> createOrderBooks(List<OrderBookRequestDto> orderBookRequestDtos) {
         List<OrderBook> orderBooks = new ArrayList<>();
 
@@ -53,12 +56,13 @@ public class OrderBookServiceImpl {
         return orderBookRepository.saveAll(orderBooks);
     }
 
-
+    @Override
     public OrderBook getOrderBook(Long orderBookId) {
         return orderBookRepository.findById(orderBookId)
                 .orElseThrow(() -> new IllegalArgumentException("OrderBook not found for ID: " + orderBookId));
     }
 
+    @Override
     public OrderBook updateOrderBook(Long orderBookId, OrderBook.OrderBookState newOrderBookState) {
 
         OrderBook orderBook = orderBookRepository.findById(orderBookId)
@@ -69,10 +73,18 @@ public class OrderBookServiceImpl {
         return orderBookRepository.save(orderBook);
     }
 
-
+    @Override
     public void deleteOrderBook(Long orderBookId) {
         OrderBook orderBook = orderBookRepository.findById(orderBookId)
                 .orElseThrow(() -> new OrderBookNotFoundException("OrderBook not found for ID: " + orderBookId));
         orderBookRepository.delete(orderBook);
+    }
+
+    @Override
+    public List<Packages> getPackagesByOrderBookId(Long orderBookId) {
+        OrderBook orderBook = orderBookRepository.findById(orderBookId)
+                .orElseThrow(() -> new OrderBookNotFoundException("OrderBook not found"));
+
+        return orderBook.getPackages();
     }
 }
