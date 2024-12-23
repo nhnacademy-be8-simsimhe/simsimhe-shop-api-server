@@ -101,14 +101,13 @@ class DeliveryPolicyControllerTest {
     @Test
     @DisplayName("유효성 검사 실패 - Delivery policy name is empty")
     void testCreateDeliveryPolicy_InvalidName_ShouldReturnBadRequest() throws Exception {
-        // Given: 이름이 비어있는 요청
+        //이름이 비어있는 요청
         DeliveryPolicyRequestDto invalidRequest = new DeliveryPolicyRequestDto(
                 "",
                 new BigDecimal("1000.00"),
                 false
         );
 
-        // When & Then
         mockMvc.perform(post("/api/admin/delivery-policies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(invalidRequest)))
@@ -119,14 +118,13 @@ class DeliveryPolicyControllerTest {
     @Test
     @DisplayName("유효성 검사 실패 - Policy standard price is null")
     void testCreateDeliveryPolicy_InvalidPrice_ShouldReturnBadRequest() throws Exception {
-        // Given: 가격이 없는 요청
+        //가격이 없는 요청
         DeliveryPolicyRequestDto invalidRequest = new DeliveryPolicyRequestDto(
                 "Test Policy",
                 null,
                 false
         );
 
-        // When & Then
         mockMvc.perform(post("/api/admin/delivery-policies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(invalidRequest)))
@@ -137,14 +135,13 @@ class DeliveryPolicyControllerTest {
     @Test
     @DisplayName("유효성 검사 실패 - Policy standard price is less than or equal to 0")
     void testCreateDeliveryPolicy_PriceLessThanZero_ShouldReturnBadRequest() throws Exception {
-        // Given: 정책 표준 가격이 0 이하인 요청
+        //정책 표준 가격이 0 이하인 요청
         DeliveryPolicyRequestDto invalidRequest = new DeliveryPolicyRequestDto(
                 "Test Policy",
                 new BigDecimal("0.0"),
                 false
         );
 
-        // When & Then
         mockMvc.perform(post("/api/admin/delivery-policies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(invalidRequest)))
