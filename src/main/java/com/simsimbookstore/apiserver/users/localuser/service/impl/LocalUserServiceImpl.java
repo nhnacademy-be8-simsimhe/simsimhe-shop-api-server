@@ -1,6 +1,6 @@
 package com.simsimbookstore.apiserver.users.localuser.service.impl;
 
-import com.simsimbookstore.apiserver.users.exception.DuplicateId;
+import com.simsimbookstore.apiserver.users.exception.DuplicateIdException;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.service.GradeService;
 import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRequestDto;
@@ -35,7 +35,7 @@ public class LocalUserServiceImpl implements LocalUserService {
         Grade grade = gradeService.findByTier(localUserRequestDto.getTier());
 
         if (localUserRepository.existsByLoginId(localUserRequestDto.getLoginId())) {
-            throw new DuplicateId("already exist login Id: " + localUserRequestDto.getLoginId());
+            throw new DuplicateIdException("already exist login Id: " + localUserRequestDto.getLoginId());
         }
 
         Role role = roleService.findByRoleName(RoleName.USER);
