@@ -3,9 +3,10 @@ package com.simsimbookstore.apiserver.books.contributor.service;
 import com.simsimbookstore.apiserver.books.contributor.dto.ContributorRequestDto;
 import com.simsimbookstore.apiserver.books.contributor.dto.ContributorResponseDto;
 import com.simsimbookstore.apiserver.books.contributor.entity.Contributor;
-import com.simsimbookstore.apiserver.books.contributor.error.ContributorNotFoundException;
 import com.simsimbookstore.apiserver.books.contributor.mapper.ContributorMapper;
 import com.simsimbookstore.apiserver.books.contributor.repository.ContributorRepositroy;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,14 +17,11 @@ import java.util.Optional;
 
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ContributorServiceImpl implements ContributorService {
 
     private final ContributorRepositroy contributorRepositroy;
-
-    public ContributorServiceImpl(ContributorRepositroy contributorRepositroy) {
-        this.contributorRepositroy = contributorRepositroy;
-    }
 
     /**
      * 기여자 등록 이미 등록되어있으면 등록되어있는 데이터를 반환하고 없는 데이터면 저장
@@ -33,7 +31,7 @@ public class ContributorServiceImpl implements ContributorService {
      */
     @Transactional
     @Override
-    public ContributorResponseDto saveContributor(ContributorRequestDto contributorRequestDto) {
+    public ContributorResponseDto createContributor(ContributorRequestDto contributorRequestDto) {
         Contributor contributor = ContributorMapper.toContributor(contributorRequestDto);
 
         Optional<Contributor> optionalContributor = contributorRepositroy.findByContributorName(contributor.getContributorName());
@@ -82,7 +80,7 @@ public class ContributorServiceImpl implements ContributorService {
     @Transactional
     @Override
     public void deleteContributor(Long contributorId) {
-        Contributor contributor = this.findById(contributorId);
+        Contributor contributor = this.getContributer(contributorId);
         contributorRepositroy.delete(contributor);
     }
 
@@ -94,17 +92,18 @@ public class ContributorServiceImpl implements ContributorService {
      * @return
      */
     @Override
-    public Contributor findById(Long contributorId) {
+    public Contributor getContributer(Long contributorId) {
         Optional<Contributor> optionalContributor = contributorRepositroy.findById(contributorId);
         if (optionalContributor.isPresent()) {
             return optionalContributor.get();
         } else {
-            throw new ContributorNotFoundException("찾는 기여자가없습니다");
+            throw new NotFoundException("찾는 기여자가없습니다");
         }
     }
 
     /**
      * 기여자 수정
+     *
      * @param contributorId
      * @param contributorRequestDto
      * @return
@@ -112,9 +111,10 @@ public class ContributorServiceImpl implements ContributorService {
     @Transactional
     @Override
     public ContributorResponseDto updateContributor(Long contributorId, ContributorRequestDto contributorRequestDto) {
-        Contributor contributor = this.findById(contributorId);
+        Contributor contributor = this.getContributer(contributorId);
         contributor.setContributorName(contributorRequestDto.getContributorName());
         contributor.setContributorRole(contributorRequestDto.getContributorRole());
-        return ContributorMapper.toResponse(contributor);
+        Contributor updatedContributor = contributorRepositroy.save(contributor);
+        return ContributorMapper.toResponse(updatedContributor);
     }
 }

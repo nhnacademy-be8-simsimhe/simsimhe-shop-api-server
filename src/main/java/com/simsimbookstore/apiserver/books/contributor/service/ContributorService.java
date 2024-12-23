@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface ContributorService {
 
-    ContributorResponseDto saveContributor(ContributorRequestDto contributorRequestDto);
+    ContributorResponseDto createContributor(ContributorRequestDto contributorRequestDto);
 
     List<ContributorResponseDto> getAllContributor();
 
@@ -18,7 +18,7 @@ public interface ContributorService {
 
     void deleteContributor(Long contributorId);
 
-    Contributor findById(Long contributorId);
+    Contributor getContributer(Long contributorId);
 
     ContributorResponseDto updateContributor(Long contributorId,ContributorRequestDto contributorRequestDto);
 

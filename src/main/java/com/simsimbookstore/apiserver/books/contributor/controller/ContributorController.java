@@ -6,6 +6,7 @@ import com.simsimbookstore.apiserver.books.contributor.entity.Contributor;
 import com.simsimbookstore.apiserver.books.contributor.mapper.ContributorMapper;
 import com.simsimbookstore.apiserver.books.contributor.service.ContributorService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,14 +18,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/admin")
 public class ContributorController {
 
     private final ContributorService contributorService;
-
-    public ContributorController(ContributorService contributorService) {
-        this.contributorService = contributorService;
-    }
 
     /**
      * 기여자 등록
@@ -39,7 +37,7 @@ public class ContributorController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bindingResult.getAllErrors());
         }
 
-        ContributorResponseDto responseDto = contributorService.saveContributor(requestDto);
+        ContributorResponseDto responseDto = contributorService.createContributor(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
@@ -90,7 +88,7 @@ public class ContributorController {
      */
     @GetMapping("/contributors/{contributorId}")
     public ResponseEntity<?> getContributor(@PathVariable("contributorId") Long contributorId) {
-        Contributor contributor = contributorService.findById(contributorId);
+        Contributor contributor = contributorService.getContributer(contributorId);
         ContributorResponseDto response = ContributorMapper.toResponse(contributor);
         return ResponseEntity.status(HttpStatus.OK).body(response);
 

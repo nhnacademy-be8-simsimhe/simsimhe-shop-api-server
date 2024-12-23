@@ -21,5 +21,9 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Query("SELECT c FROM Category c ORDER BY c.categoryId ASC")
     List<Category> findAllOrderedById();
 
+    @Query("SELECT c FROM Category c WHERE c.parent = :parent")
+    List<Category> findAllByParent(@Param("parent") Category parent);
+
+
     Page<Category> findAll(Pageable pageable);
 }

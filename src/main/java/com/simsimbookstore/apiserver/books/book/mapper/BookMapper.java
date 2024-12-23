@@ -2,17 +2,23 @@ package com.simsimbookstore.apiserver.books.book.mapper;
 
 import com.simsimbookstore.apiserver.books.book.dto.BookRequestDto;
 //import com.simsimbookstore.apiserver.books.book.dto.BookResponseDto;
+import com.simsimbookstore.apiserver.books.book.dto.BookResponseDto;
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 
 import java.time.LocalDate;
 
 public class BookMapper {
 
-//    public static BookResponseDto toResponseDto(Book book){
-//
-//    }
 
-    public static Book toBook(BookRequestDto bookRequestDto){
+    public static BookResponseDto toResponseDto(Book book) {
+        return BookResponseDto.builder()
+                .bookId(book.getBookId())
+                .isbn(book.getIsbn())
+                .viewCount(book.getViewCount())
+                .build();
+    }
+
+    public static Book toBook(BookRequestDto bookRequestDto) {
         return Book.builder()
                 .title(bookRequestDto.getTitle())
                 .description(bookRequestDto.getDescription())
