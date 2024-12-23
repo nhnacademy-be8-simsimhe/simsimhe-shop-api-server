@@ -2,156 +2,216 @@ package com.simsimbookstore.apiserver.books.category.service;
 
 import com.simsimbookstore.apiserver.books.category.dto.CategoryRequestDto;
 import com.simsimbookstore.apiserver.books.category.dto.CategoryResponseDto;
-import com.simsimbookstore.apiserver.books.category.exception.CategoryNotFoundException;
-import com.simsimbookstore.apiserver.books.category.exception.ChildCategoryExistException;
+import com.simsimbookstore.apiserver.books.category.entity.Category;
 import com.simsimbookstore.apiserver.books.category.repository.CategoryRepository;
-import org.junit.jupiter.api.Assertions;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@Transactional
+
+@ExtendWith(MockitoExtension.class)
 class CategoryServiceImplTest {
 
-    @Autowired
-    private CategoryService categoryService;
+    @InjectMocks
+    private CategoryServiceImpl categoryService;
 
-    @Autowired
+    @Mock
     private CategoryRepository categoryRepository;
 
+    private Category mockParentCategory;
+    private Category mockChildCategory;
+
     @BeforeEach
-    void cleanDatabase() {
-        categoryRepository.deleteAll();
+    void setUp() {
+
+        mockParentCategory = Category.builder()
+                .categoryId(1L)
+                .categoryName("도서")
+                .build();
+
+        mockChildCategory = Category.builder()
+                .categoryId(2L)
+                .categoryName("소설")
+                .parent(mockParentCategory)
+                .build();
     }
 
     @Test
     @DisplayName("새로운 카테고리 저장")
     void saveCategory() {
-        CategoryRequestDto requestDto = new CategoryRequestDto("국내도서", null);
+        // Arrange
+        CategoryRequestDto requestDto = new CategoryRequestDto("도서", null);
+        when(categoryRepository.save(any(Category.class))).thenAnswer(invocation -> {
+            Category category = invocation.getArgument(0);
+            category.setCategoryId(1L);
+            return category;
+        });
 
-        CategoryResponseDto responseDto = categoryService.saveCategory(requestDto);
+        // Act
+        CategoryResponseDto responseDto = categoryService.createCategory(requestDto);
 
-        Assertions.assertNotNull(responseDto);
-        Assertions.assertEquals("국내도서", responseDto.getCategoryName());
-        Assertions.assertEquals(null, responseDto.getParentId());
+        // Assert
+        assertNotNull(responseDto);
+        assertEquals("도서", responseDto.getCategoryName());
+        assertNull(responseDto.getParentId());
+
+        verify(categoryRepository, times(1)).save(any(Category.class));
     }
 
     @Test
     @DisplayName("부모 카테고리를 가진 카테고리 저장")
     void saveCategoryWithParent() {
+        // Arrange
+        when(categoryRepository.findById(mockParentCategory.getCategoryId()))
+                .thenReturn(Optional.of(mockParentCategory));
+        when(categoryRepository.save(any(Category.class))).thenAnswer(invocation -> {
+            Category category = invocation.getArgument(0);
+            category.setCategoryId(2L);
+            return category;
+        });
 
-        CategoryRequestDto parentDto = new CategoryRequestDto("국내도서", null);
+        CategoryRequestDto requestDto = new CategoryRequestDto("소설", mockParentCategory.getCategoryId());
 
-        CategoryResponseDto parentResponse = categoryService.saveCategory(parentDto);
+        // Act
+        CategoryResponseDto responseDto = categoryService.createCategory(requestDto);
 
-        CategoryRequestDto childDto = new CategoryRequestDto("소설", parentResponse.getCategoryId());
+        // Assert
+        assertNotNull(responseDto);
+        assertEquals("소설", responseDto.getCategoryName());
+        assertEquals(mockParentCategory.getCategoryId(), responseDto.getParentId());
 
-        CategoryResponseDto childResponse = categoryService.saveCategory(childDto);
-
-        Assertions.assertNotNull(childResponse);
-        Assertions.assertEquals("소설", childResponse.getCategoryName());
-        Assertions.assertEquals(parentResponse.getCategoryId(), childResponse.getParentId());
+        verify(categoryRepository, times(1)).findById(mockParentCategory.getCategoryId());
+        verify(categoryRepository, times(1)).save(any(Category.class));
     }
-
-    @Test
-    @DisplayName("모든 카테고리 조회")
-    void getAllCategories() {
-        // given
-        CategoryResponseDto parentCategory = categoryService.saveCategory(new CategoryRequestDto("국내도서", null));
-        categoryService.saveCategory(new CategoryRequestDto("전자제품", parentCategory.getCategoryId()));
-
-        // when
-        List<CategoryResponseDto> categories = categoryService.getAllCategories();
-
-        // then
-        assertNotNull(categories);
-        assertEquals(2, categories.size());
-    }
-
 
     @Test
     @DisplayName("카테고리 단건 조회")
     void getCategoryById() {
-        // given
-        CategoryRequestDto requestDto = new CategoryRequestDto("국내도서", null);
-        CategoryResponseDto responseDto = categoryService.saveCategory(requestDto);
+        // Arrange
+        when(categoryRepository.findById(mockParentCategory.getCategoryId()))
+                .thenReturn(Optional.of(mockParentCategory));
 
-        // when
-        CategoryResponseDto foundCategory = categoryService.getCategoryById(responseDto.getCategoryId());
+        // Act
+        CategoryResponseDto responseDto = categoryService.getCategoryById(mockParentCategory.getCategoryId());
 
-        // then
-        assertNotNull(foundCategory);
-        assertEquals("국내도서", foundCategory.getCategoryName());
+        // Assert
+        assertNotNull(responseDto);
+        assertEquals("도서", responseDto.getCategoryName());
+
+        verify(categoryRepository, times(1)).findById(mockParentCategory.getCategoryId());
     }
 
     @Test
     @DisplayName("존재하지 않는 카테고리 조회 시 예외 발생")
     void getCategoryById_NotFound() {
-        // expect
-        assertThrows(CategoryNotFoundException.class,
-                () -> categoryService.getCategoryById(999L));
-    }
+        // Arrange
+        when(categoryRepository.findById(999L)).thenReturn(Optional.empty());
 
-    @Test
-    @DisplayName("카테고리 삭제")
-    void deleteCategory() {
-        // given
-        CategoryRequestDto requestDto = new CategoryRequestDto("도서", null);
-        CategoryResponseDto responseDto = categoryService.saveCategory(requestDto);
+        // Act & Assert
+        assertThrows(NotFoundException.class, () -> categoryService.getCategoryById(999L));
 
-        // when
-        categoryService.deleteCategory(responseDto.getCategoryId());
-
-        // then
-        Assertions.assertThrows(CategoryNotFoundException.class,
-                () -> categoryService.getCategoryById(responseDto.getCategoryId()));
+        verify(categoryRepository, times(1)).findById(999L);
     }
 
     @Test
     @DisplayName("자식 카테고리가 있는 경우 삭제 시 예외 발생")
     void deleteCategoryWithChildren() {
-        // given
-        CategoryRequestDto parentDto = new CategoryRequestDto("도서", null);
-        CategoryResponseDto parentResponse = categoryService.saveCategory(parentDto);
+        // Arrange
+        when(categoryRepository.findById(mockParentCategory.getCategoryId()))
+                .thenReturn(Optional.of(mockParentCategory));
 
-        CategoryRequestDto childDto = new CategoryRequestDto("소설", parentResponse.getCategoryId());
-        categoryService.saveCategory(childDto);
+        // 자식 카테고리를 반환하도록 설정
+        when(categoryRepository.findAllByParent(mockParentCategory))
+                .thenReturn(List.of(mockChildCategory));
 
-        // when & then
-        Assertions.assertThrows(ChildCategoryExistException.class,
-                () -> categoryService.deleteCategory(parentResponse.getCategoryId()));
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> categoryService.deleteCategory(mockParentCategory.getCategoryId()));
+
+        verify(categoryRepository, times(1)).findById(mockParentCategory.getCategoryId());
+        verify(categoryRepository, times(1)).findAllByParent(mockParentCategory);
+    }
+
+
+    @Test
+    @DisplayName("자식 카테고리가 없는 경우 삭제 성공")
+    void deleteCategory() {
+        // Arrange
+        when(categoryRepository.findById(mockParentCategory.getCategoryId()))
+                .thenReturn(Optional.of(mockParentCategory));
+
+        when(categoryRepository.findAllByParent(mockParentCategory))
+                .thenReturn(List.of());
+
+        doNothing().when(categoryRepository).delete(mockParentCategory);
+
+        // Act
+        categoryService.deleteCategory(mockParentCategory.getCategoryId());
+
+        // Assert
+        verify(categoryRepository, times(1)).delete(mockParentCategory);
+    }
+
+    @Test
+    @DisplayName("모든 카테고리 조회")
+    void getAllCategories() {
+        // Arrange
+        when(categoryRepository.findAllOrderedById())
+                .thenReturn(Arrays.asList(mockParentCategory, mockChildCategory));
+
+        // Act
+        List<CategoryResponseDto> categories = categoryService.getAllCategories();
+
+        // Assert
+        assertNotNull(categories);
+        assertEquals(2, categories.size());
+        assertEquals("도서", categories.get(0).getCategoryName());
+        assertEquals("소설", categories.get(1).getCategoryName());
+
+        verify(categoryRepository, times(1)).findAllOrderedById();
     }
 
     @Test
     @DisplayName("페이징 처리된 카테고리 목록 조회")
     void getAllCategoryPage() {
-        // given
-        categoryService.saveCategory(new CategoryRequestDto("도서", null));
-        categoryService.saveCategory(new CategoryRequestDto("전자제품", null));
-        categoryService.saveCategory(new CategoryRequestDto("가구", null));
+        // Arrange
+        PageRequest pageable = PageRequest.of(0, 2);
 
-        Pageable pageable = PageRequest.of(0, 2);
+        // Page<Category> Mock 생성
+        Page<Category> mockPage = new PageImpl<>(Arrays.asList(mockParentCategory, mockChildCategory), pageable, 2);
 
-        // when
+        when(categoryRepository.findAll(pageable)).thenReturn(mockPage);
+
+        // Act
         Page<CategoryResponseDto> categoryPage = categoryService.getAllCategoryPage(pageable);
 
-        // then
+        // Assert
         assertNotNull(categoryPage);
         assertEquals(2, categoryPage.getContent().size()); // 한 페이지에 2개
-        assertEquals(2, categoryPage.getTotalPages()); // 총 2페이지
-        assertEquals(3, categoryPage.getTotalElements()); // 총 3개 데이터
+        assertEquals(1, categoryPage.getTotalPages()); // 총 1페이지
+        assertEquals(2, categoryPage.getTotalElements()); // 총 2개 데이터
+        assertEquals("도서", categoryPage.getContent().get(0).getCategoryName());
+        assertEquals("소설", categoryPage.getContent().get(1).getCategoryName());
+
+        verify(categoryRepository, times(1)).findAll(pageable);
     }
+
 
 }

@@ -15,8 +15,6 @@ public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
 
     private final DeliveryPolicyRepository deliveryPolicyRepository;
 
-
-
     public DeliveryPolicyServiceImpl(DeliveryPolicyRepository deliveryPolicyRepository) {
         this.deliveryPolicyRepository = deliveryPolicyRepository;
     }

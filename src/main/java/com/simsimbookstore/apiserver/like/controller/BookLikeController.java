@@ -5,20 +5,19 @@ import com.simsimbookstore.apiserver.like.dto.BookLikeRequestDto;
 import com.simsimbookstore.apiserver.like.dto.BookLikeResponseDto;
 import com.simsimbookstore.apiserver.like.service.BookLikeService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/shop/likes")
 public class BookLikeController {
 
     private final BookLikeService bookLikeService;
 
-    public BookLikeController(BookLikeService bookLikeService) {
-        this.bookLikeService = bookLikeService;
-    }
 
     /**
      * 좋아요를 설정,취소하는 컨트롤러
