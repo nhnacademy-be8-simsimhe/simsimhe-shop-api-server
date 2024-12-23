@@ -41,3 +41,9 @@ object-storage:
 database:
   username: 97f78245ad8446ce9267b29b075f80a7
   password: f2880bd868cd445c9f1c16e13b977f04
+
+
+elasticsearch:
+  uris: http://localhost:9200
+  username: elastic
+  password: nhnacademy123!
