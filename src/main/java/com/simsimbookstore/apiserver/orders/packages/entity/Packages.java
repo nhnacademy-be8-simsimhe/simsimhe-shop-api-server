@@ -15,9 +15,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,6 +35,8 @@ public class Packages {
     @Column(name = "package_type", nullable = false, length = 20)
     private String packageType;
 
+    // 연관 관계 메서드
+    @Setter
     @ManyToOne(fetch =  FetchType.LAZY)
     @JoinColumn(name = "order_book_id")
     private OrderBook orderBook;
@@ -50,4 +54,5 @@ public class Packages {
                 .packageType(packageType)
                 .build();
     }
+
 }

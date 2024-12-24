@@ -2,6 +2,7 @@ package com.simsimbookstore.apiserver.orders.orderbook.entity;
 
 
 import com.simsimbookstore.apiserver.books.book.entity.Book;
+import com.simsimbookstore.apiserver.orders.coupondiscount.entity.CouponDiscount;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.packages.entity.Packages;
 import jakarta.persistence.CascadeType;
@@ -16,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -63,6 +65,9 @@ public class OrderBook {
     @Builder.Default
     private List<Packages> packages = new ArrayList<>();
 
+    @OneToOne(mappedBy = "orderBook", cascade = CascadeType.ALL)
+    private CouponDiscount couponDiscount;
+
 
     public enum OrderBookState {
         PENDING,          // 주문대기
@@ -74,5 +79,18 @@ public class OrderBook {
 
     public void updateOrderBookState(OrderBookState newOrderBookState) {
         this.orderBookState = newOrderBookState;
+    }
+
+    // 연관 관계 메서드
+    public void addPackage(Packages pkg) {
+        this.packages.add(pkg);
+        pkg.setOrderBook(this); // 패키지의 OrderBook 설정
+    }
+
+    public void setCouponDiscount(CouponDiscount couponDiscount) {
+        this.couponDiscount = couponDiscount;
+        if (couponDiscount != null) {
+            couponDiscount.setOrderBook(this); // 쿠폰의 OrderBook 설정
+        }
     }
 }
