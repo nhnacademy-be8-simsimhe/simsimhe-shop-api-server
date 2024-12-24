@@ -19,4 +19,11 @@ public interface BookCustomRepository {
     List<Long> getLowestCategoryId(List<Long> categoryIdList);
 
     Page<BookListResponse> getUserLikeBook(Pageable pageable, Long userId);
+
+
+    List<BookListResponse> getBooksForCheck(List<Long> bookIdList);
+
+    List<BookListResponse> getBestSeller();
+
+
 }

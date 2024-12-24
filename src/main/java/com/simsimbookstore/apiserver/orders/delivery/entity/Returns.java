@@ -38,7 +38,7 @@ public class Returns {
 
     @Column(name = "return_state", nullable = false)
     @Enumerated(EnumType.STRING)
-    private String returnState;
+    private ReturnState returnState;
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
@@ -71,7 +71,7 @@ public class Returns {
                 .returnId(this.returnId)
                 .returnReason(this.returnReason)
                 .returnDate(this.returnDate)
-                .returnState(this.returnState)
+                .returnState(String.valueOf(this.returnState))
                 .quantity(this.quantity)
                 .refund(this.refund)
                 .damaged(this.damaged)
@@ -81,7 +81,7 @@ public class Returns {
     }
 
     public void updateReturnState(ReturnState newState) {
-        this.returnState = newState.name();
+        this.returnState = ReturnState.valueOf(newState.name());
     }
 
 }
