@@ -3,7 +3,9 @@ package com.simsimbookstore.apiserver.users.address;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.users.address.dto.AddressRequestDto;
+import com.simsimbookstore.apiserver.users.address.dto.AddressResponseDto;
 import com.simsimbookstore.apiserver.users.address.entity.Address;
+import com.simsimbookstore.apiserver.users.address.mapper.AddressMapper;
 import com.simsimbookstore.apiserver.users.address.service.AddressService;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
@@ -47,7 +49,7 @@ class AddressControllerTest {
     Address testAddress2;
 
     AddressRequestDto testAddressRequestDto;
-
+    AddressResponseDto testAddressResponseDto;
     @BeforeEach
     void setUp() {
         Grade testGrade = Grade.builder()
@@ -127,8 +129,9 @@ class AddressControllerTest {
 
     @Test
     void createAddress() throws Exception {
+        AddressResponseDto addressResponseDto = AddressMapper.responseDtoFrom(testAddress1);
 
-        when(addressService.createAddress(anyLong(), any(AddressRequestDto.class))).thenReturn(testAddress1);
+        when(addressService.createAddress(anyLong(), any(AddressRequestDto.class))).thenReturn(addressResponseDto);
         mockMvc.perform(post("/api/users/{userId}/addresses",1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testAddressRequestDto)))

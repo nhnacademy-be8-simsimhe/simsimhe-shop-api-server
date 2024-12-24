@@ -99,6 +99,8 @@ class AddressServiceImplTest {
     @Test
     @DisplayName("주소 등록 성공")
     void createAddress() {
+        when(userService.getUser(testUser.getUserId())).thenReturn(testUser);
+        when(addressRepository.save(any(Address.class))).thenReturn(testAddress1);
         AddressRequestDto addressRequestDto = AddressRequestDto.builder()
                 .alias("본집")
                 .postalCode("21953")
