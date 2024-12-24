@@ -32,9 +32,9 @@ public class Review {
     private String content;
 
     @Column(nullable = false)
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
-    private LocalDateTime update_at;
+    private LocalDateTime updateAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
