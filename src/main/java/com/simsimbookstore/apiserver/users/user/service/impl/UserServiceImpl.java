@@ -4,8 +4,6 @@ import com.simsimbookstore.apiserver.users.exception.ResourceNotFoundException;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
-import com.simsimbookstore.apiserver.users.user.dto.UserGradeUpdateRequestDto;
-import com.simsimbookstore.apiserver.users.user.dto.UserStatusUpdateRequestDto;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
@@ -48,5 +46,17 @@ public class UserServiceImpl implements UserService {
         user.updateGrade(newGrade);
 
             return userRepository.save(user);
+    }
+
+    @Override
+    public User getUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("not found user with ID : " + userId));
+        return user;
+    }
+
+    @Override
+    public boolean existsUser(Long userId) {
+        return userRepository.existsById(userId);
     }
 }
