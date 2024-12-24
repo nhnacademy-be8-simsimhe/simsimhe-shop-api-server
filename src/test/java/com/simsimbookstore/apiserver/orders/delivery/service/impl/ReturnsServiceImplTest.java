@@ -60,7 +60,7 @@ class ReturnsServiceImplTest {
                 .returnId(1L)
                 .returnReason("Damaged")
                 .returnDate(LocalDateTime.now())
-                .returnState("RETURN_REQUESTED")
+                .returnState(Returns.ReturnState.valueOf("RETURN_REQUESTED"))
                 .quantity(1)
                 .refund(true)
                 .damaged(true)

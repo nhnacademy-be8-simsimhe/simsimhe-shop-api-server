@@ -37,7 +37,7 @@ public class ReturnsServiceImpl implements ReturnsService {
         Returns returns = Returns.builder()
                 .returnReason(requestDto.getReturnReason())
                 .returnDate(requestDto.getReturnDate())
-                .returnState(requestDto.getReturnStatus())
+                .returnState(Returns.ReturnState.valueOf(requestDto.getReturnStatus()))
                 .quantity(requestDto.getQuantity())
                 .refund(requestDto.getRefund())
                 .damaged(requestDto.getDamaged())

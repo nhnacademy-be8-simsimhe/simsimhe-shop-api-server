@@ -42,6 +42,8 @@ public class BookResponseDto {
 
     private int pages;
 
+    private int quantity;
+
     private boolean isLiked;
 
     private BookStatus bookStatus;
