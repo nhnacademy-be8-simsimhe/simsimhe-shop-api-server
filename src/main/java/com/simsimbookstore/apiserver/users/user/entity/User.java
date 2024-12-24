@@ -4,6 +4,7 @@ package com.simsimbookstore.apiserver.users.user.entity;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -70,6 +71,15 @@ public class User {
     }
 
     public void assignGrade(Grade grade){
+        this.grade = grade;
+    }
+
+
+    public void updateUserStatus(UserStatus userStatus) {
+        this.userStatus = userStatus;
+    }
+
+    public void updateGrade(Grade grade) {
         this.grade = grade;
     }
 }
