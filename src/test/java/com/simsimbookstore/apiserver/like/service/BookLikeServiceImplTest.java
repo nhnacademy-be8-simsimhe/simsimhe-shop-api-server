@@ -2,11 +2,10 @@ package com.simsimbookstore.apiserver.like.service;
 
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.like.dto.BookLikeRequestDto;
 import com.simsimbookstore.apiserver.like.dto.BookLikeResponseDto;
 import com.simsimbookstore.apiserver.like.entity.BookLike;
-import com.simsimbookstore.apiserver.like.error.BookNotFoundException;
-import com.simsimbookstore.apiserver.like.error.UserNotFoundException;
 import com.simsimbookstore.apiserver.like.repository.BookLikeRepository;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
@@ -128,7 +127,7 @@ class BookLikeServiceImplTest {
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(UserNotFoundException.class, () -> bookLikeService.setBookLike(requestDto));
+        assertThrows(NotFoundException.class, () -> bookLikeService.setBookLike(requestDto));
         verify(bookLikeRepository, never()).save(any());
     }
 
@@ -142,7 +141,7 @@ class BookLikeServiceImplTest {
         when(bookRepository.findById(999L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(BookNotFoundException.class, () -> bookLikeService.setBookLike(requestDto));
+        assertThrows(NotFoundException.class, () -> bookLikeService.setBookLike(requestDto));
         verify(bookLikeRepository, never()).save(any());
     }
 

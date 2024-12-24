@@ -18,6 +18,7 @@ import java.util.UUID;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.RestTemplate;
@@ -74,6 +75,7 @@ public class ObjectServiceImpl {
         - 각 파일에 대해 고유한 이름 생성 후 업로드
         - 업로드된 파일의 이름 목록 반환
      */
+    @Transactional
     public List<String> uploadObjects(List<MultipartFile> multipartFiles) {
 
         if (multipartFiles == null || multipartFiles.isEmpty()) {
@@ -91,7 +93,7 @@ public class ObjectServiceImpl {
                 String url = getUrl(fileName);
 
                 uploadFileToStorage(url, multipartFile.getInputStream(), tokenId); // 파일 업로드
-                uploadedFileNames.add(fileName);
+                uploadedFileNames.add(url); // return type을 name에서 url로 변경
             } catch (HttpClientErrorException | IOException e) {
                 throw new ObjectStorageException("Failed to upload file: " + multipartFile.getOriginalFilename());
             }

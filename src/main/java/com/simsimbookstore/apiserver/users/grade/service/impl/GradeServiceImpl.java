@@ -1,6 +1,6 @@
 package com.simsimbookstore.apiserver.users.grade.service.impl;
 
-import com.simsimbookstore.apiserver.users.exception.DuplicateId;
+import com.simsimbookstore.apiserver.users.exception.DuplicateIdException;
 import com.simsimbookstore.apiserver.users.exception.ResourceNotFoundException;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
@@ -23,7 +23,7 @@ public class GradeServiceImpl implements GradeService {
     @Override
     public Grade save(Grade grade){
         if(gradeRepository.existsByTier(grade.getTier())){
-            throw new DuplicateId("already exist tier: " + grade.getTier());
+            throw new DuplicateIdException("already exist tier: " + grade.getTier());
         }
 
         return gradeRepository.save(grade);

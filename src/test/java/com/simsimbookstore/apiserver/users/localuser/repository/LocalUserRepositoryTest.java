@@ -46,12 +46,12 @@ class LocalUserRepositoryTest {
 
         testUser = LocalUser.builder()
                 .userName("John Doe")
-                .loginId("test")
                 .email("johndoe@example.com")
-                .password("test")
                 .createdAt(LocalDateTime.now())
                 .userStatus(UserStatus.ACTIVE)
                 .grade(grade)
+                .loginId("test")
+                .password("test")
                 .build();
 
         localUserRepository.save(testUser);

@@ -1,10 +1,11 @@
-package com.simsimbookstore.apiserver.orders.packages.service;
+package com.simsimbookstore.apiserver.orders.packages.service.impl;
 
 import com.simsimbookstore.apiserver.orders.packages.dto.WrapTypeRequestDto;
 import com.simsimbookstore.apiserver.orders.packages.dto.WrapTypeResponseDto;
 import com.simsimbookstore.apiserver.orders.packages.entity.WrapType;
 import com.simsimbookstore.apiserver.orders.packages.exception.WrapTypeNotFoundException;
 import com.simsimbookstore.apiserver.orders.packages.repository.WrapTypeRepository;
+import com.simsimbookstore.apiserver.orders.packages.service.WrapTypeService;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;

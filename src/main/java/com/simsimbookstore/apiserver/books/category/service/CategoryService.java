@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface CategoryService {
-    CategoryResponseDto saveCategory(CategoryRequestDto categoryRequestDto);
+    CategoryResponseDto createCategory(CategoryRequestDto categoryRequestDto);
 
     List<CategoryResponseDto> getAllCategories();
 

@@ -10,11 +10,11 @@ import java.util.List;
 
 public interface TagService {
 
-    TagResponseDto saveTag(TagRequestDto tagRequestDto);
+    TagResponseDto createTag(TagRequestDto tagRequestDto);
 
     List<TagResponseDto> getAlltag();
 
-    Tag findById(Long tagId);
+    Tag getTag(Long tagId);
 
     Page<TagResponseDto> getAllTags(Pageable pageable);
 
