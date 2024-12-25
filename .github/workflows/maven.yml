@@ -9,14 +9,14 @@
 name: Java CI with Maven
 
 on:
-  workflow_run:
-    workflows: ["Sonar Qube flow"]
-    types:
-      - completed
-    status: success
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:

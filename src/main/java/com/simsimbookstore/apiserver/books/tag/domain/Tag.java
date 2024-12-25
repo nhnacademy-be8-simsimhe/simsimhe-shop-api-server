@@ -4,6 +4,8 @@ package com.simsimbookstore.apiserver.books.tag.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
