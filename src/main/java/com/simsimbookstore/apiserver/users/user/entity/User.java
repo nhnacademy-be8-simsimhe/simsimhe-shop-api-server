@@ -58,7 +58,7 @@ public class User {
     @Column(name = "is_social_login", nullable = false)
     private boolean isSocialLogin = false;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "grade_id", nullable = false)
     private Grade grade;
 
