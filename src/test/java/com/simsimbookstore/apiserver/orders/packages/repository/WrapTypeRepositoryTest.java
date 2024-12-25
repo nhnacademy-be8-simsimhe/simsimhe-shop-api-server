@@ -2,6 +2,7 @@ package com.simsimbookstore.apiserver.orders.packages.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.simsimbookstore.apiserver.common.config.QuerydslConfig;
 import com.simsimbookstore.apiserver.orders.packages.entity.WrapType;
 
 import java.math.BigDecimal;
@@ -10,8 +11,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-
+@Import({QuerydslConfig.class})
 @DataJpaTest
 @ActiveProfiles("test")
 class WrapTypeRepositoryTest {
