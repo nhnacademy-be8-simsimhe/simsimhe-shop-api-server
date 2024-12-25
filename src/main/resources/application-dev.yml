@@ -13,7 +13,7 @@ spring:
 
 eureka:
   client:
-    enabled: false # eureka 사용시 true로 변경
+    enabled: true # eureka 사용시 true로 변경
 
 logging:
   level:
