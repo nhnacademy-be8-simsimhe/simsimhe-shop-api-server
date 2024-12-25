@@ -15,7 +15,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Import({QuerydslConfig.class})
+@Import(QuerydslConfig.class)
 @DataJpaTest
 @ActiveProfiles("test")
 class RoleRepositoryTest {
