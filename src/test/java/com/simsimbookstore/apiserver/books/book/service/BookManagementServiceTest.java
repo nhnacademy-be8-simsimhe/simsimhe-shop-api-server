@@ -3,13 +3,13 @@ package com.simsimbookstore.apiserver.books.book.service;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.simsimbookstore.apiserver.books.book.dto.BookGiftResponse;
 import com.simsimbookstore.apiserver.books.book.dto.BookRequestDto;
 import com.simsimbookstore.apiserver.books.book.dto.BookResponseDto;
 import com.simsimbookstore.apiserver.books.book.dto.BookStatusResponseDto;
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.entity.BookStatus;
-import com.simsimbookstore.apiserver.books.book.exception.BookOutOfStockException;
-import com.simsimbookstore.apiserver.books.book.mapper.BookMapper;
+
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
 import com.simsimbookstore.apiserver.books.bookcategory.entity.BookCategory;
 import com.simsimbookstore.apiserver.books.bookcategory.repository.BookCategoryRepository;
@@ -24,12 +24,10 @@ import com.simsimbookstore.apiserver.books.contributor.repository.ContributorRep
 import com.simsimbookstore.apiserver.books.tag.domain.Tag;
 import com.simsimbookstore.apiserver.books.tag.repository.TagRepository;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Constructor;
@@ -238,20 +236,6 @@ class BookManagementServiceTest {
     }
 
     @Test
-    void testModifyBookStatusNotFound() {
-        Long bookId = 1L;
-        BookRequestDto requestDto = BookRequestDto.builder()
-                .bookStatus(BookStatus.SOLDOUT)
-                .build();
-
-        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class, () -> bookManagementService.modifyBookStatus(bookId, requestDto));
-
-        verify(bookRepository).findById(bookId);
-    }
-
-    @Test
     void testModifyQuantitySOLDOUT() {
         Long bookId = 1L;
         int quantity = -10;
@@ -279,6 +263,81 @@ class BookManagementServiceTest {
 
         assertThrows(NotFoundException.class, () -> bookManagementService.modifyQuantity(bookId, quantity));
 
+        verify(bookRepository).findById(bookId);
+    }
+
+    @Test
+    void testModifyBookStatus() {
+        Long bookId = 1L;
+
+        BookRequestDto requestDto = BookRequestDto.builder()
+                .bookStatus(BookStatus.SOLDOUT)
+                .build();
+
+        Book book = Book.builder()
+                .bookStatus(BookStatus.ONSALE)
+                .build();
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+
+        BookStatusResponseDto bookStatusResponseDto = bookManagementService.modifyBookStatus(bookId, requestDto);
+        assertNotNull(bookStatusResponseDto);
+        assertEquals(BookStatus.SOLDOUT, bookStatusResponseDto.getBookStatus());
+        verify(bookRepository).findById(bookId);
+
+
+    }
+
+    @Test
+    void testModifyBookStatusNotFound() {
+        // Given
+        Long bookId = 1L;
+        BookRequestDto requestDto = BookRequestDto.builder()
+                .bookStatus(BookStatus.SOLDOUT)
+                .build();
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(NotFoundException.class, () -> bookManagementService.modifyBookStatus(bookId, requestDto));
+        verify(bookRepository).findById(bookId);
+    }
+
+    @Test
+    void testModifyBookGift() {
+        // Given
+        Long bookId = 1L;
+        BookRequestDto requestDto = BookRequestDto.builder()
+                .giftPackaging(true)
+                .build();
+
+        Book book = Book.builder()
+                .giftPackaging(false)
+                .build();
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+
+        // When
+        BookGiftResponse bookGiftResponse = bookManagementService.modifyBookGift(bookId, requestDto);
+
+        // Then
+        assertNotNull(bookGiftResponse);
+        assertTrue(bookGiftResponse.isGiftPackaging());
+        verify(bookRepository).findById(bookId);
+    }
+
+    @Test
+    void testModifyBookGiftNotFound() {
+        // Given
+        Long bookId = 1L;
+        BookRequestDto requestDto = BookRequestDto.builder()
+                .giftPackaging(true)
+                .build();
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+
+        // Then
+        assertThrows(NotFoundException.class, () -> bookManagementService.modifyBookGift(bookId, requestDto));
         verify(bookRepository).findById(bookId);
     }
 }
