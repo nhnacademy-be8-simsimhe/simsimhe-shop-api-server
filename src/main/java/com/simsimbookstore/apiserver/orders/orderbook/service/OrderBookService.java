@@ -5,7 +5,6 @@ import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookResponseDto;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
 import com.simsimbookstore.apiserver.orders.packages.dto.PackageResponseDto;
-import com.simsimbookstore.apiserver.orders.packages.entity.Packages;
 import java.util.List;
 
 public interface OrderBookService {

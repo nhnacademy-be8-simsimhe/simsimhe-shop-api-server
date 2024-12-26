@@ -3,6 +3,8 @@ package com.simsimbookstore.apiserver.orders.orderbook.service.impl;
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.exception.BookOutOfStockException;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
+import com.simsimbookstore.apiserver.books.book.service.BookManagementService;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.coupondiscount.dto.CouponDiscountResponseDto;
 import com.simsimbookstore.apiserver.orders.coupondiscount.entity.CouponDiscount;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
@@ -31,25 +33,25 @@ public class OrderBookServiceImpl implements OrderBookService {
     private final OrderBookRepository orderBookRepository;
     private final BookRepository bookRepository;
     private final OrderRepository orderRepository;
+    private final BookManagementService bookManagementService;
 
     @Override
     public List<OrderBookResponseDto> createOrderBooks(List<OrderBookRequestDto> orderBookRequestDtos) {
         List<OrderBook> orderBooks = new ArrayList<>();
 
         for (OrderBookRequestDto dto : orderBookRequestDtos) {
-            Book book = bookRepository.findByBookIdAndQuantityGreaterThan(dto.getBookId(), 0).orElseThrow(
-                    () -> new BookOutOfStockException("Book is out of stock or does not exist")
+            Book book = bookRepository.findById(dto.getBookId()).orElseThrow(
+                    () -> new NotFoundException("Book is out of stock or does not exist")
             );
 
             Order order = orderRepository.findById(dto.getOrderId())
                     .orElseThrow(() -> new OrderNotFoundException("Order not found for ID: " + dto.getOrderId()));
 
-            int updatedQuantity = book.getQuantity() - dto.getQuantity();
-            if (updatedQuantity < 0) {
-                throw new BookOutOfStockException("Not enough stock for book ID: " + book.getBookId());
+            try {
+                bookManagementService.modifyQuantity(book.getBookId(), -dto.getQuantity());
+            } catch (BookOutOfStockException e) {
+                throw new NotFoundException("Not enough stock for book ID: " + book.getBookId());
             }
-            book.setQuantity(updatedQuantity);
-            bookRepository.save(book);
 
             OrderBook orderBook = dto.toEntity(book, order);
             orderBooks.add(orderBook);
@@ -61,6 +63,7 @@ public class OrderBookServiceImpl implements OrderBookService {
                 .map(this::toOrderBookResponseDto)
                 .collect(Collectors.toList());
     }
+
 
     @Override
     public OrderBookResponseDto getOrderBook(Long orderBookId) {
