@@ -25,11 +25,7 @@ jobs:
       - name: Install Maven
         run: |
           mvn install:install-file \
-            -Dfile=libs/toast-log-crash-logback-sdk-3.0.5.jar \
-            -DgroupId=logncrash \
-            -DartifactId=toast-log-crash-logback-sdk \
-            -Dversion=3.0.5 \
-            -Dpackaging=jar
+
 
       - name: Cache SonarQube packages
         uses: actions/cache@v1

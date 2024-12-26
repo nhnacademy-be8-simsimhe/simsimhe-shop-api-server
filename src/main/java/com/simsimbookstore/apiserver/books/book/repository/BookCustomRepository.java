@@ -14,6 +14,8 @@ public interface BookCustomRepository {
 
     Page<BookListResponse> getBookListByCategory(Long userId, Long categoryId, Pageable pageable);
 
+    Page<BookListResponse> getBookListByTag(Long userId,Long tagId,Pageable pageable);
+
     BookResponseDto getBookDetail(Long userId, Long bookId);
 
     List<Long> getLowestCategoryId(List<Long> categoryIdList);
