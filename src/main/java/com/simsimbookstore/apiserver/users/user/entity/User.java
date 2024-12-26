@@ -1,6 +1,7 @@
 package com.simsimbookstore.apiserver.users.user.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 import jakarta.persistence.*;
@@ -39,6 +40,7 @@ public class User {
     @Column(nullable = false, length = 20, unique = true)
     private String email;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column
     private LocalDate birth;
 

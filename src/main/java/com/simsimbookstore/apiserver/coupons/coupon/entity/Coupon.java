@@ -3,6 +3,7 @@ package com.simsimbookstore.apiserver.coupons.coupon.entity;
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponType;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Setter
+@Builder
 public class Coupon {
 
     @Id
@@ -34,11 +35,19 @@ public class Coupon {
     private LocalDateTime useDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "coupon_type_id")
+    @JoinColumn(name = "coupon_type_id", nullable = false)
     private CouponType couponType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    public void use() {
+        couponStatus = CouponStatus.USED;
+        useDate = LocalDateTime.now();
+    }
+
+    public void expire() {
+        couponStatus = CouponStatus.EXPIRED;
+    }
 }

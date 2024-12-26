@@ -43,7 +43,7 @@ public class LocalUserRequestDto {
     private String email;
 
     @NotNull
-    @JsonFormat(pattern = "yyyyMMdd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birth;
 
     @NotNull
