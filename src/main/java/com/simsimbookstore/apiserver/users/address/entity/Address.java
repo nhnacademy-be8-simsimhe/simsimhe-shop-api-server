@@ -1,10 +1,13 @@
 package com.simsimbookstore.apiserver.users.address.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+@Builder
 @Entity
 @Table(name = "addresses")
 @AllArgsConstructor
@@ -35,5 +38,7 @@ public class Address {
     @Column(name = "detailed_address", nullable = false)
     private String detailedAddress;
 
-
+    public void assignUser(User user) {
+        this.user = user;
+    }
 }

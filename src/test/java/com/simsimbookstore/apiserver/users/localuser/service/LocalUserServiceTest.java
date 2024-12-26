@@ -1,6 +1,6 @@
 package com.simsimbookstore.apiserver.users.localuser.service;
 
-import com.simsimbookstore.apiserver.users.exception.DuplicateId;
+import com.simsimbookstore.apiserver.users.exception.DuplicateIdException;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.service.GradeService;
@@ -84,7 +84,6 @@ class LocalUserServiceTest {
     @Test
     @DisplayName("로컬 유저 저장 테스트")
     void testSaveLocalUser() {
-        when(gradeService.findByGradeId(1L)).thenReturn(testGrade);
         when(roleService.findByRoleName(RoleName.USER)).thenReturn(new Role(1L,RoleName.USER));
 
         localUserService.saveLocalUser(testUser);
@@ -95,10 +94,9 @@ class LocalUserServiceTest {
     @Test
     @DisplayName("로컬 유저 저장시 중복 아이디 에러")
     void testSaveLocalUserDuplicate() {
-        when(gradeService.findByGradeId(1L)).thenReturn(testGrade);
         when(localUserRepository.existsByLoginId(testUser.getLoginId())).thenReturn(true);
 
-        assertThrows(DuplicateId.class, () -> localUserService.saveLocalUser(testUser));
+        assertThrows(DuplicateIdException.class, () -> localUserService.saveLocalUser(testUser));
     }
 
     @Test

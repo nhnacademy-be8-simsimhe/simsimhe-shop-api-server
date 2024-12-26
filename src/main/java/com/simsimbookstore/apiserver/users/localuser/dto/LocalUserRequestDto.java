@@ -55,7 +55,6 @@ public class LocalUserRequestDto {
 
     private LocalDateTime latestLoginDate;
 
-    @NotNull
     private Tier tier = Tier.STANDARD;
 
     @NotNull

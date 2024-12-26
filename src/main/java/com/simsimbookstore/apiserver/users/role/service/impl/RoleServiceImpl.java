@@ -1,6 +1,6 @@
 package com.simsimbookstore.apiserver.users.role.service.impl;
 
-import com.simsimbookstore.apiserver.users.exception.DuplicateId;
+import com.simsimbookstore.apiserver.users.exception.DuplicateIdException;
 import com.simsimbookstore.apiserver.users.exception.ResourceNotFoundException;
 import com.simsimbookstore.apiserver.users.role.entity.Role;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
@@ -21,7 +21,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Role save(Role role){
         if (roleRepository.existsByRoleName(role.getRoleName())){
-            throw new DuplicateId("already exists " + role.getRoleName());
+            throw new DuplicateIdException("already exists " + role.getRoleName());
         }
 
         return roleRepository.save(role);

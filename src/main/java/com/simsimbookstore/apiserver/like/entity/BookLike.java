@@ -6,6 +6,8 @@ import com.simsimbookstore.apiserver.users.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+
+@Builder
 @Entity
 @Table(name = "book_likes")
 @AllArgsConstructor

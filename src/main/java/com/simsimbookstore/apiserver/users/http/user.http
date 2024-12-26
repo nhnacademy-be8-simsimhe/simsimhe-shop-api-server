@@ -14,3 +14,19 @@ Content-Type: application/json
   "loginId": "test",
   "password": "test"
 }
+
+### 유저 상태 업데이트
+PUT http://localhost:8020/api/users/1/status
+Content-Type: application/json
+
+{
+  "status": "INACTIVE"
+}
+
+### 유저 등급 업데이트
+PUT http://localhost:8020/api/users/1/grade
+Content-Type: application/json
+
+{
+  "tier": "ROYAL"
+}
