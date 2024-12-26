@@ -4,8 +4,7 @@ management:
       exposure:
         include: beans, conditions, configprops, env, health, httpexchanges, info, loggers, metrics, mappings, threaddump, shutdown
       base-path: /management
-      path-mapping:
-        health: health_check
+
   endpoint:
     health:
       show-details: never
