@@ -22,7 +22,7 @@ public class LocalUser extends User {
     @Column(name = "login_id", nullable = false, length = 20, unique = true)
     private String loginId;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private String password;
 
 

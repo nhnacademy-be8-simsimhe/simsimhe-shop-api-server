@@ -32,7 +32,7 @@ public class BookListResponse {
 
     private BookStatus bookStatus;
 
-    private int quntity;
+    private int quantity;
 
     private Long bookLikeId;
 

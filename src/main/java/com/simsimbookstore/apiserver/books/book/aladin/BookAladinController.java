@@ -1,6 +1,5 @@
-package com.simsimbookstore.apiserver.books.book.controller;
+package com.simsimbookstore.apiserver.books.book.aladin;
 
-import com.simsimbookstore.apiserver.books.book.aladin.AladinApiService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 

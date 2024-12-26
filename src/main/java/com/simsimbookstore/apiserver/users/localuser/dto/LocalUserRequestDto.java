@@ -43,7 +43,7 @@ public class LocalUserRequestDto {
     private String email;
 
     @NotNull
-    @JsonFormat(pattern = "yyyyMMdd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birth;
 
     @NotNull
@@ -55,7 +55,6 @@ public class LocalUserRequestDto {
 
     private LocalDateTime latestLoginDate;
 
-    @NotNull
     private Tier tier = Tier.STANDARD;
 
     @NotNull
