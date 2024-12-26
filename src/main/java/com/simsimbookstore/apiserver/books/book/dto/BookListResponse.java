@@ -38,7 +38,7 @@ public class BookListResponse {
 
     private boolean isLiked;
 
-    private List<BookContributorResponsDto> contributorRoleList;
+    private List<BookContributorResponsDto> contributorList;
 
 
 
