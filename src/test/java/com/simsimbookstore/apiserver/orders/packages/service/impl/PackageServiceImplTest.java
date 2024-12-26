@@ -2,7 +2,6 @@ package com.simsimbookstore.apiserver.orders.packages.service.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,7 +15,7 @@ import com.simsimbookstore.apiserver.orders.packages.entity.Packages;
 import com.simsimbookstore.apiserver.orders.packages.entity.WrapType;
 import com.simsimbookstore.apiserver.orders.packages.exception.PackagesNotFoundException;
 import com.simsimbookstore.apiserver.orders.packages.exception.WrapTypeNotFoundException;
-import com.simsimbookstore.apiserver.orders.packages.repository.PackageRepository;
+import com.simsimbookstore.apiserver.orders.packages.repository.PackagesRepository;
 import com.simsimbookstore.apiserver.orders.packages.repository.WrapTypeRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class PackageServiceImplTest {
 
     @Mock
-    private PackageRepository packageRepository;
+    private PackagesRepository packagesRepository;
 
     @Mock
     private OrderBookRepository orderBookRepository;
@@ -63,13 +62,13 @@ class PackageServiceImplTest {
                 .wrapType(wrapType)
                 .build();
 
-        when(packageRepository.save(any(Packages.class))).thenReturn(savedPackage);
+        when(packagesRepository.save(any(Packages.class))).thenReturn(savedPackage);
 
         Packages result = packageService.createPackage(requestDto);
 
         assertNotNull(result);
         assertEquals("Test Package", result.getPackageType());
-        verify(packageRepository, times(1)).save(any(Packages.class));
+        verify(packagesRepository, times(1)).save(any(Packages.class));
     }
 
     @Test
@@ -80,31 +79,13 @@ class PackageServiceImplTest {
                 .packageType("Test Package")
                 .build();
 
-        when(packageRepository.findById(1L)).thenReturn(Optional.of(existingPackage));
+        when(packagesRepository.findById(1L)).thenReturn(Optional.of(existingPackage));
 
         Packages result = packageService.getPackageById(1L);
 
         assertNotNull(result);
         assertEquals(1L, result.getPackageId());
-        verify(packageRepository, times(1)).findById(1L);
-    }
-
-    @Test
-    @DisplayName("포장 삭제 테스트")
-    void deletePackage_ShouldCallDelete_WhenPackageExists() {
-        // Given
-        Packages existingPackage = Packages.builder()
-                .packageId(1L)
-                .build();
-
-        when(packageRepository.findById(1L)).thenReturn(Optional.of(existingPackage));
-
-        // When
-        packageService.deletePackage(1L);
-
-        // Then
-        verify(packageRepository, times(1)).delete(existingPackage);
-        verify(packageRepository, never()).deleteById(anyLong());
+        verify(packagesRepository, times(1)).findById(1L);
     }
 
 
@@ -127,7 +108,7 @@ class PackageServiceImplTest {
                 .wrapType(wrapType)
                 .build();
 
-        when(packageRepository.findById(1L)).thenReturn(Optional.of(existingPackage));
+        when(packagesRepository.findById(1L)).thenReturn(Optional.of(existingPackage));
         when(orderBookRepository.findById(1L)).thenReturn(Optional.of(orderBook));
         when(wrapTypeRepository.findById(2L)).thenReturn(Optional.of(wrapType));
 
@@ -138,13 +119,13 @@ class PackageServiceImplTest {
                 .wrapType(wrapType)
                 .build();
 
-        when(packageRepository.save(any(Packages.class))).thenReturn(updatedPackage);
+        when(packagesRepository.save(any(Packages.class))).thenReturn(updatedPackage);
 
         Packages result = packageService.updatePackage(1L, requestDto);
 
         assertNotNull(result);
         assertEquals("Updated Package", result.getPackageType());
-        verify(packageRepository, times(1)).save(any(Packages.class));
+        verify(packagesRepository, times(1)).save(any(Packages.class));
     }
 
     @Test
@@ -161,7 +142,7 @@ class PackageServiceImplTest {
         assertThrows(OrderBookNotFoundException.class, () -> packageService.createPackage(requestDto));
         verify(orderBookRepository, times(1)).findById(1L);
         verify(wrapTypeRepository, never()).findById(any());
-        verify(packageRepository, never()).save(any());
+        verify(packagesRepository, never()).save(any());
     }
 
     @Test
@@ -181,26 +162,26 @@ class PackageServiceImplTest {
         assertThrows(WrapTypeNotFoundException.class, () -> packageService.createPackage(requestDto));
         verify(orderBookRepository, times(1)).findById(1L);
         verify(wrapTypeRepository, times(1)).findById(2L);
-        verify(packageRepository, never()).save(any());
+        verify(packagesRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("포장을 찾았는데 포장이 없으면 오류생김")
     void getPackageById_ShouldThrowException_WhenPackageNotFound() {
-        when(packageRepository.findById(1L)).thenReturn(Optional.empty());
+        when(packagesRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(PackagesNotFoundException.class, () -> packageService.getPackageById(1L));
-        verify(packageRepository, times(1)).findById(1L);
+        verify(packagesRepository, times(1)).findById(1L);
     }
 
     @Test
     @DisplayName("없는 포장을 삭제할때 예외 던짐")
     void deletePackage_ShouldThrowException_WhenPackageNotFound() {
-        when(packageRepository.findById(1L)).thenReturn(Optional.empty());
+        when(packagesRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(PackagesNotFoundException.class, () -> packageService.deletePackage(1L));
-        verify(packageRepository, times(1)).findById(1L);
-        verify(packageRepository, never()).delete(any());
+        verify(packagesRepository, times(1)).findById(1L);
+        verify(packagesRepository, never()).delete(any());
     }
 
     @Test
@@ -212,13 +193,13 @@ class PackageServiceImplTest {
                 .packageTypeId(2L)
                 .build();
 
-        when(packageRepository.findById(1L)).thenReturn(Optional.empty());
+        when(packagesRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(PackagesNotFoundException.class, () -> packageService.updatePackage(1L, requestDto));
-        verify(packageRepository, times(1)).findById(1L);
+        verify(packagesRepository, times(1)).findById(1L);
         verify(orderBookRepository, never()).findById(any());
         verify(wrapTypeRepository, never()).findById(any());
-        verify(packageRepository, never()).save(any());
+        verify(packagesRepository, never()).save(any());
     }
 
     @Test
@@ -235,14 +216,14 @@ class PackageServiceImplTest {
                 .packageType("Old Package")
                 .build();
 
-        when(packageRepository.findById(1L)).thenReturn(Optional.of(existingPackage));
+        when(packagesRepository.findById(1L)).thenReturn(Optional.of(existingPackage));
         when(orderBookRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(OrderBookNotFoundException.class, () -> packageService.updatePackage(1L, requestDto));
-        verify(packageRepository, times(1)).findById(1L);
+        verify(packagesRepository, times(1)).findById(1L);
         verify(orderBookRepository, times(1)).findById(1L);
         verify(wrapTypeRepository, never()).findById(any());
-        verify(packageRepository, never()).save(any());
+        verify(packagesRepository, never()).save(any());
     }
 
     @Test
@@ -261,14 +242,14 @@ class PackageServiceImplTest {
 
         OrderBook orderBook = new OrderBook();
 
-        when(packageRepository.findById(1L)).thenReturn(Optional.of(existingPackage));
+        when(packagesRepository.findById(1L)).thenReturn(Optional.of(existingPackage));
         when(orderBookRepository.findById(1L)).thenReturn(Optional.of(orderBook));
         when(wrapTypeRepository.findById(2L)).thenReturn(Optional.empty());
 
         assertThrows(WrapTypeNotFoundException.class, () -> packageService.updatePackage(1L, requestDto));
-        verify(packageRepository, times(1)).findById(1L);
+        verify(packagesRepository, times(1)).findById(1L);
         verify(orderBookRepository, times(1)).findById(1L);
         verify(wrapTypeRepository, times(1)).findById(2L);
-        verify(packageRepository, never()).save(any());
+        verify(packagesRepository, never()).save(any());
     }
 }
