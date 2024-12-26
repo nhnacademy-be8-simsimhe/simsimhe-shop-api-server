@@ -44,8 +44,6 @@ public class RedisConfig {
         config.setPort(redisProperty.getPort());
         config.setDatabase(redisProperty.getDatabase());
 
-        log.info("Connecting to Redis at {}", config.getHostName());
-        log.info("Redis password (decrypted): {}", decryptedPassword);
 
         return new LettuceConnectionFactory(config, lettuceClientConfiguration());
     }
