@@ -104,7 +104,7 @@ public class AladinApiService {
         BookImagePath bookImagePath = BookImagePath.builder()
                 .book(book)
                 .imagePath(imagePath)
-                .thumbnail(false)
+                .imageType(BookImagePath.ImageType.THUMBNAIL)
                 .build();
 
         bookImageRepoisotry.save(bookImagePath);
