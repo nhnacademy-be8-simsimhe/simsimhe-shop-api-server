@@ -5,7 +5,6 @@ import com.simsimbookstore.apiserver.orders.delivery.dto.DeliveryResponseDto;
 import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
 import com.simsimbookstore.apiserver.orders.delivery.exception.DeliveryNotFoundException;
 import com.simsimbookstore.apiserver.orders.delivery.exception.DeliveryStateUpdateException;
-import com.simsimbookstore.apiserver.orders.delivery.repository.DeliveryPolicyRepository;
 import com.simsimbookstore.apiserver.orders.delivery.repository.DeliveryRepository;
 import com.simsimbookstore.apiserver.orders.delivery.service.DeliveryService;
 import java.util.EnumSet;

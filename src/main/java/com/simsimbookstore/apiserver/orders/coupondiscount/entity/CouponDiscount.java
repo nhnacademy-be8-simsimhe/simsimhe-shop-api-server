@@ -1,6 +1,7 @@
 package com.simsimbookstore.apiserver.orders.coupondiscount.entity;
 
 
+import com.simsimbookstore.apiserver.coupons.coupon.entity.Coupon;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,6 +36,11 @@ public class CouponDiscount {
     @OneToOne
     @JoinColumn(name = "order_book_id", nullable = false)
     private OrderBook orderBook;
+
+    @OneToOne
+    @JoinColumn(name = "coupon_id", nullable = false)
+    private Coupon coupon;
+
 
     @Column(name = "coupon_name", nullable = false, length = 40)
     private String couponName;
