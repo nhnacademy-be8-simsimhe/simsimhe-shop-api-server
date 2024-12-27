@@ -44,7 +44,6 @@ public class PaymentService {
 
     public void createPayment(ConfirmSuccessResponseDto confirmSuccessResponseDto) {
         // DTO > entity
-//        Payment payment = confirmSuccessResponseDto.toEntity();
 
         // save
         Payment payment = new Payment(
@@ -75,7 +74,7 @@ public class PaymentService {
     }
 
 
-//    // 환불을 위한 주문 번호로 paymentKey 조회
+    // 환불을 위한 주문 번호로 paymentKey 조회
 //    public String getPaymentKey(String orderId) {
 //        String paymentKey = paymentRepository.findPaymentKeyByOrder(orderId);
 //        return paymentKey;
