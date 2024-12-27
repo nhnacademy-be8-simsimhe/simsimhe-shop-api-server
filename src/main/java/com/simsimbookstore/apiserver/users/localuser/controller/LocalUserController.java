@@ -25,8 +25,9 @@ public class LocalUserController {
     }
 
     @GetMapping("/{loginId}/exists")
-    public boolean existsByLoginId(@PathVariable String loginId) {
-        return userService.existsByLoginId(loginId);
+    public ResponseEntity<?> existsByLoginId(@PathVariable String loginId) {
+        boolean result = userService.existsByLoginId(loginId);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{loginId}")
