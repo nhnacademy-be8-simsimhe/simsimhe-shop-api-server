@@ -32,13 +32,13 @@ public class BookListResponse {
 
     private BookStatus bookStatus;
 
-    private int quntity;
+    private int quantity;
 
     private Long bookLikeId;
 
     private boolean isLiked;
 
-    private List<BookContributorResponsDto> contributorRoleList;
+    private List<BookContributorResponsDto> contributorList;
 
 
 
