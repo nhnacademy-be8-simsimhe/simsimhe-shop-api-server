@@ -2,6 +2,7 @@ package com.simsimbookstore.apiserver.payment.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.payment.client.PaymentRestTemplate;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmSuccessResponseDto;
@@ -50,9 +51,9 @@ public class PaymentService {
                 null,
                 confirmSuccessResponseDto.getPaymentKey(),
                 confirmSuccessResponseDto.getApprovedAt(),
-                paymentStatusRepository.findById(0L).get(),
                 confirmSuccessResponseDto.getPaymentMethod(),
-                orderRepository.findById(confirmSuccessResponseDto.getOrderId());
+                paymentStatusRepository.findById(0L).orElseThrow(() -> new NotFoundException("'SUCCESS'가 존재하지 않습니다.")),
+                orderRepository.findByOrderNumber(confirmSuccessResponseDto.getOrderId()).orElseThrow(() -> new NotFoundException("OrderNumber가 존재하지 않습니다."))
         );
 
         paymentRepository.save(payment);
@@ -74,15 +75,15 @@ public class PaymentService {
     }
 
 
-    // 환불을 위한 주문 번호로 paymentKey 조회
-    public String getPaymentKey(String orderId) {
-        String paymentKey = paymentRepository.findPaymentKeyByOrderId(orderId);
-        return paymentKey;
-    }
-
-
-    // 관리자 - toss에게 환불 요청
-    public void adminCanceled(String paymentKey, String cancelReason) {
-        String response = paymentRestTemplate.adminCanceled(paymentKey, cancelReason);
-    }
+//    // 환불을 위한 주문 번호로 paymentKey 조회
+//    public String getPaymentKey(String orderId) {
+//        String paymentKey = paymentRepository.findPaymentKeyByOrder(orderId);
+//        return paymentKey;
+//    }
+//
+//
+//    // 관리자 - toss에게 환불 요청
+//    public void adminCanceled(String paymentKey, String cancelReason) {
+//        String response = paymentRestTemplate.adminCanceled(paymentKey, cancelReason);
+//    }
 }

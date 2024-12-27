@@ -28,9 +28,11 @@ public class Payment {
     @Column(nullable = false)
     private LocalDateTime paymentDate;
 
+    // 사용자가 선택한 결제 방법
     @Column(name = "payment_method", nullable = false)
     private String paymentMethodToss;
 
+    // 사용자에게 제공되는 결제 방법
     @ManyToOne
     @JoinColumn(name = "paymentMethodId", nullable = false)
     private PaymentMethod paymentMethod;
@@ -42,4 +44,13 @@ public class Payment {
     @ManyToOne
     @JoinColumn(name = "orderId", nullable = false)
     private Order order;
+
+    public Payment(Object o, String paymentKey, LocalDateTime approvedAt, String paymentMethod, PaymentStatus paymentStatus, Order order) {
+        this.paymentId = (Long) o;
+        this.paymentKey = paymentKey;
+        this.paymentDate = approvedAt;
+        this.paymentMethodToss = paymentMethod;
+        this.paymentStatus = paymentStatus;
+        this.order = order;
+    }
 }

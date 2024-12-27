@@ -5,7 +5,6 @@ import com.simsimbookstore.apiserver.payment.dto.FailResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.RequestOrderValueDto;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
 import com.simsimbookstore.apiserver.payment.service.PaymentService;
-import com.simsimbookstore.apiserver.payment.util.AesUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
