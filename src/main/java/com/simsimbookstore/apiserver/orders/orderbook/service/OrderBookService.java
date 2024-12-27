@@ -21,4 +21,6 @@ public interface OrderBookService {
     List<PackageResponseDto> getPackages(Long orderBookId);
 
     CouponDiscountResponseDto getCouponDiscount(Long orderBookId);
+
+    OrderBookResponseDto toOrderBookResponseDto(OrderBook orderBook);
 }
