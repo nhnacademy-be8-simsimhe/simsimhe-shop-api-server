@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.util.Objects;
 
@@ -30,7 +31,7 @@ public class PaymentController {
 
         // Long orderId -> String orderId로 변환해서 session에 저장
         session.setAttribute("orderId", orderValue.getOrderId()); // orderValue 필드명 - javascript fetch에서 보내는 데이터의 이름이랑 같아야 함 (json 역직렬화 규칙)
-        session.setAttribute("amount", orderValue.getTotalAmount());
+        session.setAttribute("totalAmount", orderValue.getTotalAmount());
 
         return ResponseEntity.ok("Order information saved in session");
     }
@@ -39,14 +40,14 @@ public class PaymentController {
     @GetMapping("/payment/success")
     public ResponseEntity<SuccessRequestDto> paymentSuccess(@RequestParam String paymentKey,
                                                             @RequestParam String orderId,
-                                                            @RequestParam Double amount,
+                                                            @RequestParam BigDecimal totalAmount,
                                                             HttpServletRequest request) {
-        SuccessRequestDto successDto = new SuccessRequestDto(paymentKey, orderId, amount);
+        SuccessRequestDto successDto = new SuccessRequestDto(paymentKey, orderId, totalAmount);
         HttpSession session = request.getSession();
 
         // 임시 저장값과 같은지 검증
         if (Objects.equals(orderId, (String) session.getAttribute("orderId"))) {
-            if (Objects.equals(amount, (Double) session.getAttribute("amount"))) {
+            if (Objects.equals(totalAmount, (BigDecimal) session.getAttribute("totalAmount"))) {
                 // 같으면 세션 삭제
                 session.removeAttribute(orderId);
                 try {

@@ -76,7 +76,7 @@ public class PaymentService {
 
     // 환불을 위한 주문 번호로 paymentKey 조회
 //    public String getPaymentKey(String orderId) {
-//        String paymentKey = paymentRepository.findPaymentKeyByOrder(orderId);
+//        String paymentKey = paymentRepository.findPaymentKeyByOrderId(orderId);
 //        return paymentKey;
 //    }
 //

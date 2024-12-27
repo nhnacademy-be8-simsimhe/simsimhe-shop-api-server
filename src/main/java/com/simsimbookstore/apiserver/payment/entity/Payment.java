@@ -32,7 +32,7 @@ public class Payment {
     @Column(name = "payment_method", nullable = false)
     private String paymentMethodToss;
 
-    // 사용자에게 제공되는 결제 방법
+    // 결제 수단
     @ManyToOne
     @JoinColumn(name = "paymentMethodId", nullable = false)
     private PaymentMethod paymentMethod;
