@@ -29,6 +29,13 @@ import java.util.Optional;
 public class CustomCouponRepositoryImpl implements CustomCouponRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
+    /**
+     * 유저가 가지고 있는 쿠폰 중에서 특정 책에 적용 가능한 쿠폰만 Page로 반환한다.
+     * @param pageable
+     * @param userId
+     * @param bookId
+     * @return 특정 책에 적용 가능한 쿠폰
+     */
     @Override
     public Page<Coupon> findEligibleCouponToBook(Pageable pageable, Long userId, Long bookId) {
         QCoupon coupon = QCoupon.coupon;
@@ -91,14 +98,21 @@ public class CustomCouponRepositoryImpl implements CustomCouponRepository {
         return new PageImpl<>(coupons, pageable, total);
     }
 
+    /**
+     * 유저가 가지고 있는 쿠폰 중에서 특정 쿠폰 타입이고 아직 사용되지 않은(UNUSED)쿠폰을 반환한다
+     * 아직 사용하지 않은 특정 쿠폰 타입인 쿠폰은 사용자마다 1개씩만 가지고 있을 수 있음.
+     * @param userId
+     * @param couponTypeId
+     * @return 사용되지 않은 쿠폰
+     */
     @Override
-    public List<Coupon> findUnusedCouponByUserAndType(Long userId, Long couponTypeId) {
+    public Optional<Coupon> findUnusedCouponByUserAndType(Long userId, Long couponTypeId) {
         QCoupon coupon = QCoupon.coupon;
-        return jpaQueryFactory.selectFrom(coupon)
+        return Optional.ofNullable(jpaQueryFactory.selectFrom(coupon)
                 .where(
                         coupon.user.userId.eq(userId),
                         coupon.couponType.couponTypeId.eq(couponTypeId),
                         coupon.couponStatus.eq(CouponStatus.UNUSED)
-                ).fetch();
+                ).fetchOne());
     }
 }
