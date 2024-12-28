@@ -48,10 +48,14 @@ public class OrderFacadeImpl implements OrderFacade {
             }
             orderBookService.createOrderBooks(orderBookReqs);
         }
-        return new OrderFacadeResponseDto(
-                orderResponseDto.getOrderNumber(), //20241227-00000001
-                orderResponseDto.getTotalPrice()    //110000원
-        );
+
+        return OrderFacadeResponseDto.builder()
+                .orderNumber(orderResponseDto.getOrderNumber())
+                .totalPrice(orderResponseDto.getTotalPrice())
+                .orderName("name")
+                .email(orderReq.getOrderEmail())
+                .phoneNumber(orderReq.getPhoneNumber())
+                .build();
     }
 }
 
