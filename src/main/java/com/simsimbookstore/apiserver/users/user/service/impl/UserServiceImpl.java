@@ -1,6 +1,6 @@
 package com.simsimbookstore.apiserver.users.user.service.impl;
 
-import com.simsimbookstore.apiserver.users.exception.ResourceNotFoundException;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
     public User updateUserStatus(Long userId, UserStatus userStatus) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
-            throw new ResourceNotFoundException("not found user with ID : " + userId);
+            throw new NotFoundException("not found user with ID : " + userId);
         }
 
         User user = optionalUser.get();
@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
     public User updateUserGrade(Long userId, Tier tier) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
-            throw new ResourceNotFoundException("not found user with ID : " + userId);
+            throw new NotFoundException("not found user with ID : " + userId);
         }
 
         User user = optionalUser.get();
@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("not found user with ID : " + userId));
+                .orElseThrow(() -> new NotFoundException("not found user with ID : " + userId));
         return user;
     }
 

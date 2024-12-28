@@ -1,6 +1,6 @@
 package com.simsimbookstore.apiserver.users.localuser.service;
 
-import com.simsimbookstore.apiserver.users.exception.DuplicateIdException;
+import com.simsimbookstore.apiserver.exception.AlreadyExistException;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.service.GradeService;
@@ -96,7 +96,7 @@ class LocalUserServiceTest {
     void testSaveLocalUserDuplicate() {
         when(localUserRepository.existsByLoginId(testUser.getLoginId())).thenReturn(true);
 
-        assertThrows(DuplicateIdException.class, () -> localUserService.saveLocalUser(testUser));
+        assertThrows(AlreadyExistException.class, () -> localUserService.saveLocalUser(testUser));
     }
 
     @Test

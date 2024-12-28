@@ -1,6 +1,6 @@
 package com.simsimbookstore.apiserver.users.role.service.impl;
 
-import com.simsimbookstore.apiserver.users.exception.DuplicateIdException;
+import com.simsimbookstore.apiserver.exception.AlreadyExistException;
 import com.simsimbookstore.apiserver.users.role.entity.Role;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.role.repository.RoleRepository;
@@ -45,7 +45,7 @@ class RoleServiceImplTest {
     @DisplayName("중복된 새로운 역할 저장시 에러 테스트")
     void saveDuplicate() {
         when(roleRepository.existsByRoleName(RoleName.USER)).thenReturn(true);
-        assertThrows(DuplicateIdException.class,()-> roleService.save(testRole));
+        assertThrows(AlreadyExistException.class,()-> roleService.save(testRole));
     }
 
     @Test
