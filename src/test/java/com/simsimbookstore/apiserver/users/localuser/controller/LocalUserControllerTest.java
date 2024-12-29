@@ -2,7 +2,7 @@ package com.simsimbookstore.apiserver.users.localuser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
-import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRequestDto;
+import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.service.LocalUserService;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
@@ -39,12 +39,12 @@ class LocalUserControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    LocalUserRequestDto testUserRequestDto;
+    LocalUserRegisterRequestDto testUserRequestDto;
 
     LocalUser testLocalUser;
     @BeforeEach
     void setUp() {
-        testUserRequestDto = LocalUserRequestDto.builder()
+        testUserRequestDto = LocalUserRegisterRequestDto.builder()
                 .userName("John Doe")
                 .mobileNumber("01051278121")
                 .email("johndoe@example.com")
@@ -73,7 +73,7 @@ class LocalUserControllerTest {
 
     @Test
     void addLocalUSer() throws Exception {
-        when(localUserService.saveLocalUser(any(LocalUserRequestDto.class))).thenReturn(testLocalUser);
+        when(localUserService.saveLocalUser(any(LocalUserRegisterRequestDto.class))).thenReturn(testLocalUser);
 
         mockMvc.perform(post("/api/users/localUsers")
                         .contentType(MediaType.APPLICATION_JSON)

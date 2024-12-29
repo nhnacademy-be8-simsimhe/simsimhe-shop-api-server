@@ -116,8 +116,11 @@ class AddressControllerTest {
     @Test
     @DisplayName("리스트 조회")
     void getAddresses() throws Exception {
+        AddressResponseDto addressResponseDto1 = AddressMapper.responseDtoFrom(testAddress1);
+        AddressResponseDto addressResponseDto2 = AddressMapper.responseDtoFrom(testAddress2);
 
-        when(addressService.getAddresses(1L)).thenReturn(List.of(testAddress1,testAddress2));
+
+        when(addressService.getAddresses(1L)).thenReturn(List.of(addressResponseDto1,addressResponseDto2));
         mockMvc.perform(get("/api/users/{userId}/addresses",1L)
                 .contentType(MediaType.APPLICATION_JSON))
 

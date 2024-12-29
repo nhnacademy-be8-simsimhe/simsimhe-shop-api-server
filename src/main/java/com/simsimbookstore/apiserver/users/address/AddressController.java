@@ -33,7 +33,7 @@ public class AddressController {
     public ResponseEntity<?> getAddresses(
             @PathVariable Long userId
     ){
-        List<Address> addresses = addressService.getAddresses(userId);
+        List<AddressResponseDto> addresses = addressService.getAddresses(userId);
         return ResponseEntity.ok(addresses);
     }
 

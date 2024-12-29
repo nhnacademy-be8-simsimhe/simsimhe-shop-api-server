@@ -12,7 +12,7 @@ public interface AddressService {
     Address getAddress(Long addressId);
 
     // 유저 아이디 기준 리스트 조회
-    List<Address> getAddresses(Long userId);
+    List<AddressResponseDto> getAddresses(Long userId);
 
     // 유저 저장
     @Transactional
