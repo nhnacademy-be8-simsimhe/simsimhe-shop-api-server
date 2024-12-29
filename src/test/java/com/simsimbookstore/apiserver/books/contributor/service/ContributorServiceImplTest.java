@@ -204,6 +204,7 @@
 
 package com.simsimbookstore.apiserver.books.contributor.service;
 
+import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.books.contributor.dto.ContributorRequestDto;
 import com.simsimbookstore.apiserver.books.contributor.dto.ContributorResponseDto;
 import com.simsimbookstore.apiserver.books.contributor.entity.Contributor;
@@ -377,13 +378,13 @@ class ContributorServiceImplTest {
         when(contributorRepository.findAll(pageable)).thenReturn(mockPage);
 
         // Act
-        Page<ContributorResponseDto> contributorResponseDtoPage = contributorService.getAllContributors(pageable);
+        PageResponse<ContributorResponseDto> allContributors = contributorService.getAllContributors(pageable);
 
         // Assert
-        assertNotNull(contributorResponseDtoPage);
-        assertEquals(2, contributorResponseDtoPage.getContent().size());
-        assertEquals("유선경", contributorResponseDtoPage.getContent().get(0).getContributorName());
-        assertEquals("한강", contributorResponseDtoPage.getContent().get(1).getContributorName());
+        assertNotNull(allContributors);
+        assertEquals(2, allContributors.getTotalElements());
+        assertEquals("유선경", allContributors.getData().get(0).getContributorName());
+        assertEquals("한강", allContributors.getData().get(1).getContributorName());
         verify(contributorRepository, times(1)).findAll(pageable);
     }
 
