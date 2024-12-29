@@ -103,6 +103,9 @@ class AddressRepositoryTest {
 
         result = addresses.stream().anyMatch(address -> address.getAlias().matches(testAddress2.getAlias()));
         assertTrue(result);
+
+        result = addresses.stream().anyMatch(address -> address.getUser().getUserId().equals(testUser.getUserId()));
+        assertTrue(result);
     }
 
     @Test

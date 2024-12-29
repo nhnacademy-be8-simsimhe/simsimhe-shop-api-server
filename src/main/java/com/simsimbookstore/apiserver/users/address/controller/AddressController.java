@@ -1,4 +1,4 @@
-package com.simsimbookstore.apiserver.users.address;
+package com.simsimbookstore.apiserver.users.address.controller;
 
 import com.simsimbookstore.apiserver.users.address.dto.AddressRequestDto;
 import com.simsimbookstore.apiserver.users.address.dto.AddressResponseDto;

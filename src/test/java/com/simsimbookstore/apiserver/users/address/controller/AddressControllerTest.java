@@ -1,6 +1,5 @@
-package com.simsimbookstore.apiserver.users.address;
+package com.simsimbookstore.apiserver.users.address.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.users.address.dto.AddressRequestDto;
 import com.simsimbookstore.apiserver.users.address.dto.AddressResponseDto;
@@ -49,7 +48,6 @@ class AddressControllerTest {
     Address testAddress2;
 
     AddressRequestDto testAddressRequestDto;
-    AddressResponseDto testAddressResponseDto;
     @BeforeEach
     void setUp() {
         Grade testGrade = Grade.builder()
