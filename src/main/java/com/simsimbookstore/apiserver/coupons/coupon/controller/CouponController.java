@@ -47,7 +47,7 @@ public class CouponController {
      * @param couponTypeId
      * @return 미사용된 쿠폰
      */
-    @GetMapping("/users/{userId}/coupons/unused")
+    @GetMapping(value = "/users/{userId}/coupons/unused",params = "couponTypeId")
     public ResponseEntity<CouponResponseDto> getUnusedCouponByCouponType(@PathVariable Long userId,
                                                                        @RequestParam Long couponTypeId) {
         CouponResponseDto unusedCoupon = couponService.getUnusedCouponByCouponType(userId, couponTypeId);
@@ -77,7 +77,7 @@ public class CouponController {
      * @param pageable
      * @return 유저의 미사용 쿠폰 Page
      */
-    @GetMapping("/users/{userId}/coupons/unused")
+    @GetMapping(value ="/users/{userId}/coupons/unused", params = {"!bookId", "!couponTypeId"})
     public ResponseEntity<Page<CouponResponseDto>> getUnusedCoupons(@PathVariable Long userId,
                                                                     @RequestParam(required = false) String sortField,
                                                                     Pageable pageable) {
@@ -93,7 +93,7 @@ public class CouponController {
      * @param pageable
      * @return 적용가능한 쿠폰 Page
      */
-    @GetMapping("/users/{userId}/coupons/unused")
+    @GetMapping(value = "/users/{userId}/coupons/unused",params = "bookId")
     public ResponseEntity<Page<CouponResponseDto>> getEligibleCouponsToBook(@PathVariable Long userId,
                                                                             @RequestParam Long bookId,
                                                                             @RequestParam(required = false) String sortField,
