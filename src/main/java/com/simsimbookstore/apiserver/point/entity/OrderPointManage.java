@@ -1,5 +1,6 @@
-package com.simsimbookstore.apiserver.entity;
+package com.simsimbookstore.apiserver.point.entity;
 
+import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -20,9 +21,9 @@ public class OrderPointManage {
     @JoinColumn(name = "point_history_id", nullable = false)
     private PointHistory pointHistory;
 
-//    @OneToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "order_id", nullable = false)
-//    private Order order;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
 
     @Builder
     public OrderPointManage(Long orderPointId, PointHistory pointHistory
