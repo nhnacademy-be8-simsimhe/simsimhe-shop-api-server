@@ -52,7 +52,7 @@ public class OrderFacadeImpl implements OrderFacade {
         return OrderFacadeResponseDto.builder()
                 .orderNumber(orderResponseDto.getOrderNumber())
                 .totalPrice(orderResponseDto.getTotalPrice())
-                .orderName("name")
+                .orderName(orderBookService.getOrderName(orderBookReqs))
                 .email(orderReq.getOrderEmail())
                 .phoneNumber(orderReq.getPhoneNumber())
                 .build();
