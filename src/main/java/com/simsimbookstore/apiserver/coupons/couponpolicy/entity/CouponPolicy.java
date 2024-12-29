@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Builder
 @Setter
 @Table(name = "coupon_policies")
 public class CouponPolicy {
@@ -41,17 +42,7 @@ public class CouponPolicy {
     @Column(name = "policy_description", nullable = false)
     private String policyDescription;
 
-//    @Builder
-//    public CouponPolicy(Long couponPolicyId, String couponPolicyName, DisCountType discountType, BigDecimal discountPrice, BigDecimal discountRate, BigDecimal maxDiscountAmount, BigDecimal minOrderAmount, String policyDescription) {
-//        this.couponPolicyId = couponPolicyId;
-//        this.couponPolicyName = couponPolicyName;
-//        this.discountType = discountType;
-//        this.discountPrice = discountPrice;
-//        this.discountRate = discountRate;
-//        this.maxDiscountAmount = maxDiscountAmount;
-//        this.minOrderAmount = minOrderAmount;
-//        this.policyDescription = policyDescription;
-//    }
+
 
 
 }

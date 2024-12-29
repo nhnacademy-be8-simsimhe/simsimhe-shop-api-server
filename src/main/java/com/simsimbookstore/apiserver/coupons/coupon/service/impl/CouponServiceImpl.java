@@ -8,6 +8,7 @@ import com.simsimbookstore.apiserver.coupons.coupon.dto.DiscountAmountResponseDt
 import com.simsimbookstore.apiserver.coupons.coupon.dto.EmptyCouponResponseDto;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.Coupon;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.CouponStatus;
+import com.simsimbookstore.apiserver.coupons.coupon.exception.AlreadyCouponUsed;
 import com.simsimbookstore.apiserver.coupons.coupon.exception.InsufficientOrderAmountException;
 import com.simsimbookstore.apiserver.coupons.coupon.mapper.CouponMapper;
 import com.simsimbookstore.apiserver.coupons.coupon.repository.CouponRepository;
@@ -73,8 +74,8 @@ public class CouponServiceImpl implements CouponService {
     public CouponResponseDto getUnusedCouponByCouponType(Long userId, Long couponTypeId) {
         validateId(userId);
         validateId(couponTypeId);
-        couponTypeRepository.findById(couponTypeId).orElseThrow(() -> new NotFoundException("쿠폰 정책(id:" + couponTypeId + ")이 존재하지 않습니다.1"));
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")이 존재하지 않습니다."));
+        couponTypeRepository.findById(couponTypeId).orElseThrow(() -> new NotFoundException("쿠폰 정책(id:" + couponTypeId + ")이 존재하지 않습니다."));
         Optional<Coupon> unusedCoupon = couponRepository.findUnusedCouponByUserAndType(userId, couponTypeId);
         if (unusedCoupon.isPresent()) {
             return CouponMapper.toResponse(unusedCoupon.get());
@@ -205,7 +206,7 @@ public class CouponServiceImpl implements CouponService {
         validateId(couponId);
 
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")이 존재하지 않습니다."));
-        Coupon coupon = couponRepository.findByUserUserIdAndCouponId(userId, couponId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")은 쿠폰(id:" + couponId + "을 가지고 있지 않습니다."));
+        Coupon coupon = couponRepository.findByUserUserIdAndCouponId(userId, couponId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")은 쿠폰(id:" + couponId + ")을 가지고 있지 않습니다."));
 
         coupon.setCouponStatus(CouponStatus.EXPIRED);
 
@@ -227,8 +228,10 @@ public class CouponServiceImpl implements CouponService {
         validateId(couponId);
 
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")이 존재하지 않습니다."));
-        Coupon coupon = couponRepository.findByUserUserIdAndCouponId(userId, couponId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")은 쿠폰(id:" + couponId + "을 가지고 있지 않습니다."));
-
+        Coupon coupon = couponRepository.findByUserUserIdAndCouponId(userId, couponId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")은 쿠폰(id:" + couponId + ")을 가지고 있지 않습니다."));
+        if (coupon.getCouponStatus() != CouponStatus.UNUSED) {
+            throw new AlreadyCouponUsed("회원(id:" + userId + ")의 쿠폰(id:" + couponId + ")은 이미 사용된 쿠폰입니다.");
+        }
         coupon.setCouponStatus(CouponStatus.USED);
 
         return CouponMapper.toResponse(coupon);
@@ -248,7 +251,7 @@ public class CouponServiceImpl implements CouponService {
         validateId(couponId);
 
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")이 존재하지 않습니다."));
-        Coupon coupon = couponRepository.findByUserUserIdAndCouponId(userId, couponId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")은 쿠폰(id:" + couponId + "을 가지고 있지 않습니다."));
+        Coupon coupon = couponRepository.findByUserUserIdAndCouponId(userId, couponId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")은 쿠폰(id:" + couponId + ")을 가지고 있지 않습니다."));
 
         couponRepository.delete(coupon);
     }
@@ -280,7 +283,7 @@ public class CouponServiceImpl implements CouponService {
         CouponPolicy couponPolicy = coupon.getCouponType().getCouponPolicy();
         // 최소 주문 금액에 못미치면
         if (couponPolicy.getMinOrderAmount().compareTo(bookOrderPrice) > 0) {
-            throw new InsufficientOrderAmountException("주문 금액(" + bookOrderPrice + ")이 쿠폰 최소 주문 금액(" + couponPolicy.getMinOrderAmount() + "에 못미칩니다.");
+            throw new InsufficientOrderAmountException("주문 금액(" + bookOrderPrice + ")이 쿠폰 최소 주문 금액(" + couponPolicy.getMinOrderAmount() + ")에 못미칩니다.");
         }
 
 
@@ -294,11 +297,11 @@ public class CouponServiceImpl implements CouponService {
                     .build();
         } else {
             // 소수점 첫번째 자리에서 반올림
-            BigDecimal afterDiscount = bookOrderPrice.multiply(couponPolicy.getDiscountRate()).divide(new BigDecimal(100),1, RoundingMode.HALF_UP);
-            BigDecimal discountAmount = bookOrderPrice.subtract(afterDiscount);
+            BigDecimal discountAmount = bookOrderPrice.multiply(couponPolicy.getDiscountRate()).divide(new BigDecimal(100),1, RoundingMode.HALF_UP);
+            BigDecimal afterDiscount = bookOrderPrice.subtract(discountAmount);
 
             //만약 쿠폰을 적용한 할인금액이 최대 할인 금액보다 높다면
-            if (couponPolicy.getMaxDiscountAmount().compareTo(discountAmount) > 0) {
+            if (couponPolicy.getMaxDiscountAmount().compareTo(discountAmount) < 0) {
                 discountAmount = couponPolicy.getMaxDiscountAmount();
                 afterDiscount = bookOrderPrice.subtract(discountAmount);
             }
