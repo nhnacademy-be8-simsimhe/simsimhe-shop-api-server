@@ -3,7 +3,7 @@ package com.simsimbookstore.apiserver.users.localuser.service.impl;
 import com.simsimbookstore.apiserver.exception.AlreadyExistException;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.service.GradeService;
-import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRequestDto;
+import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
 import com.simsimbookstore.apiserver.users.localuser.mapper.LocalUserMapper;
 import com.simsimbookstore.apiserver.users.localuser.repository.LocalUserRepository;
 import com.simsimbookstore.apiserver.users.role.entity.Role;
@@ -32,7 +32,7 @@ public class LocalUserServiceImpl implements LocalUserService {
 
     @Transactional
     @Override
-    public LocalUser saveLocalUser(LocalUserRequestDto localUserRequestDto) {
+    public LocalUser saveLocalUser(LocalUserRegisterRequestDto localUserRequestDto) {
         Grade grade = gradeService.findByTier(localUserRequestDto.getTier());
 
         if (localUserRepository.existsByLoginId(localUserRequestDto.getLoginId())) {
@@ -40,7 +40,7 @@ public class LocalUserServiceImpl implements LocalUserService {
         }
 
         Role role = roleService.findByRoleName(RoleName.USER);
-        LocalUser localUser = LocalUserMapper.requestDtoTo(localUserRequestDto);
+        LocalUser localUser = LocalUserMapper.registerRequestDtoTo(localUserRequestDto);
         localUser.assignGrade(grade);
 
         UserRole userRole = UserRole.builder()

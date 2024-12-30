@@ -1,4 +1,4 @@
-package com.simsimbookstore.apiserver.users.address;
+package com.simsimbookstore.apiserver.users.address.controller;
 
 import com.simsimbookstore.apiserver.users.address.dto.AddressRequestDto;
 import com.simsimbookstore.apiserver.users.address.dto.AddressResponseDto;
@@ -33,7 +33,7 @@ public class AddressController {
     public ResponseEntity<?> getAddresses(
             @PathVariable Long userId
     ){
-        List<Address> addresses = addressService.getAddresses(userId);
+        List<AddressResponseDto> addresses = addressService.getAddresses(userId);
         return ResponseEntity.ok(addresses);
     }
 

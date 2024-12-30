@@ -1,14 +1,10 @@
 package com.simsimbookstore.apiserver.users.localuser.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.user.entity.Gender;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,7 +22,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @AllArgsConstructor
-public class LocalUserRequestDto {
+public class LocalUserRegisterRequestDto {
 
     @NotBlank
     @Length(min = 3, max = 50)
@@ -49,7 +45,7 @@ public class LocalUserRequestDto {
     @NotNull
     private Gender gender;
 
-    private UserStatus userStatus = UserStatus.ACTIVE;
+    private UserStatus userStatus = UserStatus.ACTIVE; // 기본값은 active
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -58,7 +54,7 @@ public class LocalUserRequestDto {
     private Tier tier = Tier.STANDARD;
 
     @NotNull
-    private RoleName roleName;
+    private RoleName roleName = RoleName.USER;
 
     @NotNull
     @NotBlank
