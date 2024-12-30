@@ -1,5 +1,8 @@
 package com.simsimbookstore.apiserver.payment.controller;
 
+import com.simsimbookstore.apiserver.orders.facade.OrderFacadeImpl;
+import com.simsimbookstore.apiserver.orders.facade.OrderFacadeRequestDto;
+import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmSuccessResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.FailResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.RequestOrderValueDto;
@@ -21,17 +24,24 @@ import java.util.Objects;
 @RequestMapping("/api")
 public class PaymentController {
 
+    private final OrderFacadeImpl orderFacade;
     private final PaymentService paymentService;
 //    private final AesUtil aesUtil;
 
     // 사용자 정보 (amount, orderId) 임시 저장
     @PostMapping("/payment")
-    public ResponseEntity<?> initiatePayment(@RequestBody RequestOrderValueDto orderValue, HttpServletRequest request) {
+    public ResponseEntity<?> initiatePayment(@RequestBody OrderFacadeRequestDto dto, HttpServletRequest request) {
         HttpSession session = request.getSession(true);
 
-        // Long orderId -> String orderId로 변환해서 session에 저장
-        session.setAttribute("orderId", orderValue.getOrderId()); // orderValue 필드명 - javascript fetch에서 보내는 데이터의 이름이랑 같아야 함 (json 역직렬화 규칙)
-        session.setAttribute("totalAmount", orderValue.getTotalAmount());
+        OrderFacadeResponseDto facadeResponseDto = orderFacade.createPrepareOrder(dto);
+
+        // 존재하는 결제 방법인지 확인
+        paymentService.checkPayMethod(facadeResponseDto);
+
+        session.setAttribute("orderId", facadeResponseDto.getOrderNumber());
+        session.setAttribute("totalAmount", facadeResponseDto.getTotalPrice());
+
+        String result = paymentService.createPaymentRequest(facadeResponseDto);
 
         return ResponseEntity.ok("Order information saved in session");
     }

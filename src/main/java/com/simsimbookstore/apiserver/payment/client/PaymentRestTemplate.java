@@ -2,6 +2,8 @@ package com.simsimbookstore.apiserver.payment.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
+import com.simsimbookstore.apiserver.payment.config.TossPaymentProperties;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -21,18 +23,62 @@ public class PaymentRestTemplate {
     private final HttpHeaders headers;
     private final RestTemplate restTemplate;
 
-    public PaymentRestTemplate() {
+    private final String encodedAuth;
+    private final String successUrl;
+    private final String failUrl;
+
+    public PaymentRestTemplate(TossPaymentProperties tossPaymentProperties) {
         headers = new HttpHeaders();
         restTemplate = new RestTemplate();
+
+        successUrl = tossPaymentProperties.getSuccessUrl();
+        failUrl = tossPaymentProperties.getFailUrl();
+        String secretKey = tossPaymentProperties.getSecretApiKey() + ":";
+        encodedAuth = new String(Base64.getEncoder().encode(secretKey.getBytes(StandardCharsets.UTF_8)));
     }
 
-    public String confirm(SuccessRequestDto success) throws URISyntaxException {
-        String secretKey = "test_sk_LkKEypNArW1PydoJnX5j3lmeaxYG" + ":";
-        String encodedAuth = new String(Base64.getEncoder().encode(secretKey.getBytes(StandardCharsets.UTF_8)));
+    // 요청 객체로 결제 요청
+    public String requestPayment(OrderFacadeResponseDto dto) {
+        URI uri = URI.create("https://api.tosspayments.com/v1/payments");
 
+        headers.setBasicAuth(encodedAuth);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        Map<String, String> map = new HashMap<>();
+        map.put("method", dto.getMethod());
+        map.put("amount", String.valueOf(dto.getTotalPrice()));
+        map.put("orderId", dto.getOrderNumber());
+        map.put("orderName", dto.getOrderName());
+        map.put("successUrl", successUrl);
+        map.put("failUrl", failUrl);
+        map.put("customerEmail", dto.getEmail());
+//        map.put("customerName", dto.getUserName()); // 사용자 이름
+        map.put("customerMobilePhone", dto.getPhoneNumber());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        HttpEntity<String> request = null;
+        try {
+            request = new HttpEntity<>(objectMapper.writeValueAsString(map), headers);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+                uri,
+                HttpMethod.POST,
+                request,
+                String.class
+        );
+        return responseEntity.getBody();
+    }
+
+    // 결제 승인 요청
+    public String confirm(SuccessRequestDto success) throws URISyntaxException {
         URI uri = URI.create("https://api.tosspayments.com/v1/payments/confirm");
 
-        headers.setBasicAuth("dGVzdF9za19Ma0tFeXBOQXJXMVB5ZG9Kblg1ajNsbWVheFlHOg==");
+        headers.setBasicAuth(encodedAuth);
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
@@ -62,7 +108,7 @@ public class PaymentRestTemplate {
     public String adminCanceled(String paymentKey, String cancelReason) {
         URI uri = URI.create("https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel");
 
-        headers.setBasicAuth("dGVzdF9za19Ma0tFeXBOQXJXMVB5ZG9Kblg1ajNsbWVheFlHOg==");
+        headers.setBasicAuth(encodedAuth);
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
