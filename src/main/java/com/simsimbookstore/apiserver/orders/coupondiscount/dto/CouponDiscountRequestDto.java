@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CouponDiscountRequestDto {
 
-    private Long orderBookId;   //책주문 id
+    private Long couponId;
 
-    private String counponName; //쿠폰의 이름
+    private String couponName; //쿠폰의 이름
 
     private String couponType; //쿠폰할인의 종류
 

@@ -18,34 +18,30 @@ import org.springframework.transaction.annotation.Transactional;
 public class CouponDiscountServiceImpl implements CouponDiscountService {
 
     private final CouponDiscountRepository couponDiscountRepository;
-    private final OrderBookRepository orderBookRepository;
 
     /**
      * 쿠폰 할인 생성
      */
-    @Transactional
     @Override
-    public CouponDiscountResponseDto createCouponDiscount(CouponDiscountRequestDto requestDto) {
-        OrderBook orderBook = orderBookRepository.findById(requestDto.getOrderBookId())
-                .orElseThrow(() -> new NotFoundException("OrderBook not found"));
-
-        // (OrderBook당 하나의 쿠폰 할인만 허용)
+    public CouponDiscountResponseDto createCouponDiscount(CouponDiscountRequestDto requestDto, OrderBook orderBook) {
+        // (1) 기존 쿠폰 삭제(선택적)
         if (orderBook.getCouponDiscount() != null) {
             couponDiscountRepository.delete(orderBook.getCouponDiscount());
             orderBook.setCouponDiscount(null);
         }
 
-        // 새로운 CouponDiscount 생성
+        // (2) 새 쿠폰 생성
         CouponDiscount couponDiscount = CouponDiscount.builder()
                 .orderBook(orderBook)
-                .couponName(requestDto.getCounponName())
+                .couponName(requestDto.getCouponName())
                 .couponType(requestDto.getCouponType())
                 .discountPrice(requestDto.getDiscountPrice())
                 .build();
 
-        // OrderBook과의 관계 설정
+        // (3) 양방향 연결
         orderBook.setCouponDiscount(couponDiscount);
 
+        // (4) 저장
         return toResponseDto(couponDiscountRepository.save(couponDiscount));
     }
 

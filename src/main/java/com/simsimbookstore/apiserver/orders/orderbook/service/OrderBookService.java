@@ -21,4 +21,8 @@ public interface OrderBookService {
     List<PackageResponseDto> getPackages(Long orderBookId);
 
     CouponDiscountResponseDto getCouponDiscount(Long orderBookId);
+
+    String getOrderName(List<OrderBookRequestDto> dtos);
+
+    OrderBookResponseDto toOrderBookResponseDto(OrderBook orderBook);
 }

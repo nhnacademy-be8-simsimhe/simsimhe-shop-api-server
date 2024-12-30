@@ -1,7 +1,6 @@
 package com.simsimbookstore.apiserver.orders.packages.service.impl;
 
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
-import com.simsimbookstore.apiserver.orders.orderbook.exception.OrderBookNotFoundException;
 import com.simsimbookstore.apiserver.orders.orderbook.repository.OrderBookRepository;
 import com.simsimbookstore.apiserver.orders.packages.dto.PackageRequestDto;
 import com.simsimbookstore.apiserver.orders.packages.entity.Packages;
@@ -19,21 +18,19 @@ import org.springframework.stereotype.Service;
 public class PackageServiceImpl implements PackageService {
 
     private final PackagesRepository packageRepository;
-    private final OrderBookRepository orderBookRepository;
     private final WrapTypeRepository wrapTypeRepository;
 
     /**
      * 포장 생성
      */
     @Override
-    public Packages createPackage(PackageRequestDto packageRequestDto) {
-        OrderBook orderBook = orderBookRepository.findById(packageRequestDto.getOrderBookId())
-                .orElseThrow(() -> new OrderBookNotFoundException("OrderBook not found"));
+    public Packages createPackage(PackageRequestDto packageRequestDto, OrderBook orderBook) {
 
         WrapType wrapType = wrapTypeRepository.findById(packageRequestDto.getPackageTypeId())
                 .orElseThrow(() -> new WrapTypeNotFoundException("WrapType not found"));
 
         Packages newPackage = Packages.builder()
+                .orderBook(orderBook)
                 .packageType(packageRequestDto.getPackageName())
                 .wrapType(wrapType)
                 .build();
@@ -65,32 +62,6 @@ public class PackageServiceImpl implements PackageService {
         existingPackage.getOrderBook().getPackages().remove(existingPackage);
 
         packageRepository.delete(existingPackage);
-    }
-
-    /**
-     * 패키지 업데이트
-     */
-    @Override
-    public Packages updatePackage(Long packageId, PackageRequestDto packageRequestDto) {
-        Packages existPackage = packageRepository.findById(packageId)
-                .orElseThrow(() -> new PackagesNotFoundException("Package not found"));
-
-        OrderBook orderBook = orderBookRepository.findById(packageRequestDto.getOrderBookId())
-                .orElseThrow(() -> new OrderBookNotFoundException("OrderBook not found"));
-
-        WrapType wrapType = wrapTypeRepository.findById(packageRequestDto.getPackageTypeId())
-                .orElseThrow(() -> new WrapTypeNotFoundException("WrapType not found"));
-
-        // 기존 관계 해제
-        if (!existPackage.getOrderBook().equals(orderBook)) {
-            existPackage.getOrderBook().getPackages().remove(existPackage);
-        }
-
-        // 새로운 관계 설정
-        existPackage.updatedPackage(orderBook, wrapType, packageRequestDto.getPackageName());
-        orderBook.addPackage(existPackage);
-
-        return packageRepository.save(existPackage);
     }
 }
 

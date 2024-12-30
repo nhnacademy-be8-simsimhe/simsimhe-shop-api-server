@@ -48,7 +48,7 @@ public class BookResponseDto {
 
     private BookStatus bookStatus;
 
-    private List<BookContributorResponsDto> contributorRoleList;
+    private List<BookContributorResponsDto> contributorResponsDtos;
     private List<List<CategoryResponseDto>> categoryList;
     private List<TagResponseDto> tagList;
 

@@ -20,10 +20,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "orders")
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -40,6 +42,9 @@ public class Order {
 
     @OneToOne
     private Delivery delivery;
+
+    @Column(name = "order_number")
+    private String orderNumber;
 
     @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;
@@ -58,6 +63,9 @@ public class Order {
 
     @Column(name = "order_email", nullable = false, length = 500)
     private String orderEmail;
+
+    @Column(name = "phone_number", nullable = false)
+    private String phoneNumber;
 
     @Column(name = "point_earn", nullable = false)
     private Integer pointEarn;

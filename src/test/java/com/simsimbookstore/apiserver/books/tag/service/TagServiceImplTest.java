@@ -164,4 +164,87 @@ class TagServiceImplTest {
         assertEquals("외국도서", tagResponsePage.getContent().get(1).getTagName());
         verify(tagRepository, times(1)).findAll(pageable);
     }
+
+    @Test
+    @DisplayName("태그 업데이트 성공")
+    void updateTag() {
+        // Arrange
+        TagRequestDto requestDto = new TagRequestDto("업데이트된 태그");
+        Tag updatedTag = Tag.builder().tagId(1L).tagName("업데이트된 태그").build();
+
+        when(tagRepository.findById(1L)).thenReturn(Optional.of(mockTag));
+        when(tagRepository.save(any(Tag.class))).thenReturn(updatedTag);
+
+        // Act
+        TagResponseDto responseDto = tagService.updateTag(1L, requestDto);
+
+        // Assert
+        assertNotNull(responseDto);
+        assertEquals("업데이트된 태그", responseDto.getTagName());
+        verify(tagRepository, times(1)).findById(1L);
+        verify(tagRepository, times(1)).save(any(Tag.class));
+    }
+
+    @Test
+    @DisplayName("태그 업데이트 실패 - 태그를 찾을 수 없음")
+    void updateTag_NotFound() {
+        // Arrange
+        TagRequestDto requestDto = new TagRequestDto("업데이트된 태그");
+        when(tagRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class, () -> tagService.updateTag(999L, requestDto));
+        verify(tagRepository, times(1)).findById(999L);
+        verify(tagRepository, never()).save(any(Tag.class));
+    }
+
+    @Test
+    @DisplayName("중복된 태그 처리")
+    void createTag_Duplicate() {
+        // Arrange
+        TagRequestDto requestDto = new TagRequestDto("국내도서");
+        when(tagRepository.findByTagName("국내도서")).thenReturn(Optional.of(mockTag));
+
+        // Act
+        TagResponseDto responseDto = tagService.createTag(requestDto);
+
+        // Assert
+        assertNotNull(responseDto);
+        assertEquals("국내도서", responseDto.getTagName());
+        verify(tagRepository, times(1)).findByTagName("국내도서");
+        verify(tagRepository, never()).save(any(Tag.class));
+    }
+
+    @Test
+    @DisplayName("페이징 처리된 태그 목록 조회 - 빈 결과")
+    void getAllTags_EmptyPage() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<Tag> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+        when(tagRepository.findAll(pageable)).thenReturn(emptyPage);
+
+        // Act
+        Page<TagResponseDto> tagResponsePage = tagService.getAllTags(pageable);
+
+        // Assert
+        assertNotNull(tagResponsePage);
+        assertTrue(tagResponsePage.getContent().isEmpty());
+        verify(tagRepository, times(1)).findAll(pageable);
+    }
+
+    @Test
+    @DisplayName("모든 태그 가져오기 - 태그 없음")
+    void getAllTags_NoTags() {
+        // Arrange
+        when(tagRepository.findAllTags()).thenReturn(List.of());
+
+        // Act
+        List<TagResponseDto> result = tagService.getAlltag();
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(tagRepository, times(1)).findAllTags();
+    }
 }

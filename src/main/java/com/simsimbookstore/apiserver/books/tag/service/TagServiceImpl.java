@@ -65,7 +65,6 @@ public class TagServiceImpl implements TagService {
      * @return
      */
     @Override
-    //메서드 이름 변경 직관적이게?
     public Tag getTag(Long tagId) {
         Optional<Tag> optionalTag = tagRepository.findById(tagId);
         if (optionalTag.isPresent()) {
@@ -100,5 +99,15 @@ public class TagServiceImpl implements TagService {
     public void deleteTag(Long tagId) {
         Tag tag = this.getTag(tagId);
         tagRepository.delete(tag);
+    }
+
+    @Transactional
+    @Override
+    public TagResponseDto updateTag(Long tagId, TagRequestDto requestDto) {
+        Tag tag = this.getTag(tagId);
+        tag.setTagName(requestDto.getTagName());
+        Tag updateTag = tagRepository.save(tag);
+
+        return TagMapper.toTagResponseDto(updateTag);
     }
 }
