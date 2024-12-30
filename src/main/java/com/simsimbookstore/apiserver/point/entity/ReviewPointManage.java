@@ -16,9 +16,9 @@ public class ReviewPointManage {
     @Column(name = "review_point_id")
     private Long reviewPointId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "review_id", nullable = false)
-    private Review review;
+//    @OneToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "review_id", nullable = false)
+//    private Review review;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "point_history_id", nullable = false)

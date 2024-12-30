@@ -1,16 +1,20 @@
 package com.simsimbookstore.apiserver.point.service.impl;
 
 
+import static java.time.LocalDateTime.now;
+
 import com.simsimbookstore.apiserver.exception.NotFoundException;
-import com.simsimbookstore.apiserver.point.entity.OrderPointManage;
+import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
+import com.simsimbookstore.apiserver.point.dto.OrderPointCalculateRequestDto;
+import com.simsimbookstore.apiserver.point.dto.OrderPointRequestDto;
 import com.simsimbookstore.apiserver.point.entity.PointHistory;
 import com.simsimbookstore.apiserver.point.entity.PointPolicy;
 import com.simsimbookstore.apiserver.point.repository.PointHistoryRepository;
-import com.simsimbookstore.apiserver.point.repository.PointPolicyRepository;
+import com.simsimbookstore.apiserver.point.service.PointPolicyService;
+import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,37 +24,39 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PointHistoryServiceImpl {
     private final PointHistoryRepository pointHistoryRepository;
-    private final PointPolicyRepository pointPolicyRepository;
+    private final PointPolicyService pointHistoryService;
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
     //private final ReviewRepository reviewRepository;
 
 //    public PointHistory addReviewPoint(Long userId, Long reviewId, Integer points) {
 //    }
 
-    public PointHistory addOrderPoint(Long userId, Long orderId, Integer points) {
-        // 1. PointHistory 엔티티 생성
-        Optional<PointPolicy> byId = pointPolicyRepository.findById(1L);
-        PointHistory pointHistory = PointHistory.builder()
-                .pointType(PointHistory.PointType.EARN) // EARN 또는 DEDUCT
-                .amount(points)
-                .created_at(LocalDateTime.now())
-                .user(userRepository.findById(userId).orElseThrow( () -> new NotFoundException("user Not Found"))) // 유저 정보
-                .pointPolicy(byId.orElseThrow()) // 포인트 정책 설정
+    public PointHistory addOrderPoint(OrderPointRequestDto requestDto) {
+        User user = userRepository.findById(requestDto.getUserId()).orElseThrow();
+        OrderPointCalculateRequestDto dto = OrderPointCalculateRequestDto.builder()
+                .userId(requestDto.getUserId())
+                .orderId(requestDto.getOrderId())
                 .build();
 
+        BigDecimal earnPoints = calculateEarnOrderPoints(dto);
+
+        // 1. PointHistory 엔티티 생성
+        pointHistoryRepository.save(PointHistory.builder()
+                .pointType(PointHistory.PointType.EARN)
+                .amount(earnPoints.intValue())
+                .created_at(now())
+                .user(user)
+                .pointPolicy(null)
+                .build());
+
         // 2. PointHistory 저장
-        PointHistory savedPointHistory = pointHistoryRepository.save(pointHistory);
 
         // 3. OrderPointManage 엔티티 생성 및 저장
-//        OrderPointManage orderPointManage = OrderPointManage.builder()
-//                .pointHistory(savedPointHistory)
-//                .order(new Order(orderId))
-//                .build();
-//        orderPointManageRepository.save(orderPointManage);
 
-        return savedPointHistory;
+
+        return null;
     }
-
 
 
     //특정 유저의 포인트 총 합계 조회
@@ -66,18 +72,34 @@ public class PointHistoryServiceImpl {
         return pointHistoryRepository.save(pointHistory);
     }
 
-    // Delete: 포인트 기록 삭제
-    public void deletePointHistory(Long pointHistoryId) {
-        pointHistoryRepository.deleteById(pointHistoryId);
+
+    private BigDecimal calculateEarnOrderPoints(OrderPointCalculateRequestDto dto) {
+        // 사용자 등급과 주문 금액 가져오기
+        String tier = String.valueOf(userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new NotFoundException("User not found"))
+                .getGrade()
+                .getTier());
+
+        BigDecimal originalPrice = orderRepository.findById(dto.getOrderId())
+                .orElseThrow(() -> new NotFoundException("Order not found"))
+                .getOriginalPrice();
+
+        // 티어를 EarningType으로 매핑
+        PointPolicy.EarningType earningType = tierToEarningTypeMap.get(tier);
+        if (earningType == null) {
+            throw new IllegalArgumentException("Invalid Tier: " + tier);
+        }
+
+        // 정책 조회 및 포인트 계산
+        BigDecimal rate = pointHistoryService.getPolicy(earningType).getRating();
+        return originalPrice.multiply(rate);
     }
 
-//    private String getSource(PointHistory pointHistory) {
-//        if (pointHistory.getReviewPointManage() != null) {
-//            return "리뷰 ID: " + pointHistory.getReviewPointManage().getReview().getReviewId();
-//        } else if (pointHistory.getOrderPointManage() != null) {
-//            return "주문 ID: " + pointHistory.getOrderPointManage().getOrder().getOrderId();
-//        } else {
-//            return "기타";
-//        }
-//    }
+    private static final Map<String, PointPolicy.EarningType> tierToEarningTypeMap = Map.of(
+            "NORMAL", PointPolicy.EarningType.ORDER_NORMAL,
+            "ROYAL", PointPolicy.EarningType.ORDER_ROYAL,
+            "GOLD", PointPolicy.EarningType.ORDER_GOLD,
+            "PLATINUM", PointPolicy.EarningType.ORDER_PLATINUM
+    );
+
 }

@@ -1,13 +1,13 @@
 package com.simsimbookstore.apiserver.point.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -33,22 +33,26 @@ public class PointPolicy {
     private String description;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "earning_form", nullable = false)
     private EarningForm earningForm;
+
+    @Column(name = "is_available", nullable = false)
+    private Boolean isAvailable;
 
     public enum EarningForm {
         FIX, RATE
     }
 
     public enum EarningType {
-        SIGNUP, REVIEW, PHOTOREVIEW, BOOK
+        SIGNUP, REVIEW, PHOTOREVIEW,
+        ORDER_NORMAL, ORDER_ROYAL, ORDER_GOLD, ORDER_PLATINUM
     }
 
     @Builder
-    public PointPolicy(Long pointPolicyId, EarningType earningType, Integer fixPoints, BigDecimal rating, String description, LocalDate createdAt, EarningForm earningForm) {
+    public PointPolicy(Long pointPolicyId, EarningType earningType, Integer fixPoints, BigDecimal rating, String description, LocalDateTime createdAt, EarningForm earningForm) {
         this.pointPolicyId = pointPolicyId;
         this.earningType = earningType;
         this.fixPoints = fixPoints;
