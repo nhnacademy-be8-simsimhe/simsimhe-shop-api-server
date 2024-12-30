@@ -1,5 +1,6 @@
 package com.simsimbookstore.apiserver.books.contributor.service;
 
+import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.books.contributor.dto.ContributorRequestDto;
 import com.simsimbookstore.apiserver.books.contributor.dto.ContributorResponseDto;
 import com.simsimbookstore.apiserver.books.contributor.entity.Contributor;
@@ -14,7 +15,7 @@ public interface ContributorService {
 
     List<ContributorResponseDto> getAllContributor();
 
-    Page<ContributorResponseDto> getAllContributors(Pageable pageable);
+    PageResponse<ContributorResponseDto> getAllContributors(Pageable pageable);
 
     void deleteContributor(Long contributorId);
 

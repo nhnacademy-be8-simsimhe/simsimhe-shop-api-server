@@ -7,6 +7,7 @@ import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.books.book.service.BookGetService;
 import jakarta.ws.rs.Path;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,19 +32,12 @@ public class BookGetController {
      * @param size
      * @return
      */
-//    @GetMapping
-//    public ResponseEntity<Page<BookListResponse>> getAllBooks(@RequestParam(defaultValue = "0") int page,
-//                                                              @RequestParam(defaultValue = "10") int size) {
-//        Pageable pageable = PageRequest.of(page, size, Sort.by("title"));
-//        Page<BookListResponse> books = bookGetService.getAllBook(pageable);
-//        return ResponseEntity.ok(books);
-//    }
     @GetMapping
-    public ResponseEntity<PageResponse<BookListResponse>> getAllBooks(@RequestParam(defaultValue = "0") int page,
-                                                                      @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("title"));
+    public ResponseEntity<PageResponse<BookListResponse>> getAllBooks(@RequestParam(defaultValue = "1") int page,
+                                                                      @RequestParam(defaultValue = "15") int size) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("title"));
         PageResponse<BookListResponse> allBook = bookGetService.getAllBook(pageable);
-        return ResponseEntity.ok(allBook);
+        return ResponseEntity.status(HttpStatus.OK).body(allBook);
     }
 
 
@@ -92,11 +86,11 @@ public class BookGetController {
      * @return
      */
     @GetMapping("/like/user/{userId}")
-    public ResponseEntity<Page<BookListResponse>> getUserLikeBook(@RequestParam(defaultValue = "0") int page,
-                                                                  @RequestParam(defaultValue = "5") int size,
-                                                                  @PathVariable(name = "userId") Long userId) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<BookListResponse> userLikeBook = bookGetService.getUserLikeBook(userId, pageable);
+    public ResponseEntity<PageResponse<BookListResponse>> getUserLikeBook(@RequestParam(defaultValue = "1") int page,
+                                                                          @RequestParam(defaultValue = "5") int size,
+                                                                          @PathVariable(name = "userId") Long userId) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        PageResponse<BookListResponse> userLikeBook = bookGetService.getUserLikeBook(userId, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(userLikeBook);
 
     }
@@ -111,14 +105,13 @@ public class BookGetController {
      * @return
      */
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<Page<BookListResponse>> getBooksByCategory(@PathVariable(name = "categoryId") Long categoryId,
-                                                                     @RequestParam(required = false) Long userId,
-                                                                     @RequestParam(defaultValue = "0") int page,
-                                                                     @RequestParam(defaultValue = "5") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<BookListResponse> booksByCategory = bookGetService.getBooksByCategory(userId, categoryId, pageable);
+    public ResponseEntity<PageResponse<BookListResponse>> getBooksByCategory(@PathVariable(name = "categoryId") Long categoryId,
+                                                                             @RequestParam(required = false) Long userId,
+                                                                             @RequestParam(defaultValue = "1") int page,
+                                                                             @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        PageResponse<BookListResponse> booksByCategory = bookGetService.getBooksByCategory(userId, categoryId, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(booksByCategory);
-
     }
 
     /**
@@ -131,14 +124,39 @@ public class BookGetController {
      * @return
      */
     @GetMapping("/tag/{tagId}")
-    public ResponseEntity<Page<BookListResponse>> getBooksByTag(@PathVariable(name = "tagId") Long tagId,
-                                                                @RequestParam(required = false) Long userId,
-                                                                @RequestParam(defaultValue = "0") int page,
-                                                                @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<BookListResponse> booksByTag = bookGetService.getBooksByTag(userId, tagId, pageable);
+    public ResponseEntity<PageResponse<BookListResponse>> getBooksByTag(@PathVariable(name = "tagId") Long tagId,
+                                                                        @RequestParam(required = false) Long userId,
+                                                                        @RequestParam(defaultValue = "1") int page,
+                                                                        @RequestParam(defaultValue = "15") int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        PageResponse<BookListResponse> booksByTag = bookGetService.getBooksByTag(userId, tagId, pageable);
 
         return ResponseEntity.status(HttpStatus.OK).body(booksByTag);
+    }
+
+    /**
+     * 주문량이 많은 도서 6개ㅔ 조회
+     *
+     * @return
+     */
+    @GetMapping("/popularity")
+    public ResponseEntity<List<BookListResponse>> getPopularityBook() {
+        List<BookListResponse> popularityBook = bookGetService.getPopularityBook();
+        return ResponseEntity.status(HttpStatus.OK).body(popularityBook);
+    }
+
+    /**
+     * 특정 도서를 제외한 동일 카테고리 내 인기 도서 추천 기능
+     * @param bookId
+     * @param categoryIdList
+     * @return
+     */
+    @GetMapping("/{bookId}/recommend")
+    public ResponseEntity<List<BookListResponse>> getRecommendBooks(@PathVariable(name = "bookId") Long bookId,
+                                                                   @RequestParam(name = "categoryIdList") List<Long> categoryIdList) {
+        List<BookListResponse> recommendBooks = bookGetService.getRecommendBooks(categoryIdList, bookId);
+        return ResponseEntity.status(HttpStatus.OK).body(recommendBooks);
+
     }
 
 

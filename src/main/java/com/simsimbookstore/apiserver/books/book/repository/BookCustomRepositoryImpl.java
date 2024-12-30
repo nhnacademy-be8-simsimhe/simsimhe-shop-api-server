@@ -2,7 +2,6 @@ package com.simsimbookstore.apiserver.books.book.repository;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.simsimbookstore.apiserver.books.book.dto.BookListResponse;
@@ -20,11 +19,12 @@ import com.simsimbookstore.apiserver.books.contributor.entity.QContributor;
 import com.simsimbookstore.apiserver.books.tag.domain.QTag;
 import com.simsimbookstore.apiserver.books.tag.dto.TagResponseDto;
 import com.simsimbookstore.apiserver.like.entity.QBookLike;
+import com.simsimbookstore.apiserver.orders.orderbook.entity.QOrderBook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
-import org.springframework.stereotype.Repository;
+
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,6 +46,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
     QTag tag = QTag.tag;
     QBookTag bookTag = QBookTag.bookTag;
     QBookLike bookLike = QBookLike.bookLike;
+    QOrderBook orderBook = QOrderBook.orderBook;
 
     public BookCustomRepositoryImpl(JPAQueryFactory queryFactory) {
         this.queryFactory = queryFactory;
@@ -53,7 +54,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
 
 
     /**
-     * 가장 최근에 출판된 책 8권을 조회하는 메서드
+     * 가장 최근에 출판된 책 6권을 조회하는 메서드
      *
      * @return
      */
@@ -72,7 +73,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                 ))
                 .from(book)
                 .orderBy(book.publicationDate.desc()) // 출판일 기준 최신순 정렬
-                .limit(8)                           // 상위 8권만 조회
+                .limit(6)                           // 상위 6권만 조회
                 .fetch();                           // 결과 가져오기
     }
 
@@ -99,11 +100,11 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                 .from(book)
                 .offset(pageable.getOffset()) // 페이지 시작점
                 .limit(pageable.getPageSize()) // 페이지 크기
-                .orderBy(book.publicationDate.asc()) // 출판일 기준 최신순 정렬
+                .orderBy(book.publicationDate.desc()) // 출판일 기준 최신순 정렬
                 .fetch();
 
         // 전체 데이터 수 조회 (페이징 처리에 필요)
-        long total = queryFactory
+        Long total = queryFactory
                 .select(book.count())
                 .from(book)
                 .fetchOne();
@@ -112,8 +113,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
 
 
         // Page 객체로 반환
-        //return PageableExecutionUtils.getPage(bookListResponses, pageable, () -> total);
-        return new PageImpl<>(bookListResponses,pageable,total);
+        return new PageImpl<>(bookListResponses, pageable, total);
     }
 
 
@@ -162,17 +162,18 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                 .fetch();
 
         // 전체 데이터 수 조회
-        long total = queryFactory
+        Long total = queryFactory
                 .select(book.count())
                 .from(book)
                 .leftJoin(bookCategory).on(book.bookId.eq(bookCategory.book.bookId))
                 .where(bookCategory.catagory.categoryId.in(categoryIds))
                 .fetchOne();
 
-         List<BookListResponse> bookListResponses = this.toListResponseList(content);
+        List<BookListResponse> bookListResponses = this.toListResponseList(content);
 
         // Page 객체로 반환
-        return PageableExecutionUtils.getPage(bookListResponses, pageable, () -> total);
+        //return PageableExecutionUtils.getPage(bookListResponses, pageable, () -> total);
+        return new PageImpl<>(bookListResponses, pageable, total);
     }
 
     /**
@@ -210,7 +211,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                 .fetch();
 
         // 전체 데이터 수 조회
-        long total = queryFactory
+        Long total = queryFactory
                 .select(book.count())
                 .from(book)
                 .innerJoin(bookTag).on(book.bookId.eq(bookTag.book.bookId))
@@ -221,7 +222,8 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
 
 
         // Page 객체로 반환
-        return PageableExecutionUtils.getPage(bookListResponses, pageable, () -> total);
+        return new PageImpl<>(bookListResponses, pageable, total);
+
     }
 
 
@@ -299,6 +301,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
     @Override
     public Page<BookListResponse> getUserLikeBook(Pageable pageable, Long userId) {
 
+        //좋아요 설정
         BooleanExpression isLiked = this.getLikeExpression(userId);
 
         // 좋아요한 책 데이터 조회
@@ -325,7 +328,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                 .fetchOne();
 
         // Page 객체로 반환
-        return PageableExecutionUtils.getPage(bookList, pageable, () -> totalCount);
+        return new PageImpl<>(bookList, pageable, totalCount);
     }
 
 
@@ -348,14 +351,61 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
     }
 
     /**
-     * 주문량이 많은 책 조회
+     * 주문량이 많은 책 6개 조회
      *
      * @return
      */
     @Override
-    public List<BookListResponse> getBestSeller() {
-        return List.of();
+    public List<BookListResponse> getPopularityBook() {
+        return queryFactory.select(Projections.fields(BookListResponse.class,
+                        book.bookId.as("bookId"),
+                        book.title.as("title"),
+                        book.publicationDate.as("publicationDate"),
+                        book.quantity.as("quantity"),
+                        book.price.as("price"),
+                        book.saleprice.as("saleprice"),
+                        book.bookStatus.as("bookStatus"),
+                        book.publisher.as("publisher")))
+                .from(orderBook)
+                .innerJoin(orderBook.book, book) // 명시적으로 조인
+                .groupBy(
+                        book.bookId,
+                        book.title,
+                        book.publicationDate,
+                        book.quantity,
+                        book.price,
+                        book.saleprice,
+                        book.bookStatus,
+                        book.publisher
+                ) // 필요한 필드를 명시적으로 그룹화
+                .orderBy(orderBook.quantity.sum().desc())
+                .limit(6)
+                .fetch();
     }
+
+    /**
+     * 특정 도서를 제외한 동일 카테고리 내 인기 도서 추천 기능
+     * @param categoryIdList
+     * @param bookId
+     * @return
+     */
+    @Override
+    public List<BookListResponse> getRecommendBook(List<Long> categoryIdList, Long bookId) {
+        return queryFactory.select(Projections.fields(BookListResponse.class
+                ,book.bookId
+                ,book.title
+                ,book.quantity
+                ,book.bookStatus
+                ,book.viewCount))
+                .from(book)
+                .innerJoin(bookCategory).on(book.bookId.eq(bookCategory.book.bookId))
+                .where(bookCategory.book.bookId.ne(bookId).and(bookCategory.catagory.categoryId.in(categoryIdList)))
+                .distinct()
+                .orderBy(book.viewCount.desc())
+                .limit(10)
+                .fetch();
+    }
+
 
     /**
      * 조회수를 증가하는 메서드
@@ -420,7 +470,9 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                 .select(Projections.fields(
                         BookContributorResponsDto.class,
                         bookContributor.contributor.contributorId,
-                        bookContributor.contributor.contributorName
+                        bookContributor.contributor.contributorName,
+                        bookContributor.contributor.contributorRole
+
                 ))
                 .from(bookContributor)
                 .innerJoin(contributor).on(bookContributor.contributor.contributorId.eq(contributor.contributorId))
@@ -475,7 +527,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                 .where(bookTag.book.bookId.eq(bookId))
                 .fetch();
 
-        bookResponseDto.setContributorRoleList(bookContributorResponsDtoList);
+        bookResponseDto.setContributorResponsDtos(bookContributorResponsDtoList);
         bookResponseDto.setCategoryList(categoriesList);
         bookResponseDto.setTagList(bookTagList);
 

@@ -19,4 +19,6 @@ public interface TagService {
     Page<TagResponseDto> getAllTags(Pageable pageable);
 
     void deleteTag(Long tagId);
+
+    TagResponseDto updateTag(Long tagId,TagRequestDto requestDto);
 }

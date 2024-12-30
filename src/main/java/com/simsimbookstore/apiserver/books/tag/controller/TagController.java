@@ -1,8 +1,10 @@
 package com.simsimbookstore.apiserver.books.tag.controller;
 
 
+import com.simsimbookstore.apiserver.books.tag.domain.Tag;
 import com.simsimbookstore.apiserver.books.tag.dto.TagRequestDto;
 import com.simsimbookstore.apiserver.books.tag.dto.TagResponseDto;
+import com.simsimbookstore.apiserver.books.tag.mapper.TagMapper;
 import com.simsimbookstore.apiserver.books.tag.service.TagService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -82,4 +84,19 @@ public class TagController {
         tagService.deleteTag(tagId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @PutMapping("/tags/{tagId}")
+    public ResponseEntity<TagResponseDto> updateTag(@PathVariable(name = "tagId") Long tagId,
+                                                    @RequestBody @Valid TagRequestDto requestDto) {
+        TagResponseDto tagResponseDto = tagService.updateTag(tagId, requestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(tagResponseDto);
+    }
+
+    @GetMapping("/tags/{tagId}")
+    public ResponseEntity<TagResponseDto> getTag(@PathVariable(name = "tagId") Long tagId) {
+        Tag tag = tagService.getTag(tagId);
+        TagResponseDto tagResponseDto = TagMapper.toTagResponseDto(tag);
+        return ResponseEntity.status(HttpStatus.OK).body(tagResponseDto);
+    }
+
 }
