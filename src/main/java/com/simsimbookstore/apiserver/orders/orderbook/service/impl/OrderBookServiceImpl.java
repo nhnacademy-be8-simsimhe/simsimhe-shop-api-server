@@ -132,6 +132,13 @@ public class OrderBookServiceImpl implements OrderBookService {
         return toCouponDiscountResponseDto(orderBook.getCouponDiscount());
     }
 
+    @Override
+    public String getOrderName(List<OrderBookRequestDto> dtos) {
+
+        String title = bookRepository.findById(dtos.getFirst().getBookId()).orElseThrow().getTitle();
+        return title + "외 " + String.valueOf(dtos.size()-1) + "권";
+    }
+
     private PackageResponseDto toPackageResponseDto(Packages pkg) {
         return PackageResponseDto.builder()
                 .packageId(pkg.getPackageId())

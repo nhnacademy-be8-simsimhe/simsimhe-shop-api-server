@@ -24,5 +24,6 @@ public class MemberOrderRequestDto {
     private LocalDate deliveryDate;
     private String orderEmail;
     private Integer pointEarn;
+    private String phoneNumber;
     private BigDecimal deliveryPrice;
 }

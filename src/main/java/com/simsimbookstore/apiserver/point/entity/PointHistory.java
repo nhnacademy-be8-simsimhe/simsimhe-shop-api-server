@@ -1,5 +1,6 @@
-package com.simsimbookstore.apiserver.entity;
+package com.simsimbookstore.apiserver.point.entity;
 
+import com.simsimbookstore.apiserver.users.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -29,9 +30,9 @@ public class PointHistory {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime created_at;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "point_policy_id", nullable = false)

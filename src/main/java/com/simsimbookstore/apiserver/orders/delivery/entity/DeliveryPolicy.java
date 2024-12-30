@@ -28,6 +28,8 @@ public class DeliveryPolicy {
     @Column(name = "delivery_policy_name", nullable = false, length = 100)
     private String deliveryPolicyName;
 
+    @Column(name = "delivery_price", nullable = false)
+    private BigDecimal deliveryPrice;
 
     @Column(name ="policy_standard_price")
     private BigDecimal policyStandardPrice;

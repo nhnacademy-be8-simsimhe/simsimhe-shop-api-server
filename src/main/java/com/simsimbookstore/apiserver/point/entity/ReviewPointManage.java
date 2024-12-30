@@ -1,4 +1,4 @@
-package com.simsimbookstore.apiserver.entity;
+package com.simsimbookstore.apiserver.point.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

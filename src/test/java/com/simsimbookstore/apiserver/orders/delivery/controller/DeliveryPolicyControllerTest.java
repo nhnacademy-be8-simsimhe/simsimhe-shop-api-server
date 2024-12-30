@@ -50,8 +50,8 @@ class DeliveryPolicyControllerTest {
     @DisplayName("모든 배송 정책 조회 테스트")
     void getAllDeliveryPoliciesTest() throws Exception {
         List<DeliveryPolicy> policies = List.of(
-                new DeliveryPolicy(1L, "Policy 1", BigDecimal.valueOf(1000), true),
-                new DeliveryPolicy(2L, "Policy 2", BigDecimal.valueOf(2000), false)
+                new DeliveryPolicy(1L, "Policy 1", BigDecimal.valueOf(3000.00), BigDecimal.valueOf(1000), true),
+                new DeliveryPolicy(2L, "Policy 2", BigDecimal.valueOf(3000.00), BigDecimal.valueOf(2000), false)
         );
         when(deliveryPolicyService.findAll()).thenReturn(policies);
 
@@ -65,7 +65,7 @@ class DeliveryPolicyControllerTest {
     @Test
     @DisplayName("새로운 배송 정책 생성 테스트")
     void createDeliveryPolicyTest() throws Exception {
-        DeliveryPolicy savedPolicy = new DeliveryPolicy(1L, "Policy 1", BigDecimal.valueOf(1000), true);
+        DeliveryPolicy savedPolicy = new DeliveryPolicy(1L, "Policy 1", BigDecimal.valueOf(3000.00), BigDecimal.valueOf(1000), true);
 
         when(deliveryPolicyService.save(any(DeliveryPolicyRequestDto.class))).thenReturn(savedPolicy);
 

@@ -46,6 +46,7 @@ public class MemberOrderServiceImpl implements MemberOrderService {
                 .orderEmail(requestDto.getOrderEmail())
                 .pointEarn(requestDto.getPointEarn())
                 .deliveryPrice(requestDto.getDeliveryPrice())
+                .phoneNumber(requestDto.getPhoneNumber())
                 .orderState(Order.OrderState.PENDING)  // 초기 상태
                 .build();
         Order savedOrder = orderRepository.save(order);
