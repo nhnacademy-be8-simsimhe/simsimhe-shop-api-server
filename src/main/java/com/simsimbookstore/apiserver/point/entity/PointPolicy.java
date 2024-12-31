@@ -16,7 +16,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
