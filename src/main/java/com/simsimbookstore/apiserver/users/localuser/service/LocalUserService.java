@@ -1,6 +1,5 @@
 package com.simsimbookstore.apiserver.users.localuser.service;
 
-import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRequestDto;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
