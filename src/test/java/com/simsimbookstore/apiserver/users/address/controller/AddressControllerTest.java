@@ -1,4 +1,4 @@
-package com.simsimbookstore.apiserver.users.address;
+package com.simsimbookstore.apiserver.users.address.controller;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.simsimbookstore.apiserver.users.address.controller.AddressController;
 import com.simsimbookstore.apiserver.users.address.dto.AddressRequestDto;
 import com.simsimbookstore.apiserver.users.address.dto.AddressResponseDto;
 import com.simsimbookstore.apiserver.users.address.entity.Address;

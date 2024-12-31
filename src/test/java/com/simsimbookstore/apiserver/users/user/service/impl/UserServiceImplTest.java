@@ -4,7 +4,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.simsimbookstore.apiserver.users.exception.ResourceNotFoundException;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
