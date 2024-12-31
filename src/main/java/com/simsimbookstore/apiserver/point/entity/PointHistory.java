@@ -1,17 +1,32 @@
 package com.simsimbookstore.apiserver.point.entity;
 
 import com.simsimbookstore.apiserver.users.user.entity.User;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import com.simsimbookstore.apiserver.users.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import lombok.Setter;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Table(name = "point_histories")
 public class PointHistory {
 
@@ -24,6 +39,7 @@ public class PointHistory {
     @Column(name = "point_type", nullable = false)
     private PointType pointType;
 
+    @Setter
     @Column(name = "amount", nullable = false)
     private Integer amount;
 
@@ -33,22 +49,6 @@ public class PointHistory {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "point_policy_id", nullable = false)
-    private PointPolicy pointPolicy;
-
-    @Builder
-    public PointHistory(Long pointHistoryId, PointType pointType, Integer amount, LocalDateTime created_at,
-//                        User user,
-                        PointPolicy pointPolicy) {
-        this.pointHistoryId = pointHistoryId;
-        this.pointType = pointType;
-        this.amount = amount;
-        this.created_at = created_at;
-//        this.user = user;
-        this.pointPolicy = pointPolicy;
-    }
 
     public enum PointType {
         EARN, DEDUCT

@@ -1,5 +1,9 @@
 package com.simsimbookstore.apiserver.users.user.service.impl;
 
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
@@ -7,6 +11,9 @@ import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,13 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -45,14 +45,12 @@ class UserServiceImplTest {
                 .tier(Tier.STANDARD)
                 .minAmount(BigDecimal.valueOf(0))
                 .maxAmount(BigDecimal.valueOf(100000))
-                .pointRate(BigDecimal.valueOf(0.01))
                 .build();
 
         royalGrade = Grade.builder()
                 .tier(Tier.ROYAL)
                 .minAmount(BigDecimal.valueOf(0))
                 .maxAmount(BigDecimal.valueOf(100000))
-                .pointRate(BigDecimal.valueOf(0.01))
                 .build();
 
         testUser = User.builder()

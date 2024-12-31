@@ -6,9 +6,8 @@ import com.simsimbookstore.apiserver.users.role.entity.Role;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.role.repository.RoleRepository;
 import com.simsimbookstore.apiserver.users.role.service.RoleService;
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
+import org.springframework.stereotype.Service;
 
 @Service
 public class RoleServiceImpl implements RoleService {
