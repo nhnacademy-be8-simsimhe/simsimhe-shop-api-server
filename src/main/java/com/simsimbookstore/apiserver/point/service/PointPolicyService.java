@@ -1,18 +1,24 @@
 package com.simsimbookstore.apiserver.point.service;
 
+import com.simsimbookstore.apiserver.point.dto.PointPolicyRequestDto;
+import com.simsimbookstore.apiserver.point.dto.PointPolicyResponseDto;
 import com.simsimbookstore.apiserver.point.entity.PointPolicy;
-import java.math.BigDecimal;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface PointPolicyService {
 
-    PointPolicy getPolicy(PointPolicy.EarningType earningType);
 
-    List<PointPolicy> getAllPolicies();
+    PointPolicyResponseDto getPolicy(PointPolicy.EarningMethod earningMethod);
 
-    PointPolicy createPolicy(PointPolicy pointPolicy);
+    List<PointPolicyResponseDto> getAllPolicies();
 
-    PointPolicy updatePolicy(PointPolicy pointPolicy);
+    @Transactional
+    PointPolicyResponseDto createPolicy(PointPolicyRequestDto requestDto);
 
+    @Transactional
+    PointPolicyResponseDto updatePolicy(Long policyId, PointPolicyRequestDto requestDto);
+
+    @Transactional
     void deletePolicy(Long pointPolicyId);
 }

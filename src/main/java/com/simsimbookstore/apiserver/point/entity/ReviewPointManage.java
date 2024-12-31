@@ -1,8 +1,16 @@
 package com.simsimbookstore.apiserver.point.entity;
 
-import jakarta.persistence.*;
+import com.simsimbookstore.apiserver.reviews.review.entity.Review;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -16,20 +24,12 @@ public class ReviewPointManage {
     @Column(name = "review_point_id")
     private Long reviewPointId;
 
-//    @OneToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "review_id", nullable = false)
-//    private Review review;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "review_id", nullable = false)
+    private Review review;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "point_history_id", nullable = false)
     private PointHistory pointHistory;
 
-    @Builder
-    public ReviewPointManage(Long reviewPointId,
-//                             Review review,
-                             PointHistory pointHistory) {
-        this.reviewPointId = reviewPointId;
-//        this.review = review;
-        this.pointHistory = pointHistory;
-    }
 }
