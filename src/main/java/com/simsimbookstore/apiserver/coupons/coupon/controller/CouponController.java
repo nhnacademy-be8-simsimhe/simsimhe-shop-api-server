@@ -111,7 +111,7 @@ public class CouponController {
     @PostMapping("/coupons/issue")
     public ResponseEntity<List<CouponResponseDto>> issueCoupons(@Valid @RequestBody IssueCouponsRequestDto requestDto) {
         List<CouponResponseDto> issueCoupons = couponService.issueCoupons(requestDto.getUserIds(), requestDto.getCouponTypeId());
-        return ResponseEntity.status(HttpStatus.OK).body(issueCoupons);
+        return ResponseEntity.status(HttpStatus.CREATED).body(issueCoupons);
     }
 
     /**
