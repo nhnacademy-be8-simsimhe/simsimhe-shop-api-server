@@ -21,7 +21,7 @@ import org.hibernate.validator.constraints.Length;
 @NoArgsConstructor
 @Getter
 @AllArgsConstructor
-public class LocalUserRequestDto {
+public class LocalUserRegisterRequestDto {
 
     @NotBlank
     @Length(min = 3, max = 50)
@@ -44,7 +44,7 @@ public class LocalUserRequestDto {
     @NotNull
     private Gender gender;
 
-    private UserStatus userStatus = UserStatus.ACTIVE;
+    private UserStatus userStatus = UserStatus.ACTIVE; // 기본값은 active
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -53,7 +53,7 @@ public class LocalUserRequestDto {
     private Tier tier = Tier.STANDARD;
 
     @NotNull
-    private RoleName roleName;
+    private RoleName roleName = RoleName.USER;
 
     @NotNull
     @NotBlank

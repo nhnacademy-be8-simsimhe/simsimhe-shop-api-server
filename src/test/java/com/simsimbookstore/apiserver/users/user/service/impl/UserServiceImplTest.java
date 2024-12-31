@@ -5,6 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.simsimbookstore.apiserver.users.exception.ResourceNotFoundException;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
@@ -72,7 +73,7 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).save(testUser);
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> userService.updateUserStatus(99L, UserStatus.INACTIVE));
+        Assertions.assertThrows(NotFoundException.class, () -> userService.updateUserStatus(99L, UserStatus.INACTIVE));
     }
 
     @Test
@@ -83,6 +84,6 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).save(testUser);
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> userService.updateUserGrade(99L, Tier.ROYAL));
+        Assertions.assertThrows(NotFoundException.class, () -> userService.updateUserGrade(99L, Tier.ROYAL));
     }
 }

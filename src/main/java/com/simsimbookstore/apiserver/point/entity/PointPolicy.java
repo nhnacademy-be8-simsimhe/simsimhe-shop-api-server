@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,10 +17,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 @Entity
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 @Table(name = "point_policies")
 public class PointPolicy {
     @Id

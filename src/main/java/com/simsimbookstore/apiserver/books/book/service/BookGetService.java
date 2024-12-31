@@ -25,12 +25,9 @@ public class BookGetService {
      * @param pageable
      * @return
      */
-//    public Page<BookListResponse> getAllBook(Pageable pageable) {
-//        return bookRepository.getAllBook(pageable);
-//    }
     public PageResponse<BookListResponse> getAllBook(Pageable pageable) {
         Page<BookListResponse> responses = bookRepository.getAllBook(pageable);
-        return this.getPageResponse(pageable.getPageSize(),responses);
+        return this.getPageResponse(pageable.getPageNumber(), responses);
     }
 
     /**
@@ -72,8 +69,10 @@ public class BookGetService {
      * @param pageable
      * @return
      */
-    public Page<BookListResponse> getUserLikeBook(Long userId, Pageable pageable) {
-        return bookRepository.getUserLikeBook(pageable, userId);
+    public PageResponse<BookListResponse> getUserLikeBook(Long userId, Pageable pageable) {
+        Page<BookListResponse> userLikeBook = bookRepository.getUserLikeBook(pageable, userId);
+
+        return this.getPageResponse(pageable.getPageNumber(), userLikeBook);
     }
 
     /**
@@ -84,8 +83,10 @@ public class BookGetService {
      * @param pageable
      * @return
      */
-    public Page<BookListResponse> getBooksByCategory(Long userId, Long categoryId, Pageable pageable) {
-        return bookRepository.getBookListByCategory(userId, categoryId, pageable);
+    public PageResponse<BookListResponse> getBooksByCategory(Long userId, Long categoryId, Pageable pageable) {
+        Page<BookListResponse> bookListByCategory = bookRepository.getBookListByCategory(userId, categoryId, pageable);
+
+        return this.getPageResponse(pageable.getPageNumber(), bookListByCategory);
     }
 
     /**
@@ -96,8 +97,28 @@ public class BookGetService {
      * @param pageable
      * @return
      */
-    public Page<BookListResponse> getBooksByTag(Long userId, Long tagId, Pageable pageable) {
-        return bookRepository.getBookListByTag(userId, tagId, pageable);
+    public PageResponse<BookListResponse> getBooksByTag(Long userId, Long tagId, Pageable pageable) {
+        Page<BookListResponse> bookListByTag = bookRepository.getBookListByTag(userId, tagId, pageable);
+        return this.getPageResponse(pageable.getPageNumber(), bookListByTag);
+    }
+
+    /**
+     * 주문량이 많은 6개도서
+     *
+     * @return
+     */
+    public List<BookListResponse> getPopularityBook() {
+        return bookRepository.getPopularityBook();
+    }
+
+    /**
+     * 특정 도서를 제외한 동일 카테고리 내 인기 도서 추천 기능
+     * @param categoryIdList
+     * @param bookId
+     * @return
+     */
+    public List<BookListResponse> getRecommendBooks(List<Long> categoryIdList, Long bookId) {
+        return bookRepository.getRecommendBook(categoryIdList,bookId);
     }
 
     /**
@@ -110,7 +131,8 @@ public class BookGetService {
     private PageResponse<BookListResponse> getPageResponse(int page,
                                                            Page<BookListResponse> bookPage) {
 
-        // 최대 버튼 개수 8개
+
+        //최대 버튼개수 8개
         int maxPageButtons = 8;
         int startPage = (int) Math.max(1, bookPage.getNumber() - Math.floor((double) maxPageButtons / 2));
         int endPage = Math.min(startPage + maxPageButtons - 1, bookPage.getTotalPages());

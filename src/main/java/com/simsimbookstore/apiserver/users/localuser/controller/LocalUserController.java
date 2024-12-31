@@ -1,5 +1,6 @@
 package com.simsimbookstore.apiserver.users.localuser.controller;
 
+import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
 import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRequestDto;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.service.LocalUserService;
@@ -22,15 +23,16 @@ public class LocalUserController {
 
     @PostMapping
     public ResponseEntity<?> addLocalUser(
-            @RequestBody @Valid LocalUserRequestDto localUserRequestDto
+            @RequestBody @Valid LocalUserRegisterRequestDto localUserRequestDto
             ) {
         LocalUser response = userService.saveLocalUser(localUserRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{loginId}/exists")
-    public boolean existsByLoginId(@PathVariable String loginId) {
-        return userService.existsByLoginId(loginId);
+    public ResponseEntity<?> existsByLoginId(@PathVariable String loginId) {
+        boolean result = userService.existsByLoginId(loginId);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{loginId}")

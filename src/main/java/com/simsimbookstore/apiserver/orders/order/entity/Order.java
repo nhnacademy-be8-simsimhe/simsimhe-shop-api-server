@@ -64,6 +64,9 @@ public class Order {
     @Column(name = "order_email", nullable = false, length = 500)
     private String orderEmail;
 
+    @Column(name = "phone_number", nullable = false)
+    private String phoneNumber;
+
     @Column(name = "point_earn", nullable = false)
     private Integer pointEarn;
 
