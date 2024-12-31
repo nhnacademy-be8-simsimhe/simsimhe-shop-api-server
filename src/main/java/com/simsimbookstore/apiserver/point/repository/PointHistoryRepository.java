@@ -10,6 +10,6 @@ import org.springframework.data.repository.query.Param;
 public interface PointHistoryRepository extends JpaRepository<PointHistory, Long>, PointHistoryCustomRepository {
     List<PointHistory> findByUserUserId(Long userId);
 
-    @Query("SELECT SUM(ph.amount) FROM PointHistory ph WHERE ph.user.id = :userId")
+    @Query("SELECT SUM(ph.amount) FROM PointHistory ph WHERE ph.user.userId = :userId")
     Integer sumAmountByUserId(@Param("userId") Long userId);
 }

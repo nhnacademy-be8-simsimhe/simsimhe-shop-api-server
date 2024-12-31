@@ -52,6 +52,7 @@ public class User {
     @Column(name = "user_status", nullable = false)
     private UserStatus userStatus = UserStatus.ACTIVE;
 
+    @Builder.Default
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 

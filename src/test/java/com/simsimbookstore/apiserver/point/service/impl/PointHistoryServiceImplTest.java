@@ -57,7 +57,6 @@ class PointHistoryServiceImplTest {
                 .tier(Tier.STANDARD)
                 .minAmount(BigDecimal.ZERO)
                 .maxAmount(BigDecimal.valueOf(999999))
-                .pointRate(BigDecimal.valueOf(0.01))
                 .build();
 
         // 클래스 필드에 직접 대입

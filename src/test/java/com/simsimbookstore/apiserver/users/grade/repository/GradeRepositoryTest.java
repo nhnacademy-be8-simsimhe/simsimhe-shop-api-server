@@ -31,7 +31,6 @@ class GradeRepositoryTest {
                 .tier(Tier.STANDARD)
                 .minAmount(BigDecimal.valueOf(0))
                 .maxAmount(BigDecimal.valueOf(100000))
-                .pointRate(BigDecimal.valueOf(0.01))
                 .build();
 
         gradeRepository.save(testGrade);
@@ -56,7 +55,6 @@ class GradeRepositoryTest {
         assertEquals(testGrade.getTier(), grade.getTier());
         assertEquals(testGrade.getMinAmount(), grade.getMinAmount());
         assertEquals(testGrade.getMaxAmount(), grade.getMaxAmount());
-        assertEquals(testGrade.getPointRate(), grade.getPointRate());
     }
 
     @Test

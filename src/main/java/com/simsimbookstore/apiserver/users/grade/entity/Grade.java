@@ -30,7 +30,4 @@ public class Grade {
     @Column(name = "max_amount", precision = 10, scale = 2)
     private BigDecimal maxAmount;
 
-    @Column(name = "point_rate", nullable = false, precision = 10, scale = 2)
-    private BigDecimal pointRate;
-
 }
