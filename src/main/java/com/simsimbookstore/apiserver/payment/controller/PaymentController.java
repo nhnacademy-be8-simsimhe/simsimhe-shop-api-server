@@ -11,6 +11,7 @@ import com.simsimbookstore.apiserver.payment.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/api")
 public class PaymentController {
 
@@ -30,7 +31,7 @@ public class PaymentController {
 
     // 사용자 정보 (amount, orderId) 임시 저장
     @PostMapping("/payment")
-    public ResponseEntity<?> initiatePayment(@RequestBody OrderFacadeRequestDto dto, HttpServletRequest request) {
+    public ResponseEntity<String> initiatePayment(@RequestBody OrderFacadeRequestDto dto, HttpServletRequest request) {
         HttpSession session = request.getSession(true);
 
         OrderFacadeResponseDto facadeResponseDto = orderFacade.createPrepareOrder(dto);
