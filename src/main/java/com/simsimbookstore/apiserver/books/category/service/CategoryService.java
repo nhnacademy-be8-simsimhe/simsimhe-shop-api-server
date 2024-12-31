@@ -1,5 +1,6 @@
 package com.simsimbookstore.apiserver.books.category.service;
 
+import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.books.category.dto.CategoryRequestDto;
 import com.simsimbookstore.apiserver.books.category.dto.CategoryResponseDto;
 import org.springframework.data.domain.Page;
@@ -16,5 +17,5 @@ public interface CategoryService {
 
     void deleteCategory(Long categoryId);
 
-    Page<CategoryResponseDto> getAllCategoryPage(Pageable pageable);
+    PageResponse<CategoryResponseDto> getAllCategoryPage(Pageable pageable);
 }
