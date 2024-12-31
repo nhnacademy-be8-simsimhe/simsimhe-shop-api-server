@@ -58,6 +58,6 @@ class PointPolicyRepositoryTest {
 
         assertNotNull(result, "결과 리스트는 null이 아니어야 합니다.");
         assertEquals(1, result.size(), "결과 리스트 크기는 1이어야 합니다.");
-        assertEquals("Signup reward", result.get(0).getDescription(), "첫 번째 정책 설명은 'Signup reward'이어야 합니다.");
+        assertEquals("Signup reward", result.getFirst().getDescription(), "첫 번째 정책 설명은 'Signup reward'이어야 합니다.");
     }
 }

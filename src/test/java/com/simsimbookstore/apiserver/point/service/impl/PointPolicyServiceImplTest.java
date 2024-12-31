@@ -12,8 +12,6 @@ import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Profile;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,7 +50,7 @@ class PointPolicyRepositoryTest {
                 .earningMethod(PointPolicy.EarningMethod.SIGNUP)
                 .earningType(PointPolicy.EarningType.RATE)
                 .earningValue(new BigDecimal("10"))
-                .isAvailable(false) // isAvailable = false
+                .isAvailable(false)
                 .description("Disabled signup reward")
                 .build();
 
@@ -62,10 +60,9 @@ class PointPolicyRepositoryTest {
 
         List<PointPolicy> result = pointPolicyRepository.findPointPolicyByEarningMethodAndIsAvailableTrue(PointPolicy.EarningMethod.SIGNUP);
 
-        // then (검증)
         assertNotNull(result, "결과 리스트는 null이 아니어야 합니다.");
         assertEquals(1, result.size(), "결과 리스트 크기는 1이어야 합니다.");
-        assertEquals("Signup reward", result.get(0).getDescription(), "첫 번째 정책 설명은 'Signup reward'이어야 합니다.");
+        assertEquals("Signup reward", result.getFirst().getDescription(), "첫 번째 정책 설명은 'Signup reward'이어야 합니다.");
     }
 }
 
