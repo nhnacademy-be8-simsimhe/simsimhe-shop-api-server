@@ -3,7 +3,9 @@ package com.simsimbookstore.apiserver.books.book.service;
 import com.simsimbookstore.apiserver.books.book.dto.BookListResponse;
 import com.simsimbookstore.apiserver.books.book.dto.BookResponseDto;
 import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
+import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
+import com.simsimbookstore.apiserver.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,12 +13,44 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class BookGetService {
 
     private final BookRepository bookRepository;
+
+    /**
+     * 책 수정을 위한 책 객체에 대한 정보를 얻는 메서드
+     *
+     * @param bookId 책 아이디
+     * @return BookDto.Response
+     */
+    public BookResponseDto getUpdateBook(Long bookId) {
+        Optional<Book> optionalBook = bookRepository.findById(bookId);
+        if (optionalBook.isPresent()) {
+
+            Book book = optionalBook.get();
+            return BookResponseDto.builder()
+                    .bookId(book.getBookId())
+                    .title(book.getTitle())
+                    .bookIndex(book.getBookIndex())
+                    .description(book.getDescription())
+                    .publicationDate(book.getPublicationDate())
+                    .price(book.getPrice())
+                    .saleprice(book.getSaleprice())
+                    .isbn(book.getIsbn())
+                    .pages(book.getPages())
+                    .quantity(book.getQuantity())
+                    .giftPackaging(book.isGiftPackaging())
+                    .publisher(book.getPublisher())
+                    .build();
+
+        } else {
+            throw new NotFoundException("책 정보가 없습니다.");
+        }
+    }
 
 
     /**
@@ -48,8 +82,7 @@ public class BookGetService {
      */
     @Transactional
     public BookResponseDto getBookDetail(Long userId, Long bookId) {
-        BookResponseDto bookDetail = bookRepository.getBookDetail(userId, bookId);
-        return bookDetail;
+        return bookRepository.getBookDetail(userId, bookId);
     }
 
     /**
@@ -113,12 +146,13 @@ public class BookGetService {
 
     /**
      * 특정 도서를 제외한 동일 카테고리 내 인기 도서 추천 기능
+     *
      * @param categoryIdList
      * @param bookId
      * @return
      */
     public List<BookListResponse> getRecommendBooks(List<Long> categoryIdList, Long bookId) {
-        return bookRepository.getRecommendBook(categoryIdList,bookId);
+        return bookRepository.getRecommendBook(categoryIdList, bookId);
     }
 
     /**

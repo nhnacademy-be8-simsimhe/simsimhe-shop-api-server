@@ -19,8 +19,8 @@ logging:
   level:
     org:
       hibernate:
-        SQL: debug
-        type: trace
+#        SQL: debug
+#        type: trace
 
 object-storage:
   container-name: 6781cafa4fe14ae1ac55305ac102bddf

@@ -1,5 +1,6 @@
 package com.simsimbookstore.apiserver.books.category.service;
 
+import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.books.category.dto.CategoryRequestDto;
 import com.simsimbookstore.apiserver.books.category.dto.CategoryResponseDto;
 import com.simsimbookstore.apiserver.books.category.entity.Category;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -74,8 +76,32 @@ public class CategoryServiceImpl implements CategoryService {
 
 
     @Override
-    public Page<CategoryResponseDto> getAllCategoryPage(Pageable pageable) {
+    public PageResponse<CategoryResponseDto> getAllCategoryPage(Pageable pageable) {
         Page<Category> categoryPage = categoryRepository.findAll(pageable);
-        return categoryPage.map(CategoryMapper::toResponse);
+
+        // Convert Category to CategoryResponseDto
+        List<CategoryResponseDto> responses = categoryPage.getContent().stream()
+                .map(CategoryMapper::toResponse)
+                .collect(Collectors.toList());
+
+        // Define pagination details
+        int maxPageButtons = 5;
+        int startPage = Math.max(1, categoryPage.getNumber() + 1 - (maxPageButtons / 2)); // Adjust for 1-based indexing
+        int endPage = Math.min(startPage + maxPageButtons - 1, categoryPage.getTotalPages());
+
+        if (endPage - startPage + 1 < maxPageButtons) {
+            startPage = Math.max(1, endPage - maxPageButtons + 1);
+        }
+
+        // Build and return PageResponse
+        return PageResponse.<CategoryResponseDto>builder()
+                .data(responses)
+                .currentPage(pageable.getPageNumber()) // Convert to 1-based indexing
+                .startPage(startPage)
+                .endPage(endPage)
+                .totalPage(categoryPage.getTotalPages())
+                .totalElements(categoryPage.getTotalElements())
+                .build();
     }
+
 }
