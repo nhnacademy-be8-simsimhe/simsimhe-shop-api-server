@@ -1,15 +1,28 @@
 package com.simsimbookstore.apiserver.point.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Table(name = "point_policies")
@@ -20,41 +33,44 @@ public class PointPolicy {
     private Long pointPolicyId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "earning_type" , length = 20, nullable = false)
+    @Column(name = "earning_method")
+    private EarningMethod earningMethod;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "earning_type", length = 20, nullable = false)
     private EarningType earningType;
 
-    @Column(name = "fix_points")
-    private Integer fixPoints;
+    @Column(name = "earning_value")
+    private BigDecimal earningValue;
 
-    @Column(name = "rating")
-    private BigDecimal rating;
+    @Column(name = "is_available", nullable = false)
+    private Boolean isAvailable;
 
     @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDate createdAt;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "earning_form", nullable = false)
-    private EarningForm earningForm;
-
-    public enum EarningForm {
+    public enum EarningType {
         FIX, RATE
     }
 
-    public enum EarningType {
-        SIGNUP, REVIEW, PHOTOREVIEW, BOOK
+    public enum EarningMethod {
+        SIGNUP, REVIEW, PHOTOREVIEW,
+        ORDER_STANDARD, ORDER_ROYAL, ORDER_GOLD, ORDER_PLATINUM
     }
 
-    @Builder
-    public PointPolicy(Long pointPolicyId, EarningType earningType, Integer fixPoints, BigDecimal rating, String description, LocalDate createdAt, EarningForm earningForm) {
-        this.pointPolicyId = pointPolicyId;
+    /**
+     * 엔티티의 필드를 업데이트하는 도메인 메서드
+     */
+    public void update(EarningMethod earningMethod,
+                       EarningType earningType,
+                       BigDecimal earningValue,
+                       Boolean isAvailable,
+                       String description) {
+        this.earningMethod = earningMethod;
         this.earningType = earningType;
-        this.fixPoints = fixPoints;
-        this.rating = rating;
+        this.earningValue = earningValue;
+        this.isAvailable = isAvailable;
         this.description = description;
-        this.createdAt = createdAt;
-        this.earningForm = earningForm;
     }
+
 }

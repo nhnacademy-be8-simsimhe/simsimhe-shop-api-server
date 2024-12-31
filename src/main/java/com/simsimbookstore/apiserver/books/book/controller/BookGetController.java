@@ -25,6 +25,14 @@ public class BookGetController {
 
     private final BookGetService bookGetService;
 
+    @GetMapping("/{bookId}/update")
+    public ResponseEntity<BookResponseDto> getBookByIdForUpdate(@PathVariable("bookId") Long bookId) {
+
+       BookResponseDto response = bookGetService.getUpdateBook(bookId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     /**
      * 관리자 도서 목록에서 사용할 모든 책을 조회
      *
@@ -34,7 +42,7 @@ public class BookGetController {
      */
     @GetMapping
     public ResponseEntity<PageResponse<BookListResponse>> getAllBooks(@RequestParam(defaultValue = "1") int page,
-                                                                      @RequestParam(defaultValue = "15") int size) {
+                                                                      @RequestParam(defaultValue = "30") int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("title"));
         PageResponse<BookListResponse> allBook = bookGetService.getAllBook(pageable);
         return ResponseEntity.status(HttpStatus.OK).body(allBook);
@@ -42,7 +50,7 @@ public class BookGetController {
 
 
     /**
-     * 가장 최근 출판된 책 8권을 조회
+     * 가장 최근 출판된 책 6권을 조회
      *
      * @return
      */
@@ -147,13 +155,14 @@ public class BookGetController {
 
     /**
      * 특정 도서를 제외한 동일 카테고리 내 인기 도서 추천 기능
+     *
      * @param bookId
      * @param categoryIdList
      * @return
      */
     @GetMapping("/{bookId}/recommend")
     public ResponseEntity<List<BookListResponse>> getRecommendBooks(@PathVariable(name = "bookId") Long bookId,
-                                                                   @RequestParam(name = "categoryIdList") List<Long> categoryIdList) {
+                                                                    @RequestParam(name = "categoryIdList") List<Long> categoryIdList) {
         List<BookListResponse> recommendBooks = bookGetService.getRecommendBooks(categoryIdList, bookId);
         return ResponseEntity.status(HttpStatus.OK).body(recommendBooks);
 

@@ -20,6 +20,8 @@ public class BookListResponse {
 
     private Long bookId;
 
+     private String imagePath;
+
     private String title;
 
     private LocalDate publicationDate;
@@ -37,6 +39,8 @@ public class BookListResponse {
     private Long bookLikeId;
 
     private boolean isLiked;
+
+    private boolean giftPackaging;
 
     private List<BookContributorResponsDto> contributorList;
 

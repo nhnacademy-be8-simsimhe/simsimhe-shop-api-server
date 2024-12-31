@@ -39,7 +39,7 @@ public class BookManagementController {
      * @param requestDto
      * @return
      */
-    @PatchMapping("/{bookId}")
+    @PutMapping("/{bookId}")
     private ResponseEntity<?> updateBook(@PathVariable(name = "bookId") Long bookId, @RequestBody @Valid BookRequestDto requestDto) {
         BookResponseDto bookResponseDto = bookManagementService.updateBook(bookId, requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(bookResponseDto);
@@ -52,7 +52,7 @@ public class BookManagementController {
      * @param bookRequestDto
      * @return
      */
-    @PatchMapping("/status/{bookId}")
+    @PutMapping("/status/{bookId}")
     public ResponseEntity<BookStatusResponseDto> modifyBookStatus(@PathVariable(name = "bookId") Long bookId, @RequestBody @Valid BookRequestDto bookRequestDto) {
         BookStatusResponseDto bookStatusResponseDto = bookManagementService.modifyBookStatus(bookId, bookRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(bookStatusResponseDto);
@@ -65,7 +65,7 @@ public class BookManagementController {
      * @param quantity
      * @return
      */
-    @PatchMapping("/quantity/{bookId}")
+    @PutMapping("/quantity/{bookId}")
     public ResponseEntity<Integer> modifyBookQuantity(@PathVariable(name = "bookId") Long bookId, @RequestParam(name = "quantity") int quantity) {
         int updateQuantity = bookManagementService.modifyQuantity(bookId, quantity);
         return ResponseEntity.status(HttpStatus.OK).body(updateQuantity);
@@ -77,7 +77,7 @@ public class BookManagementController {
      * @param bookRequestDto
      * @return
      */
-    @PatchMapping("/gift/{bookId}")
+    @PutMapping("/gift/{bookId}")
     public ResponseEntity<BookGiftResponse> modifyGift(@PathVariable(name = "bookId") Long bookId, @RequestBody @Valid BookRequestDto bookRequestDto) {
         BookGiftResponse bookGiftResponse = bookManagementService.modifyBookGift(bookId, bookRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(bookGiftResponse);

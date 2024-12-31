@@ -22,6 +22,10 @@ public class BookResponseDto {
 
     private Long bookId;
 
+    private String thumbnailImage; // 썸네일 이미지 추가
+
+    private String detailImage; // 디테일 이미지 추가
+
     private String title;
 
     private String description;
@@ -47,6 +51,8 @@ public class BookResponseDto {
     private boolean isLiked;
 
     private BookStatus bookStatus;
+
+    private boolean giftPackaging;
 
     private List<BookContributorResponsDto> contributorResponsDtos;
     private List<List<CategoryResponseDto>> categoryList;
