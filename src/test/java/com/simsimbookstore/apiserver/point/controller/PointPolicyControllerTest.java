@@ -1,25 +1,24 @@
 package com.simsimbookstore.apiserver.point.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.simsimbookstore.apiserver.point.dto.PointPolicyRequestDto;
 import com.simsimbookstore.apiserver.point.dto.PointPolicyResponseDto;
 import com.simsimbookstore.apiserver.point.entity.PointPolicy;
 import com.simsimbookstore.apiserver.point.service.PointPolicyService;
 import java.math.BigDecimal;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.ArrayList;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,24 +32,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.hamcrest.Matchers.*;
 
-@WebMvcTest(controllers = PointPolicyController.class)
-@ExtendWith(MockitoExtension.class)
 class PointPolicyControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @Mock
     private PointPolicyService pointPolicyService;
 
-    @Autowired
     private ObjectMapper objectMapper;
+
+    @BeforeEach
+    void setUp() {
+        pointPolicyService = mock(PointPolicyService.class);
+        PointPolicyController controller = new PointPolicyController(pointPolicyService);
+        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        objectMapper = new ObjectMapper();
+    }
 
     @Test
     void testGetAllPolicies_ReturnsEmptyList() throws Exception {
         when(pointPolicyService.getAllPolicies()).thenReturn(new ArrayList<>());
 
-        mockMvc.perform(get("/api/admin/pointPolicies"))
+        mockMvc.perform(get("/api/admin/pointPolicies")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
 
@@ -64,6 +68,7 @@ class PointPolicyControllerTest {
                 .earningType(PointPolicy.EarningType.FIX)
                 .description("Normal order reward")
                 .build();
+
         PointPolicyResponseDto policy2 = PointPolicyResponseDto.builder()
                 .earningMethod(PointPolicy.EarningMethod.SIGNUP)
                 .earningType(PointPolicy.EarningType.FIX)
@@ -72,7 +77,9 @@ class PointPolicyControllerTest {
 
         when(pointPolicyService.getAllPolicies()).thenReturn(List.of(policy1, policy2));
 
-        mockMvc.perform(get("/api/admin/pointPolicies"))
+        mockMvc.perform(get("/api/admin/pointPolicies")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].description", is("Normal order reward")))
@@ -86,7 +93,7 @@ class PointPolicyControllerTest {
         PointPolicyRequestDto requestDto = PointPolicyRequestDto.builder()
                 .earningMethod(PointPolicy.EarningMethod.SIGNUP)
                 .earningType(PointPolicy.EarningType.FIX)
-                .earningValue(BigDecimal.valueOf(100)) // 예: FIX일 경우 earningValue가 특정 숫자, 혹은 null
+                .earningValue(BigDecimal.valueOf(100))
                 .description("Signup policy")
                 .isAvailable(true)
                 .build();
@@ -102,7 +109,8 @@ class PointPolicyControllerTest {
 
         mockMvc.perform(post("/api/admin/pointPolicies")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .content(objectMapper.writeValueAsString(requestDto))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.description", is("Signup policy")));
 
@@ -132,7 +140,8 @@ class PointPolicyControllerTest {
 
         mockMvc.perform(put("/api/admin/pointPolicies/{policyId}", policyId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .content(objectMapper.writeValueAsString(requestDto))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.description", is("Normal order 5% reward")));
 
@@ -144,10 +153,11 @@ class PointPolicyControllerTest {
     void testDeletePolicy_Success() throws Exception {
         Long policyId = 99L;
 
-        mockMvc.perform(delete("/api/admin/pointPolicies/{policyId}", policyId))
+        mockMvc.perform(delete("/api/admin/pointPolicies/{policyId}", policyId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
         verify(pointPolicyService, times(1)).deletePolicy(policyId);
     }
-
 }
