@@ -9,11 +9,10 @@ import com.simsimbookstore.apiserver.users.address.repository.AddressRepository;
 import com.simsimbookstore.apiserver.users.address.service.AddressService;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.service.UserService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
