@@ -1,14 +1,20 @@
 package com.simsimbookstore.apiserver.coupons.coupon.service.impl;
 
+import com.simsimbookstore.apiserver.books.book.dto.BookResponseDto;
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
+import com.simsimbookstore.apiserver.books.bookcategory.repository.BookCategoryRepository;
+import com.simsimbookstore.apiserver.books.category.dto.CategoryResponseDto;
 import com.simsimbookstore.apiserver.common.exception.NotFoundException;
+import com.simsimbookstore.apiserver.coupons.bookcoupon.entity.BookCoupon;
+import com.simsimbookstore.apiserver.coupons.categorycoupon.entity.CategoryCoupon;
 import com.simsimbookstore.apiserver.coupons.coupon.dto.CouponResponseDto;
 import com.simsimbookstore.apiserver.coupons.coupon.dto.DiscountAmountResponseDto;
 import com.simsimbookstore.apiserver.coupons.coupon.dto.EmptyCouponResponseDto;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.Coupon;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.CouponStatus;
 import com.simsimbookstore.apiserver.coupons.coupon.exception.AlreadyCouponUsed;
+import com.simsimbookstore.apiserver.coupons.coupon.exception.InapplicableCoupon;
 import com.simsimbookstore.apiserver.coupons.coupon.exception.InsufficientOrderAmountException;
 import com.simsimbookstore.apiserver.coupons.coupon.mapper.CouponMapper;
 import com.simsimbookstore.apiserver.coupons.coupon.repository.CouponRepository;
@@ -42,6 +48,7 @@ public class CouponServiceImpl implements CouponService {
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final CouponTypeRepository couponTypeRepository;
+    private final BookCategoryRepository bookCategoryRepository;
 
     /**
      * couponId로 쿠폰을 가져온다.
@@ -208,7 +215,7 @@ public class CouponServiceImpl implements CouponService {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")이 존재하지 않습니다."));
         Coupon coupon = couponRepository.findByUserUserIdAndCouponId(userId, couponId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")은 쿠폰(id:" + couponId + ")을 가지고 있지 않습니다."));
 
-        coupon.setCouponStatus(CouponStatus.EXPIRED);
+        coupon.expire();
 
         return CouponMapper.toResponse(coupon);
     }
@@ -232,7 +239,7 @@ public class CouponServiceImpl implements CouponService {
         if (coupon.getCouponStatus() != CouponStatus.UNUSED) {
             throw new AlreadyCouponUsed("회원(id:" + userId + ")의 쿠폰(id:" + couponId + ")은 이미 사용된 쿠폰입니다.");
         }
-        coupon.setCouponStatus(CouponStatus.USED);
+        coupon.use();
 
         return CouponMapper.toResponse(coupon);
     }
@@ -275,6 +282,27 @@ public class CouponServiceImpl implements CouponService {
         validateId(couponId);
         Book book = bookRepository.findByBookId(bookId).orElseThrow(() -> new NotFoundException("책(id:" + bookId + ")이 존재하지 않습니다."));
         Coupon coupon = couponRepository.findById(couponId).orElseThrow(() -> new NotFoundException("쿠폰(id:" + couponId + ")이 존재하지 않습니다."));
+        List<List<CategoryResponseDto>> categoryList = bookRepository.getBookDetail(null, bookId).getCategoryList();
+
+
+        // 쿠폰 적용 가능한지 확인
+        if (coupon.getCouponType() instanceof BookCoupon bookCoupon) {
+            if (!bookCoupon.getBook().getBookId().equals(bookId)) {
+                throw new InapplicableCoupon("책 쿠폰(id:" + couponId + ")은 책(id:" + bookId + ")에 적용 불가능합니다.");
+            }
+        } else if (coupon.getCouponType() instanceof CategoryCoupon categoryCoupon) {
+            boolean flag = true;
+            for (List<CategoryResponseDto> categoryResponseDtos : categoryList) {
+                for (CategoryResponseDto categoryResponseDto : categoryResponseDtos) {
+                    if (categoryResponseDto.getCategoryId().equals(categoryCoupon.getCategory().getCategoryId())) {
+                        flag = false;
+                    }
+                }
+            }
+            if (flag) {
+                throw new InapplicableCoupon("카테고리 쿠폰(id:" + couponId + ")은 책(id:" + bookId + ")에 적용 불가능합니다.");
+            }
+        }
 
         //책 주문 금액 -> 책 판매가 * 개수
         BigDecimal bookOrderPrice = book.getSaleprice().multiply(new BigDecimal(quantity));
