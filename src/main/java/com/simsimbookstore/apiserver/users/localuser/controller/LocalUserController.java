@@ -1,7 +1,9 @@
 package com.simsimbookstore.apiserver.users.localuser.controller;
 
 import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
+import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserResponseDto;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
+import com.simsimbookstore.apiserver.users.localuser.mapper.LocalUserMapper;
 import com.simsimbookstore.apiserver.users.localuser.service.LocalUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,13 +32,14 @@ public class LocalUserController {
 
     @GetMapping("/{loginId}/exists")
     public ResponseEntity<?> existsByLoginId(@PathVariable String loginId) {
-        boolean result = userService.existsByLoginId(loginId);
-        return ResponseEntity.ok(result);
+        boolean response = userService.existsByLoginId(loginId);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{loginId}")
-    public LocalUser getLocalUser(@PathVariable String loginId) {
+    public ResponseEntity<?> getLocalUser(@PathVariable String loginId) {
         LocalUser localUser = userService.findByLoginId(loginId);
-        return localUser;
+        LocalUserResponseDto response = LocalUserMapper.localUserResponseDtoTo(localUser);
+        return ResponseEntity.ok(response);
     }
 }
