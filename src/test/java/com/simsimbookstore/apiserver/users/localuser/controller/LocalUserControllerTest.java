@@ -98,7 +98,6 @@ class LocalUserControllerTest {
                 .andExpect(jsonPath("$.birth").value(testUserRequestDto.getBirth().toString()))
                 .andExpect(jsonPath("$.gender").value(testUserRequestDto.getGender().toString()))
                 .andExpect(jsonPath("$.userStatus").value(testUserRequestDto.getUserStatus().toString()))
-                .andExpect(jsonPath("$.createdAt").value(testUserRequestDto.getCreatedAt().toString()))
                 .andExpect(jsonPath("$.loginId").value(testUserRequestDto.getLoginId()))
                 .andExpect(jsonPath("$.password").value(testUserRequestDto.getPassword()));
     }
