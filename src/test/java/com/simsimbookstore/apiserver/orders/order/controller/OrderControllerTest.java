@@ -105,17 +105,10 @@ class OrderControllerTest {
     private OrderListService orderListService;
 
     @Autowired
-    private WrapTypeService wrapTypeService;
-
-    @Autowired
     private OrderTotalService orderTotalService;
 
     @Autowired
     private OrderFacade orderFacade;
-
-    @Autowired
-    private AddressService addressService;
-
 
     @Test
     @DisplayName("POST 바디로 책 목록을 받아서 책 주문 리스트를 정상적으로 반환한다.")

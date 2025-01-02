@@ -2,7 +2,6 @@ package com.simsimbookstore.apiserver.point.service;
 
 import com.simsimbookstore.apiserver.point.dto.OrderPointCalculateRequestDto;
 import com.simsimbookstore.apiserver.point.dto.OrderPointRequestDto;
-import com.simsimbookstore.apiserver.point.dto.OrderPointUseRequestDto;
 import com.simsimbookstore.apiserver.point.entity.PointHistory;
 import java.math.BigDecimal;
 
