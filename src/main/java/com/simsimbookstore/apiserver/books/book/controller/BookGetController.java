@@ -25,6 +25,11 @@ public class BookGetController {
 
     private final BookGetService bookGetService;
 
+    /**
+     * 프론트에서 수정하기 위해 책을 단건 조회하는 로직
+     * @param bookId
+     * @return
+     */
     @GetMapping("/{bookId}/update")
     public ResponseEntity<BookResponseDto> getBookByIdForUpdate(@PathVariable("bookId") Long bookId) {
 
@@ -34,7 +39,7 @@ public class BookGetController {
     }
 
     /**
-     * 관리자 도서 목록에서 사용할 모든 책을 조회
+     * 관리자 도서 목록에서 사용할 모든 책을 조회 페이징처리
      *
      * @param page
      * @param size
@@ -50,7 +55,7 @@ public class BookGetController {
 
 
     /**
-     * 가장 최근 출판된 책 6권을 조회
+     * 가장 최근 출판된 책 8권을 조회
      *
      * @return
      */
@@ -135,7 +140,7 @@ public class BookGetController {
     public ResponseEntity<PageResponse<BookListResponse>> getBooksByTag(@PathVariable(name = "tagId") Long tagId,
                                                                         @RequestParam(required = false) Long userId,
                                                                         @RequestParam(defaultValue = "1") int page,
-                                                                        @RequestParam(defaultValue = "15") int size) {
+                                                                        @RequestParam(defaultValue = "16") int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         PageResponse<BookListResponse> booksByTag = bookGetService.getBooksByTag(userId, tagId, pageable);
 
@@ -143,7 +148,7 @@ public class BookGetController {
     }
 
     /**
-     * 주문량이 많은 도서 6개ㅔ 조회
+     * 주문량이 많은 도서 6개 조회
      *
      * @return
      */

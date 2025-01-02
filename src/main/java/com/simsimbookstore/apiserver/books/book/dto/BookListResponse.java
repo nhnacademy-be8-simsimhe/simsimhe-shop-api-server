@@ -20,7 +20,7 @@ public class BookListResponse {
 
     private Long bookId;
 
-     private String imagePath;
+    private String imagePath;
 
     private String title;
 
@@ -43,7 +43,6 @@ public class BookListResponse {
     private boolean giftPackaging;
 
     private List<BookContributorResponsDto> contributorList;
-
 
 
 }
