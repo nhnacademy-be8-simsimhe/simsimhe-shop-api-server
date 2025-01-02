@@ -6,6 +6,7 @@ import com.simsimbookstore.apiserver.orders.delivery.entity.DeliveryPolicy;
 import com.simsimbookstore.apiserver.orders.delivery.service.DeliveryPolicyService;
 import jakarta.validation.Valid;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+@Slf4j
 @RestController
 @RequestMapping("/api/admin/delivery-policies")
 public class DeliveryPolicyController {
@@ -36,6 +37,9 @@ public class DeliveryPolicyController {
     @PostMapping
     public ResponseEntity<DeliveryPolicy> createDeliveryPolicy(
             @RequestBody @Valid DeliveryPolicyRequestDto deliveryPolicyRequestDto) {
+        log.info("{}", deliveryPolicyRequestDto.getDeliveryPolicyName());
+        log.info("{}", deliveryPolicyRequestDto.getDeliveryPrice());
+        log.info("{}", deliveryPolicyRequestDto.getPolicyStandardPrice());
 
         DeliveryPolicy savedPolicy = deliveryPolicyService.save(deliveryPolicyRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPolicy);
