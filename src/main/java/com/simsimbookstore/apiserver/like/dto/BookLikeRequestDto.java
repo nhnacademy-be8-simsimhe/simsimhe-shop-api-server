@@ -18,4 +18,6 @@ public class BookLikeRequestDto {
 
     @NotNull
     private Long bookId;
+
+
 }

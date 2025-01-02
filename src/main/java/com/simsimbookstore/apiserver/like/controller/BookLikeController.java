@@ -26,7 +26,7 @@ public class BookLikeController {
      * @param bindingResult
      * @return
      */
-    @PostMapping
+    @PutMapping
     public ResponseEntity<?> setBookLike(@RequestBody @Valid BookLikeRequestDto requestDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bindingResult.getAllErrors());

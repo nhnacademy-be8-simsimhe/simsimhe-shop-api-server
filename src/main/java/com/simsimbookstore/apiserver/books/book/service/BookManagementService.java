@@ -240,17 +240,17 @@ public class BookManagementService {
     }
 
     @Transactional
-    public BookGiftResponse modifyBookGift(Long bookId,BookRequestDto bookRequestDto){
+    public BookGiftResponse modifyBookGift(Long bookId, BookRequestDto bookRequestDto) {
         Optional<Book> optionalBook = bookRepository.findById(bookId);
 
-        if(optionalBook.isPresent()){
+        if (optionalBook.isPresent()) {
             Book book = optionalBook.get();
             book.setGiftPackaging(bookRequestDto.isGiftPackaging());
 
             return BookGiftResponse.builder()
                     .giftPackaging(book.isGiftPackaging())
                     .build();
-        }else {
+        } else {
             throw new NotFoundException("도서 정보가 없습니다");
         }
     }
