@@ -57,7 +57,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
 
 
     /**
-     * 가장 최근에 출판된 책 6권을 조회하는 메서드
+     * 가장 최근에 출판된 책 8권을 조회하는 메서드(국내도서)
      *
      * @return
      */
@@ -78,13 +78,14 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                 .from(book)
                 .orderBy(book.publicationDate.desc()) // 출판일 기준 최신순 정렬
                 .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId))
-                .where(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL))
-                .limit(6)                           // 상위 6권만 조회
+                .innerJoin(bookTag).on(book.bookId.eq(bookTag.book.bookId))
+                .where(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL).and(bookTag.tag.tagName.eq("국내도서")))
+                .limit(8)                           // 상위 8권만 조회
                 .fetch();                           // 결과 가져오기
     }
 
     /**
-     * 모든 책 조회하는 메서드
+     * 모든 책 조회하는 메서드(관리자만 볼수 있음)
      *
      * @param pageable
      * @return
@@ -95,18 +96,22 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
         List<BookListResponse> content = queryFactory
                 .select(Projections.fields(BookListResponse.class,
                         book.bookId.as("bookId"),
+                        bookImagePath.imagePath.as("imagePath"),
                         book.title.as("title"),
                         book.publicationDate.as("publicationDate"),
                         book.price.as("price"),
                         book.saleprice.as("saleprice"),
                         book.publisher.as("publisher"),
                         book.bookStatus.as("bookStatus"),
+                        book.giftPackaging,
                         book.quantity.as("quantity")
+
                 ))
                 .from(book)
                 .offset(pageable.getOffset()) // 페이지 시작점
                 .limit(pageable.getPageSize()) // 페이지 크기
-//                .orderBy(book.publicationDate.desc()) // 출판일 기준 최신순 정렬
+                .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId)
+                        .and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
                 .orderBy(book.bookId.asc())
                 .fetch();
 
@@ -150,6 +155,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
         List<BookListResponse> content = queryFactory
                 .select(Projections.fields(BookListResponse.class,
                         book.bookId.as("bookId"),
+                        bookImagePath.imagePath.as("imagePath"),
                         book.title.as("title"),
                         book.publicationDate.as("publicationDate"),
                         book.price.as("price"),
@@ -161,6 +167,8 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                 ))
                 .from(book)
                 .innerJoin(bookCategory).on(book.bookId.eq(bookCategory.book.bookId))
+                .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId)
+                        .and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
                 .leftJoin(bookLike).on(book.bookId.eq(bookLike.book.bookId))
                 .where(bookCategory.catagory.categoryId.in(categoryIds))
                 .offset(pageable.getOffset())
@@ -197,7 +205,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
         BooleanExpression isLiked = getLikeExpression(userId);
 
         List<BookListResponse> content = queryFactory
-                .select(Projections.fields(BookListResponse.class,
+                .selectDistinct(Projections.fields(BookListResponse.class,
                         book.bookId.as("bookId"),
                         book.title.as("title"),
                         book.publicationDate.as("publicationDate"),
@@ -206,15 +214,17 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                         book.publisher.as("publisher"),
                         book.bookStatus.as("bookStatus"),
                         book.quantity.as("quantity"),
+                        bookImagePath.imagePath.as("imagePath"),
                         isLiked.as("isLiked")
                 ))
                 .from(book)
-                .leftJoin(bookTag).on(book.bookId.eq(bookTag.book.bookId))
+                .innerJoin(bookTag).on(book.bookId.eq(bookTag.book.bookId))
                 .leftJoin(bookLike).on(book.bookId.eq(bookLike.book.bookId))
-                .where(bookTag.tag.tagId.eq(tagId))
+                .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId))
+                .where(bookTag.tag.tagId.eq(tagId).and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(book.publicationDate.desc())
+                .orderBy(book.bookId.asc())
                 .fetch();
 
         // 전체 데이터 수 조회
@@ -241,42 +251,6 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
      * @param bookId
      * @return
      */
-//    @Override
-//    public BookResponseDto getBookDetail(Long userId, Long bookId) {
-//        // 좋아요 여부를 설정
-//        BooleanExpression isLiked = getLikeExpression(userId);
-//        // 책 상세 정보를 조회
-//        BookResponseDto bookResponse = queryFactory
-//                .select(Projections.fields(BookResponseDto.class,
-//                        book.bookId.as("bookId"),
-//                        book.title.as("title"),
-//                        book.description.as("description"),
-//                        book.bookIndex.as("bookIndex"),
-//                        book.publisher.as("publisher"),
-//                        book.isbn.as("isbn"),
-//                        book.viewCount.as("viewCount"),
-//                        book.price.as("price"),
-//                        book.saleprice.as("saleprice"),
-//                        book.publicationDate.as("publicationDate"),
-//                        book.pages.as("pages"),
-//                        book.quantity.as("quantity"),
-//                        isLiked.as("isLiked"),
-//                        book.bookStatus.as("bookStatus")
-//                ))
-//                .from(book)
-//                .leftJoin(bookLike).on(book.bookId.eq(bookLike.book.bookId))
-//                .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId))
-//                .where(book.bookId.eq(bookId))
-//                .groupBy(book, bookLike)
-//                .fetchOne();
-//
-//
-//        // 조회수 증가
-//        this.addViewCount(book, bookId);
-//
-//        return this.toResponse(bookId, bookResponse);
-//
-//    }
     @Override
     public BookResponseDto getBookDetail(Long userId, Long bookId) {
         // 좋아요 여부를 설정
@@ -365,10 +339,13 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                         book.title.as("title"),             // 책 제목
                         book.bookStatus.as("bookStatus"),   // 책 상태
                         book.quantity.as("quantity"),       // 책 재고
+                        bookImagePath.imagePath.as("imagePath"),
                         isLiked.as("isLiked")
                 ))
                 .from(bookLike)
                 .join(bookLike.book, book) // bookLike와 book 조인
+                .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId)
+                        .and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
                 .where(bookLike.user.userId.eq(userId)) // 특정 회원이 좋아요한 책만 필터링
                 .offset(pageable.getOffset())          // 페이징 시작점
                 .limit(pageable.getPageSize())         // 페이지 크기
@@ -438,7 +415,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
     }
 
     /**
-     * 특정 도서를 제외한 동일 카테고리 내 인기 도서 추천 기능
+     * 특정 도서를 제외한 동일 카테고리 내 인기 도서 추천 기능 5개
      *
      * @param categoryIdList
      * @param bookId
@@ -448,16 +425,22 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
     public List<BookListResponse> getRecommendBook(List<Long> categoryIdList, Long bookId) {
         return queryFactory.select(Projections.fields(BookListResponse.class
                         , book.bookId
+                        , bookImagePath.imagePath.as("imagePath")
                         , book.title
                         , book.quantity
+                        , book.saleprice
+                        , book.price
+                        , book.publisher
                         , book.bookStatus
                         , book.viewCount))
                 .from(book)
                 .innerJoin(bookCategory).on(book.bookId.eq(bookCategory.book.bookId))
+                .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId)
+                        .and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
                 .where(bookCategory.book.bookId.ne(bookId).and(bookCategory.catagory.categoryId.in(categoryIdList)))
                 .distinct()
                 .orderBy(book.viewCount.desc())
-                .limit(10)
+                .limit(5)
                 .fetch();
     }
 

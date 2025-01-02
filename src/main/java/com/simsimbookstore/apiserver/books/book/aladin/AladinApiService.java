@@ -55,54 +55,23 @@ public class AladinApiService {
         this.bookImageRepoisotry = bookImageRepoisotry;
     }
 
-    //    @Transactional
-//    public void fetchAndSaveBestsellerBooks() throws Exception {
+    @Transactional
+    public void fetchAndSaveBestsellerBooks() throws Exception {
 //        String baseUrl = "https://www.aladin.co.kr/ttb/api/ItemList.aspx"
 //                + "?ttbkey=ttbchlim201008001"
 //                + "&QueryType=Bestseller"
 //                + "&MaxResults=50"
-//                + "&SearchTarget=Book"
 //                + "&output=xml"
 //                + "&Version=20131101";
-//
-//        XmlMapper xmlMapper = new XmlMapper();
-//
-//        for (int start = 1; start <= 2; start += 1) {
-//            String url = baseUrl + "&start=" + start;
-//            System.out.println("Requesting: " + url);
-//
-//            String response = restTemplate.getForObject(url, String.class);
-//            AladinApiXmlResponse apiResponse = xmlMapper.readValue(response, AladinApiXmlResponse.class);
-//
-//            if (apiResponse.getItems().isEmpty()) {
-//                System.out.println("No data returned for start=" + start);
-//                continue;
-//            }
-//
-//            for (AladinBookXmlResponse item : apiResponse.getItems()) {
-//                if (item.getIsbn13() == null || bookRepository.existsByIsbn(item.getIsbn13())) {
-//                    System.out.println("Skipping duplicate or missing ISBN: " + item.getIsbn13());
-//                    continue;
-//                }
-//
-//                Book book = createBookEntity(item);
-//                bookRepository.save(book);
-//
-//                saveContributors(book, item.getAuthor());
-//                saveTags(book, item.getMallType());
-//                saveCategories(book, item.getCategoryName());
-//                saveImagePath(book, item.getCover());
-//            }
-//        }
-//    }
-    @Transactional
-    public void fetchAndSaveBestsellerBooks() throws Exception {
+
         String baseUrl = "https://www.aladin.co.kr/ttb/api/ItemList.aspx"
                 + "?ttbkey=ttbchlim201008001"
                 + "&QueryType=Bestseller"
                 + "&MaxResults=50"
                 + "&output=xml"
-                + "&Version=20131101";
+                + "&Version=20131101"
+                + "&Cover=Big"; // 큰 크기 이미지 요청
+
 
         // 다양한 SearchTarget 값을 정의
         String[] searchTargets = {"Book", "Foreign", "Music", "DVD", "Used", "eBook"};
@@ -110,7 +79,7 @@ public class AladinApiService {
         XmlMapper xmlMapper = new XmlMapper();
 
         for (String searchTarget : searchTargets) {
-            for (int start = 1; start <= 2; start++) {
+            for (int start = 1; start <= 1; start++) {
                 String url = baseUrl + "&SearchTarget=" + searchTarget + "&start=" + start;
                 System.out.println("Requesting: " + url);
 
