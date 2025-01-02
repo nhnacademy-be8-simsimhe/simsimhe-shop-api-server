@@ -137,7 +137,7 @@ class PointHistoryRepositoryTest {
         em.clear();
 
         // when
-        Integer totalAmount = pointHistoryRepository.sumAmountByUserId(persistedUser.getUserId());
+        Integer totalAmount = pointHistoryRepository.sumAmountByUserId(persistedUser.getUserId()).orElseThrow();
 
         // then
         assertNotNull(totalAmount, "합계가 null이면 안 됩니다.");
