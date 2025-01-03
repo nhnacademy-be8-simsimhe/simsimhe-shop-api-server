@@ -75,7 +75,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    void statusUpdate() {
+    void updateStatus() {
         testUser.updateUserStatus(UserStatus.INACTIVE);
         User updatedUser = userRepository.save(testUser);
 
@@ -83,12 +83,20 @@ class UserRepositoryTest {
     }
 
     @Test
-    void gradeUpdate(){
+    void updateGrade(){
         Grade newGrade = gradeRepository.findByTier(Tier.ROYAL);
         testUser.updateGrade(newGrade);
 
         User updatedUser = userRepository.save(testUser);
         assertEquals(updatedUser.getGrade().getTier(), Tier.ROYAL);
+    }
+
+    @Test
+    void updateLatestLoginDate() {
+        testUser.updateLatestLoginDate(LocalDateTime.now().plusHours(1));
+        User updatedUser = userRepository.save(testUser);
+
+        assertEquals(testUser.getLatestLoginDate(), updatedUser.getLatestLoginDate());
     }
 
     @Test
