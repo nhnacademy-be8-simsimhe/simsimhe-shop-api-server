@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Setter
+@Builder
 public class ReviewComment {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,11 +23,13 @@ public class ReviewComment {
 
     @Lob
     @Column(nullable = false)
+    @Setter
     private String content;
 
     @Column(nullable = false)
     private LocalDateTime created_at;
 
+    @Setter
     private LocalDateTime update_at;
 
     @ManyToOne(fetch = FetchType.LAZY)
