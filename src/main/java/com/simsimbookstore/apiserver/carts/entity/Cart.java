@@ -1,7 +1,8 @@
-package com.simsimbookstore.apiserver.carts.cart.entity;
+package com.simsimbookstore.apiserver.carts.entity;
 
 
 import com.simsimbookstore.apiserver.books.book.entity.Book;
+import com.simsimbookstore.apiserver.users.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,16 +12,23 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Setter
+@Builder
 public class Cart {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cart_id")
     private Long cartId;
 
     @Column(nullable = false)
     private int quantity;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
     private Book book;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }
