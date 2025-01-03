@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.ArrayList;
+import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -28,6 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.hamcrest.Matchers.*;
@@ -95,14 +97,14 @@ class PointPolicyControllerTest {
                 .earningType(PointPolicy.EarningType.FIX)
                 .earningValue(BigDecimal.valueOf(100))
                 .description("Signup policy")
-                .isAvailable(true)
+                .available(true)
                 .build();
 
         PointPolicyResponseDto responseDto = PointPolicyResponseDto.builder()
                 .earningMethod(PointPolicy.EarningMethod.SIGNUP)
                 .earningType(PointPolicy.EarningType.FIX)
                 .description("Signup policy")
-                .isAvailable(true)
+                .available(true)
                 .build();
 
         when(pointPolicyService.createPolicy(any(PointPolicyRequestDto.class))).thenReturn(responseDto);
@@ -120,34 +122,50 @@ class PointPolicyControllerTest {
     @Test
     void testUpdatePolicy_Success() throws Exception {
         Long policyId = 1L;
+
         PointPolicyRequestDto requestDto = PointPolicyRequestDto.builder()
                 .earningMethod(PointPolicy.EarningMethod.ORDER_STANDARD)
                 .earningType(PointPolicy.EarningType.RATE)
                 .earningValue(new BigDecimal("0.05"))
                 .description("Normal order 5% reward")
-                .isAvailable(true)
+                .available(true)
                 .build();
 
         PointPolicyResponseDto responseDto = PointPolicyResponseDto.builder()
+                .pointPolicyId(policyId)
                 .earningMethod(PointPolicy.EarningMethod.ORDER_STANDARD)
                 .earningType(PointPolicy.EarningType.RATE)
-                .description("Normal order 5% reward")
-                .isAvailable(true)
+                .earningValue(new BigDecimal("0.05"))
+                .description("Normal order 5% reward") // 반드시 설정
+                .available(false)
                 .build();
 
-        when(pointPolicyService.updatePolicy(eq(policyId), any(PointPolicyRequestDto.class)))
+        // Mock 설정
+        when(pointPolicyService.updatePolicy(eq(1L), any(PointPolicyRequestDto.class)))
                 .thenReturn(responseDto);
 
-        mockMvc.perform(put("/api/admin/pointPolicies/{policyId}", policyId)
+
+        System.out.println("Mock Response: " + responseDto);
+        System.out.println(requestDto.getDescription());
+
+
+        // MockMvc 요청 및 JSONPath 확인
+        mockMvc.perform(post("/api/admin/pointPolicies/1") // PathVariable 제대로 전달
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
                         .accept(MediaType.APPLICATION_JSON))
+                .andDo(print()) // 응답 디버깅
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.description", is("Normal order 5% reward")));
 
+
+        // 서비스 호출 검증
         verify(pointPolicyService, times(1))
                 .updatePolicy(eq(policyId), any(PointPolicyRequestDto.class));
     }
+
+
+
 
     @Test
     void testDeletePolicy_Success() throws Exception {

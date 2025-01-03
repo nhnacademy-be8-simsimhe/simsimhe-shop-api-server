@@ -96,7 +96,8 @@ class PointHistoryServiceImplTest {
 
         // NORMAL → ORDER_STANDARD 정책
         PointPolicy mockPolicy = PointPolicy.builder()
-                .earningValue(BigDecimal.valueOf(0.01)) // 1%
+                .earningValue(BigDecimal.valueOf(0.01))
+                .available(true)// 1%
                 .build();
         when(pointHistoryService.getPolicy(PointPolicy.EarningMethod.ORDER_STANDARD))
                 .thenReturn(PointPolicyResponseDto.fromEntity(mockPolicy));
@@ -141,6 +142,7 @@ class PointHistoryServiceImplTest {
         // 정책 조회 Stubbing
         PointPolicy mockPolicy = PointPolicy.builder()
                 .earningValue(BigDecimal.valueOf(0.01)) // 1% 적립
+                .available(true)
                 .build();
         when(pointHistoryService.getPolicy(PointPolicy.EarningMethod.ORDER_STANDARD))
                 .thenReturn(PointPolicyResponseDto.fromEntity(mockPolicy));
