@@ -24,8 +24,13 @@ public class PointPolicyServiceImpl implements PointPolicyService {
      */
     @Override
     public PointPolicyResponseDto getPolicy(PointPolicy.EarningMethod earningMethod) {
-        PointPolicy policy = pointPolicyRepository.findPointPolicyByEarningMethodAndIsAvailableTrue(earningMethod).getFirst();
+        PointPolicy policy = pointPolicyRepository.findPointPolicyByEarningMethodAndAvailableTrue(earningMethod).getFirst();
         return PointPolicyResponseDto.fromEntity(policy);
+    }
+
+    @Override
+    public PointPolicyResponseDto getPolicyById(Long id) {
+        return PointPolicyResponseDto.fromEntity(pointPolicyRepository.findById(id).orElseThrow());
     }
 
     /**
@@ -57,27 +62,16 @@ public class PointPolicyServiceImpl implements PointPolicyService {
     /**
      * 정책 수정
      */
-    @Override
     @Transactional
-    public PointPolicyResponseDto updatePolicy(Long policyId, PointPolicyRequestDto requestDto) {
-        // 1) DB에서 엔티티 조회
-        PointPolicy policy = pointPolicyRepository.findById(policyId).orElseThrow(
-                () -> new NotFoundException(String.format("PointPolicy with id %s not found", policyId))
-        );
+    public PointPolicyResponseDto updatePolicy(Long pointPolicyId, PointPolicyRequestDto requestDto) {
+        PointPolicy pointPolicy = pointPolicyRepository.findById(pointPolicyId)
+                .orElseThrow(() -> new NotFoundException("PointPolicy not found with id: " + pointPolicyId));
+        pointPolicy.update(requestDto.getEarningMethod(), requestDto.getEarningType(), requestDto.getEarningValue(), requestDto.isAvailable(),
+                requestDto.getDescription());
+        pointPolicyRepository.save(pointPolicy);
 
-        // 2) 필요한 필드를 갱신 (엔티티 세터 혹은 빌더패턴 재생성 등으로)
-        policy.update(
-                requestDto.getEarningMethod(),
-                requestDto.getEarningType(),
-                requestDto.getEarningValue(),
-                requestDto.isAvailable(),
-                requestDto.getDescription()
-        );
-
-
-        return PointPolicyResponseDto.fromEntity(policy);
+        return PointPolicyResponseDto.fromEntity(pointPolicy);
     }
-
     /**
      * 정책 삭제
      */

@@ -39,7 +39,7 @@ public class PointPolicy {
     private BigDecimal earningValue;
 
     @Column(name = "is_available", nullable = false)
-    private Boolean isAvailable;
+    private Boolean available;
 
     @Column(name = "description", nullable = false)
     private String description;
@@ -59,12 +59,12 @@ public class PointPolicy {
     public void update(EarningMethod earningMethod,
                        EarningType earningType,
                        BigDecimal earningValue,
-                       Boolean isAvailable,
+                       Boolean available,
                        String description) {
         this.earningMethod = earningMethod;
         this.earningType = earningType;
         this.earningValue = earningValue;
-        this.isAvailable = isAvailable;
+        this.available = available;
         this.description = description;
     }
 

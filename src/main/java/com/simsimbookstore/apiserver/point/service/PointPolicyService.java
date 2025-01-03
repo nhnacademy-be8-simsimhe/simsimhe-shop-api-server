@@ -11,6 +11,8 @@ public interface PointPolicyService {
 
     PointPolicyResponseDto getPolicy(PointPolicy.EarningMethod earningMethod);
 
+    PointPolicyResponseDto getPolicyById(Long id);
+
     List<PointPolicyResponseDto> getAllPolicies();
 
     @Transactional

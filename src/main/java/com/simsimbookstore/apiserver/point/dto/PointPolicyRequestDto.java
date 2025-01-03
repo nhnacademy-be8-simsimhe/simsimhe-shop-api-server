@@ -1,5 +1,6 @@
 package com.simsimbookstore.apiserver.point.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.simsimbookstore.apiserver.point.entity.PointPolicy;
 import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
@@ -16,7 +17,7 @@ public class PointPolicyRequestDto {
     private PointPolicy.EarningMethod earningMethod;
     private BigDecimal earningValue;
     private String description;
-    private boolean isAvailable;
+    private boolean available;
     private PointPolicy.EarningType earningType;
 
     // DTO -> 엔티티 변환
@@ -26,7 +27,7 @@ public class PointPolicyRequestDto {
                 .earningValue(this.earningValue)
                 .description(this.description)
                 .earningType(this.earningType)
-                .isAvailable(this.isAvailable)
+                .available(this.available)
                 .build();
     }
 }

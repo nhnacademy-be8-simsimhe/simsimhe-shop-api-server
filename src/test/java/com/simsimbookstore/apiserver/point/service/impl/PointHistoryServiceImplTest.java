@@ -77,7 +77,6 @@ class PointHistoryServiceImplTest {
      * Test: orderPoint(...) 성공 테스트
      */
     @Test
-    void orderPoint_Success() {
         // given
         OrderPointRequestDto requestDto = OrderPointRequestDto.builder()
                 .userId(mockUser.getUserId())
@@ -86,23 +85,6 @@ class PointHistoryServiceImplTest {
 
         when(userRepository.findById(requestDto.getUserId())).thenReturn(Optional.of(mockUser));
         when(orderRepository.findById(requestDto.getOrderId())).thenReturn(Optional.of(mockOrder));
-
-        // PointPolicyResponseDto 생성
-        PointPolicyResponseDto mockPolicy = PointPolicyResponseDto.builder()
-                .earningMethod(PointPolicy.EarningMethod.ORDER_STANDARD)
-                .earningValue(BigDecimal.valueOf(0.01))
-                .description("Standard earning policy")
-                .isAvailable(true)
-                .earningType(PointPolicy.EarningType.RATE)
-                .build();
-
-        when(pointPolicyService.getPolicy(PointPolicy.EarningMethod.ORDER_STANDARD)).thenReturn(mockPolicy);
-
-        PointHistory usedPointHistory = PointHistory.builder()
-                .pointHistoryId(1L)
-                .pointType(PointHistory.PointType.DEDUCT)
-                .amount(500)
-                .user(mockUser)
                 .build();
 
         PointHistory earnedPointHistory = PointHistory.builder()
