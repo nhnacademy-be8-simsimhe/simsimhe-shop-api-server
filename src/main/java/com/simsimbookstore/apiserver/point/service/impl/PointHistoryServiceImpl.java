@@ -8,6 +8,7 @@ import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.point.dto.OrderPointCalculateRequestDto;
 import com.simsimbookstore.apiserver.point.dto.OrderPointRequestDto;
+import com.simsimbookstore.apiserver.point.dto.PointHistoryResponseDto;
 import com.simsimbookstore.apiserver.point.entity.OrderPointManage;
 import com.simsimbookstore.apiserver.point.entity.PointHistory;
 import com.simsimbookstore.apiserver.point.entity.PointPolicy;
@@ -21,6 +22,8 @@ import java.math.BigDecimal;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @Slf4j
@@ -34,6 +37,13 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final OrderPointManageRepository orderPointManageRepository;
+
+    @Override
+    public Page<PointHistoryResponseDto> getPointHistory(Long userId, Pageable pageable) {
+        return pointHistoryRepository.getPointHistoriesByUserId(userId, pageable);
+
+    }
+
 
     @Override
     public PointHistory orderPoint(OrderPointRequestDto requestDto) {
