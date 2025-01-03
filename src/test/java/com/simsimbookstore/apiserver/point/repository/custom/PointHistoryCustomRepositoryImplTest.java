@@ -45,7 +45,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @Import(QuerydslConfig.class)
 @DataJpaTest
-@ActiveProfiles("test")
+@ActiveProfiles("test2")
 class PointHistoryCustomRepositoryImplTest {
 
     @Autowired
@@ -140,7 +140,7 @@ class PointHistoryCustomRepositoryImplTest {
                 .created_at(LocalDateTime.of(2025, 1, 3, 15, 0))
                 .build();
 
-        PointHistory pointHistory3= PointHistory.builder()
+        PointHistory pointHistory3 = PointHistory.builder()
                 .user(testUser)
                 .pointType(PointHistory.PointType.EARN)
                 .amount(3000)
