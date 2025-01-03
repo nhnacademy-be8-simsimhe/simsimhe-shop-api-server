@@ -22,9 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,7 +34,7 @@ class PointHistoryServiceImplTest {
     @Mock
     private PointHistoryRepository pointHistoryRepository;
     @Mock
-    private PointPolicyService pointHistoryService;
+    private PointPolicyService pointPolicyService;
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -59,8 +57,7 @@ class PointHistoryServiceImplTest {
                 .maxAmount(BigDecimal.valueOf(999999))
                 .build();
 
-        // 클래스 필드에 직접 대입
-        this.mockUser = User.builder()
+        mockUser = User.builder()
                 .userId(100L)
                 .userName("TestUser")
                 .mobileNumber("010-1234-5678")
@@ -69,191 +66,170 @@ class PointHistoryServiceImplTest {
                 .grade(standardGrade)
                 .build();
 
-        // Order도 마찬가지로 클래서 필드를 사용
-        this.mockOrder = Order.builder()
+        mockOrder = Order.builder()
                 .orderId(100L)
                 .originalPrice(BigDecimal.valueOf(10000))
+                .pointUse(BigDecimal.valueOf(500))
                 .build();
     }
 
     /**
-     * ==============================
-     * 1) calculateEarnOrderPoints(...) 직접 테스트
-     * ==============================
+     * Test: orderPoint(...) 성공 테스트
      */
     @Test
-    void calculateEarnOrderPoints_NormalTier() throws Exception {
-        // given
-        // Dto 준비
-        OrderPointCalculateRequestDto requestDto = OrderPointCalculateRequestDto.builder()
-                .userId(mockUser.getUserId())
-                .orderId(mockOrder.getOrderId())
-                .build();
-
-        // User, Order 모킹
-        when(userRepository.findById(mockUser.getUserId())).thenReturn(Optional.of(mockUser));
-        when(orderRepository.findById(mockOrder.getOrderId())).thenReturn(Optional.of(mockOrder));
-
-        // NORMAL → ORDER_STANDARD 정책
-        PointPolicy mockPolicy = PointPolicy.builder()
-                .earningValue(BigDecimal.valueOf(0.01)) // 1%
-                .build();
-        when(pointHistoryService.getPolicy(PointPolicy.EarningMethod.ORDER_STANDARD))
-                .thenReturn(PointPolicyResponseDto.fromEntity(mockPolicy));
-
-        // private 메서드를 Reflection으로 가져오기
-        Method method = PointHistoryServiceImpl.class
-                .getDeclaredMethod("calculateEarnOrderPoints", OrderPointCalculateRequestDto.class);
-        method.setAccessible(true);
-
-        // when
-        BigDecimal result = (BigDecimal) method.invoke(pointHistoryServiceImpl, requestDto);
-
-        // then
-        // originalPrice = 10000, rate=0.01 => 100
-        assertNotNull(result);
-        assertEquals(100, result.intValue());
-
-        // verify
-        verify(userRepository, times(1)).findById(mockUser.getUserId());
-        verify(orderRepository, times(1)).findById(mockOrder.getOrderId());
-        verify(pointHistoryService, times(1))
-                .getPolicy(PointPolicy.EarningMethod.ORDER_STANDARD);
-    }
-
-    /**
-     * ==============================
-     * 2) addOrderPoint(...) 테스트
-     * ==============================
-     */
-    @Test
-    void addOrderPoint_Success() {
+    void orderPoint_Success() {
         // given
         OrderPointRequestDto requestDto = OrderPointRequestDto.builder()
                 .userId(mockUser.getUserId())
                 .orderId(mockOrder.getOrderId())
                 .build();
 
-        // user, order 조회 stubbing
         when(userRepository.findById(requestDto.getUserId())).thenReturn(Optional.of(mockUser));
         when(orderRepository.findById(requestDto.getOrderId())).thenReturn(Optional.of(mockOrder));
 
-        // 정책 조회 Stubbing
-        PointPolicy mockPolicy = PointPolicy.builder()
-                .earningValue(BigDecimal.valueOf(0.01)) // 1% 적립
+        // PointPolicyResponseDto 생성
+        PointPolicyResponseDto mockPolicy = PointPolicyResponseDto.builder()
+                .earningMethod(PointPolicy.EarningMethod.ORDER_STANDARD)
+                .earningValue(BigDecimal.valueOf(0.01))
+                .description("Standard earning policy")
+                .isAvailable(true)
+                .earningType(PointPolicy.EarningType.RATE)
                 .build();
-        when(pointHistoryService.getPolicy(PointPolicy.EarningMethod.ORDER_STANDARD))
-                .thenReturn(PointPolicyResponseDto.fromEntity(mockPolicy));
 
-        // pointHistoryRepository.save(...) stubbing
-        PointHistory savedHistory = PointHistory.builder()
-                .pointHistoryId(999L)
-                .pointType(PointHistory.PointType.EARN)
-                .amount(100)
-                .created_at(LocalDateTime.now())
+        when(pointPolicyService.getPolicy(PointPolicy.EarningMethod.ORDER_STANDARD)).thenReturn(mockPolicy);
+
+        PointHistory usedPointHistory = PointHistory.builder()
+                .pointHistoryId(1L)
+                .pointType(PointHistory.PointType.DEDUCT)
+                .amount(500)
                 .user(mockUser)
                 .build();
-        when(pointHistoryRepository.save(any(PointHistory.class)))
-                .thenReturn(savedHistory);
 
-        OrderPointManage savedOrderPointManage = OrderPointManage.builder()
-                .orderPointId(888L)
-                .pointHistory(savedHistory)
+        PointHistory earnedPointHistory = PointHistory.builder()
+                .pointHistoryId(2L)
+                .pointType(PointHistory.PointType.EARN)
+                .amount(100)
+                .user(mockUser)
+                .build();
+
+        when(pointHistoryRepository.save(any(PointHistory.class)))
+                .thenReturn(usedPointHistory, earnedPointHistory);
+
+        OrderPointManage orderPointManage = OrderPointManage.builder()
+                .pointHistory(earnedPointHistory)
                 .order(mockOrder)
                 .build();
-        when(orderPointManageRepository.save(any(OrderPointManage.class)))
-                .thenReturn(savedOrderPointManage);
+
+        when(orderPointManageRepository.save(any(OrderPointManage.class))).thenReturn(orderPointManage);
 
         // when
-        PointHistory result = pointHistoryServiceImpl.addOrderPoint(requestDto);
+        PointHistory result = pointHistoryServiceImpl.orderPoint(requestDto);
 
         // then
         assertNotNull(result);
-        assertEquals(999L, result.getPointHistoryId());
-        assertEquals(PointHistory.PointType.EARN, result.getPointType());
-        assertEquals(100, result.getAmount());
-        assertEquals(mockUser, result.getUser());
-
+        assertEquals(earnedPointHistory.getPointHistoryId(), result.getPointHistoryId());
+        assertEquals(earnedPointHistory.getAmount(), result.getAmount());
         verify(userRepository, times(2)).findById(requestDto.getUserId());
         verify(orderRepository, times(2)).findById(requestDto.getOrderId());
-        verify(pointHistoryService, times(1))
-                .getPolicy(PointPolicy.EarningMethod.ORDER_STANDARD);
-        verify(pointHistoryRepository, times(1)).save(any(PointHistory.class));
+        verify(pointHistoryRepository, times(2)).save(any(PointHistory.class));
         verify(orderPointManageRepository, times(2)).save(any(OrderPointManage.class));
     }
 
+    /**
+     * Test: orderPoint(...) Order Not Found
+     */
     @Test
-    void addOrderPoint_OrderNotFound() {
+    void orderPoint_OrderNotFound() {
         // given
         OrderPointRequestDto requestDto = OrderPointRequestDto.builder()
                 .userId(mockUser.getUserId())
-                .orderId(99999L)
+                .orderId(99999L) // Non-existent orderId
                 .build();
 
-        // user는 존재하지만 order가 없다
         when(userRepository.findById(requestDto.getUserId())).thenReturn(Optional.of(mockUser));
         when(orderRepository.findById(requestDto.getOrderId())).thenReturn(Optional.empty());
 
         // when + then
         assertThrows(NotFoundException.class,
-                () -> pointHistoryServiceImpl.addOrderPoint(requestDto));
+                () -> pointHistoryServiceImpl.orderPoint(requestDto));
+        verify(orderRepository, times(1)).findById(requestDto.getOrderId());
     }
 
     /**
-     * ==============================
-     * 3) usePoints(...) 테스트
-     * ==============================
+     * Test: validateUsePoints(...) 실패 (잔여 포인트 부족)
      */
     @Test
-    void usePoints_Success() {
+    void validateUsePoints_InsufficientBalance() {
         // given
-        OrderPointUseRequestDto requestDto = OrderPointUseRequestDto.builder()
-                .userId(100L)
-                .orderId(100L)
-                .usePoints(BigDecimal.valueOf(300))
+        Long userId = mockUser.getUserId();
+        BigDecimal requestedPoints = BigDecimal.valueOf(2000);
+
+        when(pointHistoryRepository.sumAmountByUserId(userId)).thenReturn(Optional.of(1000));
+
+        // when + then
+        assertThrows(IllegalArgumentException.class,
+                () -> pointHistoryServiceImpl.validateUsePoints(userId, requestedPoints),
+                "잔여 포인트 부족 예외가 발생해야 합니다.");
+        verify(pointHistoryRepository, times(1)).sumAmountByUserId(userId);
+    }
+
+    /**
+     * Test: updatePoint(...) 성공 테스트
+     */
+    @Test
+    void updatePoint_Success() {
+        // given
+        Long pointHistoryId = 1L;
+        Integer newAmount = 300;
+
+        PointHistory existingHistory = PointHistory.builder()
+                .pointHistoryId(pointHistoryId)
+                .amount(200)
                 .build();
 
-        when(userRepository.findById(requestDto.getUserId())).thenReturn(Optional.of(mockUser));
-        when(orderRepository.findById(requestDto.getOrderId())).thenReturn(Optional.of(mockOrder));
-
-        // 보유 포인트 = 1000
-        when(pointHistoryRepository.sumAmountByUserId(requestDto.getUserId()))
-                .thenReturn(1000);
-
-        // 포인트 차감 후 Save
-        PointHistory usedHistory = PointHistory.builder()
-                .pointHistoryId(555L)
-                .pointType(PointHistory.PointType.DEDUCT)
-                .amount(-300)
-                .created_at(LocalDateTime.now())
-                .user(mockUser)
-                .build();
-        when(pointHistoryRepository.save(any(PointHistory.class)))
-                .thenReturn(usedHistory);
+        when(pointHistoryRepository.findById(pointHistoryId)).thenReturn(Optional.of(existingHistory));
+        when(pointHistoryRepository.save(any(PointHistory.class))).thenReturn(existingHistory);
 
         // when
-        PointHistory result = pointHistoryServiceImpl.usePoints(requestDto);
+        PointHistory updatedHistory = pointHistoryServiceImpl.updatePoint(pointHistoryId, newAmount);
+
+        // then
+        assertNotNull(updatedHistory);
+        assertEquals(newAmount, updatedHistory.getAmount());
+        verify(pointHistoryRepository, times(1)).findById(pointHistoryId);
+        verify(pointHistoryRepository, times(1)).save(any(PointHistory.class));
+    }
+
+    /**
+     * Test: calculateEarnOrderPoints(...) 성공 테스트
+     */
+    @Test
+    void calculateEarnOrderPoints_Success() {
+        // given
+        OrderPointCalculateRequestDto requestDto = OrderPointCalculateRequestDto.builder()
+                .userId(mockUser.getUserId())
+                .orderId(mockOrder.getOrderId())
+                .build();
+
+        when(userRepository.findById(mockUser.getUserId())).thenReturn(Optional.of(mockUser));
+        when(orderRepository.findById(mockOrder.getOrderId())).thenReturn(Optional.of(mockOrder));
+
+        // PointPolicyResponseDto 생성
+        PointPolicyResponseDto mockPolicy = PointPolicyResponseDto.builder()
+                .earningMethod(PointPolicy.EarningMethod.ORDER_STANDARD)
+                .earningValue(BigDecimal.valueOf(0.01)) // 1%
+                .description("Standard earning policy")
+                .isAvailable(true)
+                .earningType(PointPolicy.EarningType.RATE)
+                .build();
+
+        when(pointPolicyService.getPolicy(PointPolicy.EarningMethod.ORDER_STANDARD)).thenReturn(mockPolicy);
+
+        // when
+        BigDecimal result = pointHistoryServiceImpl.calculateEarnOrderPoints(requestDto);
 
         // then
         assertNotNull(result);
-        assertEquals(PointHistory.PointType.DEDUCT, result.getPointType());
-        assertEquals(-300, result.getAmount());
-        verify(orderPointManageRepository, times(1)).save(any(OrderPointManage.class));
-    }
-
-    @Test
-    void usePoints_InsufficientBalance() {
-        // given
-        OrderPointUseRequestDto requestDto = OrderPointUseRequestDto.builder()
-                .userId(100L)
-                .orderId(100L)
-                .usePoints(BigDecimal.valueOf(2000))
-                .build();
-
-        // when + then
-        assertThrows(NotFoundException.class,
-                () -> pointHistoryServiceImpl.usePoints(requestDto),
-                "잔여 포인트 부족 예외가 발생해야 합니다."
-        );
+        assertEquals(100, result.intValue()); // 10,000 * 0.01 = 100
     }
 }

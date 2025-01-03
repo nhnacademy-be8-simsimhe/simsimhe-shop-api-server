@@ -2,13 +2,19 @@ package com.simsimbookstore.apiserver.orders.order.dto;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
 
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TotalRequestDto {
     private Long userId;
     private List<BookListRequestDto> bookList; // 책 주문 리스트

@@ -8,8 +8,6 @@ import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
-import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
-import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,10 +28,6 @@ class PointHistoryRepositoryTest {
 
     @Autowired
     private PointHistoryRepository pointHistoryRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-    // 만약 별도의 UserRepository가 없다면, TestEntityManager로 user를 persist해도 됩니다.
 
     @Autowired
     private TestEntityManager em;
@@ -137,7 +131,7 @@ class PointHistoryRepositoryTest {
         em.clear();
 
         // when
-        Integer totalAmount = pointHistoryRepository.sumAmountByUserId(persistedUser.getUserId());
+        Integer totalAmount = pointHistoryRepository.sumAmountByUserId(persistedUser.getUserId()).orElseThrow();
 
         // then
         assertNotNull(totalAmount, "합계가 null이면 안 됩니다.");

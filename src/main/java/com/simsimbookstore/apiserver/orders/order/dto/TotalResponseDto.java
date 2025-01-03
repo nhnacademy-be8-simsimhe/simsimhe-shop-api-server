@@ -18,6 +18,7 @@ public class TotalResponseDto {
     BigDecimal deliveryPrice;
     BigDecimal originalPrice;
     BigDecimal usePoint;
+    BigDecimal availablePoints;
 
     List<CouponUsageDto> couponDiscountDetails; // 각 책별 쿠폰 사용 정보
 }

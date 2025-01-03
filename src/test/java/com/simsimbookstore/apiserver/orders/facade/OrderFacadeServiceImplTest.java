@@ -1,7 +1,9 @@
 package com.simsimbookstore.apiserver.orders.facade;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.any;
+
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,10 +15,12 @@ import com.simsimbookstore.apiserver.orders.order.dto.MemberOrderRequestDto;
 import com.simsimbookstore.apiserver.orders.order.dto.OrderResponseDto;
 import com.simsimbookstore.apiserver.orders.order.service.MemberOrderService;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
+import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookResponseDto;
 import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
+import com.simsimbookstore.apiserver.point.dto.OrderPointRequestDto;
+import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
+
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,12 +40,14 @@ class OrderFacadeServiceImplTest {
     @Mock
     private DeliveryService deliveryService;
 
+    @Mock
+    private PointHistoryService pointHistoryService;
+
     @InjectMocks
     private OrderFacadeImpl orderFacadeService;
 
     @Test
-    void testCreateOrderFacade_Success() {
-
+    void testCreatePrepareOrder_Success() {
         DeliveryRequestDto deliveryRequestDto = new DeliveryRequestDto();
         deliveryRequestDto.setDeliveryState(Delivery.DeliveryState.READY);
 
@@ -59,11 +65,16 @@ class OrderFacadeServiceImplTest {
                 .orderNumber("20241226-000001")
                 .build();
 
-        List<OrderBookRequestDto> orderBookReqList = new ArrayList<>();
-        orderBookReqList.add(OrderBookRequestDto.builder()
-                .bookId(501L)
-                .quantity(2)
-                .build());
+        List<OrderBookRequestDto> orderBookReqList = List.of(
+                OrderBookRequestDto.builder()
+                        .bookId(501L)
+                        .quantity(2)
+                        .build(),
+                OrderBookRequestDto.builder()
+                        .bookId(502L)
+                        .quantity(1)
+                        .build()
+        );
 
         OrderFacadeRequestDto facadeRequestDto = new OrderFacadeRequestDto(
                 deliveryRequestDto,
@@ -77,19 +88,20 @@ class OrderFacadeServiceImplTest {
         when(memberOrderService.createOrder(orderReqDto))
                 .thenReturn(mockOrderResponse);
 
-        when(orderBookService.createOrderBooks(anyList()))
-                .thenReturn(Collections.emptyList());
+        when(orderBookService.createOrderBook(any(OrderBookRequestDto.class)))
+                .thenReturn(mock(OrderBookResponseDto.class));
 
         OrderFacadeResponseDto result = orderFacadeService.createPrepareOrder(facadeRequestDto);
 
         verify(deliveryService, times(1)).createDelivery(deliveryRequestDto);
         verify(memberOrderService, times(1)).createOrder(orderReqDto);
-        verify(orderBookService, times(1)).createOrderBooks(anyList());
+        verify(orderBookService, times(orderBookReqList.size())).createOrderBook(any(OrderBookRequestDto.class));
+        verify(pointHistoryService, times(1)).orderPoint(any(OrderPointRequestDto.class));
 
-        // 2) result에 기대하는 값이 들어있는지
         assertNotNull(result);
         assertEquals(mockOrderResponse.getOrderNumber(), result.getOrderNumber());
         assertEquals(mockOrderResponse.getTotalPrice(), result.getTotalPrice());
-
     }
 }
+
+
