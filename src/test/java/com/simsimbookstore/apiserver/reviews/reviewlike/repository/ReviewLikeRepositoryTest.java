@@ -52,8 +52,8 @@ class ReviewLikeRepositoryTest {
     @BeforeEach
     void setUp() {
 
-        Grade grade1 = createGrade(Tier.STANDARD, 0.01);
-        Grade grade2 = createGrade(Tier.ROYAL, 0.01);
+        Grade grade1 = createGrade(Tier.STANDARD);
+        Grade grade2 = createGrade(Tier.ROYAL);
 
         gradeRepository.save(grade1);
         gradeRepository.save(grade2);
@@ -144,12 +144,11 @@ class ReviewLikeRepositoryTest {
     }
 
 
-    private Grade createGrade(Tier tier, double pointRate) {
+    private Grade createGrade(Tier tier) {
         return gradeRepository.save(Grade.builder()
                 .tier(tier)
                 .minAmount(BigDecimal.valueOf(0))
                 .maxAmount(BigDecimal.valueOf(100000))
-                .pointRate(BigDecimal.valueOf(pointRate))
                 .build());
     }
 
