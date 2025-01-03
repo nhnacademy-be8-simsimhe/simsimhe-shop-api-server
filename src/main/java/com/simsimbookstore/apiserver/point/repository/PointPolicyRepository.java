@@ -5,5 +5,5 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PointPolicyRepository extends JpaRepository<PointPolicy, Long> {
-    List<PointPolicy> findPointPolicyByEarningMethodAndIsAvailableTrue(PointPolicy.EarningMethod EarningMethod);
+    List<PointPolicy> findPointPolicyByEarningMethodAndAvailableTrue(PointPolicy.EarningMethod EarningMethod);
 }

@@ -9,16 +9,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Entity
 @Builder
@@ -44,7 +39,7 @@ public class PointPolicy {
     private BigDecimal earningValue;
 
     @Column(name = "is_available", nullable = false)
-    private Boolean isAvailable;
+    private Boolean available;
 
     @Column(name = "description", nullable = false)
     private String description;
@@ -64,12 +59,12 @@ public class PointPolicy {
     public void update(EarningMethod earningMethod,
                        EarningType earningType,
                        BigDecimal earningValue,
-                       Boolean isAvailable,
+                       Boolean available,
                        String description) {
         this.earningMethod = earningMethod;
         this.earningType = earningType;
         this.earningValue = earningValue;
-        this.isAvailable = isAvailable;
+        this.available = available;
         this.description = description;
     }
 

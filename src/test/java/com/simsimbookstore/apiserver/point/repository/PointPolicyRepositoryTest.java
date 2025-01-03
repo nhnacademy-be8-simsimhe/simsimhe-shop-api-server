@@ -30,7 +30,7 @@ class PointPolicyRepositoryTest {
                 .earningMethod(PointPolicy.EarningMethod.SIGNUP)
                 .earningType(PointPolicy.EarningType.FIX)
                 .earningValue(new BigDecimal("100"))
-                .isAvailable(true)
+                .available(true)
                 .description("Signup reward")
                 .build();
 
@@ -38,7 +38,7 @@ class PointPolicyRepositoryTest {
                 .earningMethod(PointPolicy.EarningMethod.REVIEW)
                 .earningType(PointPolicy.EarningType.FIX)
                 .earningValue(new BigDecimal("200"))
-                .isAvailable(true)
+                .available(true)
                 .description("Review reward")
                 .build();
 
@@ -46,7 +46,7 @@ class PointPolicyRepositoryTest {
                 .earningMethod(PointPolicy.EarningMethod.SIGNUP)
                 .earningType(PointPolicy.EarningType.RATE)
                 .earningValue(new BigDecimal("10"))
-                .isAvailable(false) // isAvailable = false
+                .available(false) // isAvailable = false
                 .description("Disabled signup reward")
                 .build();
 
@@ -54,7 +54,7 @@ class PointPolicyRepositoryTest {
         pointPolicyRepository.save(policy2);
         pointPolicyRepository.save(policy3);
 
-        List<PointPolicy> result = pointPolicyRepository.findPointPolicyByEarningMethodAndIsAvailableTrue(PointPolicy.EarningMethod.SIGNUP);
+        List<PointPolicy> result = pointPolicyRepository.findPointPolicyByEarningMethodAndAvailableTrue(PointPolicy.EarningMethod.SIGNUP);
 
         assertNotNull(result, "결과 리스트는 null이 아니어야 합니다.");
         assertEquals(1, result.size(), "결과 리스트 크기는 1이어야 합니다.");
