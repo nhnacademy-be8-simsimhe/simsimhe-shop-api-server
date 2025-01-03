@@ -7,6 +7,7 @@ import com.simsimbookstore.apiserver.orders.order.dto.CouponUsageDto;
 import com.simsimbookstore.apiserver.orders.order.dto.TotalRequestDto;
 import com.simsimbookstore.apiserver.orders.order.dto.TotalResponseDto;
 import com.simsimbookstore.apiserver.orders.packages.service.WrapTypeService;
+import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,8 +27,7 @@ public class OrderTotalServiceImpl implements OrderTotalService{
     private final WrapTypeService wrapTypeService;
     private final OrderListService orderListService;
     private final DeliveryPolicyService deliveryPolicyService;
-    //private final CouponService couponService;
-    //private final PointService pointService;
+    private final PointHistoryService pointHistoryService;
 
     @Override
     public TotalResponseDto calculateTotal(TotalRequestDto requestDto) {
@@ -37,48 +37,52 @@ public class OrderTotalServiceImpl implements OrderTotalService{
         BigDecimal total = BigDecimal.ZERO;
         BigDecimal originalPrice = BigDecimal.ZERO;
         BigDecimal discountedPrice = BigDecimal.ZERO;
-        BigDecimal usePoint = BigDecimal.ZERO;
 
         List<CouponUsageDto> couponUsageDtos = new ArrayList<>();
-
         Map<Long, BigDecimal> couponDiscountDetails = new HashMap<>();
 
+        // 책 가격 및 포장 비용 계산
         for (BookListResponseDto book : bookOrderList) {
-            BigDecimal bookTotal = book.getPrice().multiply(BigDecimal.valueOf(book.getQuantity()));
+            BigDecimal bookOriginalTotal = book.getPrice().multiply(BigDecimal.valueOf(book.getQuantity()));
+            originalPrice = originalPrice.add(bookOriginalTotal);
 
-            // 쿠폰 할인
-            //
-            //
+            BigDecimal bookTotal = bookOriginalTotal;
 
-            // 포장 비용
-            TotalRequestDto.PackagingRequestDto packaging = requestDto.getPackagingOptions().get(book.getBookId());
-            if (packaging != null && packaging.getPackageTypeId() != null) {
-                BigDecimal packagingCost = wrapTypeService.getWrapTypeById(packaging.getPackageTypeId()).getPackagePrice();
-                log.info("Packaging cost: BookId={}, TypeId={}, Quantity={}, Cost={}",
-                        book.getBookId(), packaging.getPackageTypeId(), packaging.getQuantity(), packagingCost);
-                bookTotal = bookTotal.add(packagingCost.multiply(BigDecimal.valueOf(packaging.getQuantity())));
+            // 포장 비용 계산
+            if (requestDto.getPackagingOptions() != null) {
+                TotalRequestDto.PackagingRequestDto packaging = requestDto.getPackagingOptions().get(book.getBookId());
+                if (packaging != null && packaging.getPackageTypeId() != null) {
+                    BigDecimal packagingCost = wrapTypeService.getWrapTypeById(packaging.getPackageTypeId()).getPackagePrice();
+                    log.info("Packaging cost: BookId={}, TypeId={}, Quantity={}, Cost={}",
+                            book.getBookId(), packaging.getPackageTypeId(), packaging.getQuantity(), packagingCost);
+                    bookTotal = bookTotal.add(packagingCost.multiply(BigDecimal.valueOf(packaging.getQuantity())));
+                }
             }
 
             total = total.add(bookTotal);
         }
 
-        //포인트
-        //total -= usePoint;
+        // 포인트 사용 검증
+        pointHistoryService.validateUsePoints(requestDto.getUserId(), requestDto.getUsePoint());
+        BigDecimal userPoints = pointHistoryService.getUserPoints(requestDto.getUserId());
+        total = total.subtract(requestDto.getUsePoint());
 
-        BigDecimal deliveryPrice = calculateDeliveryPrice(total);
+        // 배송비 계산 (할인되지 않은 책 가격 기준)
+        BigDecimal deliveryPrice = calculateDeliveryPrice(originalPrice);
 
+        // 배송비 추가
         total = total.add(deliveryPrice);
 
         log.info("Final total: {}", total);
         return TotalResponseDto.builder()
                 .total(total)
+                .availablePoints(userPoints)
                 .deliveryPrice(deliveryPrice)
                 .originalPrice(originalPrice)
-                .usePoint(usePoint)
+                .usePoint(requestDto.getUsePoint())
                 .couponDiscountDetails(couponUsageDtos)
                 .build();
     }
-
     public BigDecimal calculateDeliveryPrice(BigDecimal total) {
         DeliveryPolicy standardPolicy = deliveryPolicyService.getStandardPolicy();
 

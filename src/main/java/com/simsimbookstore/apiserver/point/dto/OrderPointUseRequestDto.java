@@ -12,6 +12,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OrderPointUseRequestDto {
     Long userId;
-    Long orderId;
     BigDecimal usePoints;
 }
