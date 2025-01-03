@@ -2,7 +2,9 @@ package com.simsimbookstore.apiserver.payment.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 
+@Getter
 @Builder
 @AllArgsConstructor
 public class FailResponseDto {
