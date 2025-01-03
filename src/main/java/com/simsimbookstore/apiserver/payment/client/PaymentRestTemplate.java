@@ -4,20 +4,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
 import com.simsimbookstore.apiserver.payment.config.TossPaymentProperties;
+import com.simsimbookstore.apiserver.payment.dto.ConfirmSuccessResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+@Configuration
 public class PaymentRestTemplate {
 
     private final HttpHeaders headers;
@@ -53,7 +54,7 @@ public class PaymentRestTemplate {
         map.put("successUrl", successUrl);
         map.put("failUrl", failUrl);
         map.put("customerEmail", dto.getEmail());
-//        map.put("customerName", dto.getUserName()); // 사용자 이름
+        map.put("customerName", dto.getUserName()); // 사용자 이름
         map.put("customerMobilePhone", dto.getPhoneNumber());
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -65,7 +66,7 @@ public class PaymentRestTemplate {
             throw new RuntimeException(e);
         }
 
-        ResponseEntity<String> responseEntity = restTemplate.exchange(
+        ResponseEntity <String> responseEntity = restTemplate.exchange(
                 uri,
                 HttpMethod.POST,
                 request,
@@ -75,7 +76,7 @@ public class PaymentRestTemplate {
     }
 
     // 결제 승인 요청
-    public String confirm(SuccessRequestDto success) throws URISyntaxException {
+    public ConfirmSuccessResponseDto confirm(SuccessRequestDto success){
         URI uri = URI.create("https://api.tosspayments.com/v1/payments/confirm");
 
         headers.setBasicAuth(encodedAuth);
@@ -95,11 +96,11 @@ public class PaymentRestTemplate {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        ResponseEntity<String> responseEntity = restTemplate.exchange(
+        ResponseEntity<ConfirmSuccessResponseDto> responseEntity = restTemplate.exchange(
                 uri,
                 HttpMethod.POST,
                 request,
-                String.class
+                ConfirmSuccessResponseDto.class
         );
         return responseEntity.getBody();
     }

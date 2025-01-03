@@ -8,13 +8,18 @@ import com.simsimbookstore.apiserver.orders.facade.OrderFacadeRequestDto;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
 import com.simsimbookstore.apiserver.orders.order.dto.MemberOrderRequestDto;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
+import com.simsimbookstore.apiserver.payment.dto.FailResponseDto;
+import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
 import com.simsimbookstore.apiserver.payment.service.PaymentService;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,11 +29,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebAppConfiguration
 @WebMvcTest(controllers = PaymentController.class)
@@ -46,35 +52,20 @@ class PaymentControllerTest {
     @MockitoBean
     private PaymentService paymentService;
 
-    @Test
-    @DisplayName("orderName, totalAmount 데이터가 /api/payment 경로로 들어오는지 확인")
-    void initiatePayment() throws Exception {
+    String orderId;
+    BigDecimal totalAmount;
+    String paymentKey;
 
-//        OrderFacadeRequestDto orderFacadeRequestDto
-//                = new OrderFacadeRequestDto(
-//
-//        )
-//                ;
-
-
-
-//        String req = objectMapper.writeValueAsString(dd);
-
-        //when
-        mvc.perform(post("/api/payment")
-//                        .content(req)
-//                        .param("id","1")
-                )
-                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.orderId").value(1))
-//                .andExpect(jsonPath())
-                .andExpect(content().string("Order information saved in session"));
-
+    @BeforeEach
+    void data() {
+        paymentKey = "tviva202412302247066Cbm6";
+        orderId = "2222-1jjh";
+        totalAmount = BigDecimal.valueOf(10000);
     }
 
     @Test
-    @DisplayName("paymentSuccess 테스트 - 정상동작")
-    void orderFacadeRequestDtoTest() throws Exception {
+    @DisplayName("paymentInitiate 테스트")
+    void paymentInitiateTest() throws Exception {
         // deliveryRequestDto
         DeliveryRequestDto deliveryRequestDto = DeliveryRequestDto.builder()
                 .deliveryState(Delivery.DeliveryState.READY)
@@ -109,6 +100,7 @@ class PaymentControllerTest {
                 .orderBookState("READY")
                 .couponDiscountRequestDto(null)
                 .build();
+
         // orderFacadeRequestDto - List 형태여서 list에 추가
         List<OrderBookRequestDto> orderBookRequestDtoList = new ArrayList<>();
         orderBookRequestDtoList.add(orderBookRequestDto);
@@ -116,57 +108,111 @@ class PaymentControllerTest {
         // 위의 세가지를 받는 orderFacadeRequestDto
         OrderFacadeRequestDto orderFacadeRequestDto = new OrderFacadeRequestDto(deliveryRequestDto, memberOrderRequestDto, orderBookRequestDtoList);
 
+        // session에 임시 데이터 저장
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("orderId", orderId);
+        session.setAttribute("amount", totalAmount);
+
+        Assertions.assertEquals("2222-1jjh", session.getAttribute("orderId"));
+        Assertions.assertEquals(totalAmount, session.getAttribute("amount"));
+
         // @RequestBody : 역직렬화
         String requestBody = objectMapper.writeValueAsString(orderFacadeRequestDto);
 
         // OrderFacadeResponseDto stubbing 처리
-        OrderFacadeResponseDto facadeResponseDto = mock(OrderFacadeResponseDto.class);
-        when(orderFacade.createPrepareOrder(orderFacadeRequestDto))
-                .thenReturn(OrderFacadeResponseDto.builder()
-                        .orderNumber("20229-3kn")
-                        .totalPrice(BigDecimal.valueOf(10000))
-                        .orderName("JPA 프로그래밍 외 1권")
-                        .email("hi@hi.com")
-                        .phoneNumber("01022223333")
-                        .build());
+        OrderFacadeResponseDto facadeResponseDto = new OrderFacadeResponseDto("1213-ddd", "책 외 1권", "hi@hi.com", "01022223333", "홍길동", BigDecimal.valueOf(10000), "CARD");
+        when(orderFacade.createPrepareOrder(any(OrderFacadeRequestDto.class))).thenReturn(facadeResponseDto);
 
-        OrderFacadeResponseDto facadeResponseDto1 = orderFacade.createPrepareOrder(orderFacadeRequestDto);
-
-        String response = objectMapper.writeValueAsString(facadeResponseDto1);
+        String url = "결제 url";
+        when(paymentService.createPaymentRequest(facadeResponseDto)).thenReturn(url);
 
         // response
         mvc.perform(post("/api/payment")
-                        .content(response)
+                        .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Order information saved in session"));
+                .andExpect(content().string(url));
     }
 
     @Test
-    @DisplayName("session에 저장")
-    void saveSession() {
+    @DisplayName("paymentSuccess 테스트")
+    void paymentSuccessTest() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("orderId", orderId);
+        session.setAttribute("totalAmount", totalAmount);
 
-    }
-
-    @Test
-    @DisplayName("orderName -> orderId로 jsonProperty 사용")
-    void jsonProperty() {
-
-    }
-
-    @Test
-    void paymentSuccess() {
-        // 결제 요청
-        // 결제 paymentKey, orderId, amount 값 응답 받고
-        // 검증
-        // session.getAttribute("orderId") 삭제
-        // 결제 승인 요청 : restTemplate
-        // 모든 요청에 성공하면 DB에 저장 : JpaRepository
-    }
-
-//    @Test
-//    @DisplayName("/api/payment/success")
-//    void paymentSuccess() {
+//        String expectedOrderId = (String) session.getAttribute("orderId");
+//        BigDecimal expectedAmount = (BigDecimal) session.getAttribute("totalAmount");
 //
-//    }
+//        // 임시 저장 값과 파라미터 값이 같은지 검증
+//        Assertions.assertEquals(expectedOrderId, orderId);
+//        Assertions.assertEquals(expectedAmount, totalAmount);
+
+        mvc.perform(get("/api/payment/success")
+                        .param("paymentKey", paymentKey)
+                        .param("orderId", orderId)
+                        .param("totalAmount", String.valueOf(totalAmount))
+                        .session(session)
+                )
+                .andExpect(status().isCreated());
+
+        // 검증 성공 시, session 임시 저장 값 삭제
+        Assertions.assertNull(session.getAttribute("orderId"));
+        Assertions.assertNull(session.getAttribute("totalAmount"));
+
+        Mockito.verify(paymentService, Mockito.times(1)).confirm(Mockito.any(SuccessRequestDto.class));
+//        Mockito.verify(paymentService, Mockito.times(1)).confirmPayment(Mockito.any());
+    }
+
+    @Test
+    @DisplayName("검증 실패시 BAD_REQUEST 반환")
+    void failValidationTest() throws Exception {
+        String wrongOrderId = "1232jkj-d";
+
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("orderId", wrongOrderId);
+        session.setAttribute("totalAmount", totalAmount);
+
+        mvc.perform(get("/api/payment/success")
+                .param("paymentKey", paymentKey)
+                .param("orderId", orderId)
+                .param("totalAmount", String.valueOf(totalAmount))
+                .session(session))
+                .andExpect(status().isBadRequest());
+
+        Mockito.verify(paymentService, Mockito.never()).confirm(Mockito.any(SuccessRequestDto.class));
+//        Mockito.verify(paymentService, Mockito.never()).confirmPayment(Mockito.any());
+    }
+
+    @Test
+    @DisplayName("paymentSuccess 테스트 - 승인 실패")
+    void paymentValidationFailTest() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("orderId", orderId);
+        session.setAttribute("totalAmount", totalAmount);
+
+        mvc.perform(get("/api/payment/success")
+                        .param("paymentKey", paymentKey)
+                        .param("orderId", orderId)
+                        .param("totalAmount", "293480")
+                        .session(session))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(""));
+    }
+
+    @Test
+    @DisplayName("결제 인증 실패 테스트")
+    void paymentFail() throws Exception {
+        String code = "400";
+        String message = "결제 실패";
+
+        mvc.perform(get("/api/payment/fail")
+                        .param("code", code)
+                        .param("message", message)
+                        .param("orderId", orderId))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(message));
+
+        Mockito.verify(paymentService, Mockito.times(1)).failPayment(any(FailResponseDto.class));
+    }
 }

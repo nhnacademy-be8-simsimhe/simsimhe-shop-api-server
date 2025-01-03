@@ -4,12 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
+import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.payment.client.PaymentRestTemplate;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmSuccessResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.FailResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
 import com.simsimbookstore.apiserver.payment.entity.Payment;
+import com.simsimbookstore.apiserver.payment.entity.PaymentStatus;
 import com.simsimbookstore.apiserver.payment.repository.PaymentMethodRepository;
 import com.simsimbookstore.apiserver.payment.repository.PaymentRepository;
 import com.simsimbookstore.apiserver.payment.repository.PaymentStatusRepository;
@@ -50,39 +52,28 @@ public class PaymentService {
     }
 
     // 결제 승인 요청
-    public ConfirmSuccessResponseDto confirm(SuccessRequestDto successDto) throws URISyntaxException {
-        String response = paymentRestTemplate.confirm(successDto);
-        // response = 응답 객체
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            ConfirmSuccessResponseDto confirmSuccessResponseDto = objectMapper.readValue(response, ConfirmSuccessResponseDto.class);
-            System.out.println(confirmSuccessResponseDto.toString());
-
-            return confirmSuccessResponseDto;
-
-            // 승인 요청 중 실패
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+    public ConfirmSuccessResponseDto confirm(SuccessRequestDto successDto) {
+        ConfirmSuccessResponseDto response = paymentRestTemplate.confirm(successDto);
+        savePayment(response);
+        return response;
     }
 
     // 결제 완료된 객체 저장
-    public void createPayment(ConfirmSuccessResponseDto confirmSuccessResponseDto) {
-        // DTO > entity
+    private void savePayment(ConfirmSuccessResponseDto confirmSuccessResponseDto) {
+        PaymentStatus status = paymentStatusRepository.findByPaymentStatusName("SUCCESS").orElseThrow(() -> new NotFoundException("'SUCCESS'가 존재하지 않습니다."));
+        Order order = orderRepository.findByOrderNumber(confirmSuccessResponseDto.getOrderId()).orElseThrow(() -> new NotFoundException("OrderNumber가 존재하지 않습니다."));
 
         // save
         Payment payment = new Payment(
                 null,
                 confirmSuccessResponseDto.getPaymentKey(),
                 confirmSuccessResponseDto.getApprovedAt(),
-                confirmSuccessResponseDto.getPaymentMethod(),
-                paymentStatusRepository.findById(0L).orElseThrow(() -> new NotFoundException("'SUCCESS'가 존재하지 않습니다.")),
-                orderRepository.findByOrderNumber(confirmSuccessResponseDto.getOrderId()).orElseThrow(() -> new NotFoundException("OrderNumber가 존재하지 않습니다."))
+                confirmSuccessResponseDto.getMethod(),
+                status,
+                order
         );
 
         paymentRepository.save(payment);
-
-        // entity > DTO
     }
 
     // 인증 실패
@@ -96,6 +87,15 @@ public class PaymentService {
 //                .message(message)
 //                .orderId(orderId)
 //                .build();
+
+        // code에 따라 달라지는 상황
+        if (failResponseDto.getCode().equals("PAY_PROCESS_CANCELED")) {
+            // 1. PAY_PROCESS_CANCELED : 구매자에 의한 취소 + orderId X -> 저장만 안되면 됨
+        } else if (failResponseDto.getCode().equals("PAY_PROCESS_ABORTED")) {
+            // 2. PAY_PROCESS_ABORTED : 오류 메시지 확인 필요
+        } else if (failResponseDto.getCode().equals("REJECT_CARD_COMPANY")) {
+            // 3. REJECT_CARD_COMPANY : 구매자의 카드 정보가 문제 -> 오류 메시지 확인 + 구매자에게 안내 필요
+        }
     }
 
 

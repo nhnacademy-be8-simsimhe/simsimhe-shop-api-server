@@ -3,13 +3,11 @@ package com.simsimbookstore.apiserver.payment.entity;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmSuccessResponseDto;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
+@Getter
 @Setter
 @Entity
 @Builder
