@@ -11,5 +11,7 @@ public interface UserService {
 
     User getUser(Long userId);
 
+    User getUserWithGradeAndRoles(Long userId);
+
     boolean existsUser(Long userId);
 }

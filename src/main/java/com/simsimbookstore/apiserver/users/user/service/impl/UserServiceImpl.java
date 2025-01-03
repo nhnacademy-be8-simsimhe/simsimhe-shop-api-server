@@ -55,6 +55,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getUserWithGradeAndRoles(Long userId){
+        User user = userRepository.findUserWithGradeAndUserRoleListByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("not found user with ID : " + userId));
+        return user;
+    }
+
+    @Override
     public boolean existsUser(Long userId) {
         return userRepository.existsById(userId);
     }
