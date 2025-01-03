@@ -2,6 +2,7 @@ package com.simsimbookstore.apiserver.orders.packages.entity;
 
 
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
+import com.simsimbookstore.apiserver.orders.packages.dto.PackageRequestDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,9 +16,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,6 +36,8 @@ public class Packages {
     @Column(name = "package_type", nullable = false, length = 20)
     private String packageType;
 
+    // 연관 관계 메서드
+    @Setter
     @ManyToOne(fetch =  FetchType.LAZY)
     @JoinColumn(name = "order_book_id")
     private OrderBook orderBook;
@@ -42,7 +47,7 @@ public class Packages {
     private WrapType wrapType;
 
 
-    public Packages updatedPackage(OrderBook orderBook, WrapType wrapType, String packageType) {
+    public Packages updatedPackage(OrderBook orderBook, PackageRequestDto packageRequestDto) {
         return Packages.builder()
                 .packageId(this.packageId)
                 .orderBook(orderBook)
@@ -50,4 +55,5 @@ public class Packages {
                 .packageType(packageType)
                 .build();
     }
+
 }

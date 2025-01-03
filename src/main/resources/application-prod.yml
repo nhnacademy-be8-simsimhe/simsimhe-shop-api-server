@@ -15,3 +15,6 @@ object-storage:
 
 database:
   url: ffad5418272e4efeb469f91a7b2c288e
+
+redis:
+  database: 211

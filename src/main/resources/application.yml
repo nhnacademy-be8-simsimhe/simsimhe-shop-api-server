@@ -46,3 +46,9 @@ object-storage:
 database:
   username: 97f78245ad8446ce9267b29b075f80a7
   password: f2880bd868cd445c9f1c16e13b977f04
+
+redis:
+  host: 7098f39a110b4eb88c68ffd65f18774f
+  port: 6379
+  password: d183598bca794d998bada10b352f57ad
+

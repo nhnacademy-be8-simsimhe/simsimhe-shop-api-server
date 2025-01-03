@@ -1,5 +1,6 @@
 package com.simsimbookstore.apiserver.books.contributor.service;
 
+import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.books.contributor.dto.ContributorRequestDto;
 import com.simsimbookstore.apiserver.books.contributor.dto.ContributorResponseDto;
 import com.simsimbookstore.apiserver.books.contributor.entity.Contributor;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -67,10 +69,34 @@ public class ContributorServiceImpl implements ContributorService {
      * @return
      */
     @Override
-    public Page<ContributorResponseDto> getAllContributors(Pageable pageable) {
+    public PageResponse<ContributorResponseDto> getAllContributors(Pageable pageable) {
         Page<Contributor> contributorPage = contributorRepositroy.findAll(pageable);
-        return contributorPage.map(ContributorMapper::toResponse);
+
+        // Convert Contributor to ContributorResponseDto
+        List<ContributorResponseDto> responses = contributorPage.getContent().stream()
+                .map(ContributorMapper::toResponse)
+                .collect(Collectors.toList());
+
+        // Define pagination details
+        int maxPageButtons = 5;
+        int startPage = Math.max(1, contributorPage.getNumber() + 1 - (maxPageButtons / 2)); // Adjust for 1-based indexing
+        int endPage = Math.min(startPage + maxPageButtons - 1, contributorPage.getTotalPages());
+
+        if (endPage - startPage + 1 < maxPageButtons) {
+            startPage = Math.max(1, endPage - maxPageButtons + 1);
+        }
+
+        // Build and return PageResponse
+        return PageResponse.<ContributorResponseDto>builder()
+                .data(responses)
+                .currentPage(pageable.getPageNumber())
+                .startPage(startPage)
+                .endPage(endPage)
+                .totalPage(contributorPage.getTotalPages())
+                .totalElements(contributorPage.getTotalElements())
+                .build();
     }
+
 
     /**
      * 기여자 삭제

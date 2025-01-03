@@ -9,10 +9,12 @@
 name: Java CI with Maven
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_run:
+    workflows: ["Sonar Qube flow"]
+    types:
+      - completed
+    status: success
+
 
 jobs:
   build:
@@ -32,7 +34,7 @@ jobs:
     - name: Install Maven
       run: |
         mvn install:install-file \
-          -Dfile=src/main/resources/libs/toast-log-crash-logback-sdk-3.0.5.jar \
+          -Dfile=libs/toast-log-crash-logback-sdk-3.0.5.jar \
           -DgroupId=logncrash \
           -DartifactId=toast-log-crash-logback-sdk \
           -Dversion=3.0.5 \

@@ -6,7 +6,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
@@ -22,7 +26,7 @@ public class LocalUser extends User {
     @Column(name = "login_id", nullable = false, length = 20, unique = true)
     private String loginId;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private String password;
 
 

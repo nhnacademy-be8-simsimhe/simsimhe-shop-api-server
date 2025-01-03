@@ -28,10 +28,12 @@ public class BookImagePath {
     @Column(name = "image_path", nullable = false)
     private String imagePath;
 
+    @Enumerated(EnumType.STRING)
+    private ImageType imageType;
 
-    //false면 썸내일(커버) 이미지 true면 상세내용에 있는 이미지
-    @Column(name = "thumbnail", nullable = false)
-    private boolean thumbnail = false;
+    public enum ImageType{
+         THUMBNAIL, DETAIL;
 
+    }
 
 }

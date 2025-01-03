@@ -13,17 +13,20 @@ spring:
 
 eureka:
   client:
-    enabled: false # eureka 사용시 true로 변경
+    enabled: true # eureka 사용시 true로 변경
 
 logging:
   level:
     org:
       hibernate:
-        SQL: debug
-        type: trace
+#        SQL: debug
+#        type: trace
 
 object-storage:
   container-name: 6781cafa4fe14ae1ac55305ac102bddf
 
 database:
   url: 22ebb2edfcd24204b891cc8f4a5b8a9c
+
+redis:
+  database: 220

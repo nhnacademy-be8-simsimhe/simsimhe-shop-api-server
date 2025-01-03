@@ -1,9 +1,9 @@
 package com.simsimbookstore.apiserver.users.localuser.service.impl;
 
-import com.simsimbookstore.apiserver.users.exception.DuplicateIdException;
+import com.simsimbookstore.apiserver.exception.AlreadyExistException;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.service.GradeService;
-import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRequestDto;
+import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
 import com.simsimbookstore.apiserver.users.localuser.mapper.LocalUserMapper;
 import com.simsimbookstore.apiserver.users.localuser.repository.LocalUserRepository;
 import com.simsimbookstore.apiserver.users.role.entity.Role;
@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class LocalUserServiceImpl implements LocalUserService {
 
+
     private final LocalUserRepository localUserRepository;
 
     private final RoleService roleService;
@@ -31,15 +32,15 @@ public class LocalUserServiceImpl implements LocalUserService {
 
     @Transactional
     @Override
-    public LocalUser saveLocalUser(LocalUserRequestDto localUserRequestDto) {
+    public LocalUser saveLocalUser(LocalUserRegisterRequestDto localUserRequestDto) {
         Grade grade = gradeService.findByTier(localUserRequestDto.getTier());
 
         if (localUserRepository.existsByLoginId(localUserRequestDto.getLoginId())) {
-            throw new DuplicateIdException("already exist login Id: " + localUserRequestDto.getLoginId());
+            throw new AlreadyExistException("already exist login Id: " + localUserRequestDto.getLoginId());
         }
 
         Role role = roleService.findByRoleName(RoleName.USER);
-        LocalUser localUser = LocalUserMapper.requestDtoTo(localUserRequestDto);
+        LocalUser localUser = LocalUserMapper.registerRequestDtoTo(localUserRequestDto);
         localUser.assignGrade(grade);
 
         UserRole userRole = UserRole.builder()
@@ -57,6 +58,7 @@ public class LocalUserServiceImpl implements LocalUserService {
     @Transactional
     public LocalUser findByLoginId(String loginId) {
         LocalUser localuser = localUserRepository.findByLoginId(loginId);
+
         return localuser;
     }
 

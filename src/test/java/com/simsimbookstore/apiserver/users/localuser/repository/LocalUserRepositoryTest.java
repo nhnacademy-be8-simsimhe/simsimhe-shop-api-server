@@ -1,23 +1,23 @@
 package com.simsimbookstore.apiserver.users.localuser.repository;
 
+import com.simsimbookstore.apiserver.common.config.QuerydslConfig;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
-import com.simsimbookstore.apiserver.users.role.entity.Role;
 import com.simsimbookstore.apiserver.users.role.repository.RoleRepository;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
-
+@Import(QuerydslConfig.class)
 @DataJpaTest
 @ActiveProfiles("test")
 class LocalUserRepositoryTest {
@@ -39,7 +39,6 @@ class LocalUserRepositoryTest {
                 .tier(Tier.STANDARD)
                 .minAmount(BigDecimal.valueOf(0))
                 .maxAmount(BigDecimal.valueOf(100000))
-                .pointRate(BigDecimal.valueOf(0.01))
                 .build();
 
         gradeRepository.save(grade);

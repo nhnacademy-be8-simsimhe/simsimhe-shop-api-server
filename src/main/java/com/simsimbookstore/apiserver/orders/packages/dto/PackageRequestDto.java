@@ -14,7 +14,5 @@ public class PackageRequestDto {
 
     private Long packageTypeId;
 
-    private Long orderBookId;
-
     private String packageName;
 }

@@ -1,6 +1,9 @@
 package com.simsimbookstore.apiserver.users.user.repository;
 
-import com.netflix.discovery.converters.Auto;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.simsimbookstore.apiserver.common.config.QuerydslConfig;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
@@ -8,18 +11,17 @@ import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.repository.LocalUserRepository;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-
+@Import(QuerydslConfig.class)
 @DataJpaTest
 @ActiveProfiles("test")
 class UserRepositoryTest {
@@ -40,14 +42,12 @@ class UserRepositoryTest {
                 .tier(Tier.STANDARD)
                 .minAmount(BigDecimal.valueOf(0))
                 .maxAmount(BigDecimal.valueOf(100000))
-                .pointRate(BigDecimal.valueOf(0.01))
                 .build();
 
         Grade royalGrade = Grade.builder()
                 .tier(Tier.ROYAL)
                 .minAmount(BigDecimal.valueOf(0))
                 .maxAmount(BigDecimal.valueOf(100000))
-                .pointRate(BigDecimal.valueOf(0.01))
                 .build();
 
         gradeRepository.save(standardGrade);

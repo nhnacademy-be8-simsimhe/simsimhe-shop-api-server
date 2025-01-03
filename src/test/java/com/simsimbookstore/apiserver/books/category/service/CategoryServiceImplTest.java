@@ -1,5 +1,6 @@
 package com.simsimbookstore.apiserver.books.category.service;
 
+import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.books.category.dto.CategoryRequestDto;
 import com.simsimbookstore.apiserver.books.category.dto.CategoryResponseDto;
 import com.simsimbookstore.apiserver.books.category.entity.Category;
@@ -200,15 +201,15 @@ class CategoryServiceImplTest {
         when(categoryRepository.findAll(pageable)).thenReturn(mockPage);
 
         // Act
-        Page<CategoryResponseDto> categoryPage = categoryService.getAllCategoryPage(pageable);
+        PageResponse<CategoryResponseDto> categoryPage = categoryService.getAllCategoryPage(pageable);
 
         // Assert
         assertNotNull(categoryPage);
-        assertEquals(2, categoryPage.getContent().size()); // 한 페이지에 2개
-        assertEquals(1, categoryPage.getTotalPages()); // 총 1페이지
+        assertEquals(2, categoryPage.getData().size()); // 한 페이지에 2개
+        assertEquals(1, categoryPage.getTotalPage()); // 총 1페이지
         assertEquals(2, categoryPage.getTotalElements()); // 총 2개 데이터
-        assertEquals("도서", categoryPage.getContent().get(0).getCategoryName());
-        assertEquals("소설", categoryPage.getContent().get(1).getCategoryName());
+        assertEquals("도서", categoryPage.getData().getFirst().getCategoryName());
+        assertEquals("소설", categoryPage.getData().get(1).getCategoryName());
 
         verify(categoryRepository, times(1)).findAll(pageable);
     }
