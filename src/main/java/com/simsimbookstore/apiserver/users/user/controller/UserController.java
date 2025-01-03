@@ -2,6 +2,7 @@ package com.simsimbookstore.apiserver.users.user.controller;
 
 import com.simsimbookstore.apiserver.users.UserMapper;
 import com.simsimbookstore.apiserver.users.user.dto.UserGradeUpdateRequestDto;
+import com.simsimbookstore.apiserver.users.user.dto.UserLatestLoginDateUpdateRequestDto;
 import com.simsimbookstore.apiserver.users.user.dto.UserResponse;
 import com.simsimbookstore.apiserver.users.user.dto.UserStatusUpdateRequestDto;
 import com.simsimbookstore.apiserver.users.user.entity.User;
@@ -26,18 +27,28 @@ public class UserController {
     @PutMapping("/{userId}/status")
     public ResponseEntity<?> updateStatus(
             @PathVariable Long userId,
-            @RequestBody @Valid UserStatusUpdateRequestDto userStatusUpdateRequestDto
+            @RequestBody @Valid UserStatusUpdateRequestDto requestDto
     ){
-        User response = userService.updateUserStatus(userId, userStatusUpdateRequestDto.getStatus());
+        User response = userService.updateUserStatus(userId, requestDto.getStatus());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PutMapping("/{userId}/grade")
     public ResponseEntity<?> updateGrade(
             @PathVariable Long userId,
-            @RequestBody @Valid UserGradeUpdateRequestDto userGradeUpdateRequestDto
+            @RequestBody @Valid UserGradeUpdateRequestDto requestDto
     ){
-        User response = userService.updateUserGrade(userId, userGradeUpdateRequestDto.getTier());
+        User response = userService.updateUserGrade(userId, requestDto.getTier());
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PutMapping("/{userId}/latestLoginDate")
+    public ResponseEntity<?> updateLatestLoginDate(
+              @PathVariable Long userId,
+              @RequestBody @Valid UserLatestLoginDateUpdateRequestDto requestDto
+    ){
+        User user = userService.updateUserLatestLoginDate(userId, requestDto.getLatestLoginDate());
+        UserResponse response = UserMapper.toResponse(user);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

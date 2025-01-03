@@ -8,19 +8,23 @@ import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import com.simsimbookstore.apiserver.users.user.service.UserService;
-import java.util.Optional;
-import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RestController;
+
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final GradeRepository gradeRepository;
 
-    public UserServiceImpl(UserRepository userRepository, GradeRepository gradeRepository) {
-        this.userRepository = userRepository;
-        this.gradeRepository = gradeRepository;
-    }
-
+    @Transactional
     @Override
     public User updateUserStatus(Long userId, UserStatus userStatus) {
         Optional<User> optionalUser = userRepository.findById(userId);
@@ -33,6 +37,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
+    @Transactional
     @Override
     public User updateUserGrade(Long userId, Tier tier) {
         Optional<User> optionalUser = userRepository.findById(userId);
@@ -46,6 +51,22 @@ public class UserServiceImpl implements UserService {
 
             return userRepository.save(user);
     }
+
+    @Transactional
+    @Override
+    public User updateUserLatestLoginDate(Long userId, LocalDateTime latestLoginDate) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            throw new NotFoundException("not found user with ID : " + userId);
+        }
+
+        User user = optionalUser.get();
+        user.updateLatestLoginDate(latestLoginDate);
+        userRepository.save(user);
+        Optional<User> savedUser = userRepository.findUserWithGradeAndUserRoleListByUserId(user.getUserId());
+        return savedUser.get();
+    }
+
 
     @Override
     public User getUser(Long userId) {

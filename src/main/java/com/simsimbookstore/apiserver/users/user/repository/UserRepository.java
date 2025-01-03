@@ -12,5 +12,5 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     @EntityGraph(attributePaths = {"grade", "userRoleList", "userRoleList.role"})
-    public Optional<User> findUserWithGradeAndUserRoleListByUserId(Long userId);
+    Optional<User> findUserWithGradeAndUserRoleListByUserId(Long userId);
 }
