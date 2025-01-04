@@ -53,9 +53,11 @@ class ReviewLikeRepositoryTest {
 
     @BeforeEach
     void setUp() {
+
         // 1. Grade 데이터 생성 및 저장
         Grade grade1 = createGrade(Tier.STANDARD, 0.01);
         Grade grade2 = createGrade(Tier.ROYAL, 0.01);
+
 
         // 2. User 데이터 생성 및 저장
         user1 = createUser("User1", "user1@example.com", "01011111111", grade1);
@@ -86,6 +88,7 @@ class ReviewLikeRepositoryTest {
     }
 
     private Grade createGrade(Tier tier, double pointRate) {
+
         return gradeRepository.save(Grade.builder()
                 .tier(tier)
                 .minAmount(BigDecimal.valueOf(0))

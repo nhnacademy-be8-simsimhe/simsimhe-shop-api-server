@@ -92,12 +92,15 @@ public class User {
         this.grade = grade;
     }
 
-
     public void updateUserStatus(UserStatus userStatus) {
         this.userStatus = userStatus;
     }
 
     public void updateGrade(Grade grade) {
         this.grade = grade;
+    }
+
+    public void updateLatestLoginDate(LocalDateTime latestLoginDate) {
+        this.latestLoginDate = latestLoginDate;
     }
 }

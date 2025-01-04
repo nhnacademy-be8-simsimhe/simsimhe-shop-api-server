@@ -1,7 +1,6 @@
 package com.simsimbookstore.apiserver.users.user.repository;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.simsimbookstore.apiserver.common.config.QuerydslConfig;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
@@ -14,6 +13,8 @@ import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
+
+import org.hibernate.LazyInitializationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +75,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    void statusUpdate() {
+    void updateStatus() {
         testUser.updateUserStatus(UserStatus.INACTIVE);
         User updatedUser = userRepository.save(testUser);
 
@@ -82,11 +83,27 @@ class UserRepositoryTest {
     }
 
     @Test
-    void gradeUpdate(){
+    void updateGrade(){
         Grade newGrade = gradeRepository.findByTier(Tier.ROYAL);
         testUser.updateGrade(newGrade);
 
         User updatedUser = userRepository.save(testUser);
         assertEquals(updatedUser.getGrade().getTier(), Tier.ROYAL);
+    }
+
+    @Test
+    void updateLatestLoginDate() {
+        testUser.updateLatestLoginDate(LocalDateTime.now().plusHours(1));
+        User updatedUser = userRepository.save(testUser);
+
+        assertEquals(testUser.getLatestLoginDate(), updatedUser.getLatestLoginDate());
+    }
+
+    @Test
+    void findUserWithGradeById() {
+        Optional<User> user = userRepository.findById(testUser.getUserId());
+        assertTrue(user.isPresent());
+
+        assertEquals(user.get().getGrade().getTier(), Tier.STANDARD);
     }
 }

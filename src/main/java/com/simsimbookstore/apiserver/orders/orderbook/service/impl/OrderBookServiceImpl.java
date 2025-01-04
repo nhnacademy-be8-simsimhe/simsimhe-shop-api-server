@@ -41,6 +41,41 @@ public class OrderBookServiceImpl implements OrderBookService {
 
     @Override
     @Transactional
+    public OrderBookResponseDto createOrderBook(OrderBookRequestDto orderBookRequestDto) {
+        // 1. Book 찾기 & 재고 차감
+        Book book = bookRepository.findById(orderBookRequestDto.getBookId())
+                .orElseThrow(() -> new NotFoundException("Book not found. ID=" + orderBookRequestDto.getBookId()));
+        bookManagementService.modifyQuantity(book.getBookId(), -orderBookRequestDto.getQuantity());
+
+        // 2. Order(주문) 찾기
+        Order order = orderRepository.findById(orderBookRequestDto.getOrderId())
+                .orElseThrow(() -> new OrderNotFoundException("Order not found. ID=" + orderBookRequestDto.getOrderId()));
+
+        // 3. OrderBook 엔티티 생성 & DB 저장
+        OrderBook savedOrderBook = orderBookRepository.save(orderBookRequestDto.toEntity(book, order));
+
+        // 4. 쿠폰 할인 생성 (CouponDiscountService 사용)
+        if (orderBookRequestDto.getCouponDiscountRequestDto() != null) {
+            couponDiscountService.createCouponDiscount(orderBookRequestDto.getCouponDiscountRequestDto(), savedOrderBook);
+        }
+
+        // 5. 패키지 생성 (PackageService 사용) - 여러 개
+        if (orderBookRequestDto.getPackagesRequestDtos() != null && !orderBookRequestDto.getPackagesRequestDtos().isEmpty()) {
+            for (PackageRequestDto pkgDto : orderBookRequestDto.getPackagesRequestDtos()) {
+                packageService.createPackage(pkgDto, savedOrderBook);
+            }
+        }
+
+        // 6. DB에서 다시 OrderBook을 조회하여 최종 상태 확인 (optional)
+        OrderBook finalOrderBook = orderBookRepository.findById(savedOrderBook.getOrderBookId())
+                .orElseThrow(() -> new NotFoundException("OrderBook not found after creation"));
+
+        return toOrderBookResponseDto(finalOrderBook);
+    }
+
+
+    @Override
+    @Transactional
     public List<OrderBookResponseDto> createOrderBooks(List<OrderBookRequestDto> orderBookRequestDtos) {
         List<OrderBookResponseDto> resultList = new ArrayList<>();
 

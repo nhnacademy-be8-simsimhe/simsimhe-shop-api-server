@@ -15,6 +15,7 @@ public class OrderFacadeResponseDto {
     String orderName;
     String email;
     String phoneNumber;
+    String userName;
     BigDecimal totalPrice;
-
+    String method;
 }

@@ -5,9 +5,10 @@ import com.simsimbookstore.apiserver.orders.order.dto.BookListResponseDto;
 import com.simsimbookstore.apiserver.orders.order.service.Impl.OrderListServiceImpl;
 import com.simsimbookstore.apiserver.orders.packages.dto.WrapTypeResponseDto;
 import com.simsimbookstore.apiserver.orders.packages.service.impl.WrapTypeServiceImpl;
-import com.simsimbookstore.apiserver.users.address.entity.Address;
+import com.simsimbookstore.apiserver.point.service.PointHistoryService;
+import com.simsimbookstore.apiserver.users.address.dto.AddressResponseDto;
 import com.simsimbookstore.apiserver.users.address.service.AddressService;
-import com.simsimbookstore.apiserver.users.address.service.impl.AddressServiceImpl;
+import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -24,11 +25,13 @@ public class OrderTestController {
 
     private final OrderListServiceImpl orderListService;
     private final WrapTypeServiceImpl wrapTypeService;
-    //private final AddressService addressService;
-
+    private final AddressService addressService;
+    private final PointHistoryService pointHistoryService;
 
     @GetMapping("/api/test/order")
     public String testOrderPage(Model model) {
+        Long userId = 1L; // 고정된 테스트용 userId
+        log.info("testOrderPage 호출 시 userId: {}", userId);
         // 테스트용 BookListRequestDto 데이터 생성
         List<BookListRequestDto> testDtoList = new ArrayList<>();
         testDtoList.add(new BookListRequestDto(1L, 2)); // bookId=1, quantity=2
@@ -37,14 +40,16 @@ public class OrderTestController {
         // orderPage 메서드에 전달
         List<BookListResponseDto> bookOrderList = orderListService.toBookOrderList(testDtoList);
         List<WrapTypeResponseDto> wrapTypes = wrapTypeService.getAllWrapTypes();
-//        List<Address> addresses = addressService.getAddresses(1L);
-//        for (Address a : addresses) {
-//            log.info("Addresses: {}", a.getRoadAddress());
-//        }
-
+        List<AddressResponseDto> addresses = addressService.getAddresses(userId);
+        BigDecimal userPoints = pointHistoryService.getUserPoints(userId);
+        for (AddressResponseDto a : addresses) {
+            log.info("Addresses: {}", a.getRoadAddress());
+        }
+        model.addAttribute("userId", userId);
         model.addAttribute("bookOrderList", bookOrderList);
         model.addAttribute("wrapTypes", wrapTypes);
-       // model.addAttribute("addresses", addresses);
+        model.addAttribute("addresses", addresses);
+        model.addAttribute("availablePoints", userPoints);
         return "payTest"; // payTest.html 렌더링
     }
 }
