@@ -227,9 +227,6 @@ class CouponControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.couponId", is(1004)))
                 .andExpect(jsonPath("$.couponTypeName", is("Rate Discount Type 400")))
-                // description 필드가 DTO에 없으므로 제거하거나 관련 필드로 대체
-                // .andExpect(jsonPath("$.description", is("")))
-                // discountAmount 대신 discountInfo.discountRate 사용
                 .andExpect(jsonPath("$.discountInfo.discountRate", is(10.00)))
                 .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(120.00)))
                 .andExpect(jsonPath("$.discountInfo.maxDiscountAmount", is(25.00)))
@@ -453,7 +450,7 @@ class CouponControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)))
                 // 첫 번째 FixCouponResponseDto 검증
@@ -516,7 +513,7 @@ class CouponControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)))
                 // 첫 번째 RateCouponResponseDto 검증

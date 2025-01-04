@@ -1,12 +1,9 @@
 package com.simsimbookstore.apiserver.coupons.coupon.controller;
 
-import com.simsimbookstore.apiserver.common.exception.NotFoundException;
 import com.simsimbookstore.apiserver.coupons.coupon.dto.CouponResponseDto;
 import com.simsimbookstore.apiserver.coupons.coupon.dto.DiscountAmountResponseDto;
 import com.simsimbookstore.apiserver.coupons.coupon.dto.IssueCouponsRequestDto;
-import com.simsimbookstore.apiserver.coupons.coupon.exception.InsufficientOrderAmountException;
 import com.simsimbookstore.apiserver.coupons.coupon.service.CouponService;
-import com.simsimbookstore.apiserver.exception.AlreadyExistException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;

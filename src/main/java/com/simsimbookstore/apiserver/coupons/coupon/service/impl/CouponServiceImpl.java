@@ -1,6 +1,5 @@
 package com.simsimbookstore.apiserver.coupons.coupon.service.impl;
 
-import com.simsimbookstore.apiserver.books.book.dto.BookResponseDto;
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
 import com.simsimbookstore.apiserver.books.bookcategory.repository.BookCategoryRepository;
@@ -13,9 +12,9 @@ import com.simsimbookstore.apiserver.coupons.coupon.dto.DiscountAmountResponseDt
 import com.simsimbookstore.apiserver.coupons.coupon.dto.EmptyCouponResponseDto;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.Coupon;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.CouponStatus;
-import com.simsimbookstore.apiserver.coupons.coupon.exception.AlreadyCouponUsed;
-import com.simsimbookstore.apiserver.coupons.coupon.exception.InapplicableCoupon;
-import com.simsimbookstore.apiserver.coupons.coupon.exception.InsufficientOrderAmountException;
+import com.simsimbookstore.apiserver.coupons.exception.AlreadyCouponUsed;
+import com.simsimbookstore.apiserver.coupons.exception.InapplicableCoupon;
+import com.simsimbookstore.apiserver.coupons.exception.InsufficientOrderAmountException;
 import com.simsimbookstore.apiserver.coupons.coupon.mapper.CouponMapper;
 import com.simsimbookstore.apiserver.coupons.coupon.repository.CouponRepository;
 import com.simsimbookstore.apiserver.coupons.coupon.service.CouponService;

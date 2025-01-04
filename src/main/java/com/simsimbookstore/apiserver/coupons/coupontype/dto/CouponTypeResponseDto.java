@@ -1,8 +1,6 @@
 package com.simsimbookstore.apiserver.coupons.coupontype.dto;
 
-import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.CouponPolicy;
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponTargetType;
-import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,7 +13,7 @@ public class CouponTypeResponseDto {
 
     private String couponTypeName;
 
-    private int period;
+    private Integer period;
 
     private LocalDateTime deadline;
 

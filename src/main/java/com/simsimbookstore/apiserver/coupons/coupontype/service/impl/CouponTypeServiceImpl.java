@@ -4,7 +4,7 @@ import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
 import com.simsimbookstore.apiserver.books.category.entity.Category;
 import com.simsimbookstore.apiserver.books.category.repository.CategoryRepository;
-import com.simsimbookstore.apiserver.coupons.coupon.exception.AlreadyCouponTypeIssue;
+import com.simsimbookstore.apiserver.coupons.exception.AlreadyCouponTypeIssue;
 import com.simsimbookstore.apiserver.common.exception.NotFoundException;
 import com.simsimbookstore.apiserver.coupons.bookcoupon.entity.BookCoupon;
 import com.simsimbookstore.apiserver.coupons.categorycoupon.entity.CategoryCoupon;
