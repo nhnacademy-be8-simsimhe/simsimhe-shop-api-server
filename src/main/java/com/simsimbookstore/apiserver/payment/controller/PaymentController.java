@@ -46,16 +46,16 @@ public class PaymentController {
     }
 
     // Toss에게 받은 결제 인증 성공시 검증 후 결제 승인 요청 -> 결제 완료 -> DB 저장
-    @GetMapping("/payment/success")
+    @GetMapping("/success")
     public ResponseEntity<SuccessRequestDto> paymentSuccess(@RequestParam String paymentKey,
                                                             @RequestParam String orderId,
-                                                            @RequestParam BigDecimal totalAmount,
+                                                            @RequestParam BigDecimal amount,
                                                             HttpServletRequest request) {
-        SuccessRequestDto successDto = new SuccessRequestDto(paymentKey, orderId, totalAmount);
+        SuccessRequestDto successDto = new SuccessRequestDto(paymentKey, orderId, amount);
         HttpSession session = request.getSession();
 
         // 임시 저장값과 같은지 검증
-        if ((Objects.equals(orderId, (String) session.getAttribute("orderId"))) && (Objects.equals(totalAmount, (BigDecimal) session.getAttribute("totalAmount")))) {
+        if ((Objects.equals(orderId, (String) session.getAttribute("orderId"))) && (Objects.equals(amount, (BigDecimal) session.getAttribute("totalAmount")))) {
                 // 같으면 세션 삭제
                 session.removeAttribute("orderId");
                 session.removeAttribute("totalAmount");
@@ -69,7 +69,7 @@ public class PaymentController {
     }
 
     // 결제 인증 실패
-    @GetMapping("/payment/fail")
+    @GetMapping("/fail")
     public ResponseEntity<String> paymentFail(@RequestParam String code,
                                               @RequestParam String message,
                                               @RequestParam String orderId) {

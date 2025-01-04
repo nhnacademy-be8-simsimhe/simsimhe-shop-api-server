@@ -60,7 +60,7 @@ class PaymentControllerTest {
     void data() {
         paymentKey = "tviva202412302247066Cbm6";
         orderId = "2222-1jjh";
-        totalAmount = BigDecimal.valueOf(10000);
+        totalAmount = BigDecimal.valueOf(10000.00);
     }
 
     @Test
@@ -148,10 +148,10 @@ class PaymentControllerTest {
 //        Assertions.assertEquals(expectedOrderId, orderId);
 //        Assertions.assertEquals(expectedAmount, totalAmount);
 
-        mvc.perform(get("/api/payment/success")
+        mvc.perform(get("/api/success")
                         .param("paymentKey", paymentKey)
                         .param("orderId", orderId)
-                        .param("totalAmount", String.valueOf(totalAmount))
+                        .param("amount", String.valueOf(totalAmount))
                         .session(session)
                 )
                 .andExpect(status().isCreated());
@@ -173,7 +173,7 @@ class PaymentControllerTest {
         session.setAttribute("orderId", wrongOrderId);
         session.setAttribute("totalAmount", totalAmount);
 
-        mvc.perform(get("/api/payment/success")
+        mvc.perform(get("/api/success")
                 .param("paymentKey", paymentKey)
                 .param("orderId", orderId)
                 .param("totalAmount", String.valueOf(totalAmount))
@@ -191,7 +191,7 @@ class PaymentControllerTest {
         session.setAttribute("orderId", orderId);
         session.setAttribute("totalAmount", totalAmount);
 
-        mvc.perform(get("/api/payment/success")
+        mvc.perform(get("/api/success")
                         .param("paymentKey", paymentKey)
                         .param("orderId", orderId)
                         .param("totalAmount", "293480")
@@ -206,7 +206,7 @@ class PaymentControllerTest {
         String code = "400";
         String message = "결제 실패";
 
-        mvc.perform(get("/api/payment/fail")
+        mvc.perform(get("/api/fail")
                         .param("code", code)
                         .param("message", message)
                         .param("orderId", orderId))

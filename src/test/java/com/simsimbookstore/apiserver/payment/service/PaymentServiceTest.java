@@ -8,10 +8,12 @@ import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.payment.client.PaymentRestTemplate;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmSuccessResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
+import com.simsimbookstore.apiserver.payment.entity.PaymentMethod;
 import com.simsimbookstore.apiserver.payment.entity.PaymentStatus;
 import com.simsimbookstore.apiserver.payment.repository.PaymentMethodRepository;
 import com.simsimbookstore.apiserver.payment.repository.PaymentRepository;
 import com.simsimbookstore.apiserver.payment.repository.PaymentStatusRepository;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +33,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -155,14 +158,14 @@ class PaymentServiceTest {
     void confirm() {
         //given
         SuccessRequestDto successRequestDto = new SuccessRequestDto("paymentKey", "orderId", amount);
-        ConfirmSuccessResponseDto response = new ConfirmSuccessResponseDto("orderId", "paymentKey", amount, "CARD", LocalDateTime.now());
+        ConfirmSuccessResponseDto response = new ConfirmSuccessResponseDto("orderId", "paymentKey", amount, "CARD", "2025-01-04T16:56:59.227252+09:00");
         PaymentStatus status = new PaymentStatus(1L, "SUCCESS");
         Order order = new Order(1L, null, null, "orderId", null, null, null, null, null, null, null, null, null, null);
 
         when(paymentRestTemplate.confirm(successRequestDto)).thenReturn(response);
         when(paymentStatusRepository.findByPaymentStatusName("SUCCESS")).thenReturn(Optional.of(status));
         when(orderRepository.findByOrderNumber(successRequestDto.getOrderId())).thenReturn(Optional.of(order));
-
+        when(paymentMethodRepository.findByPaymentMethod(any())).thenReturn(Optional.of(mock(PaymentMethod.class)));
         //when
         ConfirmSuccessResponseDto actual = paymentService.confirm(successRequestDto);
 

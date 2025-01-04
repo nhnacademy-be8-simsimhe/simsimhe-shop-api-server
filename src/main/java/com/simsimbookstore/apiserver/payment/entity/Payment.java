@@ -3,6 +3,7 @@ package com.simsimbookstore.apiserver.payment.entity;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmSuccessResponseDto;
 import jakarta.persistence.*;
+import java.time.OffsetDateTime;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -32,23 +33,23 @@ public class Payment {
 
     // 결제 수단
     @ManyToOne
-    @JoinColumn(name = "paymentMethodId", nullable = false)
+    @JoinColumn(name = "payment_method_id", nullable = false)
     private PaymentMethod paymentMethod;
 
     @ManyToOne
-    @JoinColumn(name = "paymentStatusId", nullable = false)
+    @JoinColumn(name = "payment_status_id", nullable = false)
     private PaymentStatus paymentStatus;
 
     @ManyToOne
-    @JoinColumn(name = "orderId", nullable = false)
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    public Payment(Object o, String paymentKey, LocalDateTime approvedAt, String paymentMethod, PaymentStatus paymentStatus, Order order) {
-        this.paymentId = (Long) o;
-        this.paymentKey = paymentKey;
-        this.paymentDate = approvedAt;
-        this.paymentMethodToss = paymentMethod;
-        this.paymentStatus = paymentStatus;
-        this.order = order;
-    }
+//    public Payment(Object o, String paymentKey, OffsetDateTime approvedAt, String paymentMethod, PaymentStatus paymentStatus, Order order) {
+//        this.paymentId = (Long) o;
+//        this.paymentKey = paymentKey;
+//        this.paymentDate = approvedAt;
+//        this.paymentMethodToss = paymentMethod;
+//        this.paymentStatus = paymentStatus;
+//        this.order = order;
+//    }
 }
