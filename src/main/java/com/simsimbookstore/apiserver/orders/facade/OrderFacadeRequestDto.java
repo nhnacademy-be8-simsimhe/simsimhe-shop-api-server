@@ -15,4 +15,5 @@ public class OrderFacadeRequestDto {
     DeliveryRequestDto deliveryRequestDto;
     MemberOrderRequestDto memberOrderRequestDto;
     List<OrderBookRequestDto> orderBookRequestDtos;
+    //method
 }

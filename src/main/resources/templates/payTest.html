@@ -240,7 +240,7 @@
         console.log("Order Data:", orderFacadeRequestDto);
 
         // 서버로 주문 데이터 전송
-        fetch("/api/order/prepare", {
+        fetch("/api/payment", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -249,18 +249,19 @@
         })
             .then(response => {
                 if (response.ok) {
-                    return response.json();
+                    return response.text();
                 } else {
-                    throw new Error("주문 실패!");
+                    throw new Error("결제 링크 생성 실패!");
                 }
             })
-            .then(data => {
-                console.log("주문 완료:", data);
-                alert("주문이 성공적으로 완료되었습니다!");
+            .then(link => {
+                console.log("결제 링크:", link);
+                // 리디렉션 또는 링크 표시
+                window.location.href = link; // 결제창으로 이동
             })
             .catch(error => {
                 console.error("에러 발생:", error);
-                alert("주문 중 문제가 발생했습니다.");
+                alert("결제 처리 중 문제가 발생했습니다.");
             });
     }
 

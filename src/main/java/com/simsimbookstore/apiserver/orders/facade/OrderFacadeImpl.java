@@ -84,6 +84,8 @@ public class OrderFacadeImpl implements OrderFacade {
                 .orderName(orderName)
                 .email(orderReq.getOrderEmail())
                 .phoneNumber(orderReq.getPhoneNumber())
+                .method("CARD")
+                .userName("이름")
                 .build();
 
         log.info("OrderFacadeResponseDto created: {}", response);
