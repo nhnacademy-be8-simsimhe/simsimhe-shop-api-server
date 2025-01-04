@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/books/{bookId}/reviews")
+@RequestMapping("/api/shop/books/{bookId}/reviews")
 @RequiredArgsConstructor
 @Slf4j
 public class ReviewController {
@@ -82,11 +82,7 @@ public class ReviewController {
                                                       @RequestParam(defaultValue = "10") int size) {
         log.info("bookId : {}", bookId);
         var reviews = reviewService.getReviewsByBookOrderByRecent(bookId, page, size);
-        for (ReviewLikeCountDTO review : reviews){
-            log.info("id : {}", review.getReviewId());
-            log.info("id : {}", review.getUserName());
-            log.info("like : {}", review.getLikeCount());
-        }
+
         return ResponseEntity.ok(reviews);
     }
 
@@ -101,6 +97,8 @@ public class ReviewController {
 
         return ResponseEntity.ok(new ReviewResponseDTO(updatedReview));
     }
+
+
 
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<?> deleteReview(

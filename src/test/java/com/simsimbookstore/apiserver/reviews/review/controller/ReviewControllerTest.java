@@ -6,20 +6,25 @@ import com.simsimbookstore.apiserver.reviews.review.dto.ReviewLikeCountDTO;
 import com.simsimbookstore.apiserver.reviews.review.dto.ReviewRequestDTO;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.reviews.review.service.ReviewService;
+import com.simsimbookstore.apiserver.reviews.reviewcomment.controller.ReviewCommentController;
+import com.simsimbookstore.apiserver.reviews.reviewcomment.service.ReviewCommentService;
 import com.simsimbookstore.apiserver.reviews.reviewimage.service.ReviewImagePathService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,25 +39,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@WebMvcTest(ReviewController.class)
-@ExtendWith(MockitoExtension.class)
 class ReviewControllerTest {
 
-
-    @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
+    private ObjectMapper objectMapper;
     private ReviewService reviewService;
-
-    @MockBean
     private ReviewImagePathService reviewImagePathService;
 
-    @MockBean
-    private QuerydslConfig querydslConfig;
+    @BeforeEach
+    void setup() {
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-
+        reviewService = mock(ReviewService.class);
+        reviewImagePathService = mock(ReviewImagePathService.class);
+        ReviewController reviewController = new ReviewController(reviewService, reviewImagePathService);
+        mockMvc = MockMvcBuilders.standaloneSetup(reviewController).build();
+        objectMapper = new ObjectMapper();
+    }
 
     @Test
     void saveReviewTest() throws Exception {
@@ -74,6 +76,7 @@ class ReviewControllerTest {
         mockMvc.perform(post("/api/shop/books/{bookId}/reviews", bookId)
                         .param("userId", String.valueOf(userId))
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
                         .content("{\"score\": 5,\"title\": \"소년이 온다\",\"content\": \"I loved this book!\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.score").value(5))
@@ -84,32 +87,33 @@ class ReviewControllerTest {
     }
 
 
-    @Test
-    @DisplayName("리뷰 목록 조회 테스트")
-    void getAllReviewsTest() throws Exception{
-
-        Long bookId = 1L;
-        int page = 0;
-        int size = 10;
-
-        var reviews = List.of(
-                new ReviewLikeCountDTO(1L, "good book", "I loved this book!", LocalDateTime.now(),"mingyeong", 4,12L, 12L),
-                new ReviewLikeCountDTO(2L, "great book", "Interesting", LocalDateTime.now(),"hello", 3,20L, 9L)
-        );
-
-        var pageable = PageRequest.of(page, size);
-        var response = new PageImpl<>(reviews, pageable, reviews.size());
-
-
-        when(reviewService.getReviewsByBookOrderByRecent(eq(bookId), eq(page), eq(size)))
-                .thenReturn(response);
-
-
-
+//    @Test
+//    @DisplayName("리뷰 목록 조회 테스트")
+//    void getAllReviewsTest() throws Exception{
+//
+//        Long bookId = 1L;
+//        int page = 0;
+//        int size = 10;
+//
+//        var reviews = List.of(
+//                new ReviewLikeCountDTO(1L, "good book", "I loved this book!", LocalDateTime.now(),"mingyeong", 4,12L, 12L),
+//                new ReviewLikeCountDTO(2L, "great book", "Interesting", LocalDateTime.now(),"hello", 3,20L, 9L)
+//        );
+//
+//        var pageable = PageRequest.of(page, size);
+//        var response = new PageImpl<>(reviews, pageable, reviews.size());
+//
+//
+//        when(reviewService.getReviewsByBookOrderByRecent(eq(bookId), eq(page), eq(size)))
+//                .thenReturn(response);
+//
+//
+//
 //        mockMvc.perform(get("/api/shop/books/{bookId}/reviews", bookId)
 //                        .param("page", String.valueOf(page))
 //                        .param("size", String.valueOf(size))
-//                        .contentType(MediaType.APPLICATION_JSON))
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .accept(MediaType.APPLICATION_JSON))
 //                .andExpect(status().isOk())
 //                .andExpect(jsonPath("$.content[0].score").value(5))
 //                .andExpect(jsonPath("$.content[0].title").value("good book"))
@@ -119,8 +123,8 @@ class ReviewControllerTest {
 //
 //
 //        verify(reviewService).getReviewsByBookOrderByRecent(eq(bookId), eq(page), eq(size));
-
-    }
+//
+//    }
 
     @Test
     @DisplayName("리뷰 수정 테스트")
@@ -141,6 +145,7 @@ class ReviewControllerTest {
         // When & Then
         mockMvc.perform(post("/api/shop/books/{bookId}/reviews/{reviewId}", bookId, reviewId)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reviewId").value(2L))
@@ -161,7 +166,8 @@ class ReviewControllerTest {
 
         doNothing().when(reviewService).deleteReview(eq(reviewId));
 
-        mockMvc.perform(delete("/api/shop/books/{bookId}/reviews/{reviewId}", bookId, reviewId))
+        mockMvc.perform(delete("/api/shop/books/{bookId}/reviews/{reviewId}", bookId, reviewId)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent())
                 .andExpect(status().isNoContent());
 
