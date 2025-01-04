@@ -1,6 +1,7 @@
 package com.simsimbookstore.apiserver.users.localuser.service.impl;
 
 import com.simsimbookstore.apiserver.exception.AlreadyExistException;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.service.GradeService;
 import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
@@ -15,6 +16,9 @@ import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+
+@Transactional(readOnly = true)
 @Service
 public class LocalUserServiceImpl implements LocalUserService {
 
@@ -55,16 +59,13 @@ public class LocalUserServiceImpl implements LocalUserService {
     }
 
     @Override
-    @Transactional
     public LocalUser findByLoginId(String loginId) {
-        LocalUser localuser = localUserRepository.findByLoginId(loginId);
-
-        return localuser;
+        LocalUser localUser = localUserRepository.findByLoginId(loginId);
+        return localUser;
     }
 
 
     //중복 loginId 체크
-    @Transactional
     @Override
     public boolean existsByLoginId(String loginId) {
         return localUserRepository.existsByLoginId(loginId);

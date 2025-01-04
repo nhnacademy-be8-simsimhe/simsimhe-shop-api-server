@@ -22,6 +22,7 @@ import com.simsimbookstore.apiserver.books.tag.domain.QTag;
 import com.simsimbookstore.apiserver.books.tag.dto.TagResponseDto;
 import com.simsimbookstore.apiserver.like.entity.QBookLike;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.QOrderBook;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -35,10 +36,11 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-
+@RequiredArgsConstructor
 public class BookCustomRepositoryImpl implements BookCustomRepository {
 
     private final JPAQueryFactory queryFactory;
+
 
     QBook book = QBook.book;
     QBookContributor bookContributor = QBookContributor.bookContributor;
@@ -50,10 +52,6 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
     QBookLike bookLike = QBookLike.bookLike;
     QOrderBook orderBook = QOrderBook.orderBook;
     QBookImagePath bookImagePath = QBookImagePath.bookImagePath;
-
-    public BookCustomRepositoryImpl(JPAQueryFactory queryFactory) {
-        this.queryFactory = queryFactory;
-    }
 
 
     /**

@@ -17,7 +17,7 @@ public class ConfirmSuccessResponseDto {
     private String orderId;
     private String paymentKey;
     private BigDecimal totalAmount;
-    private String paymentMethod;
+    private String method; // paymentMethod
     private LocalDateTime approvedAt;
 
     public static void toEntity(ConfirmSuccessResponseDto confirmSuccessResponseDto,  //원래는 Payment Type
