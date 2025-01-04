@@ -136,12 +136,35 @@
     <span id="total_price">₩0</span>
 </div>
 
+<!-- 결제 방법 선택 -->
+<div class="p-3 border rounded-3 mb-4">
+    <div class="box_section" style="padding: 40px 30px 50px 30px; margin-top: 30px; margin-bottom: 50px">
+        <h4 class="fw-normal mb-3">결제 방법</h4>
+        <div id="payment-method" style="display: flex">
+            <button id="CARD" class="button2" onclick="selectPaymentMethod('CARD')">카드</button>
+            <button id="TRANSFER" class="button2" onclick="selectPaymentMethod('TRANSFER')">계좌이체</button>
+        </div>
+    </div>
+</div>
+
 <!-- 결제 버튼 -->
 <div class="p-3 border rounded-3 mb-4">
     <button id="paymentButton" class="btn btn-primary btn-lg" onclick="submitOrder()">결제하기</button>
 </div>
 
 <script>
+    let selectedPaymentMethod = null;
+
+    function selectPaymentMethod(method) {
+        if (selectedPaymentMethod != null) {
+            document.getElementById(selectedPaymentMethod).style.backgroundColor = "#ffffff";
+        }
+
+        selectedPaymentMethod = method;
+
+        document.getElementById(selectedPaymentMethod).style.backgroundColor = "rgb(229 239 255)";
+    }
+
     function submitOrder() {
         const phoneNumber = document.getElementById("senderPhoneNumber").value.trim();
         console.log("Collected Phone Number:", phoneNumber);
@@ -230,11 +253,24 @@
             });
         });
 
+        let method;
+
+        try {
+            if (selectedPaymentMethod === "CARD") {
+                method = "CARD";
+            } else if (selectedPaymentMethod === "TRANSFER") {
+                method = "TRANSFER";
+            }
+        } catch (error) {
+            console.error("결제 요청 중 에러 발생: ", error);
+        }
+
         // 주문 요청 데이터 구성
         const orderFacadeRequestDto = {
             deliveryRequestDto: deliveryRequestDto,
             memberOrderRequestDto: memberOrderRequestDto,
-            orderBookRequestDtos: orderBookRequestDtos
+            orderBookRequestDtos: orderBookRequestDtos,
+            method: selectedPaymentMethod
         };
 
         console.log("Order Data:", orderFacadeRequestDto);
