@@ -9,7 +9,7 @@ public class CouponPolicyMapper {
         return CouponPolicyResponseDto.builder()
                 .couponPolicyId(couponPolicy.getCouponPolicyId())
                 .couponPolicyName(couponPolicy.getCouponPolicyName())
-                .disCountType(couponPolicy.getDiscountType())
+                .discountType(couponPolicy.getDiscountType())
                 .discountRate(couponPolicy.getDiscountRate())
                 .discountPrice(couponPolicy.getDiscountPrice())
                 .maxDiscountAmount(couponPolicy.getMaxDiscountAmount())

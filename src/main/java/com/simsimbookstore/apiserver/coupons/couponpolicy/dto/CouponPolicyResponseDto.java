@@ -13,7 +13,7 @@ public class CouponPolicyResponseDto {
 
     private String couponPolicyName;
 
-    private DisCountType disCountType; // RATE, FIX
+    private DisCountType discountType; // RATE, FIX
 
     private BigDecimal discountRate;
 
