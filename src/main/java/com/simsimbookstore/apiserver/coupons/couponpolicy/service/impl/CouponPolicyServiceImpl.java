@@ -26,12 +26,22 @@ public class CouponPolicyServiceImpl implements CouponPolicyService {
     private final CouponPolicyRepository couponPolicyRepository;
     private final CouponTypeRepository couponTypeRepository;
 
+    /**
+     * 모든 쿠폰 정책을 Page로 가지고온다.
+     * @param pageable
+     * @return
+     */
     @Override
     public Page<CouponPolicyResponseDto> getAllCouponPolicy(Pageable pageable) {
         Page<CouponPolicy> couponPolicies = couponPolicyRepository.findAll(pageable);
         return couponPolicies.map(CouponPolicyMapper::toResponse);
     }
 
+    /**
+     * 특정 쿠폰 정책(couponPolicyId)를 하나 가지고 온다.
+     * @param couponPolicyId
+     * @return
+     */
     @Override
     public CouponPolicyResponseDto getCouponPolicy(Long couponPolicyId) {
         validateId(couponPolicyId);
@@ -40,6 +50,11 @@ public class CouponPolicyServiceImpl implements CouponPolicyService {
 
     }
 
+    /**
+     * 쿠폰 정책을 생성한다.
+     * @param requestDto
+     * @return
+     */
     @Override
     @Transactional
     public CouponPolicyResponseDto createCouponPolicy(CouponPolicyRequestDto requestDto) {
@@ -48,7 +63,12 @@ public class CouponPolicyServiceImpl implements CouponPolicyService {
         return CouponPolicyMapper.toResponse(save);
     }
 
-
+    /**
+     * 쿠폰 정책을 삭제한다.
+     * 해당 쿠폰 정책으로 이미 쿠폰 타입이 만들어졌으면 삭제 불가능
+     * @param couponPolicyId
+     * @throws AlreadyCouponPolicyUsed
+     */
     @Override
     @Transactional
     public void deleteCouponPolicy(Long couponPolicyId) {
