@@ -281,7 +281,7 @@ public class CouponServiceImpl implements CouponService {
         validateId(couponId);
         Book book = bookRepository.findByBookId(bookId).orElseThrow(() -> new NotFoundException("책(id:" + bookId + ")이 존재하지 않습니다."));
         Coupon coupon = couponRepository.findById(couponId).orElseThrow(() -> new NotFoundException("쿠폰(id:" + couponId + ")이 존재하지 않습니다."));
-        List<List<CategoryResponseDto>> categoryList = bookRepository.getBookDetail(null, bookId).getCategoryList();
+        List<List<CategoryResponseDto>> categoryList = bookRepository.getBookDetail(null, book.getBookId()).getCategoryList();
 
 
         // 쿠폰 적용 가능한지 확인
@@ -341,8 +341,6 @@ public class CouponServiceImpl implements CouponService {
                     .afterCouponDiscount(afterDiscount)
                     .build();
         }
-
-
 
     }
 

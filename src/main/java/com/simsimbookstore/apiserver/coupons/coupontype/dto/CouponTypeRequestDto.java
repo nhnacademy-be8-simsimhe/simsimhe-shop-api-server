@@ -1,6 +1,7 @@
 package com.simsimbookstore.apiserver.coupons.coupontype.dto;
 
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponTargetType;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -9,6 +10,7 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Builder
 @Data
@@ -31,4 +33,25 @@ public class CouponTypeRequestDto {
     private CouponTargetType couponTargetType;
 
     private Long targetId; //BookId , CategoryID
+
+    /**
+     * period와 deadline 중 하나는 null이어야 함.
+     */
+    @AssertTrue
+    public boolean isValidPeriodAndDeadline() {
+        boolean isPeriodNull = (this.period == null);
+        boolean isDeadlineNull = (this.deadline == null);
+        return isPeriodNull ^ isDeadlineNull;
+    }
+
+    /**
+     * AllCoupon이면 targetId는 null이어야함
+     */
+    @AssertTrue
+    public boolean AllCouponTargetIdValid() {
+        if (couponTargetType == CouponTargetType.ALL) {
+            return Objects.isNull(targetId);
+        }
+        return true;
+    }
 }

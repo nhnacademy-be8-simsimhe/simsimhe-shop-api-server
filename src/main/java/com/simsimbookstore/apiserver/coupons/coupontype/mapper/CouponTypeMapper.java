@@ -3,8 +3,6 @@ package com.simsimbookstore.apiserver.coupons.coupontype.mapper;
 import com.simsimbookstore.apiserver.coupons.allcoupon.entity.AllCoupon;
 import com.simsimbookstore.apiserver.coupons.bookcoupon.entity.BookCoupon;
 import com.simsimbookstore.apiserver.coupons.categorycoupon.entity.CategoryCoupon;
-import com.simsimbookstore.apiserver.coupons.coupon.dto.CouponResponseDto;
-import com.simsimbookstore.apiserver.coupons.coupon.entity.Coupon;
 import com.simsimbookstore.apiserver.coupons.coupontype.dto.CouponTypeRequestDto;
 import com.simsimbookstore.apiserver.coupons.coupontype.dto.CouponTypeResponseDto;
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponTargetType;

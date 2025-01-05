@@ -27,13 +27,13 @@ public class CouponPolicy {
     private DisCountType discountType;
 
     @Column(name = "discount_price", precision = 10, scale = 2)
-    private BigDecimal discountPrice;
+    private BigDecimal discountPrice; //FIX
 
     @Column(name = "discount_rate", precision = 10, scale = 2)
-    private BigDecimal discountRate;
+    private BigDecimal discountRate; // RATE
 
     @Column(name = "max_discount_amount", precision = 10, scale = 2)
-    private BigDecimal maxDiscountAmount;
+    private BigDecimal maxDiscountAmount; // RATE
 
     @Column(name = "min_order_amount", precision = 10, scale = 2)
     private BigDecimal minOrderAmount;

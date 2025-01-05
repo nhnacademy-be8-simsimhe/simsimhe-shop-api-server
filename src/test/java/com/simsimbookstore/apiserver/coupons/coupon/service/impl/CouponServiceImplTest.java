@@ -1,7 +1,9 @@
 package com.simsimbookstore.apiserver.coupons.coupon.service.impl;
 
+import com.simsimbookstore.apiserver.books.book.dto.BookResponseDto;
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
+import com.simsimbookstore.apiserver.books.category.dto.CategoryResponseDto;
 import com.simsimbookstore.apiserver.books.category.entity.Category;
 import com.simsimbookstore.apiserver.common.exception.NotFoundException;
 import com.simsimbookstore.apiserver.coupons.allcoupon.entity.AllCoupon;
@@ -956,7 +958,13 @@ class CouponServiceImplTest {
                 .useDate(null)
                 .build();
 
+        BookResponseDto bookResponseDto = BookResponseDto.builder()
+                .categoryList(Arrays.asList(Arrays.asList(CategoryResponseDto.builder().categoryId(1L).categoryName("Test Category").build())))
+                .build();
+
         when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
+        when(bookRepository.getBookDetail(null, bookId)).thenReturn(bookResponseDto);
+
 
         DiscountAmountResponseDto responseDto = couponService.calDiscountAmount(bookId, quantity, couponId);
 
@@ -996,7 +1004,12 @@ class CouponServiceImplTest {
                 .useDate(null)
                 .build();
 
+        BookResponseDto bookResponseDto = BookResponseDto.builder()
+                .categoryList(Arrays.asList(Arrays.asList(CategoryResponseDto.builder().categoryId(1L).categoryName("Test Category").build())))
+                .build();
+
         when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
+        when(bookRepository.getBookDetail(null, bookId)).thenReturn(bookResponseDto);
 
         DiscountAmountResponseDto responseDto = couponService.calDiscountAmount(bookId, quantity, couponId);
 
@@ -1029,8 +1042,14 @@ class CouponServiceImplTest {
         Integer quantity = 1;
         Long couponId = 1003L;
 
+        BookResponseDto bookResponseDto = BookResponseDto.builder()
+                .categoryList(Arrays.asList(Arrays.asList(CategoryResponseDto.builder().categoryId(1L).categoryName("Test Category").build())))
+                .build();
+
         // 책 조회 시 정상적으로 반환
         when(bookRepository.findByBookId(bookId)).thenReturn(Optional.of(book));
+        when(bookRepository.getBookDetail(null, bookId)).thenReturn(bookResponseDto);
+
 
         // 쿠폰 조회 시 정상적으로 반환
         Coupon coupon = Coupon.builder()
