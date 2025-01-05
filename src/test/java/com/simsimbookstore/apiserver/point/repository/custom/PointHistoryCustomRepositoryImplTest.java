@@ -24,7 +24,6 @@ import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.repository.LocalUserRepository;
-import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import java.math.BigDecimal;
@@ -163,6 +162,7 @@ class PointHistoryCustomRepositoryImplTest {
 
         Order mockOrder = Order.builder()
                 .user(testUser)
+                .orderName("aaa")
                 .orderNumber("aaa")
                 .orderDate(LocalDateTime.now())
                 .originalPrice(BigDecimal.valueOf(100000))
