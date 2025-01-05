@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -203,11 +202,12 @@ class OrderControllerTest {
                 .quantity(2)
                 .salePrice(BigDecimal.valueOf(10000))
                 .build();
-
+        String method = "CARD";
         OrderFacadeRequestDto facadeRequestDto = new OrderFacadeRequestDto(
                 deliveryRequestDto,
                 memberOrderRequestDto,
-                List.of(orderBookRequestDto)
+                List.of(orderBookRequestDto),
+                method
         );
 
         OrderFacadeResponseDto facadeResponseDto = OrderFacadeResponseDto.builder()

@@ -23,7 +23,7 @@ public class MemberOrderRequestDto {
     private BigDecimal totalPrice;
     private LocalDate deliveryDate;
     private String orderEmail;
-    private Integer pointEarn;
     private String phoneNumber;
     private BigDecimal deliveryPrice;
+    private String senderName;
 }
