@@ -19,13 +19,11 @@ import com.simsimbookstore.apiserver.payment.repository.PaymentStatusRepository;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
-import lombok.AllArgsConstructor;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.net.URISyntaxException;
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -62,7 +60,7 @@ public class PaymentService {
 
     // 결제 승인 요청
     public ConfirmSuccessResponseDto confirm(SuccessRequestDto successDto) {
-        ConfirmSuccessResponseDto response = paymentRestTemplate.confirm(successDto);
+        ConfirmSuccessResponseDto response = paymentRestTemplate.confirm(successDto);   //성공
         savePayment(response);
         return response;
     }

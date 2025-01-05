@@ -73,6 +73,9 @@ public class Order {
     @Column(name = "delivery_price", nullable = false)
     private BigDecimal deliveryPrice;
 
+    @Column(name = "order_name", nullable = false)
+    private String orderName;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "order_state", nullable = false)
     private OrderState orderState;
