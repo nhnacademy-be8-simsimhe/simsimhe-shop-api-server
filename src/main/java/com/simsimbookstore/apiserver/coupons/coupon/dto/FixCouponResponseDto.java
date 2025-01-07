@@ -1,5 +1,6 @@
 package com.simsimbookstore.apiserver.coupons.coupon.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.CouponStatus;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.DisCountType;
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponTargetType;
@@ -16,8 +17,10 @@ public class FixCouponResponseDto implements CouponResponseDto{
     //쿠폰 Id
     private Long couponId;
     //쿠폰 발급 날짜
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", shape = JsonFormat.Shape.STRING)
     private LocalDateTime issueDate;
     // 쿠폰 마감일
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", shape = JsonFormat.Shape.STRING)
     private LocalDateTime deadline;
     // 쿠폰 상태 -> USED, EXPIRED, UNUSED
     private CouponStatus couponStatus;
