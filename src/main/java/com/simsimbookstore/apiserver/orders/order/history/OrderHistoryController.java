@@ -16,7 +16,7 @@ public class OrderHistoryController {
 
     private final OrderHistoryService orderHistoryService;
 
-    @GetMapping(value = "/api/users/{userId}/orders", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/api/shop/users/{userId}/orders", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Page<OrderHistoryResponseDto>> getOrderBook(@PathVariable Long userId, Pageable pageable) {
         return ResponseEntity.ok().body(orderHistoryService.getOrderHistory(userId, pageable));
     }
