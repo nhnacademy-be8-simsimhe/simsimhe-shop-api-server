@@ -24,7 +24,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @Validated
-@RequestMapping("/api")
+@RequestMapping("/api/shop")
 public class CouponController {
     private final CouponService couponService;
 
