@@ -29,8 +29,8 @@ public class UserController {
             @PathVariable Long userId,
             @RequestBody @Valid UserStatusUpdateRequestDto requestDto
     ){
-        User response = userService.updateUserStatus(userId, requestDto.getStatus());
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        userService.updateUserStatus(userId, requestDto.getStatus());
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PutMapping("/{userId}/grade")
