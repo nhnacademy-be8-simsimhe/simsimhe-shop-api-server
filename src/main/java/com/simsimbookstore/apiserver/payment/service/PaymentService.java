@@ -8,7 +8,6 @@ import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.payment.client.PaymentRestTemplate;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmSuccessResponseDto;
-import com.simsimbookstore.apiserver.payment.dto.FailResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
 import com.simsimbookstore.apiserver.payment.entity.Payment;
 import com.simsimbookstore.apiserver.payment.entity.PaymentMethod;
@@ -16,13 +15,13 @@ import com.simsimbookstore.apiserver.payment.entity.PaymentStatus;
 import com.simsimbookstore.apiserver.payment.repository.PaymentMethodRepository;
 import com.simsimbookstore.apiserver.payment.repository.PaymentRepository;
 import com.simsimbookstore.apiserver.payment.repository.PaymentStatusRepository;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Slf4j
 @Service
@@ -68,35 +67,21 @@ public class PaymentService {
     // 결제 완료된 객체 저장
     private void savePayment(ConfirmSuccessResponseDto confirmSuccessResponseDto) {
         PaymentStatus status = paymentStatusRepository.findByPaymentStatusName("SUCCESS")
-                .orElseThrow(() -> new NotFoundException("'SUCCESS'가 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException("SUCCESS 상태가 존재하지 않습니다."));
         Order order = orderRepository.findByOrderNumber(confirmSuccessResponseDto.getOrderId())
-                .orElseThrow(() -> new NotFoundException("OrderNumber가 존재하지 않습니다."));
-        // save
-//        Payment payment = new Payment(
-//                null,
-//                confirmSuccessResponseDto.getPaymentKey(),
-//                confirmSuccessResponseDto.getApprovedAt(),
-//                confirmSuccessResponseDto.getMethod(),
-//                status,
-//                order
-//        );
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 OrderNumber 입니다."));
 
-        PaymentMethod paymentMethod = paymentMethodRepository.findByPaymentMethod("CARD")
+        PaymentMethod paymentMethod = paymentMethodRepository.findByPaymentMethod(confirmSuccessResponseDto.getMethod())
                 .orElseThrow(() -> new NotFoundException("해당 결제 수단이 존재하지 않습니다."));
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
-
-        // OffsetDateTime으로 먼저 파싱
-        OffsetDateTime offsetDateTime = OffsetDateTime.parse(confirmSuccessResponseDto.getApprovedAt(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);;
-
-        // LocalDateTime으로 변환
-        LocalDateTime localDateTime = offsetDateTime.toLocalDateTime();
+        ZoneId seoulZone = ZoneId.of("Asia/Seoul");
+        ZonedDateTime zonedDateTime = ZonedDateTime.parse(confirmSuccessResponseDto.getApprovedAt());
+        LocalDateTime dateTime = zonedDateTime.withZoneSameInstant(seoulZone).toLocalDateTime();
 
         // Payment 객체 생성 (빌더 패턴 사용)
         Payment payment = Payment.builder()
                 .paymentKey(confirmSuccessResponseDto.getPaymentKey())
-                .paymentDate(localDateTime)
-                .paymentMethodToss("TOSS")
+                .paymentDate(dateTime)
                 .paymentStatus(status)
                 .order(order)
                 .paymentMethod(paymentMethod)
@@ -105,29 +90,6 @@ public class PaymentService {
         // Payment 저장
         paymentRepository.save(payment);
     }
-
-    // 인증 실패
-    public void failPayment(FailResponseDto failResponseDto) {
-//        paymentRepository.savePaymentStatus(paymentStatus);
-        Payment payment = new Payment();
-//        payment.setPaymentStatusId(PaymentStatusName.FAIL);
-
-//        return FailDto.builder()
-//                .code(code)
-//                .message(message)
-//                .orderId(orderId)
-//                .build();
-
-        // code에 따라 달라지는 상황
-        if (failResponseDto.getCode().equals("PAY_PROCESS_CANCELED")) {
-            // 1. PAY_PROCESS_CANCELED : 구매자에 의한 취소 + orderId X -> 저장만 안되면 됨
-        } else if (failResponseDto.getCode().equals("PAY_PROCESS_ABORTED")) {
-            // 2. PAY_PROCESS_ABORTED : 오류 메시지 확인 필요
-        } else if (failResponseDto.getCode().equals("REJECT_CARD_COMPANY")) {
-            // 3. REJECT_CARD_COMPANY : 구매자의 카드 정보가 문제 -> 오류 메시지 확인 + 구매자에게 안내 필요
-        }
-    }
-
 
     // 환불을 위한 주문 번호로 paymentKey 조회
 //    public String getPaymentKey(String orderId) {
