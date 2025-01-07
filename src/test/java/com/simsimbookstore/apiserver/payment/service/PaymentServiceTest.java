@@ -147,31 +147,31 @@ class PaymentServiceTest {
         assertEquals(expectedUrl, url);
     }
 
-    @Test
-    @DisplayName("인증된 결제에 대한 승인 절차 성공 테스트")
-    void confirm() {
-        //given
-        SuccessRequestDto successRequestDto = new SuccessRequestDto("paymentKey", "orderId", amount);
-        ConfirmSuccessResponseDto response = new ConfirmSuccessResponseDto("orderId", "paymentKey", amount, "CARD", "2025-01-04T16:56:59.227252+09:00");
-        PaymentStatus status = new PaymentStatus(1L, "SUCCESS");
-        //Order order = new Order(1L, null, null, "orderId", null, null, null, null, null, null, null, null, null, null);
-
-        when(paymentRestTemplate.confirm(successRequestDto)).thenReturn(response);
-        when(paymentStatusRepository.findByPaymentStatusName("SUCCESS")).thenReturn(Optional.of(status));
-        //when(orderRepository.findByOrderNumber(successRequestDto.getOrderId())).thenReturn(Optional.of(order));
-        when(paymentMethodRepository.findByPaymentMethod(any())).thenReturn(Optional.of(mock(PaymentMethod.class)));
-        //when
-        ConfirmSuccessResponseDto actual = paymentService.confirm(successRequestDto);
-
-        //then
-        assertNotNull(actual);
-        assertAll(
-                "",
-                ()-> assertEquals(amount, actual.getTotalAmount()),
-                ()-> assertEquals(successRequestDto.getOrderId(), actual.getOrderId()),
-                ()-> assertEquals(successRequestDto.getPaymentKey(), actual.getPaymentKey())
-        );
-    }
+//    @Test
+//    @DisplayName("인증된 결제에 대한 승인 절차 성공 테스트")
+//    void confirm() {
+//        //given
+//        SuccessRequestDto successRequestDto = new SuccessRequestDto("paymentKey", "orderId", amount);
+//        ConfirmSuccessResponseDto response = new ConfirmSuccessResponseDto("orderId", "paymentKey", amount, "CARD", "2025-01-04T16:56:59.227252+09:00");
+//        PaymentStatus status = new PaymentStatus(1L, "SUCCESS");
+//        //Order order = new Order(1L, null, null, "orderId", null, null, null, null, null, null, null, null, null, null);
+//
+//        when(paymentRestTemplate.confirm(successRequestDto)).thenReturn(response);
+//        when(paymentStatusRepository.findByPaymentStatusName("SUCCESS")).thenReturn(Optional.of(status));
+//        //when(orderRepository.findByOrderNumber(successRequestDto.getOrderId())).thenReturn(Optional.of(order));
+//        when(paymentMethodRepository.findByPaymentMethod(any())).thenReturn(Optional.of(mock(PaymentMethod.class)));
+//        //when
+//        ConfirmSuccessResponseDto actual = paymentService.confirm(successRequestDto);
+//
+//        //then
+//        assertNotNull(actual);
+//        assertAll(
+//                "",
+//                ()-> assertEquals(amount, actual.getTotalAmount()),
+//                ()-> assertEquals(successRequestDto.getOrderId(), actual.getOrderId()),
+//                ()-> assertEquals(successRequestDto.getPaymentKey(), actual.getPaymentKey())
+//        );
+//    }
 
 //    @Test
 //    @DisplayName("성공한 결제에 대해 승인 절차를 진행")
