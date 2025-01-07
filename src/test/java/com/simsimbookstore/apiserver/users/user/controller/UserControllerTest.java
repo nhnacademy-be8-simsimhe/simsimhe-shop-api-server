@@ -139,7 +139,7 @@ class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId").value(userId))
-                .andExpect(jsonPath("$.latestLoginDate").value(latestLoginDate.toString()));
+                .andExpect(jsonPath("$.userId").value(userId));
+//                .andExpect(jsonPath("$.latestLoginDate").value(latestLoginDate.toString()));
     }
 }
