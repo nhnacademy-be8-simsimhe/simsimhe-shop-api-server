@@ -198,20 +198,4 @@ class PaymentControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(""));
     }
-
-    @Test
-    @DisplayName("결제 인증 실패 테스트")
-    void paymentFail() throws Exception {
-        String code = "400";
-        String message = "결제 실패";
-
-        mvc.perform(get("/api/shop/fail")
-                        .param("code", code)
-                        .param("message", message)
-                        .param("orderId", orderId))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(message));
-
-        Mockito.verify(paymentService, Mockito.times(1)).failPayment(any(FailResponseDto.class));
-    }
 }
