@@ -23,5 +23,5 @@ payment:
     client_api_key : test_ck_vZnjEJeQVxbmJoKKo22P8PmOoBN0
     secret_api_key : test_sk_LkKEypNArW1PydoJnX5j3lmeaxYG
 #    front url
-    success_url : "http://localhost:3000/api/success"
-    fail_url : "http://localhost:3000/api/fail"
+    success_url : "http://localhost:3000/payments/success"
+    fail_url : "http://localhost:3000/payments/fail"
