@@ -13,6 +13,8 @@ import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
 import com.simsimbookstore.apiserver.orders.delivery.service.DeliveryService;
 import com.simsimbookstore.apiserver.orders.order.dto.MemberOrderRequestDto;
 import com.simsimbookstore.apiserver.orders.order.dto.OrderResponseDto;
+import com.simsimbookstore.apiserver.orders.order.entity.Order;
+import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.orders.order.service.MemberOrderService;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookResponseDto;
@@ -22,6 +24,7 @@ import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import java.math.BigDecimal;
 
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,11 +46,15 @@ class OrderFacadeServiceImplTest {
     @Mock
     private PointHistoryService pointHistoryService;
 
+    @Mock
+    private OrderRepository orderRepository;
+
     @InjectMocks
     private OrderFacadeImpl orderFacadeService;
 
     @Test
     void testCreatePrepareOrder_Success() {
+
         DeliveryRequestDto deliveryRequestDto = new DeliveryRequestDto();
         deliveryRequestDto.setDeliveryState(Delivery.DeliveryState.READY);
 
@@ -64,7 +71,7 @@ class OrderFacadeServiceImplTest {
                 .orderId(1234L)
                 .orderNumber("20241226-000001")
                 .build();
-
+        String method = "CARD";
         List<OrderBookRequestDto> orderBookReqList = List.of(
                 OrderBookRequestDto.builder()
                         .bookId(501L)
@@ -79,28 +86,41 @@ class OrderFacadeServiceImplTest {
         OrderFacadeRequestDto facadeRequestDto = new OrderFacadeRequestDto(
                 deliveryRequestDto,
                 orderReqDto,
-                orderBookReqList
+                orderBookReqList,
+                method
         );
+
+        String mockOrderName = "Test Order Name";
+        Order mockOrder = Order.builder()
+                .orderId(mockOrderResponse.getOrderId())
+                .orderName(null) // 초기 상태
+                .build();
 
         when(deliveryService.createDelivery(deliveryRequestDto))
                 .thenReturn(mockDelivery);
-
         when(memberOrderService.createOrder(orderReqDto))
                 .thenReturn(mockOrderResponse);
-
         when(orderBookService.createOrderBook(any(OrderBookRequestDto.class)))
                 .thenReturn(mock(OrderBookResponseDto.class));
+        when(orderBookService.getOrderName(orderBookReqList))
+                .thenReturn(mockOrderName);
+        when(orderRepository.findById(mockOrderResponse.getOrderId()))
+                .thenReturn(Optional.of(mockOrder));
 
         OrderFacadeResponseDto result = orderFacadeService.createPrepareOrder(facadeRequestDto);
 
         verify(deliveryService, times(1)).createDelivery(deliveryRequestDto);
         verify(memberOrderService, times(1)).createOrder(orderReqDto);
         verify(orderBookService, times(orderBookReqList.size())).createOrderBook(any(OrderBookRequestDto.class));
+        verify(orderBookService, times(1)).getOrderName(orderBookReqList);
+        verify(orderRepository, times(1)).findById(mockOrderResponse.getOrderId());
         verify(pointHistoryService, times(1)).orderPoint(any(OrderPointRequestDto.class));
 
         assertNotNull(result);
         assertEquals(mockOrderResponse.getOrderNumber(), result.getOrderNumber());
         assertEquals(mockOrderResponse.getTotalPrice(), result.getTotalPrice());
+
+        assertEquals(mockOrderName, mockOrder.getOrderName());
     }
 }
 

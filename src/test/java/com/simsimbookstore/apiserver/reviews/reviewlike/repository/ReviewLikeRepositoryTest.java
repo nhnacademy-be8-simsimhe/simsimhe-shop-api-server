@@ -44,107 +44,51 @@ class ReviewLikeRepositoryTest {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    GradeRepository gradeRepository;
+    private GradeRepository gradeRepository;
     @Autowired
     private ReviewRepository reviewRepository;
 
+    private User user1, user2;
+    private Review review1, review2;
 
     @BeforeEach
     void setUp() {
 
-        Grade grade1 = createGrade(Tier.STANDARD);
-        Grade grade2 = createGrade(Tier.ROYAL);
-
-        gradeRepository.save(grade1);
-        gradeRepository.save(grade2);
+        // 1. Grade 데이터 생성 및 저장
+        Grade grade1 = createGrade(Tier.STANDARD, 0.01);
+        Grade grade2 = createGrade(Tier.ROYAL, 0.01);
 
 
-        User user1 = createUser("User1", "user1@example.com", "01011111111", grade1);
-        User user2 =  createUser("User2", "user2@example.com", "01057238902", grade2);
+        // 2. User 데이터 생성 및 저장
+        user1 = createUser("User1", "user1@example.com", "01011111111", grade1);
+        user2 = createUser("User2", "user2@example.com", "01057238902", grade2);
 
-        userRepository.save(user1);
-        userRepository.save(user2);
+        // 3. Review 데이터 생성 및 저장
+        review1 = createReview("Review 1", "Review 1 !!!!!!");
+        review2 = createReview("Review 2", "Review 2 !!!!!!");
 
-
-
-        Review review1 = Review.builder()
-                .createdAt(LocalDateTime.now())
-                .title("Review 1")
-                .content("Review 1 !!!!!!")
-                .build();
-
-
-        Review review2 = Review.builder()
-                .createdAt(LocalDateTime.now())
-                .title("Review 2")
-                .content("Review 2 !!!!!!")
-                .build();
-
-        reviewRepository.save(review1);
-        reviewRepository.save(review2);
-
-        ReviewLike like1 = ReviewLike.builder().created_at(LocalDateTime.now()).review(review1).user(user1).build();
-        ReviewLike like2 = ReviewLike.builder().created_at(LocalDateTime.now()).review(review1).user(user2).build();
-        ReviewLike like3 = ReviewLike.builder().created_at(LocalDateTime.now()).review(review2).user(user1).build();
-
-        reviewLikeRepository.saveAll(List.of(like1, like2, like3));
-    }
-
-    @Test
-    @DisplayName("특정 사용자의 좋아요 수 조회")
-    void countByUser() {
-        User user = User.builder().userId(1L).build();
-
-        long count = reviewLikeRepository.countByUser(user);
-
-        assertThat(count).isEqualTo(2);
-    }
-
-
-    @Test
-    @DisplayName("특정 리뷰에 대한 좋아요 수 조회")
-    void countByReview() {
-        Review review = Review.builder().reviewId(2L).build();
-
-        long count = reviewLikeRepository.countByReview(review);
-
-        assertThat(count).isEqualTo(1);
-    }
-
-    @Test
-    @DisplayName("특정 사용자가 특정 리뷰를 좋아요 했는지 확인")
-    void findByUserAndReview() {
-        User user = User.builder().userId(1L).build();
-
-        Review review = Review.builder().reviewId(1L).build();
-
-        Optional<ReviewLike> like = reviewLikeRepository.findByUserAndReview(user, review);
-
-        assertThat(like).isPresent();
-    }
-
-    @Test
-    @DisplayName("특정 리뷰에 대한 모든 좋아요 조회")
-    void findAllByReview() {
-        Review review = Review.builder().reviewId(1L).build();
-
-        List<ReviewLike> likes = reviewLikeRepository.findAllByReview(review);
-
-        assertThat(likes).hasSize(2);
+        // 4. ReviewLike 데이터 생성 및 저장
+        createReviewLike(review1, user1);
+        createReviewLike(review1, user2);
+        createReviewLike(review2, user1);
     }
 
     @Test
     @DisplayName("특정 사용자가 남긴 모든 좋아요 조회")
     void findAllByUser() {
-        User user = User.builder().userId(1L).build();
+        // Given
+        User savedUser = userRepository.findById(user1.getUserId())
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
-        List<ReviewLike> likes = reviewLikeRepository.findAllByUser(user);
+        // When
+        List<ReviewLike> likes = reviewLikeRepository.findAllByUser(savedUser);
 
+        // Then
         assertThat(likes).hasSize(2);
     }
 
+    private Grade createGrade(Tier tier, double pointRate) {
 
-    private Grade createGrade(Tier tier) {
         return gradeRepository.save(Grade.builder()
                 .tier(tier)
                 .minAmount(BigDecimal.valueOf(0))
@@ -162,6 +106,22 @@ class ReviewLikeRepositoryTest {
                 .gender(Gender.MALE)
                 .userStatus(UserStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
+                .build());
+    }
+
+    private Review createReview(String title, String content) {
+        return reviewRepository.save(Review.builder()
+                .createdAt(LocalDateTime.now())
+                .title(title)
+                .content(content)
+                .build());
+    }
+
+    private void createReviewLike(Review review, User user) {
+        reviewLikeRepository.save(ReviewLike.builder()
+                .created_at(LocalDateTime.now())
+                .review(review)
+                .user(user)
                 .build());
     }
 

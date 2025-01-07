@@ -22,6 +22,7 @@ import com.simsimbookstore.apiserver.books.tag.domain.QTag;
 import com.simsimbookstore.apiserver.books.tag.dto.TagResponseDto;
 import com.simsimbookstore.apiserver.like.entity.QBookLike;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.QOrderBook;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -35,10 +36,11 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-
+@RequiredArgsConstructor
 public class BookCustomRepositoryImpl implements BookCustomRepository {
 
     private final JPAQueryFactory queryFactory;
+
 
     QBook book = QBook.book;
     QBookContributor bookContributor = QBookContributor.bookContributor;
@@ -50,10 +52,6 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
     QBookLike bookLike = QBookLike.bookLike;
     QOrderBook orderBook = QOrderBook.orderBook;
     QBookImagePath bookImagePath = QBookImagePath.bookImagePath;
-
-    public BookCustomRepositoryImpl(JPAQueryFactory queryFactory) {
-        this.queryFactory = queryFactory;
-    }
 
 
     /**
@@ -340,7 +338,10 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                         book.bookStatus.as("bookStatus"),   // 책 상태
                         book.quantity.as("quantity"),       // 책 재고
                         bookImagePath.imagePath.as("imagePath"),
-                        isLiked.as("isLiked")
+                        isLiked.as("isLiked"),
+                        book.publisher,
+                        book.price,
+                        book.saleprice
                 ))
                 .from(bookLike)
                 .join(bookLike.book, book) // bookLike와 book 조인
@@ -391,6 +392,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
         return queryFactory.select(Projections.fields(BookListResponse.class,
                         book.bookId.as("bookId"),
                         book.title.as("title"),
+                        bookImagePath.imagePath.min().as("imagePath"), // 이미지 경로를 하나만 가져오도록 수정
                         book.publicationDate.as("publicationDate"),
                         book.quantity.as("quantity"),
                         book.price.as("price"),
@@ -398,7 +400,9 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                         book.bookStatus.as("bookStatus"),
                         book.publisher.as("publisher")))
                 .from(orderBook)
-                .innerJoin(orderBook.book, book) // 명시적으로 조인
+                .innerJoin(orderBook.book, book)
+                .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId)
+                        .and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
                 .groupBy(
                         book.bookId,
                         book.title,
@@ -408,11 +412,12 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                         book.saleprice,
                         book.bookStatus,
                         book.publisher
-                ) // 필요한 필드를 명시적으로 그룹화
+                )
                 .orderBy(orderBook.quantity.sum().desc())
                 .limit(6)
                 .fetch();
     }
+
 
     /**
      * 특정 도서를 제외한 동일 카테고리 내 인기 도서 추천 기능 5개

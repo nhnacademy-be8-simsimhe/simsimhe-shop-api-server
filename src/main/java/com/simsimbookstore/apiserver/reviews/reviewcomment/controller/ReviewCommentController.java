@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/reviews/{reviewId}/comments")
+@RequestMapping("/api/shop/reviews/{reviewId}/comments")
 @RequiredArgsConstructor
 public class ReviewCommentController {
     private final ReviewCommentService reviewCommentService;
@@ -65,7 +65,7 @@ public class ReviewCommentController {
             @PathVariable Long reviewId,
       @RequestParam(defaultValue = "0") int page,
     @RequestParam(defaultValue = "10") int size){
-        Page<ReviewCommentResponseDTO> reviewComments = reviewCommentService.getReviewComments(reviewId, 0, 10);
+        Page<ReviewCommentResponseDTO> reviewComments = reviewCommentService.getReviewComments(reviewId, page, size);
         return ResponseEntity.ok(reviewComments);
     }
 

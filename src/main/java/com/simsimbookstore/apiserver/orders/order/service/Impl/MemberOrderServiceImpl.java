@@ -8,8 +8,11 @@ import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.orders.order.service.MemberOrderService;
 import com.simsimbookstore.apiserver.orders.order.service.OrderNumberService;
+import com.simsimbookstore.apiserver.orders.order.service.OrderTotalService;
+import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,8 @@ public class MemberOrderServiceImpl implements MemberOrderService {
     private final UserRepository userRepository;
     private final OrderNumberService orderNumberService;
     private final DeliveryRepository deliveryRepository;
+    private final OrderBookService orderBookService;
+    private final OrderTotalService orderTotalService;
 
 
     @Override
@@ -33,10 +38,12 @@ public class MemberOrderServiceImpl implements MemberOrderService {
         User user = userRepository.findById(requestDto.getUserId())
                 .orElseThrow(() -> new NotFoundException("User not found. ID=" + requestDto.getUserId()));
 
+        BigDecimal deliveryPrice = orderTotalService.calculateDeliveryPrice(requestDto.getTotalPrice());
+
         //Order 엔티티 생성
         Order order = Order.builder()
                 .user(user)
-                .delivery(deliveryRepository.findById(requestDto.getDeliveryId()).orElseThrow())
+                .delivery(deliveryRepository.findById(requestDto.getDeliveryId()).orElseThrow(()-> new NotFoundException("delivery not found. ID=" + requestDto.getDeliveryId())))
                 .orderNumber(orderNumber)
                 .orderDate(LocalDateTime.now())
                 .originalPrice(requestDto.getOriginalPrice())
@@ -44,9 +51,10 @@ public class MemberOrderServiceImpl implements MemberOrderService {
                 .totalPrice(requestDto.getTotalPrice())
                 .deliveryDate(requestDto.getDeliveryDate())
                 .orderEmail(requestDto.getOrderEmail())
-                .pointEarn(requestDto.getPointEarn())
-                .deliveryPrice(requestDto.getDeliveryPrice())
+                .deliveryPrice(deliveryPrice)
+                .pointEarn(0)
                 .phoneNumber(requestDto.getPhoneNumber())
+                .senderName(requestDto.getSenderName())
                 .orderState(Order.OrderState.PENDING)  // 초기 상태
                 .build();
         Order savedOrder = orderRepository.save(order);

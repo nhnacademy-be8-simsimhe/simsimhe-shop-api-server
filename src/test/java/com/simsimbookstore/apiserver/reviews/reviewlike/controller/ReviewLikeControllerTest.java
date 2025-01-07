@@ -2,17 +2,20 @@ package com.simsimbookstore.apiserver.reviews.reviewlike.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.common.config.QuerydslConfig;
+import com.simsimbookstore.apiserver.reviews.reviewimage.controller.ReviewImageController;
+import com.simsimbookstore.apiserver.reviews.reviewimage.service.ReviewImagePathService;
 import com.simsimbookstore.apiserver.reviews.reviewlike.service.ReviewLikeService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,17 +29,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static reactor.core.publisher.Mono.when;
 
 
-@WebMvcTest(ReviewLikeController.class)
-@ExtendWith(MockitoExtension.class)
+
 class ReviewLikeControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
 
-    @MockBean
+
+    private MockMvc mockMvc;
     ReviewLikeService reviewLikeService;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    @BeforeEach
+    void setup() {
+        reviewLikeService = mock(ReviewLikeService.class);
+        ReviewLikeController reviewLikeController = new ReviewLikeController(reviewLikeService);
+        mockMvc = MockMvcBuilders.standaloneSetup(reviewLikeController).build();
+    }
 
 
 

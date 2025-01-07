@@ -58,13 +58,15 @@ public class PointHistoryServiceImpl implements PointHistoryService {
                 .orElseThrow(() -> new NotFoundException("Order not found"));
 
         BigDecimal pointUse = order.getPointUse();
-
-        PointHistory use = pointHistoryRepository.save(PointHistory.builder()
-                .pointType(PointHistory.PointType.DEDUCT)
-                .amount(-order.getPointUse().intValue())
-                .created_at(now())
-                .user(user)
-                .build());
+        if (pointUse.compareTo(BigDecimal.ZERO) > 0) {
+            PointHistory use = pointHistoryRepository.save(PointHistory.builder()
+                    .pointType(PointHistory.PointType.DEDUCT)
+                    .amount(-order.getPointUse().intValue())
+                    .created_at(now())
+                    .user(user)
+                    .build());
+            log.info("포인트 use 저장 {}", use);
+        }
 
         // 1. PointHistory 엔티티 저장
         PointHistory save = pointHistoryRepository.save(PointHistory.builder()
@@ -80,6 +82,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
                 .order(order)
                 .build());
 
+        order.setPointEarn(earnPoints.intValue());
         orderPointManageRepository.save(orderPointManage);
 
         return save;

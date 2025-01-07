@@ -24,7 +24,6 @@ import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.repository.LocalUserRepository;
-import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import java.math.BigDecimal;
@@ -45,7 +44,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @Import(QuerydslConfig.class)
 @DataJpaTest
-@ActiveProfiles("test")
+@ActiveProfiles("test2")
 class PointHistoryCustomRepositoryImplTest {
 
     @Autowired
@@ -140,7 +139,7 @@ class PointHistoryCustomRepositoryImplTest {
                 .created_at(LocalDateTime.of(2025, 1, 3, 15, 0))
                 .build();
 
-        PointHistory pointHistory3= PointHistory.builder()
+        PointHistory pointHistory3 = PointHistory.builder()
                 .user(testUser)
                 .pointType(PointHistory.PointType.EARN)
                 .amount(3000)
@@ -163,6 +162,7 @@ class PointHistoryCustomRepositoryImplTest {
 
         Order mockOrder = Order.builder()
                 .user(testUser)
+                .orderName("aaa")
                 .orderNumber("aaa")
                 .orderDate(LocalDateTime.now())
                 .originalPrice(BigDecimal.valueOf(100000))
@@ -172,6 +172,7 @@ class PointHistoryCustomRepositoryImplTest {
                 .orderEmail("test@example.com")
                 .phoneNumber("010-1234-5678")
                 .pointEarn(100)
+                .senderName("senderName")
                 .deliveryPrice(BigDecimal.valueOf(5000))
                 .orderState(Order.OrderState.PENDING)
                 .build();

@@ -6,6 +6,8 @@ import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
 import com.simsimbookstore.apiserver.orders.delivery.service.DeliveryService;
 import com.simsimbookstore.apiserver.orders.order.dto.MemberOrderRequestDto;
 import com.simsimbookstore.apiserver.orders.order.dto.OrderResponseDto;
+import com.simsimbookstore.apiserver.orders.order.entity.Order;
+import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.orders.order.service.MemberOrderService;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
 import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
@@ -27,6 +29,7 @@ public class OrderFacadeImpl implements OrderFacade {
     private final OrderBookService orderBookService;
     private final DeliveryService deliveryService;
     private final PointHistoryService pointHistoryService;
+    private final OrderRepository orderRepository;
 
     @Override
     @Transactional
@@ -78,12 +81,17 @@ public class OrderFacadeImpl implements OrderFacade {
 
         // 4. 응답 생성
         String orderName = orderBookService.getOrderName(orderBookReqs);
+        Order byId = orderRepository.findById(orderResponseDto.getOrderId()).orElseThrow();
+        byId.setOrderName(orderName);
+
         OrderFacadeResponseDto response = OrderFacadeResponseDto.builder()
                 .orderNumber(orderResponseDto.getOrderNumber())
                 .totalPrice(orderResponseDto.getTotalPrice())
                 .orderName(orderName)
                 .email(orderReq.getOrderEmail())
                 .phoneNumber(orderReq.getPhoneNumber())
+                .method(facadeRequestDto.getMethod())
+                .userName("이름")
                 .build();
 
         log.info("OrderFacadeResponseDto created: {}", response);
