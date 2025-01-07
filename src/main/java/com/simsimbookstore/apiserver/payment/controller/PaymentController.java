@@ -20,7 +20,7 @@ import java.util.Objects;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/shop")
 public class PaymentController {
 
     private final OrderFacadeImpl orderFacade;

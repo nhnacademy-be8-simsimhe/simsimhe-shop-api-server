@@ -2,6 +2,7 @@ package com.simsimbookstore.apiserver.payment.service;
 
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
+import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.payment.client.PaymentRestTemplate;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmSuccessResponseDto;
@@ -154,7 +155,7 @@ class PaymentServiceTest {
         SuccessRequestDto successRequestDto = new SuccessRequestDto("paymentKey", "orderId", amount);
         ConfirmSuccessResponseDto response = new ConfirmSuccessResponseDto("orderId", "paymentKey", amount, "CARD", "2025-01-04T16:56:59.227252+09:00");
         PaymentStatus status = new PaymentStatus(1L, "SUCCESS");
-        //Order order = new Order(1L, null, null, "orderId", null, null, null, null, null, null, null, null, null, null);
+        //Order order = new Order(1L, null,null, null, "orderId", null, null, null, null, null, null, null, null, null, null);
 
         when(paymentRestTemplate.confirm(successRequestDto)).thenReturn(response);
         when(paymentStatusRepository.findByPaymentStatusName("SUCCESS")).thenReturn(Optional.of(status));
