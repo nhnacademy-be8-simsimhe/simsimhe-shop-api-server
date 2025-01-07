@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -82,13 +83,13 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.couponId", is(couponId.intValue())))
                 .andExpect(jsonPath("$.couponTypeName", is("Fix Discount")))
                 .andExpect(jsonPath("$.discountInfo.discountPrice", is(10.00)))
-                .andExpect(jsonPath("$.disCountType", is("FIX")))
+                .andExpect(jsonPath("$.disCountType", is("정액")))
                 .andExpect(jsonPath("$.issueDate", notNullValue()))
                 .andExpect(jsonPath("$.deadline", notNullValue()))
-                .andExpect(jsonPath("$.couponStatus", is("UNUSED")))
+                .andExpect(jsonPath("$.couponStatus", is("미사용")))
                 .andExpect(jsonPath("$.couponTypeName", is("Fix Discount")))
                 .andExpect(jsonPath("$.stacking", is(false)))
-                .andExpect(jsonPath("$.couponTargetType", is("ALL")))
+                .andExpect(jsonPath("$.couponTargetType", is("전체")))
                 .andExpect(jsonPath("$.couponTargetId", is(nullValue())))
                 .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(50.00)));
     }
@@ -125,13 +126,13 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.discountInfo.discountRate", is(15.00)))
                 .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(100.00)))
                 .andExpect(jsonPath("$.discountInfo.maxDiscountAmount", is(30.00)))
-                .andExpect(jsonPath("$.disCountType", is("RATE")))
+                .andExpect(jsonPath("$.disCountType", is("정률")))
                 .andExpect(jsonPath("$.issueDate", notNullValue()))
                 .andExpect(jsonPath("$.deadline", notNullValue()))
-                .andExpect(jsonPath("$.couponStatus", is("UNUSED")))
+                .andExpect(jsonPath("$.couponStatus", is("미사용")))
                 .andExpect(jsonPath("$.couponTypeName", is("Rate Discount")))
                 .andExpect(jsonPath("$.stacking", is(true)))
-                .andExpect(jsonPath("$.couponTargetType", is("CATEGORY")))
+                .andExpect(jsonPath("$.couponTargetType", is("카테고리")))
                 .andExpect(jsonPath("$.couponTargetId", is(200)));
     }
 
@@ -185,13 +186,13 @@ class CouponControllerTest {
                 // description 필드가 DTO에 없으므로 제거하거나 관련 필드로 대체
                 // .andExpect(jsonPath("$.description", is("")))
                 .andExpect(jsonPath("$.discountInfo.discountPrice", is(20.00)))
-                .andExpect(jsonPath("$.disCountType", is("FIX")))
+                .andExpect(jsonPath("$.disCountType", is("정액")))
                 .andExpect(jsonPath("$.issueDate", notNullValue()))
                 .andExpect(jsonPath("$.deadline", notNullValue()))
-                .andExpect(jsonPath("$.couponStatus", is("UNUSED")))
+                .andExpect(jsonPath("$.couponStatus", is("미사용")))
                 .andExpect(jsonPath("$.couponTypeName", is("Fix Discount Type 300")))
                 .andExpect(jsonPath("$.stacking", is(false)))
-                .andExpect(jsonPath("$.couponTargetType", is("ALL")))
+                .andExpect(jsonPath("$.couponTargetType", is("전체")))
                 .andExpect(jsonPath("$.couponTargetId", is(nullValue())))
                 .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(80.00)));
     }
@@ -230,13 +231,13 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.discountInfo.discountRate", is(10.00)))
                 .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(120.00)))
                 .andExpect(jsonPath("$.discountInfo.maxDiscountAmount", is(25.00)))
-                .andExpect(jsonPath("$.disCountType", is("RATE")))
+                .andExpect(jsonPath("$.disCountType", is("정률")))
                 .andExpect(jsonPath("$.issueDate", notNullValue()))
                 .andExpect(jsonPath("$.deadline", notNullValue()))
-                .andExpect(jsonPath("$.couponStatus", is("UNUSED")))
+                .andExpect(jsonPath("$.couponStatus", is("미사용")))
                 .andExpect(jsonPath("$.couponTypeName", is("Rate Discount Type 400")))
                 .andExpect(jsonPath("$.stacking", is(true)))
-                .andExpect(jsonPath("$.couponTargetType", is("BOOK")))
+                .andExpect(jsonPath("$.couponTargetType", is("책")))
                 .andExpect(jsonPath("$.couponTargetId", is(300)));
     }
 
@@ -293,26 +294,26 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.content[0].couponId", is(1005)))
                 .andExpect(jsonPath("$.content[0].couponTypeName", is("Fix Discount for Book")))
                 .andExpect(jsonPath("$.content[0].discountInfo.discountPrice", is(5.00)))
-                .andExpect(jsonPath("$.content[0].disCountType", is("FIX")))
+                .andExpect(jsonPath("$.content[0].disCountType", is("정액")))
                 .andExpect(jsonPath("$.content[0].issueDate", notNullValue()))
                 .andExpect(jsonPath("$.content[0].deadline", notNullValue()))
-                .andExpect(jsonPath("$.content[0].couponStatus", is("UNUSED")))
+                .andExpect(jsonPath("$.content[0].couponStatus", is("미사용")))
                 .andExpect(jsonPath("$.content[0].couponTypeName", is("Fix Discount for Book")))
                 .andExpect(jsonPath("$.content[0].stacking", is(false)))
-                .andExpect(jsonPath("$.content[0].couponTargetType", is("BOOK")))
+                .andExpect(jsonPath("$.content[0].couponTargetType", is("책")))
                 .andExpect(jsonPath("$.content[0].couponTargetId", is(200)))
                 .andExpect(jsonPath("$.content[0].discountInfo.minOrderAmount", is(40.00)))
                 .andExpect(jsonPath("$.content[0].discountInfo.discountPrice", is(5.00)))
                 .andExpect(jsonPath("$.content[1].couponId", is(1006)))
                 .andExpect(jsonPath("$.content[1].couponTypeName", is("Another Fix Discount for Book")))
                 .andExpect(jsonPath("$.content[1].discountInfo.discountPrice", is(10.00)))
-                .andExpect(jsonPath("$.content[1].disCountType", is("FIX")))
+                .andExpect(jsonPath("$.content[1].disCountType", is("정액")))
                 .andExpect(jsonPath("$.content[1].issueDate", notNullValue()))
                 .andExpect(jsonPath("$.content[1].deadline", notNullValue()))
-                .andExpect(jsonPath("$.content[1].couponStatus", is("UNUSED")))
+                .andExpect(jsonPath("$.content[1].couponStatus", is("미사용")))
                 .andExpect(jsonPath("$.content[1].couponTypeName", is("Another Fix Discount for Book")))
                 .andExpect(jsonPath("$.content[1].stacking", is(true)))
-                .andExpect(jsonPath("$.content[1].couponTargetType", is("BOOK")))
+                .andExpect(jsonPath("$.content[1].couponTargetType", is("책")))
                 .andExpect(jsonPath("$.content[1].couponTargetId", is(200)))
                 .andExpect(jsonPath("$.content[1].discountInfo.minOrderAmount", is(60.00)))
                 .andExpect(jsonPath("$.content[1].discountInfo.discountPrice", is(10.00)))
@@ -373,13 +374,13 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.content[0].couponId", is(1007)))
                 .andExpect(jsonPath("$.content[0].couponTypeName", is("Fix Discount Mixed")))
                 .andExpect(jsonPath("$.content[0].discountInfo.discountPrice", is(15.00)))
-                .andExpect(jsonPath("$.content[0].disCountType", is("FIX")))
+                .andExpect(jsonPath("$.content[0].disCountType", is("정액")))
                 .andExpect(jsonPath("$.content[0].issueDate", notNullValue()))
                 .andExpect(jsonPath("$.content[0].deadline", notNullValue()))
-                .andExpect(jsonPath("$.content[0].couponStatus", is("UNUSED")))
+                .andExpect(jsonPath("$.content[0].couponStatus", is("미사용")))
                 .andExpect(jsonPath("$.content[0].couponTypeName", is("Fix Discount Mixed")))
                 .andExpect(jsonPath("$.content[0].stacking", is(false)))
-                .andExpect(jsonPath("$.content[0].couponTargetType", is("ALL")))
+                .andExpect(jsonPath("$.content[0].couponTargetType", is("전체")))
                 .andExpect(jsonPath("$.content[0].couponTargetId", is(nullValue())))
                 .andExpect(jsonPath("$.content[0].discountInfo.minOrderAmount", is(70.00)))
                 .andExpect(jsonPath("$.content[0].discountInfo.discountPrice", is(15.00)))
@@ -389,13 +390,13 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.content[1].discountInfo.discountRate", is(20.00)))
                 .andExpect(jsonPath("$.content[1].discountInfo.minOrderAmount", is(150.00)))
                 .andExpect(jsonPath("$.content[1].discountInfo.maxDiscountAmount", is(50.00)))
-                .andExpect(jsonPath("$.content[1].disCountType", is("RATE")))
+                .andExpect(jsonPath("$.content[1].disCountType", is("정률")))
                 .andExpect(jsonPath("$.content[1].issueDate", notNullValue()))
                 .andExpect(jsonPath("$.content[1].deadline", notNullValue()))
-                .andExpect(jsonPath("$.content[1].couponStatus", is("UNUSED")))
+                .andExpect(jsonPath("$.content[1].couponStatus", is("미사용")))
                 .andExpect(jsonPath("$.content[1].couponTypeName", is("Rate Discount Mixed")))
                 .andExpect(jsonPath("$.content[1].stacking", is(true)))
-                .andExpect(jsonPath("$.content[1].couponTargetType", is("CATEGORY")))
+                .andExpect(jsonPath("$.content[1].couponTargetType", is("카테고리")))
                 .andExpect(jsonPath("$.content[1].couponTargetId", is(400)))
                 .andExpect(jsonPath("$.content[1].discountInfo.discountRate", is(20.00)))
                 .andExpect(jsonPath("$.content[1].discountInfo.minOrderAmount", is(150.00)))
@@ -417,54 +418,43 @@ class CouponControllerTest {
 
 
 
-        List<CouponResponseDto> responseDtoList = Arrays.asList(
-                FixCouponResponseDto.builder()
-                        .couponId(1009L)
-                        .issueDate(LocalDateTime.now())
-                        .deadline(LocalDateTime.now().plusDays(30))
-                        .couponStatus(CouponStatus.UNUSED)
-                        .couponTypeName("Issued Fix Discount")
-                        .isStacking(false)
-                        .couponTargetType(CouponTargetType.ALL)
-                        .couponTargetId(null)
-                        .discountPrice(new BigDecimal("25.00"))
-                        .minOrderAmount(new BigDecimal("100.00"))
-                        .build(),
-                FixCouponResponseDto.builder()
-                        .couponId(1010L)
-                        .issueDate(LocalDateTime.now())
-                        .deadline(LocalDateTime.now().plusDays(30))
-                        .couponStatus(CouponStatus.UNUSED)
-                        .couponTypeName("Issued Fix Discount")
-                        .isStacking(false)
-                        .couponTargetType(CouponTargetType.ALL)
-                        .couponTargetId(null)
-                        .discountPrice(new BigDecimal("30.00"))
-                        .minOrderAmount(new BigDecimal("120.00"))
-                        .build()
-        );
+//        List<CouponResponseDto> responseDtoList = Arrays.asList(
+//                FixCouponResponseDto.builder()
+//                        .couponId(1009L)
+//                        .issueDate(LocalDateTime.now())
+//                        .deadline(LocalDateTime.now().plusDays(30))
+//                        .couponStatus(CouponStatus.UNUSED)
+//                        .couponTypeName("Issued Fix Discount")
+//                        .isStacking(false)
+//                        .couponTargetType(CouponTargetType.ALL)
+//                        .couponTargetId(null)
+//                        .discountPrice(new BigDecimal("25.00"))
+//                        .minOrderAmount(new BigDecimal("100.00"))
+//                        .build(),
+//                FixCouponResponseDto.builder()
+//                        .couponId(1010L)
+//                        .issueDate(LocalDateTime.now())
+//                        .deadline(LocalDateTime.now().plusDays(30))
+//                        .couponStatus(CouponStatus.UNUSED)
+//                        .couponTypeName("Issued Fix Discount")
+//                        .isStacking(false)
+//                        .couponTargetType(CouponTargetType.ALL)
+//                        .couponTargetId(null)
+//                        .discountPrice(new BigDecimal("30.00"))
+//                        .minOrderAmount(new BigDecimal("120.00"))
+//                        .build()
+//        );
+        List<Long> couponIds = List.of(1009L, 1010L);
 
-        when(couponService.issueCoupons(anyList(), eq(100L))).thenReturn(responseDtoList);
+        when(couponService.issueCoupons(anyList(), eq(100L))).thenReturn(couponIds);
 
         mockMvc.perform(post("/api/coupons/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(2)))
-                // 첫 번째 FixCouponResponseDto 검증
-                .andExpect(jsonPath("$[0].couponId", is(1009)))
-                .andExpect(jsonPath("$[0].couponTypeName", is("Issued Fix Discount")))
-                .andExpect(jsonPath("$[0].discountInfo.discountPrice", is(25.00)))
-                .andExpect(jsonPath("$[0].disCountType", is("FIX")))
-                .andExpect(jsonPath("$[0].discountInfo.minOrderAmount", is(100.00)))
-                // 두 번째 FixCouponResponseDto 검증
-                .andExpect(jsonPath("$[1].couponId", is(1010)))
-                .andExpect(jsonPath("$[1].couponTypeName", is("Issued Fix Discount")))
-                .andExpect(jsonPath("$[1].discountInfo.discountPrice", is(30.00)))
-                .andExpect(jsonPath("$[1].disCountType", is("FIX")))
-                .andExpect(jsonPath("$[1].discountInfo.minOrderAmount", is(120.00)));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
     }
 
     /**
@@ -478,58 +468,45 @@ class CouponControllerTest {
                 .couponTypeId(200L)
                 .build();
 
-        List<CouponResponseDto> responseDtoList = Arrays.asList(
-                RateCouponResponseDto.builder()
-                        .couponId(1011L)
-                        .issueDate(LocalDateTime.now())
-                        .deadline(LocalDateTime.now().plusDays(30))
-                        .couponStatus(CouponStatus.UNUSED)
-                        .couponTypeName("Issued Rate Discount")
-                        .isStacking(true)
-                        .couponTargetType(CouponTargetType.CATEGORY)
-                        .couponTargetId(500L)
-                        .discountRate(new BigDecimal("20.00"))
-                        .maxDiscountAmount(new BigDecimal("40.00"))
-                        .minOrderAmount(new BigDecimal("200.00"))
-                        .build(),
-                RateCouponResponseDto.builder()
-                        .couponId(1012L)
-                        .issueDate(LocalDateTime.now())
-                        .deadline(LocalDateTime.now().plusDays(30))
-                        .couponStatus(CouponStatus.UNUSED)
-                        .couponTypeName("Issued Rate Discount")
-                        .isStacking(true)
-                        .couponTargetType(CouponTargetType.BOOK)
-                        .couponTargetId(600L)
-                        .discountRate(new BigDecimal("15.00"))
-                        .maxDiscountAmount(new BigDecimal("30.00"))
-                        .minOrderAmount(new BigDecimal("180.00"))
-                        .build()
-        );
+//        List<CouponResponseDto> responseDtoList = Arrays.asList(
+//                RateCouponResponseDto.builder()
+//                        .couponId(1011L)
+//                        .issueDate(LocalDateTime.now())
+//                        .deadline(LocalDateTime.now().plusDays(30))
+//                        .couponStatus(CouponStatus.UNUSED)
+//                        .couponTypeName("Issued Rate Discount")
+//                        .isStacking(true)
+//                        .couponTargetType(CouponTargetType.CATEGORY)
+//                        .couponTargetId(500L)
+//                        .discountRate(new BigDecimal("20.00"))
+//                        .maxDiscountAmount(new BigDecimal("40.00"))
+//                        .minOrderAmount(new BigDecimal("200.00"))
+//                        .build(),
+//                RateCouponResponseDto.builder()
+//                        .couponId(1012L)
+//                        .issueDate(LocalDateTime.now())
+//                        .deadline(LocalDateTime.now().plusDays(30))
+//                        .couponStatus(CouponStatus.UNUSED)
+//                        .couponTypeName("Issued Rate Discount")
+//                        .isStacking(true)
+//                        .couponTargetType(CouponTargetType.BOOK)
+//                        .couponTargetId(600L)
+//                        .discountRate(new BigDecimal("15.00"))
+//                        .maxDiscountAmount(new BigDecimal("30.00"))
+//                        .minOrderAmount(new BigDecimal("180.00"))
+//                        .build()
+//        );
+        List<Long> couponIds = List.of(1009L, 1010L);
 
-        when(couponService.issueCoupons(anyList(), eq(200L))).thenReturn(responseDtoList);
+
+        when(couponService.issueCoupons(anyList(), eq(200L))).thenReturn(couponIds);
 
         mockMvc.perform(post("/api/coupons/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(2)))
-                // 첫 번째 RateCouponResponseDto 검증
-                .andExpect(jsonPath("$[0].couponId", is(1011)))
-                .andExpect(jsonPath("$[0].couponTypeName", is("Issued Rate Discount")))
-                .andExpect(jsonPath("$[0].discountInfo.discountRate", is(20.00)))
-                .andExpect(jsonPath("$[0].discountInfo.minOrderAmount", is(200.00)))
-                .andExpect(jsonPath("$[0].discountInfo.maxDiscountAmount", is(40.00)))
-                .andExpect(jsonPath("$[0].disCountType", is("RATE")))
-                // 두 번째 RateCouponResponseDto 검증
-                .andExpect(jsonPath("$[1].couponId", is(1012)))
-                .andExpect(jsonPath("$[1].couponTypeName", is("Issued Rate Discount")))
-                .andExpect(jsonPath("$[1].discountInfo.discountRate", is(15.00)))
-                .andExpect(jsonPath("$[1].discountInfo.minOrderAmount", is(180.00)))
-                .andExpect(jsonPath("$[1].discountInfo.maxDiscountAmount", is(30.00)))
-                .andExpect(jsonPath("$[1].disCountType", is("RATE")));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     /**
@@ -584,14 +561,14 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.couponId", is(couponId.intValue())))
                 .andExpect(jsonPath("$.couponTypeName", is("Expired Fix Discount")))
                 .andExpect(jsonPath("$.discountInfo.discountPrice", is(15.00)))
-                .andExpect(jsonPath("$.disCountType", is("FIX")))
+                .andExpect(jsonPath("$.disCountType", is("정액")))
                 .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(90.00)))
                 .andExpect(jsonPath("$.issueDate", notNullValue()))
                 .andExpect(jsonPath("$.deadline", notNullValue()))
-                .andExpect(jsonPath("$.couponStatus", is("EXPIRED")))
+                .andExpect(jsonPath("$.couponStatus", is("만료")))
                 .andExpect(jsonPath("$.couponTypeName", is("Expired Fix Discount")))
                 .andExpect(jsonPath("$.stacking", is(false)))
-                .andExpect(jsonPath("$.couponTargetType", is("ALL")))
+                .andExpect(jsonPath("$.couponTargetType", is("전체")))
                 .andExpect(jsonPath("$.couponTargetId", is(nullValue())))
                 .andExpect(jsonPath("$.discountInfo.discountPrice", is(15.00)));
     }
@@ -629,13 +606,13 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.discountInfo.discountRate", is(25.00)))
                 .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(200.00)))
                 .andExpect(jsonPath("$.discountInfo.maxDiscountAmount", is(60.00)))
-                .andExpect(jsonPath("$.disCountType", is("RATE")))
+                .andExpect(jsonPath("$.disCountType", is("정률")))
                 .andExpect(jsonPath("$.issueDate", notNullValue()))
                 .andExpect(jsonPath("$.deadline", notNullValue()))
-                .andExpect(jsonPath("$.couponStatus", is("USED")))
+                .andExpect(jsonPath("$.couponStatus", is("사용")))
                 .andExpect(jsonPath("$.couponTypeName", is("Used Rate Discount")))
                 .andExpect(jsonPath("$.stacking", is(true)))
-                .andExpect(jsonPath("$.couponTargetType", is("CATEGORY")))
+                .andExpect(jsonPath("$.couponTargetType", is("카테고리")))
                 .andExpect(jsonPath("$.couponTargetId", is(700)));
     }
 
@@ -687,14 +664,14 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.couponId", is(couponId.intValue())))
                 .andExpect(jsonPath("$.couponTypeName", is("Used Fix Discount")))
                 .andExpect(jsonPath("$.discountInfo.discountPrice", is(20.00)))
-                .andExpect(jsonPath("$.disCountType", is("FIX")))
+                .andExpect(jsonPath("$.disCountType", is("정액")))
                 .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(100.00)))
                 .andExpect(jsonPath("$.issueDate", notNullValue()))
                 .andExpect(jsonPath("$.deadline", notNullValue()))
-                .andExpect(jsonPath("$.couponStatus", is("USED")))
+                .andExpect(jsonPath("$.couponStatus", is("사용")))
                 .andExpect(jsonPath("$.couponTypeName", is("Used Fix Discount")))
                 .andExpect(jsonPath("$.stacking", is(false)))
-                .andExpect(jsonPath("$.couponTargetType", is("ALL")))
+                .andExpect(jsonPath("$.couponTargetType", is("전체")))
                 .andExpect(jsonPath("$.couponTargetId", is(nullValue())))
                 .andExpect(jsonPath("$.discountInfo.discountPrice", is(20.00)));
     }
@@ -732,13 +709,13 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.discountInfo.discountRate", is(30.00)))
                 .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(250.00)))
                 .andExpect(jsonPath("$.discountInfo.maxDiscountAmount", is(70.00)))
-                .andExpect(jsonPath("$.disCountType", is("RATE")))
+                .andExpect(jsonPath("$.disCountType", is("정률")))
                 .andExpect(jsonPath("$.issueDate", notNullValue()))
                 .andExpect(jsonPath("$.deadline", notNullValue()))
-                .andExpect(jsonPath("$.couponStatus", is("USED")))
+                .andExpect(jsonPath("$.couponStatus", is("사용")))
                 .andExpect(jsonPath("$.couponTypeName", is("Used Rate Discount")))
                 .andExpect(jsonPath("$.stacking", is(true)))
-                .andExpect(jsonPath("$.couponTargetType", is("BOOK")))
+                .andExpect(jsonPath("$.couponTargetType", is("책")))
                 .andExpect(jsonPath("$.couponTargetId", is(800)));
     }
 

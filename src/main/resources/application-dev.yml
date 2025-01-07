@@ -19,11 +19,21 @@ logging:
   level:
     org:
       hibernate:
-        SQL: debug
-        type: trace
+#        SQL: debug
+#        type: trace
 
 object-storage:
   container-name: 6781cafa4fe14ae1ac55305ac102bddf
 
 database:
   url: 22ebb2edfcd24204b891cc8f4a5b8a9c
+
+redis:
+  database: 220
+
+payment:
+  toss:
+    client_api_key : test_ck_vZnjEJeQVxbmJoKKo22P8PmOoBN0
+    secret_api_key : test_sk_LkKEypNArW1PydoJnX5j3lmeaxYG
+    success_url : "http://localhost:8020/api/success"
+    fail_url : "http://localhost:8020/api/fail"

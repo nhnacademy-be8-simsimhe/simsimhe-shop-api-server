@@ -1,5 +1,6 @@
 package com.simsimbookstore.apiserver.coupons.coupontype.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponTargetType;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
@@ -18,6 +19,7 @@ public class CouponTypeRequestDto {
     @NotBlank(message = "쿠폰 종류 이름을 입력해주세요")
     @Length(max = 40,message = "쿠폰 종류 이름은 최대 40자까지 입력 가능합니다.")
     private String couponTypeName;
+    private Long targetId; //BookId , CategoryID
 
     private Integer period;
 
@@ -32,12 +34,11 @@ public class CouponTypeRequestDto {
     @NotNull(message = "쿠폰 타입을 입력해주세요")
     private CouponTargetType couponTargetType;
 
-    private Long targetId; //BookId , CategoryID
 
     /**
      * period와 deadline 중 하나는 null이어야 함.
      */
-    @AssertTrue
+    @AssertTrue(message = "period와 deadline은 서로 XOR 관계입니다.")
     public boolean isValidPeriodAndDeadline() {
         boolean isPeriodNull = (this.period == null);
         boolean isDeadlineNull = (this.deadline == null);
@@ -47,8 +48,9 @@ public class CouponTypeRequestDto {
     /**
      * AllCoupon이면 targetId는 null이어야함
      */
-    @AssertTrue
-    public boolean AllCouponTargetIdValid() {
+    @AssertTrue(message = "ALL 쿠폰은 TargetId를 가질 수 없습니다.")
+    public boolean isValidAllCouponTargetId() {
+
         if (couponTargetType == CouponTargetType.ALL) {
             return Objects.isNull(targetId);
         }

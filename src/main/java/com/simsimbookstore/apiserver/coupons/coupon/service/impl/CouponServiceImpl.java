@@ -1,10 +1,11 @@
 package com.simsimbookstore.apiserver.coupons.coupon.service.impl;
 
+import com.simsimbookstore.apiserver.books.book.dto.BookResponseDto;
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
+import com.simsimbookstore.apiserver.books.bookcategory.entity.BookCategory;
 import com.simsimbookstore.apiserver.books.bookcategory.repository.BookCategoryRepository;
 import com.simsimbookstore.apiserver.books.category.dto.CategoryResponseDto;
-import com.simsimbookstore.apiserver.common.exception.NotFoundException;
 import com.simsimbookstore.apiserver.coupons.bookcoupon.entity.BookCoupon;
 import com.simsimbookstore.apiserver.coupons.categorycoupon.entity.CategoryCoupon;
 import com.simsimbookstore.apiserver.coupons.coupon.dto.CouponResponseDto;
@@ -23,6 +24,7 @@ import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.DisCountType;
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponType;
 import com.simsimbookstore.apiserver.coupons.coupontype.repository.CouponTypeRepository;
 import com.simsimbookstore.apiserver.exception.AlreadyExistException;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -164,8 +166,8 @@ public class CouponServiceImpl implements CouponService {
      */
     @Override
     @Transactional
-    public List<CouponResponseDto> issueCoupons(List<Long> userIds, Long couponTypeId) {
-        List<CouponResponseDto> result = new ArrayList<>();
+    public List<Long> issueCoupons(List<Long> userIds, Long couponTypeId) {
+        List<Long> result = new ArrayList<>();
         validateId(couponTypeId);
         CouponType couponType = couponTypeRepository.findById(couponTypeId).orElseThrow(() -> new NotFoundException("쿠폰 정책(id:" + couponTypeId + ")이 존재하지 않습니다.1"));
 
@@ -190,7 +192,7 @@ public class CouponServiceImpl implements CouponService {
                     .build();
 
             Coupon savedCoupon = couponRepository.save(coupon);
-            result.add(CouponMapper.toResponse(savedCoupon));
+            result.add(savedCoupon.getCouponId());
 
         }
         return result;
@@ -281,7 +283,10 @@ public class CouponServiceImpl implements CouponService {
         validateId(couponId);
         Book book = bookRepository.findByBookId(bookId).orElseThrow(() -> new NotFoundException("책(id:" + bookId + ")이 존재하지 않습니다."));
         Coupon coupon = couponRepository.findById(couponId).orElseThrow(() -> new NotFoundException("쿠폰(id:" + couponId + ")이 존재하지 않습니다."));
-        List<List<CategoryResponseDto>> categoryList = bookRepository.getBookDetail(null, book.getBookId()).getCategoryList();
+//        BookResponseDto bookDetail = bookRepository.getBookDetail(null, book.getBookId());
+//        List<List<CategoryResponseDto>> categoryList = bookDetail.getCategoryList();
+        List<BookCategory> bookCategoryList = bookCategoryRepository.findByBookId(book.getBookId());
+
 
 
         // 쿠폰 적용 가능한지 확인
@@ -291,11 +296,18 @@ public class CouponServiceImpl implements CouponService {
             }
         } else if (coupon.getCouponType() instanceof CategoryCoupon categoryCoupon) {
             boolean flag = true;
-            for (List<CategoryResponseDto> categoryResponseDtos : categoryList) {
-                for (CategoryResponseDto categoryResponseDto : categoryResponseDtos) {
-                    if (categoryResponseDto.getCategoryId().equals(categoryCoupon.getCategory().getCategoryId())) {
-                        flag = false;
-                    }
+//            for (List<CategoryResponseDto> categoryResponseDtos : categoryList) {
+//                for (CategoryResponseDto categoryResponseDto : categoryResponseDtos) {
+//                    if (categoryResponseDto.getCategoryId().equals(categoryCoupon.getCategory().getCategoryId())) {
+//                        flag = false;
+//                    }
+//                }
+//            }
+            for (BookCategory bookCategory : bookCategoryList) {
+                Long bookCategoryId = bookCategory.getCatagory().getCategoryId();
+                Long couponCategoryId = categoryCoupon.getCategory().getCategoryId();
+                if (bookCategoryId.equals(couponCategoryId)) {
+                    flag = false;
                 }
             }
             if (flag) {

@@ -18,6 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -106,9 +107,9 @@ public class CouponController {
      * @return 발행된 쿠폰들
      */
     @PostMapping("/coupons/issue")
-    public ResponseEntity<List<CouponResponseDto>> issueCoupons(@Valid @RequestBody IssueCouponsRequestDto requestDto) {
-        List<CouponResponseDto> issueCoupons = couponService.issueCoupons(requestDto.getUserIds(), requestDto.getCouponTypeId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(issueCoupons);
+    public ResponseEntity<Map<String,List<Long>>> issueCoupons(@Valid @RequestBody IssueCouponsRequestDto requestDto) {
+        List<Long> issueCouponIds = couponService.issueCoupons(requestDto.getUserIds(), requestDto.getCouponTypeId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("couponIds",issueCouponIds));
     }
 
     /**

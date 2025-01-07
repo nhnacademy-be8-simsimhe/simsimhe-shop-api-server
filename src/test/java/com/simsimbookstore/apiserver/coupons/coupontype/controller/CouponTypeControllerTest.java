@@ -138,8 +138,10 @@ class CouponTypeControllerTest {
                 .couponTypeName("New CouponType")
                 .couponPolicyId(100L) // ★ 필수 필드
                 .period(30)
+                .deadline(null)
                 .stacking(false)
                 .couponTargetType(CouponTargetType.BOOK) // ★ 필수 필드
+                .targetId(1L)
                 .build();
 
         CouponTypeResponseDto createdCouponType = CouponTypeResponseDto.builder()
@@ -150,7 +152,6 @@ class CouponTypeControllerTest {
 
         when(couponTypeService.createCouponType(any(CouponTypeRequestDto.class)))
                 .thenReturn(createdCouponType);
-
         // when & then
         mockMvc.perform(post("/api/admin/couponTypes")
                         .contentType(MediaType.APPLICATION_JSON)

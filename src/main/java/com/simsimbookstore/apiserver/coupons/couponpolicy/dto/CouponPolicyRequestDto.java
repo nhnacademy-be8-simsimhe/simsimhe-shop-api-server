@@ -38,7 +38,7 @@ public class CouponPolicyRequestDto {
      * 2) discountType == FIX
      * -> discountPrice가 Notnull이고 discountRate, maxDiscountAmount은 null
      */
-    @AssertTrue
+    @AssertTrue(message = "FIX와 RATE 간에 상호배제되는 값을 확인하세요")
     public boolean isDiscountValueValid() {
         if (discountType == DisCountType.RATE) {
             // null체크

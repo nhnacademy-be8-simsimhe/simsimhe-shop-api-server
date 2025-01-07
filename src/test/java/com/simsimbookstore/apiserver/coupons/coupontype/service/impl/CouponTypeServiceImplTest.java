@@ -4,7 +4,8 @@ import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
 import com.simsimbookstore.apiserver.books.category.entity.Category;
 import com.simsimbookstore.apiserver.books.category.repository.CategoryRepository;
-import com.simsimbookstore.apiserver.common.exception.NotFoundException;
+import com.simsimbookstore.apiserver.coupons.couponpolicy.repository.CouponPolicyRepository;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.coupons.allcoupon.entity.AllCoupon;
 import com.simsimbookstore.apiserver.coupons.bookcoupon.entity.BookCoupon;
 import com.simsimbookstore.apiserver.coupons.categorycoupon.entity.CategoryCoupon;
@@ -47,6 +48,8 @@ class CouponTypeServiceImplTest {
 
     @Mock
     private CategoryRepository categoryRepository;
+    @Mock
+    private CouponPolicyRepository couponPolicyRepository;
 
     @InjectMocks
     private CouponTypeServiceImpl couponTypeService;
@@ -55,11 +58,12 @@ class CouponTypeServiceImplTest {
     private CouponType couponType1;
     private CouponType couponType2;
     private CouponType couponType3;
-
+    private CouponPolicy couponPolicy1;
+    private CouponPolicy couponPolicy2;
     @BeforeEach
     void setup() {
-        CouponPolicy couponPolicy1 = CouponPolicy.builder().couponPolicyId(1L).build();
-        CouponPolicy couponPolicy2 = CouponPolicy.builder().couponPolicyId(2L).build();
+        couponPolicy1 = CouponPolicy.builder().couponPolicyId(1L).build();
+        couponPolicy2 = CouponPolicy.builder().couponPolicyId(2L).build();
         Book book = Book.builder().bookId(100L).title("Test Book").build();
         Category category = Category.builder().categoryId(1001L).categoryName("Test Category").build();
 
@@ -176,9 +180,11 @@ class CouponTypeServiceImplTest {
                 .targetId(100L)
                 .build();
 
+
+
         when(bookRepository.findByBookId(100L)).thenReturn(Optional.of(((BookCoupon) couponType1).getBook()));
         when(couponTypeRepository.save(any(BookCoupon.class))).thenReturn((BookCoupon) couponType1);
-
+        when(couponPolicyRepository.findById(requestDto.getCouponPolicyId())).thenReturn(Optional.of(couponPolicy1));
         // When
         CouponTypeResponseDto result = couponTypeService.createCouponType(requestDto);
 
@@ -206,6 +212,7 @@ class CouponTypeServiceImplTest {
 
         when(categoryRepository.findById(1001L)).thenReturn(Optional.of(((CategoryCoupon) couponType2).getCategory()));
         when(couponTypeRepository.save(any(CategoryCoupon.class))).thenReturn((CategoryCoupon) couponType2);
+        when(couponPolicyRepository.findById(requestDto.getCouponPolicyId())).thenReturn(Optional.of(couponPolicy1));
 
         // When
         CouponTypeResponseDto result = couponTypeService.createCouponType(requestDto);
@@ -232,9 +239,11 @@ class CouponTypeServiceImplTest {
                 .build();
 
         when(couponTypeRepository.save(any(AllCoupon.class))).thenReturn((AllCoupon) couponType3);
+        when(couponPolicyRepository.findById(requestDto.getCouponPolicyId())).thenReturn(Optional.of(couponPolicy2));
 
         // When
         CouponTypeResponseDto result = couponTypeService.createCouponType(requestDto);
+
 
         // Then
         assertNotNull(result);

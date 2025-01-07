@@ -1,6 +1,6 @@
 package com.simsimbookstore.apiserver.coupons.couponpolicy.service.impl;
 
-import com.simsimbookstore.apiserver.common.exception.NotFoundException;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.dto.CouponPolicyRequestDto;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.dto.CouponPolicyResponseDto;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.CouponPolicy;

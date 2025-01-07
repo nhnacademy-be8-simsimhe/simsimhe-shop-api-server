@@ -4,8 +4,10 @@ import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
 import com.simsimbookstore.apiserver.books.category.entity.Category;
 import com.simsimbookstore.apiserver.books.category.repository.CategoryRepository;
+import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.CouponPolicy;
+import com.simsimbookstore.apiserver.coupons.couponpolicy.repository.CouponPolicyRepository;
 import com.simsimbookstore.apiserver.coupons.exception.AlreadyCouponTypeIssue;
-import com.simsimbookstore.apiserver.common.exception.NotFoundException;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.coupons.bookcoupon.entity.BookCoupon;
 import com.simsimbookstore.apiserver.coupons.categorycoupon.entity.CategoryCoupon;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.Coupon;
@@ -29,10 +31,11 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CouponTypeServiceImpl implements CouponTypeService {
-    private CouponTypeRepository couponTypeRepository;
-    private CouponRepository couponRepository;
-    private BookRepository bookRepository;
-    private CategoryRepository categoryRepository;
+    private final CouponTypeRepository couponTypeRepository;
+    private final CouponRepository couponRepository;
+    private final BookRepository bookRepository;
+    private final CategoryRepository categoryRepository;
+    private final CouponPolicyRepository couponPolicyRepository;
 
     /**
      * 모든 쿠폰 타입을 가져온다.
@@ -95,6 +98,9 @@ public class CouponTypeServiceImpl implements CouponTypeService {
             Category category = categoryRepository.findById(requestDto.getTargetId()).orElseThrow(() -> new NotFoundException("카테고리(id:" + requestDto.getTargetId() + ")이 존재하지 않습니다."));
             ((CategoryCoupon) couponType).setCategory(category);
         }
+        validateId(requestDto.getCouponPolicyId());
+        CouponPolicy couponPolicy = couponPolicyRepository.findById(requestDto.getCouponPolicyId()).orElseThrow(() -> new NotFoundException("쿠폰 정책(id:" + requestDto.getCouponPolicyId() + ")이 존재하지 않습니다."));
+        couponType.setCouponPolicy(couponPolicy);
         CouponType save = couponTypeRepository.save(couponType);
         return CouponTypeMapper.toResponse(save);
     }
@@ -112,8 +118,8 @@ public class CouponTypeServiceImpl implements CouponTypeService {
     public void deleteCouponType(Long couponTypeId) {
         validateId(couponTypeId);
         CouponType couponType = couponTypeRepository.findById(couponTypeId).orElseThrow(() -> new NotFoundException("쿠폰타입(id:" + couponTypeId + ")이 존재하지 않습니다."));
-        List<Coupon> couponTypes = couponRepository.findByCouponTypeCouponTypeId(couponTypeId);
-        if (!couponTypes.isEmpty()) {
+        List<Coupon> coupons = couponRepository.findByCouponTypeCouponTypeId(couponTypeId);
+        if (!coupons.isEmpty()) {
             throw new AlreadyCouponTypeIssue("쿠폰 타입(id:" + couponTypeId + ")이 이미 회원에게 발급되었습니다.");
         }
         couponTypeRepository.delete(couponType);

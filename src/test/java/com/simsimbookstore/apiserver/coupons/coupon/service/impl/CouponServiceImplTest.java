@@ -3,9 +3,11 @@ package com.simsimbookstore.apiserver.coupons.coupon.service.impl;
 import com.simsimbookstore.apiserver.books.book.dto.BookResponseDto;
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
+import com.simsimbookstore.apiserver.books.bookcategory.entity.BookCategory;
+import com.simsimbookstore.apiserver.books.bookcategory.repository.BookCategoryRepository;
 import com.simsimbookstore.apiserver.books.category.dto.CategoryResponseDto;
 import com.simsimbookstore.apiserver.books.category.entity.Category;
-import com.simsimbookstore.apiserver.common.exception.NotFoundException;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.coupons.allcoupon.entity.AllCoupon;
 import com.simsimbookstore.apiserver.coupons.bookcoupon.entity.BookCoupon;
 import com.simsimbookstore.apiserver.coupons.categorycoupon.entity.CategoryCoupon;
@@ -58,6 +60,8 @@ class CouponServiceImplTest {
     private BookRepository bookRepository;
     @Mock
     private CouponTypeRepository couponTypeRepository;
+    @Mock
+    private BookCategoryRepository bookCategoryRepository;
     @InjectMocks
     private CouponServiceImpl couponService;
 
@@ -627,40 +631,22 @@ class CouponServiceImplTest {
         // 쿠폰 저장 Mock 설정
         when(couponRepository.save(any(Coupon.class))).thenReturn(coupon1, coupon2, coupon3);
 
-        List<CouponResponseDto> issuedCoupons = couponService.issueCoupons(userIds, couponTypeId);
+        List<Long> issuedCouponIds = couponService.issueCoupons(userIds, couponTypeId);
 
-        assertNotNull(issuedCoupons);
-        assertEquals(3, issuedCoupons.size());
+        assertNotNull(issuedCouponIds);
+        assertEquals(3, issuedCouponIds.size());
 
         // First Issued Coupon
-        CouponResponseDto firstDto = issuedCoupons.get(0);
-        assertTrue(firstDto instanceof FixCouponResponseDto);
-        FixCouponResponseDto fixDto1 = (FixCouponResponseDto) firstDto;
-        assertEquals(1001L, fixDto1.getCouponId());
-        assertEquals("Book Discount", fixDto1.getCouponTypeName());
-        assertEquals(DisCountType.FIX, fixDto1.getDisCountType());
-        assertEquals(new BigDecimal("5000"), fixDto1.getDiscountPrice());
-        assertEquals(new BigDecimal("20000"), fixDto1.getMinOrderAmount());
+        Long firstId = issuedCouponIds.get(0);
+        assertEquals(1001L, firstId);
 
         // Second Issued Coupon
-        CouponResponseDto secondDto = issuedCoupons.get(1);
-        assertTrue(secondDto instanceof FixCouponResponseDto);
-        FixCouponResponseDto fixDto2 = (FixCouponResponseDto) secondDto;
-        assertEquals(1002L, fixDto2.getCouponId());
-        assertEquals("Book Discount", fixDto2.getCouponTypeName());
-        assertEquals(DisCountType.FIX, fixDto2.getDisCountType());
-        assertEquals(new BigDecimal("5000"), fixDto2.getDiscountPrice());
-        assertEquals(new BigDecimal("20000"), fixDto2.getMinOrderAmount());
+        Long secondId = issuedCouponIds.get(1);
+        assertEquals(1002L, secondId);
 
         // Third Issued Coupon
-        CouponResponseDto thirdDto = issuedCoupons.get(2);
-        assertTrue(thirdDto instanceof FixCouponResponseDto);
-        FixCouponResponseDto fixDto3 = (FixCouponResponseDto) thirdDto;
-        assertEquals(1003L, fixDto3.getCouponId());
-        assertEquals("Book Discount", fixDto3.getCouponTypeName());
-        assertEquals(DisCountType.FIX, fixDto3.getDisCountType());
-        assertEquals(new BigDecimal("5000"), fixDto3.getDiscountPrice());
-        assertEquals(new BigDecimal("20000"), fixDto3.getMinOrderAmount());
+        Long thirdId = issuedCouponIds.get(2);
+        assertEquals(1003L, thirdId);
 
         // 쿠폰 저장이 3번 호출되었는지 검증
         verify(couponRepository, times(3)).save(any(Coupon.class));
@@ -958,12 +944,13 @@ class CouponServiceImplTest {
                 .useDate(null)
                 .build();
 
-        BookResponseDto bookResponseDto = BookResponseDto.builder()
-                .categoryList(Arrays.asList(Arrays.asList(CategoryResponseDto.builder().categoryId(1L).categoryName("Test Category").build())))
-                .build();
+//        BookResponseDto bookResponseDto = BookResponseDto.builder()
+//                .categoryList(Arrays.asList(Arrays.asList(CategoryResponseDto.builder().categoryId(1L).categoryName("Test Category").build())))
+//                .build();
 
         when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
-        when(bookRepository.getBookDetail(null, bookId)).thenReturn(bookResponseDto);
+//        when(bookRepository.getBookDetail(null, bookId)).thenReturn(bookResponseDto);
+        when(bookCategoryRepository.findByBookId(bookId)).thenReturn(List.of(BookCategory.builder().catagory(Category.builder().categoryId(1L).build()).build()));
 
 
         DiscountAmountResponseDto responseDto = couponService.calDiscountAmount(bookId, quantity, couponId);
@@ -1004,13 +991,13 @@ class CouponServiceImplTest {
                 .useDate(null)
                 .build();
 
-        BookResponseDto bookResponseDto = BookResponseDto.builder()
-                .categoryList(Arrays.asList(Arrays.asList(CategoryResponseDto.builder().categoryId(1L).categoryName("Test Category").build())))
-                .build();
+//        BookResponseDto bookResponseDto = BookResponseDto.builder()
+//                .categoryList(Arrays.asList(Arrays.asList(CategoryResponseDto.builder().categoryId(1L).categoryName("Test Category").build())))
+//                .build();
 
         when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
-        when(bookRepository.getBookDetail(null, bookId)).thenReturn(bookResponseDto);
-
+//        when(bookRepository.getBookDetail(null, bookId)).thenReturn(bookResponseDto);
+        when(bookCategoryRepository.findByBookId(bookId)).thenReturn(List.of(BookCategory.builder().catagory(Category.builder().categoryId(1L).build()).build()));
         DiscountAmountResponseDto responseDto = couponService.calDiscountAmount(bookId, quantity, couponId);
 
         assertNotNull(responseDto);
@@ -1042,13 +1029,14 @@ class CouponServiceImplTest {
         Integer quantity = 1;
         Long couponId = 1003L;
 
-        BookResponseDto bookResponseDto = BookResponseDto.builder()
-                .categoryList(Arrays.asList(Arrays.asList(CategoryResponseDto.builder().categoryId(1L).categoryName("Test Category").build())))
-                .build();
+//        BookResponseDto bookResponseDto = BookResponseDto.builder()
+//                .categoryList(Arrays.asList(Arrays.asList(CategoryResponseDto.builder().categoryId(1L).categoryName("Test Category").build())))
+//                .build();
 
         // 책 조회 시 정상적으로 반환
         when(bookRepository.findByBookId(bookId)).thenReturn(Optional.of(book));
-        when(bookRepository.getBookDetail(null, bookId)).thenReturn(bookResponseDto);
+//        when(bookRepository.getBookDetail(null, bookId)).thenReturn(bookResponseDto);
+
 
 
         // 쿠폰 조회 시 정상적으로 반환
