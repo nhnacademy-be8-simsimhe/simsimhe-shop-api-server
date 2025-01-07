@@ -129,6 +129,9 @@ class LocalUserControllerTest {
         mockMvc.perform(get("/api/users/localUsers/{loginId}", testLocalUser.getLoginId())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId").value(responseDto.getUserId()));
+                .andExpect(jsonPath("$.userId").value(responseDto.getUserId()))
+                .andExpect(jsonPath("$.loginId").value(responseDto.getLoginId()))
+                .andExpect(jsonPath("$.password").value(responseDto.getPassword()))
+                .andExpect(jsonPath("$.userStatus").value(responseDto.getUserStatus().toString()));
     }
 }
