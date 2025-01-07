@@ -1,16 +1,3 @@
-spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-#    dbcp2:
-#      initial-size: 2
-#      max-idle: 5
-#      min-idle: 1
-#      max-total: 10
-#      max-wait-millis: 5000
-#      test-on-borrow: true
-#      test-while-idle: true
-#      validation-query: select 1
-
 eureka:
   client:
     enabled: true # eureka 사용시 true로 변경

@@ -1,15 +1,3 @@
-spring:
-  datasource:
-    driverClassName: com.mysql.cj.jdbc.Driver
-#    dbcp2:
-#      initial-size: 20
-#      max-idle: 30
-#      min-idle: 10
-#      max-total: 50
-#      max-wait-millis: 3000
-#      test-on-borrow: true
-#      test-while-idle: true
-#      validation-query: select 1
 object-storage:
   container-name: 9dcd20ed0e9841929870ec167eb03518
 
