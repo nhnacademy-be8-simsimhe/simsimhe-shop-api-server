@@ -76,6 +76,9 @@ public class Order {
     @Column(name = "order_name", nullable = false)
     private String orderName;
 
+    @Column(name = "sender_name", nullable = false)
+    private String senderName;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "order_state", nullable = false)
     private OrderState orderState;

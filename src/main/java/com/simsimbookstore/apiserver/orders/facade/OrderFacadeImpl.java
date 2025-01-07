@@ -90,7 +90,7 @@ public class OrderFacadeImpl implements OrderFacade {
                 .orderName(orderName)
                 .email(orderReq.getOrderEmail())
                 .phoneNumber(orderReq.getPhoneNumber())
-                .method("CARD")
+                .method(facadeRequestDto.getMethod())
                 .userName("이름")
                 .build();
 

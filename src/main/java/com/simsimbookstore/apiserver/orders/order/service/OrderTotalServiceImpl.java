@@ -83,6 +83,8 @@ public class OrderTotalServiceImpl implements OrderTotalService{
                 .couponDiscountDetails(couponUsageDtos)
                 .build();
     }
+
+    @Override
     public BigDecimal calculateDeliveryPrice(BigDecimal total) {
         DeliveryPolicy standardPolicy = deliveryPolicyService.getStandardPolicy();
 

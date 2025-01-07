@@ -172,6 +172,7 @@ class PointHistoryCustomRepositoryImplTest {
                 .orderEmail("test@example.com")
                 .phoneNumber("010-1234-5678")
                 .pointEarn(100)
+                .senderName("senderName")
                 .deliveryPrice(BigDecimal.valueOf(5000))
                 .orderState(Order.OrderState.PENDING)
                 .build();

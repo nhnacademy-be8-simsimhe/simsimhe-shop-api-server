@@ -71,7 +71,7 @@ class OrderFacadeServiceImplTest {
                 .orderId(1234L)
                 .orderNumber("20241226-000001")
                 .build();
-
+        String method = "CARD";
         List<OrderBookRequestDto> orderBookReqList = List.of(
                 OrderBookRequestDto.builder()
                         .bookId(501L)
@@ -86,7 +86,8 @@ class OrderFacadeServiceImplTest {
         OrderFacadeRequestDto facadeRequestDto = new OrderFacadeRequestDto(
                 deliveryRequestDto,
                 orderReqDto,
-                orderBookReqList
+                orderBookReqList,
+                method
         );
 
         String mockOrderName = "Test Order Name";

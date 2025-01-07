@@ -16,11 +16,11 @@ import com.simsimbookstore.apiserver.orders.order.dto.OrderResponseDto;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.orders.order.service.OrderNumberService;
+import com.simsimbookstore.apiserver.orders.order.service.OrderTotalService;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +42,9 @@ class MemberOrderServiceImplTest {
 
     @Mock
     private DeliveryRepository deliveryRepository;
+
+    @Mock
+    private OrderTotalService orderTotalService;
 
     @InjectMocks
     private MemberOrderServiceImpl memberOrderService;
@@ -73,7 +76,6 @@ class MemberOrderServiceImplTest {
                 .totalPrice(BigDecimal.valueOf(100000))
                 .deliveryDate(LocalDate.now())
                 .orderEmail("test@example.com")
-                .pointEarn(1000)
                 .deliveryPrice(BigDecimal.valueOf(5000))
                 .phoneNumber("01012345678")
                 .build();
@@ -89,7 +91,7 @@ class MemberOrderServiceImplTest {
 
         when(orderRepository.save(any(Order.class)))
                 .thenReturn(mockOrder);
-
+        when(orderTotalService.calculateDeliveryPrice(any())).thenReturn(BigDecimal.valueOf(3000));
         OrderResponseDto responseDto = memberOrderService.createOrder(requestDto);
 
         assertNotNull(responseDto);
@@ -143,8 +145,8 @@ class MemberOrderServiceImplTest {
         when(deliveryRepository.findById(requestDto.getDeliveryId()))
                 .thenReturn(Optional.empty());
 
-        NoSuchElementException exception = assertThrows(
-                NoSuchElementException.class,
+        NotFoundException exception = assertThrows(
+                NotFoundException.class,
                 () -> memberOrderService.createOrder(requestDto)
         );
 

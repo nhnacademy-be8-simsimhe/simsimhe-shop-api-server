@@ -86,7 +86,6 @@ class PaymentControllerTest {
                 .totalPrice(BigDecimal.valueOf(10000))
                 .deliveryDate(LocalDate.of(2023,12,31))
                 .orderEmail("hi@hi.com")
-                .pointEarn(100)
                 .deliveryPrice(BigDecimal.valueOf(0))
                 .build();
 
@@ -104,9 +103,9 @@ class PaymentControllerTest {
         // orderFacadeRequestDto - List 형태여서 list에 추가
         List<OrderBookRequestDto> orderBookRequestDtoList = new ArrayList<>();
         orderBookRequestDtoList.add(orderBookRequestDto);
-
+        String method = "CARD";
         // 위의 세가지를 받는 orderFacadeRequestDto
-        OrderFacadeRequestDto orderFacadeRequestDto = new OrderFacadeRequestDto(deliveryRequestDto, memberOrderRequestDto, orderBookRequestDtoList);
+        OrderFacadeRequestDto orderFacadeRequestDto = new OrderFacadeRequestDto(deliveryRequestDto, memberOrderRequestDto, orderBookRequestDtoList, method);
 
         // session에 임시 데이터 저장
         MockHttpSession session = new MockHttpSession();
