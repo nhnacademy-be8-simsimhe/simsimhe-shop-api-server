@@ -132,6 +132,6 @@ class LocalUserControllerTest {
                 .andExpect(jsonPath("$.userId").value(responseDto.getUserId()))
                 .andExpect(jsonPath("$.loginId").value(responseDto.getLoginId()))
                 .andExpect(jsonPath("$.password").value(responseDto.getPassword()))
-                .andExpect(jsonPath("$.status").value(responseDto.getStatus().toString()));
+                .andExpect(jsonPath("$.userStatus").value(responseDto.getUserStatus().toString()));
     }
 }
