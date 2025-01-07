@@ -1,10 +1,19 @@
 package com.simsimbookstore.apiserver.users.localuser.service;
 
-import com.simsimbookstore.apiserver.users.exception.DuplicateIdException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.simsimbookstore.apiserver.exception.AlreadyExistException;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.service.GradeService;
-import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRequestDto;
+import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.mapper.LocalUserMapper;
 import com.simsimbookstore.apiserver.users.localuser.repository.LocalUserRepository;
@@ -15,6 +24,9 @@ import com.simsimbookstore.apiserver.users.role.service.RoleService;
 import com.simsimbookstore.apiserver.users.user.entity.Gender;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +37,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -45,21 +56,18 @@ class LocalUserServiceTest {
     @Mock
     private GradeService gradeService;
 
-    LocalUserRequestDto testUser;
+    LocalUserRegisterRequestDto testUser;
     Grade testGrade;
     UserRole testUserRole;
 
     @BeforeEach
     void setUp() {
-        testUser = LocalUserRequestDto.builder()
+        testUser = LocalUserRegisterRequestDto.builder()
                 .userName("John Doe")
                 .mobileNumber("01051278121")
                 .email("johndoe@example.com")
                 .birth(LocalDate.now())
                 .gender(Gender.MALE)
-                .userStatus(UserStatus.ACTIVE)
-                .createdAt(LocalDateTime.now())
-                .tier(Tier.GOLD)
                 .loginId("test")
                 .password("test")
                 .build();
@@ -69,7 +77,6 @@ class LocalUserServiceTest {
                 .tier(Tier.STANDARD)
                 .minAmount(BigDecimal.valueOf(0))
                 .maxAmount(BigDecimal.valueOf(100000))
-                .pointRate(BigDecimal.valueOf(0.01))
                 .build();
 
         Role testRole = Role.builder()
@@ -96,13 +103,13 @@ class LocalUserServiceTest {
     void testSaveLocalUserDuplicate() {
         when(localUserRepository.existsByLoginId(testUser.getLoginId())).thenReturn(true);
 
-        assertThrows(DuplicateIdException.class, () -> localUserService.saveLocalUser(testUser));
+        assertThrows(AlreadyExistException.class, () -> localUserService.saveLocalUser(testUser));
     }
 
     @Test
     @DisplayName("로그인 아이디로 로컬 유저 조회 테스트")
     void findByLoginId() {
-        LocalUser actualUser = LocalUserMapper.requestDtoTo(testUser);
+        LocalUser actualUser = LocalUserMapper.registerRequestDtoTo(testUser);
         actualUser.assignGrade(testGrade);
         actualUser.addUserRole(testUserRole);
         when(localUserRepository.findByLoginId(testUser.getLoginId())).thenReturn(actualUser);

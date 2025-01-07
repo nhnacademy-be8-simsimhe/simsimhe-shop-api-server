@@ -10,18 +10,24 @@ import com.simsimbookstore.apiserver.books.book.entity.QBook;
 import com.simsimbookstore.apiserver.books.bookcategory.entity.QBookCategory;
 import com.simsimbookstore.apiserver.books.bookcontributor.dto.BookContributorResponsDto;
 import com.simsimbookstore.apiserver.books.bookcontributor.entity.QBookContributor;
+import com.simsimbookstore.apiserver.books.bookimage.entity.BookImagePath;
+import com.simsimbookstore.apiserver.books.bookimage.entity.QBookImagePath;
 import com.simsimbookstore.apiserver.books.booktag.entity.QBookTag;
 import com.simsimbookstore.apiserver.books.category.dto.CategoryResponseDto;
 import com.simsimbookstore.apiserver.books.category.entity.Category;
 import com.simsimbookstore.apiserver.books.category.entity.QCategory;
+import com.simsimbookstore.apiserver.books.contributor.dto.ContributorResponseDto;
 import com.simsimbookstore.apiserver.books.contributor.entity.QContributor;
 import com.simsimbookstore.apiserver.books.tag.domain.QTag;
 import com.simsimbookstore.apiserver.books.tag.dto.TagResponseDto;
 import com.simsimbookstore.apiserver.like.entity.QBookLike;
+import com.simsimbookstore.apiserver.orders.orderbook.entity.QOrderBook;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
-import org.springframework.stereotype.Repository;
+
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,10 +36,11 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-
+@RequiredArgsConstructor
 public class BookCustomRepositoryImpl implements BookCustomRepository {
 
     private final JPAQueryFactory queryFactory;
+
 
     QBook book = QBook.book;
     QBookContributor bookContributor = QBookContributor.bookContributor;
@@ -43,14 +50,12 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
     QTag tag = QTag.tag;
     QBookTag bookTag = QBookTag.bookTag;
     QBookLike bookLike = QBookLike.bookLike;
-
-    public BookCustomRepositoryImpl(JPAQueryFactory queryFactory) {
-        this.queryFactory = queryFactory;
-    }
+    QOrderBook orderBook = QOrderBook.orderBook;
+    QBookImagePath bookImagePath = QBookImagePath.bookImagePath;
 
 
     /**
-     * 가장 최근에 출판된 책 5권을 조회하는 메서드
+     * 가장 최근에 출판된 책 8권을 조회하는 메서드(국내도서)
      *
      * @return
      */
@@ -59,6 +64,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
         return queryFactory
                 .select(Projections.fields(BookListResponse.class,
                         book.bookId.as("bookId"),                  // Book 엔티티의 ID
+                        bookImagePath.imagePath.as("imagePath"),
                         book.title.as("title"),                // 책 제목
                         book.publicationDate.as("publicationDate"), // 출판일
                         book.price.as("price"),                // 가격
@@ -66,16 +72,18 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                         book.publisher.as("publisher"),   // 출판사 이름
                         book.bookStatus.as("bookStatus"),      // 책 상태
                         book.quantity.as("quantity")            // 재고 수량
-                        // 필요한 경우 추가 필드를 여기에 매핑
                 ))
                 .from(book)
                 .orderBy(book.publicationDate.desc()) // 출판일 기준 최신순 정렬
-                .limit(5)                           // 상위 5권만 조회
+                .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId))
+                .innerJoin(bookTag).on(book.bookId.eq(bookTag.book.bookId))
+                .where(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL).and(bookTag.tag.tagName.eq("국내도서")))
+                .limit(8)                           // 상위 8권만 조회
                 .fetch();                           // 결과 가져오기
     }
 
     /**
-     * 모든 책 조회
+     * 모든 책 조회하는 메서드(관리자만 볼수 있음)
      *
      * @param pageable
      * @return
@@ -86,35 +94,153 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
         List<BookListResponse> content = queryFactory
                 .select(Projections.fields(BookListResponse.class,
                         book.bookId.as("bookId"),
+                        bookImagePath.imagePath.as("imagePath"),
                         book.title.as("title"),
                         book.publicationDate.as("publicationDate"),
                         book.price.as("price"),
                         book.saleprice.as("saleprice"),
                         book.publisher.as("publisher"),
                         book.bookStatus.as("bookStatus"),
+                        book.giftPackaging,
                         book.quantity.as("quantity")
+
                 ))
                 .from(book)
                 .offset(pageable.getOffset()) // 페이지 시작점
                 .limit(pageable.getPageSize()) // 페이지 크기
-                .orderBy(book.publicationDate.asc()) // 출판일 기준 최신순 정렬
+                .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId)
+                        .and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
+                .orderBy(book.bookId.asc())
                 .fetch();
 
         // 전체 데이터 수 조회 (페이징 처리에 필요)
-        long total = queryFactory
+        Long total = queryFactory
                 .select(book.count())
                 .from(book)
                 .fetchOne();
 
+        List<BookListResponse> bookListResponses = this.toListResponseList(content);
+
+
         // Page 객체로 반환
-        return PageableExecutionUtils.getPage(content, pageable, () -> total);
+        return new PageImpl<>(bookListResponses, pageable, total);
     }
 
 
+    /**
+     * 카테고리와 하위 카테고리에 해당하는 책들을 조회하는 메서드
+     *
+     * @param userId
+     * @param categoryId
+     * @param pageable
+     * @return
+     */
     @Override
     public Page<BookListResponse> getBookListByCategory(Long userId, Long categoryId, Pageable pageable) {
-        return null;
+        // 좋아요 여부를 설정
+        BooleanExpression isLiked = getLikeExpression(userId);
+
+
+        // 특정 카테고리와 하위 카테고리 ID를 조회
+        List<Long> categoryIds = queryFactory
+                .select(category.categoryId)
+                .from(category)
+                .where(category.categoryId.eq(categoryId)
+                        .or(category.parent.categoryId.eq(categoryId)))
+                .fetch();
+
+        // 책 리스트를 조회
+        List<BookListResponse> content = queryFactory
+                .select(Projections.fields(BookListResponse.class,
+                        book.bookId.as("bookId"),
+                        bookImagePath.imagePath.as("imagePath"),
+                        book.title.as("title"),
+                        book.publicationDate.as("publicationDate"),
+                        book.price.as("price"),
+                        book.saleprice.as("saleprice"),
+                        book.publisher.as("publisher"),
+                        book.bookStatus.as("bookStatus"),
+                        book.quantity.as("quantity"),
+                        isLiked.as("isLiked")
+                ))
+                .from(book)
+                .innerJoin(bookCategory).on(book.bookId.eq(bookCategory.book.bookId))
+                .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId)
+                        .and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
+                .leftJoin(bookLike).on(book.bookId.eq(bookLike.book.bookId))
+                .where(bookCategory.catagory.categoryId.in(categoryIds))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(book.publicationDate.desc())
+                .fetch();
+
+        // 전체 데이터 수 조회
+        Long total = queryFactory
+                .select(book.count())
+                .from(book)
+                .leftJoin(bookCategory).on(book.bookId.eq(bookCategory.book.bookId))
+                .where(bookCategory.catagory.categoryId.in(categoryIds))
+                .fetchOne();
+
+        List<BookListResponse> bookListResponses = this.toListResponseList(content);
+
+        // Page 객체로 반환
+        //return PageableExecutionUtils.getPage(bookListResponses, pageable, () -> total);
+        return new PageImpl<>(bookListResponses, pageable, total);
     }
+
+    /**
+     * 특징 태그에 해당하는 도서조회
+     *
+     * @param userId
+     * @param tagId
+     * @param pageable
+     * @return
+     */
+    @Override
+    public Page<BookListResponse> getBookListByTag(Long userId, Long tagId, Pageable pageable) {
+        // 좋아요 여부를 설정
+        BooleanExpression isLiked = getLikeExpression(userId);
+
+        List<BookListResponse> content = queryFactory
+                .selectDistinct(Projections.fields(BookListResponse.class,
+                        book.bookId.as("bookId"),
+                        book.title.as("title"),
+                        book.publicationDate.as("publicationDate"),
+                        book.price.as("price"),
+                        book.saleprice.as("saleprice"),
+                        book.publisher.as("publisher"),
+                        book.bookStatus.as("bookStatus"),
+                        book.quantity.as("quantity"),
+                        bookImagePath.imagePath.as("imagePath"),
+                        isLiked.as("isLiked")
+                ))
+                .from(book)
+                .innerJoin(bookTag).on(book.bookId.eq(bookTag.book.bookId))
+                .leftJoin(bookLike).on(book.bookId.eq(bookLike.book.bookId))
+                .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId))
+                .where(bookTag.tag.tagId.eq(tagId).and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(book.bookId.asc())
+                .fetch();
+
+        // 전체 데이터 수 조회
+        Long total = queryFactory
+                .select(book.count())
+                .from(book)
+                .innerJoin(bookTag).on(book.bookId.eq(bookTag.book.bookId))
+                .where(bookTag.tag.tagId.eq(tagId))
+                .fetchOne();
+
+        List<BookListResponse> bookListResponses = this.toListResponseList(content);
+
+
+        // Page 객체로 반환
+        return new PageImpl<>(bookListResponses, pageable, total);
+
+    }
+
 
     /**
      * 책 상세조회
@@ -125,8 +251,9 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
      */
     @Override
     public BookResponseDto getBookDetail(Long userId, Long bookId) {
-// 좋아요 여부를 설정
+        // 좋아요 여부를 설정
         BooleanExpression isLiked = getLikeExpression(userId);
+
         // 책 상세 정보를 조회
         BookResponseDto bookResponse = queryFactory
                 .select(Projections.fields(BookResponseDto.class,
@@ -143,10 +270,21 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                         book.pages.as("pages"),
                         book.quantity.as("quantity"),
                         isLiked.as("isLiked"),
-                        book.bookStatus.as("bookStatus")
+                        book.bookStatus.as("bookStatus"),
+                        book.giftPackaging,
+                        // 이미지 경로들 가져오기
+                        Expressions.stringTemplate(
+                                "GROUP_CONCAT(CASE WHEN {0} = 'THUMBNAIL' THEN {1} END)",
+                                bookImagePath.imageType, bookImagePath.imagePath
+                        ).as("thumbnailImage"),
+                        Expressions.stringTemplate(
+                                "GROUP_CONCAT(CASE WHEN {0} = 'DETAIL' THEN {1} END)",
+                                bookImagePath.imageType, bookImagePath.imagePath
+                        ).as("detailImage")
                 ))
                 .from(book)
                 .leftJoin(bookLike).on(book.bookId.eq(bookLike.book.bookId))
+                .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId))
                 .where(book.bookId.eq(bookId))
                 .groupBy(book, bookLike)
                 .fetchOne();
@@ -155,7 +293,211 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
         this.addViewCount(book, bookId);
 
         return this.toResponse(bookId, bookResponse);
+    }
 
+
+    /**
+     * 받은 카테고리 아이디에서 최하위 카테고리만 얻는 메서드
+     *
+     * @param categoryIdList
+     * @return
+     */
+    @Override
+    public List<Long> getLowestCategoryId(List<Long> categoryIdList) {
+        if (categoryIdList == null || categoryIdList.isEmpty()) {
+            return List.of();
+        }
+
+        return queryFactory
+                .select(category.categoryId)
+                .from(category)
+                .where(category.categoryId.in(categoryIdList)
+                        .and(category.children.isEmpty())) // 자식 카테고리가 없는 조건
+                .fetch();
+    }
+
+
+    /**
+     * 회원이 좋아요한 책을 조회하는 메서드
+     *
+     * @param pageable
+     * @param userId
+     * @return
+     */
+    @Override
+    public Page<BookListResponse> getUserLikeBook(Pageable pageable, Long userId) {
+
+        //좋아요 설정
+        BooleanExpression isLiked = this.getLikeExpression(userId);
+
+        // 좋아요한 책 데이터 조회
+        List<BookListResponse> bookList = queryFactory
+                .select(Projections.fields(BookListResponse.class,
+                        book.bookId.as("bookId"),           // 책 ID
+                        book.title.as("title"),             // 책 제목
+                        book.bookStatus.as("bookStatus"),   // 책 상태
+                        book.quantity.as("quantity"),       // 책 재고
+                        bookImagePath.imagePath.as("imagePath"),
+                        isLiked.as("isLiked"),
+                        book.publisher,
+                        book.price,
+                        book.saleprice
+                ))
+                .from(bookLike)
+                .join(bookLike.book, book) // bookLike와 book 조인
+                .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId)
+                        .and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
+                .where(bookLike.user.userId.eq(userId)) // 특정 회원이 좋아요한 책만 필터링
+                .offset(pageable.getOffset())          // 페이징 시작점
+                .limit(pageable.getPageSize())         // 페이지 크기
+                .fetch();
+
+        // 전체 좋아요 데이터 수 조회
+        Long totalCount = queryFactory
+                .select(bookLike.count())
+                .from(bookLike)
+                .where(bookLike.user.userId.eq(userId)) // 특정 회원이 좋아요한 책만 카운트
+                .fetchOne();
+
+        // Page 객체로 반환
+        return new PageImpl<>(bookList, pageable, totalCount);
+    }
+
+
+    /**
+     * 책 수량을 조회하는 메서드
+     *
+     * @param bookIdList
+     * @return
+     */
+    @Override
+    public List<BookListResponse> getBooksForCheck(List<Long> bookIdList) {
+        return queryFactory.select(Projections.fields(BookListResponse.class
+                        , book.bookId
+                        , book.title
+                        , book.saleprice
+                        , book.quantity))
+                .from(book)
+                .where(book.bookId.in(bookIdList))
+                .fetch();
+    }
+
+    /**
+     * 주문량이 많은 책 6개 조회
+     *
+     * @return
+     */
+    @Override
+    public List<BookListResponse> getPopularityBook() {
+        return queryFactory.select(Projections.fields(BookListResponse.class,
+                        book.bookId.as("bookId"),
+                        book.title.as("title"),
+                        bookImagePath.imagePath.min().as("imagePath"), // 이미지 경로를 하나만 가져오도록 수정
+                        book.publicationDate.as("publicationDate"),
+                        book.quantity.as("quantity"),
+                        book.price.as("price"),
+                        book.saleprice.as("saleprice"),
+                        book.bookStatus.as("bookStatus"),
+                        book.publisher.as("publisher")))
+                .from(orderBook)
+                .innerJoin(orderBook.book, book)
+                .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId)
+                        .and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
+                .groupBy(
+                        book.bookId,
+                        book.title,
+                        book.publicationDate,
+                        book.quantity,
+                        book.price,
+                        book.saleprice,
+                        book.bookStatus,
+                        book.publisher
+                )
+                .orderBy(orderBook.quantity.sum().desc())
+                .limit(6)
+                .fetch();
+    }
+
+
+    /**
+     * 특정 도서를 제외한 동일 카테고리 내 인기 도서 추천 기능 5개
+     *
+     * @param categoryIdList
+     * @param bookId
+     * @return
+     */
+    @Override
+    public List<BookListResponse> getRecommendBook(List<Long> categoryIdList, Long bookId) {
+        return queryFactory.select(Projections.fields(BookListResponse.class
+                        , book.bookId
+                        , bookImagePath.imagePath.as("imagePath")
+                        , book.title
+                        , book.quantity
+                        , book.saleprice
+                        , book.price
+                        , book.publisher
+                        , book.bookStatus
+                        , book.viewCount))
+                .from(book)
+                .innerJoin(bookCategory).on(book.bookId.eq(bookCategory.book.bookId))
+                .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId)
+                        .and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
+                .where(bookCategory.book.bookId.ne(bookId).and(bookCategory.catagory.categoryId.in(categoryIdList)))
+                .distinct()
+                .orderBy(book.viewCount.desc())
+                .limit(5)
+                .fetch();
+    }
+
+
+    /**
+     * 조회수를 증가하는 메서드
+     *
+     * @param book
+     * @param bookId
+     */
+    private synchronized void addViewCount(QBook book, Long bookId) {
+        queryFactory.update(book)
+                .set(book.viewCount, book.viewCount.add(1))
+                .where(book.bookId.eq(bookId))
+                .execute();
+    }
+
+
+    // 사용자의 로그인 여부확인
+    private BooleanExpression getLikeExpression(Long userId) {
+        return userId == null
+                ? Expressions.asBoolean(false) // 로그인하지 않은 사용자
+                : bookLike.user.userId.eq(userId); // 로그인한 사용자의 좋아요 여부 확인
+    }
+
+
+    /**
+     * 도서에 기여자와 역할 정보를 설정하고 반환하는 메서드
+     *
+     * @param responseList
+     * @return
+     */
+    private List<BookListResponse> toListResponseList(List<BookListResponse> responseList) {
+
+        if (responseList.isEmpty()) {
+            return responseList;
+        }
+
+        for (BookListResponse bookListResponse : responseList) {
+            List<BookContributorResponsDto> bookContributorResponsDtoList = queryFactory.select(Projections.fields(BookContributorResponsDto.class
+                            , contributor.contributorId
+                            , contributor.contributorName
+                            , contributor.contributorRole))
+                    .from(bookContributor)
+                    .innerJoin(contributor).on(bookContributor.contributor.contributorId.eq(contributor.contributorId))
+                    .where(bookContributor.book.bookId.eq(bookListResponse.getBookId()))
+                    .fetch();
+
+            bookListResponse.setContributorList(bookContributorResponsDtoList);
+
+        }
+        return responseList;
     }
 
     /**
@@ -171,7 +513,9 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                 .select(Projections.fields(
                         BookContributorResponsDto.class,
                         bookContributor.contributor.contributorId,
-                        bookContributor.contributor.contributorName
+                        bookContributor.contributor.contributorName,
+                        bookContributor.contributor.contributorRole
+
                 ))
                 .from(bookContributor)
                 .innerJoin(contributor).on(bookContributor.contributor.contributorId.eq(contributor.contributorId))
@@ -226,121 +570,12 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                 .where(bookTag.book.bookId.eq(bookId))
                 .fetch();
 
-        bookResponseDto.setContributorRoleList(bookContributorResponsDtoList);
+        bookResponseDto.setContributorResponsDtos(bookContributorResponsDtoList);
         bookResponseDto.setCategoryList(categoriesList);
         bookResponseDto.setTagList(bookTagList);
 
 
         return bookResponseDto;
-    }
-
-    /**
-     * 받은 카테고리 아이디에서 최하위 카테고리만 얻는 메서드
-     *
-     * @param categoryIdList
-     * @return
-     */
-    @Override
-    public List<Long> getLowestCategoryId(List<Long> categoryIdList) {
-        if (categoryIdList == null || categoryIdList.isEmpty()) {
-            return List.of();
-        }
-
-        return queryFactory
-                .select(category.categoryId)
-                .from(category)
-                .where(category.categoryId.in(categoryIdList)
-                        .and(category.children.isEmpty())) // 자식 카테고리가 없는 조건
-                .fetch();
-    }
-
-
-    /**
-     * 회원이 좋아요한 책을 조회하는 메서드
-     *
-     * @param pageable
-     * @param userId
-     * @return
-     */
-    @Override
-    public Page<BookListResponse> getUserLikeBook(Pageable pageable, Long userId) {
-
-        BooleanExpression isLiked = this.getLikeExpression(userId);
-
-        // 좋아요한 책 데이터 조회
-        List<BookListResponse> bookList = queryFactory
-                .select(Projections.fields(BookListResponse.class,
-                        book.bookId.as("bookId"),           // 책 ID
-                        book.title.as("title"),             // 책 제목
-                        book.bookStatus.as("bookStatus"),   // 책 상태
-                        book.quantity.as("quantity"),       // 책 재고
-                        isLiked.as("isLiked")
-                ))
-                .from(bookLike)
-                .join(bookLike.book, book) // bookLike와 book 조인
-                .where(bookLike.user.userId.eq(userId)) // 특정 회원이 좋아요한 책만 필터링
-                .offset(pageable.getOffset())          // 페이징 시작점
-                .limit(pageable.getPageSize())         // 페이지 크기
-                .fetch();
-
-        // 전체 좋아요 데이터 수 조회
-        Long totalCount = queryFactory
-                .select(bookLike.count())
-                .from(bookLike)
-                .where(bookLike.user.userId.eq(userId)) // 특정 회원이 좋아요한 책만 카운트
-                .fetchOne();
-
-        // Page 객체로 반환
-        return PageableExecutionUtils.getPage(bookList, pageable, () -> totalCount);
-    }
-
-
-    /**
-     * 책 수량을 조회하는 메서드
-     *
-     * @param bookIdList
-     * @return
-     */
-    @Override
-    public List<BookListResponse> getBooksForCheck(List<Long> bookIdList) {
-        return queryFactory.select(Projections.fields(BookListResponse.class
-                        , book.bookId
-                        , book.title
-                        , book.saleprice
-                        , book.quantity))
-                .from(book)
-                .where(book.bookId.in(bookIdList))
-                .fetch();
-    }
-
-    /**
-     * 주문량이 많은 책 조회
-     *
-     * @return
-     */
-    @Override
-    public List<BookListResponse> getBestSeller() {
-        return List.of();
-    }
-
-    /**
-     * 조회수를 증가하는 메서드
-     *
-     * @param book
-     * @param bookId
-     */
-    private synchronized void addViewCount(QBook book, Long bookId) {
-        queryFactory.update(book)
-                .set(book.viewCount, book.viewCount.add(1))
-                .where(book.bookId.eq(bookId))
-                .execute();
-    }
-
-
-    private BooleanExpression getLikeExpression(Long userId) {
-        return userId == null
-                ? Expressions.asBoolean(false) // 로그인하지 않은 사용자
-                : bookLike.user.userId.eq(userId); // 로그인한 사용자의 좋아요 여부 확인
     }
 
 

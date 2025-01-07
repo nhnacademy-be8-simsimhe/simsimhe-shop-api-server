@@ -1,6 +1,7 @@
 package com.simsimbookstore.apiserver.users.user.repository;
 
-import com.netflix.discovery.converters.Auto;
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.simsimbookstore.apiserver.common.config.QuerydslConfig;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
@@ -9,18 +10,17 @@ import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.repository.LocalUserRepository;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import org.hibernate.LazyInitializationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @Import(QuerydslConfig.class)
 @DataJpaTest
@@ -43,14 +43,12 @@ class UserRepositoryTest {
                 .tier(Tier.STANDARD)
                 .minAmount(BigDecimal.valueOf(0))
                 .maxAmount(BigDecimal.valueOf(100000))
-                .pointRate(BigDecimal.valueOf(0.01))
                 .build();
 
         Grade royalGrade = Grade.builder()
                 .tier(Tier.ROYAL)
                 .minAmount(BigDecimal.valueOf(0))
                 .maxAmount(BigDecimal.valueOf(100000))
-                .pointRate(BigDecimal.valueOf(0.01))
                 .build();
 
         gradeRepository.save(standardGrade);
@@ -77,7 +75,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    void statusUpdate() {
+    void updateStatus() {
         testUser.updateUserStatus(UserStatus.INACTIVE);
         User updatedUser = userRepository.save(testUser);
 
@@ -85,11 +83,27 @@ class UserRepositoryTest {
     }
 
     @Test
-    void gradeUpdate(){
+    void updateGrade(){
         Grade newGrade = gradeRepository.findByTier(Tier.ROYAL);
         testUser.updateGrade(newGrade);
 
         User updatedUser = userRepository.save(testUser);
         assertEquals(updatedUser.getGrade().getTier(), Tier.ROYAL);
+    }
+
+    @Test
+    void updateLatestLoginDate() {
+        testUser.updateLatestLoginDate(LocalDateTime.now().plusHours(1));
+        User updatedUser = userRepository.save(testUser);
+
+        assertEquals(testUser.getLatestLoginDate(), updatedUser.getLatestLoginDate());
+    }
+
+    @Test
+    void findUserWithGradeById() {
+        Optional<User> user = userRepository.findById(testUser.getUserId());
+        assertTrue(user.isPresent());
+
+        assertEquals(user.get().getGrade().getTier(), Tier.STANDARD);
     }
 }

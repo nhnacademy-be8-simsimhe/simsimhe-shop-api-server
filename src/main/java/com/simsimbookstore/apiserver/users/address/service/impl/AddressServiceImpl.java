@@ -9,11 +9,13 @@ import com.simsimbookstore.apiserver.users.address.repository.AddressRepository;
 import com.simsimbookstore.apiserver.users.address.service.AddressService;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.service.UserService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -34,9 +36,12 @@ public class AddressServiceImpl implements AddressService {
 
     // 유저 아이디 기준 리스트 조회
     @Override
-    public List<Address> getAddresses(Long userId) {
-        addressRepository.findAllByUserUserId(userId);
-        return addressRepository.findAll();
+    public List<AddressResponseDto> getAddresses(Long userId) {
+        List<Address> addresses = addressRepository.findAllByUserUserId(userId);
+        List<AddressResponseDto> list = addresses.stream()
+                .map(AddressMapper::responseDtoFrom)
+                .toList();
+        return list;
     }
 
     // 유저 저장

@@ -50,8 +50,8 @@ class DeliveryPolicyControllerTest {
     @DisplayName("모든 배송 정책 조회 테스트")
     void getAllDeliveryPoliciesTest() throws Exception {
         List<DeliveryPolicy> policies = List.of(
-                new DeliveryPolicy(1L, "Policy 1", BigDecimal.valueOf(1000), true),
-                new DeliveryPolicy(2L, "Policy 2", BigDecimal.valueOf(2000), false)
+                new DeliveryPolicy(1L, "Policy 1", BigDecimal.valueOf(3000.00), BigDecimal.valueOf(1000), true),
+                new DeliveryPolicy(2L, "Policy 2", BigDecimal.valueOf(3000.00), BigDecimal.valueOf(2000), false)
         );
         when(deliveryPolicyService.findAll()).thenReturn(policies);
 
@@ -65,17 +65,18 @@ class DeliveryPolicyControllerTest {
     @Test
     @DisplayName("새로운 배송 정책 생성 테스트")
     void createDeliveryPolicyTest() throws Exception {
-        DeliveryPolicy savedPolicy = new DeliveryPolicy(1L, "Policy 1", BigDecimal.valueOf(1000), true);
+        DeliveryPolicy savedPolicy = new DeliveryPolicy(1L, "Policy 1", BigDecimal.valueOf(1000.00), BigDecimal.valueOf(1000), true);
 
         when(deliveryPolicyService.save(any(DeliveryPolicyRequestDto.class))).thenReturn(savedPolicy);
 
         mockMvc.perform(post("/api/admin/delivery-policies")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"deliveryPolicyName\": \"Policy 1\", \"policyStandardPrice\": 1000, \"standardPolicy\": true}"))
+                        .content("{\"deliveryPolicyName\": \"Policy 1\", \"policyStandardPrice\": 1000, \"deliveryPrice\": 1000, \"standardPolicy\": true}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.deliveryPolicyId").value(1))
                 .andExpect(jsonPath("$.deliveryPolicyName").value("Policy 1"))
                 .andExpect(jsonPath("$.policyStandardPrice").value(1000))
+                .andExpect(jsonPath("$.deliveryPrice").value(1000))
                 .andExpect(jsonPath("$.standardPolicy").value(true));
     }
 
@@ -105,6 +106,7 @@ class DeliveryPolicyControllerTest {
         DeliveryPolicyRequestDto invalidRequest = new DeliveryPolicyRequestDto(
                 "",
                 new BigDecimal("1000.00"),
+                new BigDecimal("1000.00"),
                 false
         );
 
@@ -122,6 +124,7 @@ class DeliveryPolicyControllerTest {
         DeliveryPolicyRequestDto invalidRequest = new DeliveryPolicyRequestDto(
                 "Test Policy",
                 null,
+                new BigDecimal("1000.00"),
                 false
         );
 
@@ -139,6 +142,7 @@ class DeliveryPolicyControllerTest {
         DeliveryPolicyRequestDto invalidRequest = new DeliveryPolicyRequestDto(
                 "Test Policy",
                 new BigDecimal("0.0"),
+                new BigDecimal("1000.00"),
                 false
         );
 
@@ -156,6 +160,7 @@ class DeliveryPolicyControllerTest {
         String longName = "a".repeat(101);
         DeliveryPolicyRequestDto invalidRequest = new DeliveryPolicyRequestDto(
                 longName,
+                new BigDecimal("1000.00"),
                 new BigDecimal("1000.00"),
                 false
         );

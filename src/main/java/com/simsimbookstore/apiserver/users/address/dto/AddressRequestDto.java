@@ -1,7 +1,11 @@
 package com.simsimbookstore.apiserver.users.address.dto;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 @Builder
@@ -19,9 +23,9 @@ public class AddressRequestDto {
     private String postalCode;
 
     @NotNull
-    @Length(min = 5, max = 255)
+    @Length(min = 3, max = 255)
     private String roadAddress;
 
-    @Length(min = 5, max = 255)
+    @Length(min = 0, max = 255)
     private String detailedAddress;
 }

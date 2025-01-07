@@ -15,3 +15,13 @@ object-storage:
 
 database:
   url: ffad5418272e4efeb469f91a7b2c288e
+
+redis:
+  database: 211
+
+payment:
+  toss:
+    client_api_key : test_ck_vZnjEJeQVxbmJoKKo22P8PmOoBN0
+    secret_api_key : test_sk_LkKEypNArW1PydoJnX5j3lmeaxYG
+    success_url : "https://simsimbook.store/success"
+    fail_url : "https://simsimbook.store/fail"

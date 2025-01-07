@@ -1,40 +1,51 @@
 package com.simsimbookstore.apiserver.users.localuser.controller;
 
-import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRequestDto;
-import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserLoginRequestDto;
+import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
+import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserResponseDto;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
+import com.simsimbookstore.apiserver.users.localuser.mapper.LocalUserMapper;
 import com.simsimbookstore.apiserver.users.localuser.service.LocalUserService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Objects;
+
+@RequiredArgsConstructor
 @RequestMapping("/api/users/localUsers")
 @RestController
 public class LocalUserController {
-    private final LocalUserService userService;
-
-    public LocalUserController(LocalUserService userService) {
-        this.userService = userService;
-    }
+    private final LocalUserService localUserService;
 
     @PostMapping
     public ResponseEntity<?> addLocalUser(
-            @RequestBody @Valid LocalUserRequestDto localUserRequestDto
+            @RequestBody @Valid LocalUserRegisterRequestDto localUserRequestDto
             ) {
-
-        LocalUser response = userService.saveLocalUser(localUserRequestDto);
+        LocalUser response = localUserService.saveLocalUser(localUserRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{loginId}/exists")
-    public boolean existsByLoginId(@PathVariable String loginId) {
-        return userService.existsByLoginId(loginId);
+    public ResponseEntity<?> existsByLoginId(@PathVariable String loginId) {
+        boolean response = localUserService.existsByLoginId(loginId);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{loginId}")
-    public LocalUser getLocalUser(@PathVariable String loginId) {
-        LocalUser localUser = userService.findByLoginId(loginId);
-        return localUser;
+    public ResponseEntity<?> getLocalUser(@PathVariable String loginId) {
+        LocalUser localUser = localUserService.findByLoginId(loginId);
+        if (Objects.isNull(localUser)) {
+            return ResponseEntity.ok(null);
+        }
+
+        LocalUserResponseDto response = LocalUserMapper.localUserResponseDtoTo(localUser);
+        return ResponseEntity.ok(response);
     }
 }

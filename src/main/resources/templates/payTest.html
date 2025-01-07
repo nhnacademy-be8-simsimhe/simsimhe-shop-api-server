@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>pay test</title>
+    <!-- 토스 페이먼츠, 다음 우편번호 JS -->
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+</head>
+<body>
+
+<div class="p-3 border rounded-3 mb-4">
+    <h4 class="fw-normal">수취인 정보</h4>
+    <label for="addressSelection">주소 선택:</label>
+    <select class="form-select mb-3" id="addressSelection" onchange="fillAddressFields(this)">
+        <option value="">새로운 배송지</option>
+        <option th:each="address : ${addresses}"
+                th:value="${address.addressId}"
+                th:data-zip-code="${address.postalCode}"
+                th:data-address="${address.roadAddress}"
+                th:data-detail-address="${address.detailedAddress}"
+                th:text="${address.alias}">
+        </option>
+    </select>
+
+
+    <input type="text" class="form-control mb-2" id="receiverName" placeholder="이름" required>
+    <input type="tel" class="form-control mb-2" id="receiverNumber" placeholder="전화번호" pattern="[0-9]{11}" required>
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" id="zipCode" placeholder="우편번호" readonly>
+        <button class="btn btn-outline-secondary" type="button" onclick="execDaumPostcode()">우편번호 찾기</button>
+    </div>
+    <input type="text" class="form-control mb-2" id="address" placeholder="도로명주소" readonly required>
+    <input type="text" class="form-control" id="detailAddress" placeholder="상세주소" required>
+</div>
+
+<div class="p-3 border rounded-3 mb-4">
+    <h4 class="fw-normal mb-5">발송인 정보</h4>
+    <input type="text" class="form-control mb-2" id="senderName" placeholder="이름">
+    <input type="tel" pattern="[0-9]{11}" maxlength="11" class="form-control mb-2" id="senderPhoneNumber"
+           placeholder="전화번호">
+    <input type="email" class="form-control" id="senderEmail" placeholder="이메일">
+</div>
+
+<div class="p-3 border rounded-3 mb-4">
+    <h4 class="fw-normal mb-3">배송일 선택</h4>
+    <input type="date" class="form-control w-50" id="deliveryDate">
+</div>
+
+<!-- 주문 목록 영역 -->
+<div id="order_id">
+    <ul>
+        <th:block th:each="bookOrder : ${bookOrderList}">
+            <li>
+                <!-- 개별 상품 묶음 -->
+                <div class="order_item"
+                     th:attr="data-book-id=${bookOrder.bookId}">
+
+                    <span>상품아이디 : </span>
+                    <span th:text="${bookOrder.bookId}"></span>&nbsp;&nbsp;
+
+                    <span>상품명 : </span>
+                    <span th:text="${bookOrder.title}"></span>&nbsp;&nbsp;
+
+                    <span>가격 : </span>
+                    <!-- 여기서 class="book-price"로 설정 -->
+                    <span class="book-price" th:text="${bookOrder.price}"></span>&nbsp;&nbsp;
+
+                    <span>수량: </span>
+                    <!-- 여기서 class="book-quantity"로 설정 -->
+                    <span class="book-quantity" th:text="${bookOrder.quantity}"></span>
+                </div>
+
+                <!-- 쿠폰 선택 -->
+                <div>
+                    <h5>쿠폰 선택</h5>
+                    <th:block th:if="${couponList != null}">
+                        <!-- coupon-select 클래스 -->
+                        <select id="coupon-${bookOrder.bookId}" class="form-select coupon-select">
+                            <option value="">쿠폰 선택</option>
+                            <th:block th:each="coupon : ${couponList}" th:if="${coupon.bookId == bookOrder.bookId}">
+                                <option th:value="${coupon.memberCouponId}"
+                                        th:data-discount="${coupon.discountPrice}"
+                                        th:text="${coupon.couponName + ' - '
+                                                 + coupon.discountPrice
+                                                 + (coupon.couponType == 'PERCENT' ? '%' : '원')}">
+                                </option>
+                            </th:block>
+                        </select>
+                    </th:block>
+                    <th:block th:if="${couponList == null}">
+                        <p>사용 가능한 쿠폰이 없습니다.</p>
+                    </th:block>
+                </div>
+
+                <!-- 포장 선택 -->
+                <div>
+                    <h5>포장 선택</h5>
+                    <!-- package-select 클래스 -->
+                    <select th:attr="id=${'package-' + bookOrder.bookId}" class="form-select package-select">
+                        <option value="0" data-price="0">포장 없음</option>
+                        <th:block th:each="wrapType : ${wrapTypes}">
+                            <option th:value="${wrapType.packageTypeId}"
+                                    th:data-price="${wrapType.packagePrice}"
+                                    th:text="${wrapType.packageName + ' - ' + wrapType.packagePrice + '원'}">
+                            </option>
+                        </th:block>
+                    </select>
+                    <!-- package-quantity 클래스 -->
+                    <input th:attr="id=${'package-quantity-' + bookOrder.bookId}"
+                           type="number" min="0" value="1"
+                           class="form-control mt-2 package-quantity"
+                           placeholder="포장 개수">
+                </div>
+                <br><br>
+            </li>
+        </th:block>
+    </ul>
+</div>
+
+<div class="p-3 border rounded-3 mb-4">
+    <h4 class="fw-normal mb-3">포인트 사용</h4>
+    <div>
+        <label for="usePoint">사용할 포인트:</label>
+        <input type="number" class="form-control" id="usePoint" placeholder="사용할 포인트 입력" min="0">
+        <small id="availablePoints" class="form-text text-muted">
+            사용 가능한 포인트: <span id="availablePointsValue">0</span>원
+        </small>
+
+    </div>
+</div>
+
+<!-- 합계 영역 -->
+<div>
+    <span>합계: </span>
+    <span id="total_price">₩0</span>
+</div>
+
+<!-- 결제 방법 선택 -->
+<div class="p-3 border rounded-3 mb-4">
+    <div class="box_section" style="padding: 40px 30px 50px 30px; margin-top: 30px; margin-bottom: 50px">
+        <h4 class="fw-normal mb-3">결제 방법</h4>
+        <div id="payment-method" style="display: flex">
+            <button id="CARD" class="button2" onclick="selectPaymentMethod('CARD')">카드</button>
+            <button id="TRANSFER" class="button2" onclick="selectPaymentMethod('TRANSFER')">계좌이체</button>
+        </div>
+    </div>
+</div>
+
+<!-- 결제 버튼 -->
+<div class="p-3 border rounded-3 mb-4">
+    <button id="paymentButton" class="btn btn-primary btn-lg" onclick="submitOrder()">결제하기</button>
+</div>
+
+<script>
+    let selectedPaymentMethod = null;
+
+    function selectPaymentMethod(method) {
+        if (selectedPaymentMethod != null) {
+            document.getElementById(selectedPaymentMethod).style.backgroundColor = "#ffffff";
+        }
+
+        selectedPaymentMethod = method;
+
+        document.getElementById(selectedPaymentMethod).style.backgroundColor = "rgb(229 239 255)";
+    }
+
+    function submitOrder() {
+        const phoneNumber = document.getElementById("senderPhoneNumber").value.trim();
+        console.log("Collected Phone Number:", phoneNumber);
+        const senderName = document.getElementById("senderName").value.trim();
+        const receiverName = document.getElementById("receiverName").value.trim();
+        const receiverNumber = document.getElementById("receiverNumber").value.trim();
+
+        if (!phoneNumber) {
+            alert("전화번호를 입력해주세요.");
+            return;
+        }
+        if (!receiverName) {
+            alert("수취인 이름을 입력해주세요.");
+            return;
+        }
+        if (!receiverNumber) {
+            alert("수취인 전화번호를 입력해주세요.");
+            return;
+        }
+
+        const deliveryRequestDto = {
+            deliveryState: "PENDING",
+            deliveryReceiver: receiverName,
+            receiverPhoneNumber: receiverNumber,
+            postalCode: document.getElementById("zipCode").value,
+            roadAddress: document.getElementById("address").value,
+            detailedAddress: document.getElementById("detailAddress").value,
+            reference: "" // 참고 사항
+        };
+
+        const memberOrderRequestDto = {
+            userId: userId,
+            deliveryId: null,
+            originalPrice: originalCalcPrice,
+            pointUse: parseInt(document.getElementById("usePoint").value || "0", 10),
+            totalPrice: parseInt(document.getElementById("total_price").innerText.replace(/[₩,]/g, ""), 10),
+            deliveryDate: document.getElementById("deliveryDate").value,
+            orderEmail: document.getElementById("senderEmail").value,
+            phoneNumber: phoneNumber,
+            senderName:senderName,
+            deliveryPrice: null
+        };
+
+        // 주문 상품 정보 수집
+        const orderBookRequestDtos = [];
+        document.querySelectorAll(".order_item").forEach(item => {
+            const bookId = item.getAttribute("data-book-id");
+            const quantity = parseInt(item.querySelector(".book-quantity").textContent || "0", 10);
+            const salePrice = parseFloat(item.querySelector(".book-price").textContent || "0");
+
+            // 쿠폰 정보
+            const couponSelect = document.getElementById(`coupon-${bookId}`);
+            const couponId = couponSelect && couponSelect.value ? parseInt(couponSelect.value, 10) : null;
+            const discountPrice = couponId
+                ? parseFloat(couponSelect.options[couponSelect.selectedIndex].getAttribute("data-discount") || "0")
+                : 0;
+
+            // 포장 정보
+            const packageSelect = document.getElementById(`package-${bookId}`);
+            const packageQuantityInput = document.getElementById(`package-quantity-${bookId}`);
+            const packagesRequestDtos = [];
+            if (packageSelect && packageSelect.value !== "0") {
+                packagesRequestDtos.push({
+                    packageTypeId: parseInt(packageSelect.value, 10),
+                    packageName: packageSelect.options[packageSelect.selectedIndex].textContent.trim(),
+                    quantity: parseInt(packageQuantityInput.value || "0", 10)
+                });
+            }
+
+            orderBookRequestDtos.push({
+                bookId: parseInt(bookId, 10),
+                couponId: couponId,
+                quantity: quantity,
+                salePrice: salePrice,
+                discountPrice: discountPrice,
+                orderBookState: "PENDING",
+                couponDiscountRequestDto: couponId
+                    ? {
+                        couponId: couponId,
+                        couponName: couponSelect.options[couponSelect.selectedIndex].textContent,
+                        couponType: "FIX", // 예제 값, 서버 로직에 따라 다를 수 있음
+                        discountPrice: discountPrice
+                    }
+                    : null,
+                packagesRequestDtos: packagesRequestDtos
+            });
+        });
+
+        let method;
+
+        try {
+            if (selectedPaymentMethod === "CARD") {
+                method = "CARD";
+            } else if (selectedPaymentMethod === "TRANSFER") {
+                method = "TRANSFER";
+            }
+        } catch (error) {
+            console.error("결제 요청 중 에러 발생: ", error);
+        }
+
+        // 주문 요청 데이터 구성
+        const orderFacadeRequestDto = {
+            deliveryRequestDto: deliveryRequestDto,
+            memberOrderRequestDto: memberOrderRequestDto,
+            orderBookRequestDtos: orderBookRequestDtos,
+            method: selectedPaymentMethod
+        };
+
+        console.log("Order Data:", orderFacadeRequestDto);
+
+        // 서버로 주문 데이터 전송
+        fetch("/api/payment", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(orderFacadeRequestDto)
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    throw new Error("결제 링크 생성 실패!");
+                }
+            })
+            .then(link => {
+                console.log("결제 링크:", link);
+                // 리디렉션 또는 링크 표시
+                window.location.href = link; // 결제창으로 이동
+            })
+            .catch(error => {
+                console.error("에러 발생:", error);
+                alert("결제 처리 중 문제가 발생했습니다.");
+            });
+    }
+
+</script>
+
+<!-- bookOrderList 데이터를 JSON으로 변환해서 JS에서 참조 가능하게 -->
+<script th:inline="javascript">
+    const bookOrderList = [[${bookOrderList}]];
+    const addresses =  [[${addresses}]];
+    const userId = [[${userId}]];
+</script>
+
+<script th:inline="javascript">
+    console.log("Book Order List: ", [[${bookOrderList}]]);
+    console.log("Coupon List: ", [[${couponList}]]);
+    console.log("Wrap Types: ", [[${wrapTypes}]]);
+</script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        console.log("DOM fully loaded and parsed.");
+
+        // 페이지 로드 시 초기 합계 계산
+        updateTotal();
+
+        // 포인트 입력 변경 시 합계 업데이트
+        const usePointInput = document.getElementById("usePoint");
+        usePointInput.addEventListener("input", () => {
+            const usePoint = parseInt(usePointInput.value || "0", 10);
+            const availablePoints = parseInt(
+                document.getElementById("availablePointsValue")
+            );
+
+            // 사용 가능한 포인트 초과 시 제한
+            if (usePoint > availablePoints) {
+                usePointInput.value = availablePoints;
+            } else if (usePoint < 0) {
+                usePointInput.value = 0;
+            }
+            updateTotal();
+        });
+
+        // 쿠폰 변경, 포장 변경 시 합계 재계산 이벤트
+        document.querySelectorAll(".coupon-select").forEach(select => {
+            select.addEventListener("change", updateTotal);
+        });
+        document.querySelectorAll(".package-select").forEach(select => {
+            select.addEventListener("change", updateTotal);
+        });
+        document.querySelectorAll(".package-quantity").forEach(input => {
+            input.addEventListener("input", updateTotal);
+        });
+    });
+
+    // 합계 계산 함수 (포장, 쿠폰, 포인트 모두 처리)
+    async function updateTotal() {
+        const userId = document.getElementById("userId");
+        const bookList = [];
+        const packagingOptions = {};
+        const couponOptions = {};
+
+        // 주문 정보 수집
+        document.querySelectorAll(".order_item").forEach(item => {
+            const bookId = item.getAttribute("data-book-id");
+            const price = parseInt(item.querySelector(".book-price").textContent || "0", 10);
+            const quantity = parseInt(item.querySelector(".book-quantity").textContent || "0", 10);
+
+            // 책 목록
+            bookList.push({
+                bookId: parseInt(bookId, 10),
+                price: price,
+                quantity: quantity
+            });
+
+            // 쿠폰 선택
+            const couponSelect = document.getElementById(`coupon-${bookId}`);
+            if (couponSelect && couponSelect.value) {
+                const discount = parseInt(
+                    couponSelect.options[couponSelect.selectedIndex].getAttribute("data-discount") || "0",
+                    10
+                );
+                couponOptions[bookId] = {
+                    couponId: parseInt(couponSelect.value, 10),
+                    discount: discount
+                };
+            }
+
+            // 포장 선택
+            const packageSelect = document.getElementById(`package-${bookId}`);
+            const packageQuantityInput = document.getElementById(`package-quantity-${bookId}`);
+            if (packageSelect && packageSelect.value !== "0") {
+                const packagePrice = parseInt(
+                    packageSelect.options[packageSelect.selectedIndex].getAttribute("data-price") || "0",
+                    10
+                );
+                const packageQuantity = parseInt(packageQuantityInput.value || "0", 10);
+
+                packagingOptions[bookId] = {
+                    packageTypeId: parseInt(packageSelect.value, 10),
+                    quantity: packageQuantity,
+                    packagePrice: packagePrice
+                };
+            }
+        });
+
+        // 포인트 사용
+        const usePoint = parseInt(document.getElementById("usePoint").value || "0", 10);
+
+        // 서버로 전송할 데이터
+        const requestBody = { userId ,bookList, packagingOptions, couponOptions, usePoint };
+
+        console.log("보낼 데이터:", requestBody);
+
+        try {
+            // POST /api/order/total (백엔드가 total + availablePoints 등을 내려줌)
+            const response = await fetch("/api/shop/order/total", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(requestBody),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log("서버 응답:", data);
+
+                // 서버에서 반환한 합계(total)
+                document.getElementById("total_price").innerText
+                    = `₩${data.total.toLocaleString("ko-KR")}`;
+
+                originalCalcPrice = data.originalPrice; // 전역 변수에 저장
+                console.log("Original Price 저장:", originalCalcPrice);
+
+
+                // 서버에서 반환한 availablePoints(남은 포인트, 혹은 현재 포인트)
+                    document.getElementById("availablePoints").innerText = data.availablePoints.toLocaleString("ko-KR");
+            } else {
+                console.error("HTTP 오류:", response.statusText);
+            }
+        } catch (error) {
+            console.error("서버 요청 실패:", error);
+        }
+    }
+
+    // 다음 우편번호
+    function execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function (data) {
+                var roadAddr = data.roadAddress;
+                var extraRoadAddr = '';
+
+                if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                    extraRoadAddr += data.bname;
+                }
+                if (data.buildingName !== '' && data.apartment === 'Y') {
+                    extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                }
+                if (extraRoadAddr !== '') {
+                    extraRoadAddr = ' (' + extraRoadAddr + ')';
+                    roadAddr = roadAddr + extraRoadAddr;
+                }
+                document.getElementById('zipCode').value = data.zonecode;
+                document.getElementById("address").value = roadAddr;
+            }
+        }).open();
+    }
+
+    // 주소 선택 시 자동 입력
+    function fillAddressFields(selectedDropdown) {
+        var selectedOption = selectedDropdown.options[selectedDropdown.selectedIndex];
+
+        if (selectedDropdown.value === "") {
+            document.getElementById('receiverName').value = "";
+            document.getElementById('receiverNumber').value = "";
+            document.getElementById('zipCode').value = "";
+            document.getElementById('address').value = "";
+            document.getElementById('detailAddress').value = "";
+        } else {
+            document.getElementById('receiverName').value = selectedOption.getAttribute('data-receiver-name');
+            document.getElementById('receiverNumber').value = selectedOption.getAttribute('data-receiver-number');
+            document.getElementById('zipCode').value = selectedOption.getAttribute('data-zip-code');
+            document.getElementById('address').value = selectedOption.getAttribute('data-address');
+            document.getElementById('detailAddress').value = selectedOption.getAttribute('data-detail-address');
+        }
+    }
+</script>
+</body>
+</html>
