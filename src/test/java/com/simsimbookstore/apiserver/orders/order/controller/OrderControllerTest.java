@@ -48,9 +48,9 @@ import org.springframework.test.web.servlet.MockMvc;
 @Import(OrderControllerTest.MockConfig.class) // TestConfiguration이 있는 내부 클래스를 Import
 class OrderControllerTest {
 
-    private static final String API_ORDER_URL = "/api/order";
-    private static final String API_ORDER_TOTAL_URL = "/api/order/total";
-    private static final String API_ORDER_PREPARE_URL = "/api/order/prepare";
+    private static final String API_ORDER_URL = "/api/shop/order";
+    private static final String API_ORDER_TOTAL_URL = "/api/shop/order/total";
+    private static final String API_ORDER_PREPARE_URL = "/api/shop/order/prepare";
 
     @Autowired
     private MockMvc mockMvc;

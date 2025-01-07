@@ -53,4 +53,11 @@ public class WrapTypeServiceImpl implements WrapTypeService {
 
         return updatedWrapType.toResponseDto();
     }
+
+    @Override
+    public List<WrapTypeResponseDto> getAllWarpTypeIsAvailable() {
+        return wrapTypeRepository.findAllByIsAvailableTrue()
+                .stream().map(WrapType::toResponseDto)
+                .collect(Collectors.toList());
+    }
 }

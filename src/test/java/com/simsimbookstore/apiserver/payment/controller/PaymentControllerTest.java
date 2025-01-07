@@ -126,7 +126,7 @@ class PaymentControllerTest {
         when(paymentService.createPaymentRequest(facadeResponseDto)).thenReturn(url);
 
         // response
-        mvc.perform(post("/api/payment")
+        mvc.perform(post("/api/shop/payment")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -147,7 +147,7 @@ class PaymentControllerTest {
 //        Assertions.assertEquals(expectedOrderId, orderId);
 //        Assertions.assertEquals(expectedAmount, totalAmount);
 
-        mvc.perform(get("/api/success")
+        mvc.perform(get("/api/shop/success")
                         .param("paymentKey", paymentKey)
                         .param("orderId", orderId)
                         .param("amount", String.valueOf(totalAmount))
@@ -172,7 +172,7 @@ class PaymentControllerTest {
         session.setAttribute("orderId", wrongOrderId);
         session.setAttribute("totalAmount", totalAmount);
 
-        mvc.perform(get("/api/success")
+        mvc.perform(get("/api/shop/success")
                 .param("paymentKey", paymentKey)
                 .param("orderId", orderId)
                 .param("totalAmount", String.valueOf(totalAmount))
@@ -190,7 +190,7 @@ class PaymentControllerTest {
         session.setAttribute("orderId", orderId);
         session.setAttribute("totalAmount", totalAmount);
 
-        mvc.perform(get("/api/success")
+        mvc.perform(get("/api/shop/success")
                         .param("paymentKey", paymentKey)
                         .param("orderId", orderId)
                         .param("totalAmount", "293480")
@@ -205,7 +205,7 @@ class PaymentControllerTest {
         String code = "400";
         String message = "결제 실패";
 
-        mvc.perform(get("/api/fail")
+        mvc.perform(get("/api/shop/fail")
                         .param("code", code)
                         .param("message", message)
                         .param("orderId", orderId))

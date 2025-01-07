@@ -13,4 +13,6 @@ public interface WrapTypeService {
     List<WrapTypeResponseDto> getAllWrapTypes();
 
     WrapTypeResponseDto updateAvailability(Long id, Boolean isAvailable);
+
+    List<WrapTypeResponseDto> getAllWarpTypeIsAvailable();
 }

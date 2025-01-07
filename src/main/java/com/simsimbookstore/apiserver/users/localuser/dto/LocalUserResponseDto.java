@@ -20,5 +20,5 @@ public class LocalUserResponseDto {
 
     private String password;
 
-    private UserStatus status;
+    private UserStatus userStatus;
 }
