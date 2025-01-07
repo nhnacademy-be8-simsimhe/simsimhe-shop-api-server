@@ -28,8 +28,8 @@ public class Payment {
     private LocalDateTime paymentDate;
 
     // 사용자가 선택한 결제 방법
-    @Column(name = "payment_method", nullable = false)
-    private String paymentMethodToss;
+//    @Column(name = "payment_method", nullable = false)
+//    private String paymentMethodToss;
 
     // 결제 수단
     @ManyToOne
