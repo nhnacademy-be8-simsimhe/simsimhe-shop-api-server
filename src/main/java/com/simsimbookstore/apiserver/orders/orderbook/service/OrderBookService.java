@@ -6,8 +6,12 @@ import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookResponseDto;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
 import com.simsimbookstore.apiserver.orders.packages.dto.PackageResponseDto;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface OrderBookService {
+
+    @Transactional
+    OrderBookResponseDto createOrderBook(OrderBookRequestDto orderBookRequestDto);
 
     List<OrderBookResponseDto> createOrderBooks(List<OrderBookRequestDto> orderBookRequestDtos);
 

@@ -46,7 +46,6 @@ public class BookGetService {
                     .giftPackaging(book.isGiftPackaging())
                     .publisher(book.getPublisher())
                     .build();
-
         } else {
             throw new NotFoundException("책 정보가 없습니다.");
         }

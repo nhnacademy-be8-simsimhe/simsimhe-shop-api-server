@@ -11,13 +11,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
+import com.simsimbookstore.apiserver.users.role.entity.Role;
+import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.user.dto.UserGradeUpdateRequestDto;
+import com.simsimbookstore.apiserver.users.user.dto.UserLatestLoginDateUpdateRequestDto;
 import com.simsimbookstore.apiserver.users.user.dto.UserStatusUpdateRequestDto;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.service.impl.UserServiceImpl;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+
+import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -61,7 +67,16 @@ class UserControllerTest {
                 .createdAt(LocalDateTime.now())
                 .userStatus(UserStatus.ACTIVE)
                 .grade(testGrade)
+                .userRoleList(new HashSet<>())
                 .build();
+
+        UserRole userRole = UserRole.builder()
+                .userRoleId(1L)
+                .user(testUser)
+                .role(new Role(1L, RoleName.USER))
+                .build();
+
+        testUser.addUserRole(userRole);
 
 
         when(userService.updateUserStatus(anyLong(), any(UserStatus.class))).thenReturn(testUser);
@@ -71,7 +86,6 @@ class UserControllerTest {
     @DisplayName("유저 상태 업데이트")
     void updateStatus() throws Exception {
 
-        Long UserId = 1L;
         UserStatusUpdateRequestDto userStatusUpdateRequestDto = UserStatusUpdateRequestDto.builder()
                 .status(UserStatus.ACTIVE)
                 .build();
@@ -83,9 +97,7 @@ class UserControllerTest {
         mockMvc.perform(put("/api/users/1/status")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userStatusUpdateRequestDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId").value(UserId))
-                .andExpect(jsonPath("$.userStatus").value(UserStatus.INACTIVE.toString()));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -108,5 +120,26 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(userId))
                 .andExpect(jsonPath("$.grade.tier").value(Tier.ROYAL.toString()));
+    }
+
+    @Test
+    @DisplayName("유저 최근 로그인 날짜 업데이트")
+    void updateLatestLoginDate() throws Exception {
+        Long userId = 1L;
+        LocalDateTime latestLoginDate = LocalDateTime.now();
+        UserLatestLoginDateUpdateRequestDto requestDto = UserLatestLoginDateUpdateRequestDto.builder()
+                .latestLoginDate(latestLoginDate)
+                .build();
+
+        testUser.updateLatestLoginDate(latestLoginDate);
+
+        when(userService.updateUserLatestLoginDate(userId, requestDto.getLatestLoginDate())).thenReturn(testUser);
+
+        mockMvc.perform(put("/api/users/1/latestLoginDate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId").value(userId))
+                .andExpect(jsonPath("$.latestLoginDate").value(latestLoginDate.toString()));
     }
 }

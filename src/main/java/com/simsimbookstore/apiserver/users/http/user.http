@@ -3,16 +3,16 @@ POST http://localhost:8020/api/users/localUsers
 Content-Type: application/json
 
 {
-  "userName": "John Doe",
-  "mobileNumber": "01051278121",
-  "email": "johndoe@example.com",
-  "birth": "1995-03-09",
-  "gender": "MALE",
+  "userName": "김민경",
+  "mobileNumber": "01010101010",
+  "email": "김민경@example.com",
+  "birth": "2000-01-01",
+  "gender": "FEMALE",
   "userStatus": "ACTIVE",
   "tier": "STANDARD",
   "roleName": "USER",
-  "loginId": "test",
-  "password": "test"
+  "loginId": "김민경",
+  "password": "김민경"
 }
 
 ### 유저 상태 업데이트

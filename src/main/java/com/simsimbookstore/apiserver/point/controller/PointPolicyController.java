@@ -32,6 +32,11 @@ public class PointPolicyController {
         return ResponseEntity.ok(allPolicies);
     }
 
+    @GetMapping("/{policyId}")
+    public ResponseEntity<PointPolicyResponseDto> getById(@PathVariable long policyId) {
+        return ResponseEntity.ok(pointPolicyService.getPolicyById(policyId));
+    }
+
     /**
      * 정책 생성
      */
@@ -44,7 +49,8 @@ public class PointPolicyController {
     /**
      * 정책 수정
      */
-    @PutMapping("/{policyId}")
+
+    @PostMapping("/{policyId}")
     public ResponseEntity<PointPolicyResponseDto> updatePolicy(
             @PathVariable Long policyId,
             @RequestBody PointPolicyRequestDto requestDto) {

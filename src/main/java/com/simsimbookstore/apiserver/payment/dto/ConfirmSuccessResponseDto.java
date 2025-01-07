@@ -5,6 +5,7 @@ import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.payment.entity.Payment;
 import com.simsimbookstore.apiserver.payment.entity.PaymentMethod;
 import com.simsimbookstore.apiserver.payment.entity.PaymentStatus;
+import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -14,14 +15,19 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class ConfirmSuccessResponseDto {
+    @JsonProperty("orderId")
     private String orderId;
+    @JsonProperty("paymentKey")
     private String paymentKey;
+    @JsonProperty("totalAmount")
     private BigDecimal totalAmount;
-    private String paymentMethod;
-    private LocalDateTime approvedAt;
+    @JsonProperty("paymentMethod")
+    private String method; // paymentMethod
+    @JsonProperty("approvedAt")
+    private String approvedAt;
 
-    public static void toEntity(ConfirmSuccessResponseDto confirmSuccessResponseDto,  //원래는 Payment Type
-                                   PaymentStatus paymentStatus, Order order) {
+//    public static void toEntity(ConfirmSuccessResponseDto confirmSuccessResponseDto,  //원래는 Payment Type
+//                                   PaymentStatus paymentStatus, Order order) {
 
 //        return new Payment(
 //                null,
@@ -33,11 +39,22 @@ public class ConfirmSuccessResponseDto {
 //        );
 
 //        return Payment.builder()
-//                .order()
-//                .paymentKey(this.paymentKey)
-//                .paymentMethodId(this.paymentMethod)
+//                .order(order)
+//                .paymentKey(confirmSuccessResponseDto.paymentKey)
+//                .paymentMethodId(confirmSuccessResponseDto.getMethod())
 //                .paymentDate(this.approvedAt)
 //                .paymentStatusId(paymentStatus)
 //                .build();
-    }
+
+//    public Payment toEntity(PaymentStatus paymentStatus, Order order, PaymentMethod paymentMethod) {
+//        return Payment.builder()
+//                .paymentKey(this.paymentKey)
+//                .paymentDate(this.approvedAt)
+//                .paymentMethodToss(this.method)
+//                .paymentStatus(paymentStatus)
+//                .order(order)
+//                .paymentMethod(paymentMethod)
+//                .build();
+//
+//    }
 }

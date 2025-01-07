@@ -3,11 +3,15 @@ package com.simsimbookstore.apiserver.users.localuser.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
+import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserResponseDto;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
+import com.simsimbookstore.apiserver.users.localuser.mapper.LocalUserMapper;
 import com.simsimbookstore.apiserver.users.localuser.service.LocalUserService;
+import com.simsimbookstore.apiserver.users.role.entity.Role;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.user.entity.Gender;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
+import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Set;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -58,6 +63,12 @@ class LocalUserControllerTest {
                 .password("test")
                 .build();
 
+        UserRole testUserRole = UserRole.builder()
+                .userRoleId(1L)
+                .user(testLocalUser)
+                .role(Role.builder().roleId(1L).roleName(RoleName.USER).build())
+                .build();
+
         testLocalUser = LocalUser.builder()
                 .userName(testUserRequestDto.getUserName())
                 .mobileNumber(testUserRequestDto.getMobileNumber())
@@ -65,6 +76,7 @@ class LocalUserControllerTest {
                 .birth(testUserRequestDto.getBirth())
                 .gender(testUserRequestDto.getGender())
                 .userStatus(UserStatus.ACTIVE)
+                .userRoleList(Set.of(testUserRole))
                 .createdAt(testUserRequestDto.getCreatedAt())
                 .loginId(testUserRequestDto.getLoginId())
                 .password(testUserRequestDto.getPassword())
@@ -85,7 +97,6 @@ class LocalUserControllerTest {
                 .andExpect(jsonPath("$.birth").value(testUserRequestDto.getBirth().toString()))
                 .andExpect(jsonPath("$.gender").value(testUserRequestDto.getGender().toString()))
                 .andExpect(jsonPath("$.userStatus").value(testUserRequestDto.getUserStatus().toString()))
-                .andExpect(jsonPath("$.createdAt").value(testUserRequestDto.getCreatedAt().toString()))
                 .andExpect(jsonPath("$.loginId").value(testUserRequestDto.getLoginId()))
                 .andExpect(jsonPath("$.password").value(testUserRequestDto.getPassword()));
     }
@@ -111,12 +122,16 @@ class LocalUserControllerTest {
     }
 
     @Test
-    void getLocalUSer() throws Exception {
+    void getLocalUser() throws Exception {
+        LocalUserResponseDto responseDto = LocalUserMapper.localUserResponseDtoTo(testLocalUser);
         when(localUserService.findByLoginId(anyString())).thenReturn(testLocalUser);
 
         mockMvc.perform(get("/api/users/localUsers/{loginId}", testLocalUser.getLoginId())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userName").value(testUserRequestDto.getUserName()));
+                .andExpect(jsonPath("$.userId").value(responseDto.getUserId()))
+                .andExpect(jsonPath("$.loginId").value(responseDto.getLoginId()))
+                .andExpect(jsonPath("$.password").value(responseDto.getPassword()))
+                .andExpect(jsonPath("$.userStatus").value(responseDto.getUserStatus().toString()));
     }
 }

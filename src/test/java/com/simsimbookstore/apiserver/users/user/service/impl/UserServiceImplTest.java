@@ -54,10 +54,12 @@ class UserServiceImplTest {
                 .build();
 
         testUser = User.builder()
+                .userId(1L)
                 .userName("John Doe")
                 .email("johndoe@example.com")
                 .createdAt(LocalDateTime.now())
                 .userStatus(UserStatus.ACTIVE)
+                .latestLoginDate(LocalDateTime.now())
                 .grade(standardGrade)
                 .build();
 
@@ -84,5 +86,19 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).save(testUser);
 
         Assertions.assertThrows(NotFoundException.class, () -> userService.updateUserGrade(99L, Tier.ROYAL));
+    }
+
+    @Test
+    void updateUserLatestLoginDate(){
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.findUserWithGradeAndUserRoleListByUserId(1L)).thenReturn(Optional.of(testUser));
+
+        userService.updateUserLatestLoginDate(1L, LocalDateTime.now());
+        verify(userRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).findUserWithGradeAndUserRoleListByUserId(1L);
+        verify(userRepository, times(1)).save(testUser);
+
+        Assertions.assertThrows(NotFoundException.class, () -> userService.updateUserLatestLoginDate(99L, LocalDateTime.now()));
     }
 }

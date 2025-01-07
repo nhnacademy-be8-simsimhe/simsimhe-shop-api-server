@@ -118,19 +118,196 @@
     </ul>
 </div>
 
+<div class="p-3 border rounded-3 mb-4">
+    <h4 class="fw-normal mb-3">포인트 사용</h4>
+    <div>
+        <label for="usePoint">사용할 포인트:</label>
+        <input type="number" class="form-control" id="usePoint" placeholder="사용할 포인트 입력" min="0">
+        <small id="availablePoints" class="form-text text-muted">
+            사용 가능한 포인트: <span id="availablePointsValue">0</span>원
+        </small>
+
+    </div>
+</div>
+
 <!-- 합계 영역 -->
 <div>
     <span>합계: </span>
     <span id="total_price">₩0</span>
 </div>
 
-<!-- (테스트용) 버튼 -->
-<!-- <button class="btn btn-primary mt-3" onclick="updateTotal()">합계 다시 계산</button> -->
+<!-- 결제 방법 선택 -->
+<div class="p-3 border rounded-3 mb-4">
+    <div class="box_section" style="padding: 40px 30px 50px 30px; margin-top: 30px; margin-bottom: 50px">
+        <h4 class="fw-normal mb-3">결제 방법</h4>
+        <div id="payment-method" style="display: flex">
+            <button id="CARD" class="button2" onclick="selectPaymentMethod('CARD')">카드</button>
+            <button id="TRANSFER" class="button2" onclick="selectPaymentMethod('TRANSFER')">계좌이체</button>
+        </div>
+    </div>
+</div>
+
+<!-- 결제 버튼 -->
+<div class="p-3 border rounded-3 mb-4">
+    <button id="paymentButton" class="btn btn-primary btn-lg" onclick="submitOrder()">결제하기</button>
+</div>
+
+<script>
+    let selectedPaymentMethod = null;
+
+    function selectPaymentMethod(method) {
+        if (selectedPaymentMethod != null) {
+            document.getElementById(selectedPaymentMethod).style.backgroundColor = "#ffffff";
+        }
+
+        selectedPaymentMethod = method;
+
+        document.getElementById(selectedPaymentMethod).style.backgroundColor = "rgb(229 239 255)";
+    }
+
+    function submitOrder() {
+        const phoneNumber = document.getElementById("senderPhoneNumber").value.trim();
+        console.log("Collected Phone Number:", phoneNumber);
+        const senderName = document.getElementById("senderName").value.trim();
+        const receiverName = document.getElementById("receiverName").value.trim();
+        const receiverNumber = document.getElementById("receiverNumber").value.trim();
+
+        if (!phoneNumber) {
+            alert("전화번호를 입력해주세요.");
+            return;
+        }
+        if (!receiverName) {
+            alert("수취인 이름을 입력해주세요.");
+            return;
+        }
+        if (!receiverNumber) {
+            alert("수취인 전화번호를 입력해주세요.");
+            return;
+        }
+
+        const deliveryRequestDto = {
+            deliveryState: "PENDING",
+            deliveryReceiver: receiverName,
+            receiverPhoneNumber: receiverNumber,
+            postalCode: document.getElementById("zipCode").value,
+            roadAddress: document.getElementById("address").value,
+            detailedAddress: document.getElementById("detailAddress").value,
+            reference: "" // 참고 사항
+        };
+
+        const memberOrderRequestDto = {
+            userId: userId,
+            deliveryId: null,
+            originalPrice: originalCalcPrice,
+            pointUse: parseInt(document.getElementById("usePoint").value || "0", 10),
+            totalPrice: parseInt(document.getElementById("total_price").innerText.replace(/[₩,]/g, ""), 10),
+            deliveryDate: document.getElementById("deliveryDate").value,
+            orderEmail: document.getElementById("senderEmail").value,
+            phoneNumber: phoneNumber,
+            senderName:senderName,
+            deliveryPrice: null
+        };
+
+        // 주문 상품 정보 수집
+        const orderBookRequestDtos = [];
+        document.querySelectorAll(".order_item").forEach(item => {
+            const bookId = item.getAttribute("data-book-id");
+            const quantity = parseInt(item.querySelector(".book-quantity").textContent || "0", 10);
+            const salePrice = parseFloat(item.querySelector(".book-price").textContent || "0");
+
+            // 쿠폰 정보
+            const couponSelect = document.getElementById(`coupon-${bookId}`);
+            const couponId = couponSelect && couponSelect.value ? parseInt(couponSelect.value, 10) : null;
+            const discountPrice = couponId
+                ? parseFloat(couponSelect.options[couponSelect.selectedIndex].getAttribute("data-discount") || "0")
+                : 0;
+
+            // 포장 정보
+            const packageSelect = document.getElementById(`package-${bookId}`);
+            const packageQuantityInput = document.getElementById(`package-quantity-${bookId}`);
+            const packagesRequestDtos = [];
+            if (packageSelect && packageSelect.value !== "0") {
+                packagesRequestDtos.push({
+                    packageTypeId: parseInt(packageSelect.value, 10),
+                    packageName: packageSelect.options[packageSelect.selectedIndex].textContent.trim(),
+                    quantity: parseInt(packageQuantityInput.value || "0", 10)
+                });
+            }
+
+            orderBookRequestDtos.push({
+                bookId: parseInt(bookId, 10),
+                couponId: couponId,
+                quantity: quantity,
+                salePrice: salePrice,
+                discountPrice: discountPrice,
+                orderBookState: "PENDING",
+                couponDiscountRequestDto: couponId
+                    ? {
+                        couponId: couponId,
+                        couponName: couponSelect.options[couponSelect.selectedIndex].textContent,
+                        couponType: "FIX", // 예제 값, 서버 로직에 따라 다를 수 있음
+                        discountPrice: discountPrice
+                    }
+                    : null,
+                packagesRequestDtos: packagesRequestDtos
+            });
+        });
+
+        let method;
+
+        try {
+            if (selectedPaymentMethod === "CARD") {
+                method = "CARD";
+            } else if (selectedPaymentMethod === "TRANSFER") {
+                method = "TRANSFER";
+            }
+        } catch (error) {
+            console.error("결제 요청 중 에러 발생: ", error);
+        }
+
+        // 주문 요청 데이터 구성
+        const orderFacadeRequestDto = {
+            deliveryRequestDto: deliveryRequestDto,
+            memberOrderRequestDto: memberOrderRequestDto,
+            orderBookRequestDtos: orderBookRequestDtos,
+            method: selectedPaymentMethod
+        };
+
+        console.log("Order Data:", orderFacadeRequestDto);
+
+        // 서버로 주문 데이터 전송
+        fetch("/api/payment", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(orderFacadeRequestDto)
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    throw new Error("결제 링크 생성 실패!");
+                }
+            })
+            .then(link => {
+                console.log("결제 링크:", link);
+                // 리디렉션 또는 링크 표시
+                window.location.href = link; // 결제창으로 이동
+            })
+            .catch(error => {
+                console.error("에러 발생:", error);
+                alert("결제 처리 중 문제가 발생했습니다.");
+            });
+    }
+
+</script>
 
 <!-- bookOrderList 데이터를 JSON으로 변환해서 JS에서 참조 가능하게 -->
 <script th:inline="javascript">
     const bookOrderList = [[${bookOrderList}]];
     const addresses =  [[${addresses}]];
+    const userId = [[${userId}]];
 </script>
 
 <script th:inline="javascript">
@@ -139,120 +316,124 @@
     console.log("Wrap Types: ", [[${wrapTypes}]]);
 </script>
 
+
 <script>
-    // 페이지가 로드되면 실행
     document.addEventListener("DOMContentLoaded", () => {
         console.log("DOM fully loaded and parsed.");
 
-        // [1] 각 상품별로 이벤트 리스너 등록
-        document.querySelectorAll(".order_item").forEach(item => {
-            const bookId = item.getAttribute("data-book-id");
+        // 페이지 로드 시 초기 합계 계산
+        updateTotal();
 
-            // 쿠폰 셀렉트
-            const couponSelect = document.getElementById(`coupon-${bookId}`);
-            // 포장지 셀렉트
-            const packageSelect = document.getElementById(`package-${bookId}`);
-            // 포장 개수
-            const packageQuantityInput = document.getElementById(`package-quantity-${bookId}`);
+        // 포인트 입력 변경 시 합계 업데이트
+        const usePointInput = document.getElementById("usePoint");
+        usePointInput.addEventListener("input", () => {
+            const usePoint = parseInt(usePointInput.value || "0", 10);
+            const availablePoints = parseInt(
+                document.getElementById("availablePointsValue")
+            );
 
-            // 이벤트 리스너들
-            if (couponSelect) {
-                couponSelect.addEventListener("change", () => {
-                    console.log(`Coupon changed for bookId: ${bookId}`);
-                    updateTotal();
-                });
+            // 사용 가능한 포인트 초과 시 제한
+            if (usePoint > availablePoints) {
+                usePointInput.value = availablePoints;
+            } else if (usePoint < 0) {
+                usePointInput.value = 0;
             }
-            if (packageSelect) {
-                packageSelect.addEventListener("change", () => {
-                    console.log(`Package changed for bookId: ${bookId}`);
-                    updateTotal();
-                });
-            }
-            if (packageQuantityInput) {
-                packageQuantityInput.addEventListener("input", () => {
-                    console.log(`Package quantity changed for bookId: ${bookId}`);
-                    updateTotal();
-                });
-            }
+            updateTotal();
         });
 
-        // [2] 페이지 로딩 후 최초 합계 계산
-        updateTotal();
+        // 쿠폰 변경, 포장 변경 시 합계 재계산 이벤트
+        document.querySelectorAll(".coupon-select").forEach(select => {
+            select.addEventListener("change", updateTotal);
+        });
+        document.querySelectorAll(".package-select").forEach(select => {
+            select.addEventListener("change", updateTotal);
+        });
+        document.querySelectorAll(".package-quantity").forEach(input => {
+            input.addEventListener("input", updateTotal);
+        });
     });
 
-    // 서버로 총액을 계산 요청하는 함수
+    // 합계 계산 함수 (포장, 쿠폰, 포인트 모두 처리)
     async function updateTotal() {
-        // 서버에 보낼 데이터 구조
+        const userId = document.getElementById("userId");
         const bookList = [];
         const packagingOptions = {};
         const couponOptions = {};
 
-        // .order_item을 모두 돌며 데이터 수집
+        // 주문 정보 수집
         document.querySelectorAll(".order_item").forEach(item => {
             const bookId = item.getAttribute("data-book-id");
+            const price = parseInt(item.querySelector(".book-price").textContent || "0", 10);
+            const quantity = parseInt(item.querySelector(".book-quantity").textContent || "0", 10);
 
-            // 책 가격, 수량(span 태그)
-            const priceElement = item.querySelector(".book-price");
-            const quantityElement = item.querySelector(".book-quantity");
-
-            // 쿠폰, 포장지, 포장 수량
-            const couponSelect = document.getElementById(`coupon-${bookId}`);
-            const packageSelect = document.getElementById(`package-${bookId}`);
-            const packageQuantityInput = document.getElementById(`package-quantity-${bookId}`);
-
-            // 실제 숫자 값 가져오기
-            const price = parseInt(priceElement?.textContent || "0", 10);
-            const quantity = parseInt(quantityElement?.textContent || "0", 10);
-
-            // bookList 배열에 현재 책 정보 push
+            // 책 목록
             bookList.push({
                 bookId: parseInt(bookId, 10),
                 price: price,
                 quantity: quantity
             });
 
-            // 쿠폰 선택값
+            // 쿠폰 선택
+            const couponSelect = document.getElementById(`coupon-${bookId}`);
             if (couponSelect && couponSelect.value) {
-                couponOptions[bookId] = parseInt(couponSelect.value, 10);
-            } else {
-                couponOptions[bookId] = null;
+                const discount = parseInt(
+                    couponSelect.options[couponSelect.selectedIndex].getAttribute("data-discount") || "0",
+                    10
+                );
+                couponOptions[bookId] = {
+                    couponId: parseInt(couponSelect.value, 10),
+                    discount: discount
+                };
             }
 
-            // 포장 타입
-            if (packageSelect) {
-                const packageTypeId = parseInt(packageSelect.value, 10);
-                const pkgQty = packageQuantityInput ? parseInt(packageQuantityInput.value, 10) : 0;
+            // 포장 선택
+            const packageSelect = document.getElementById(`package-${bookId}`);
+            const packageQuantityInput = document.getElementById(`package-quantity-${bookId}`);
+            if (packageSelect && packageSelect.value !== "0") {
+                const packagePrice = parseInt(
+                    packageSelect.options[packageSelect.selectedIndex].getAttribute("data-price") || "0",
+                    10
+                );
+                const packageQuantity = parseInt(packageQuantityInput.value || "0", 10);
 
-                // 0이면 "포장 없음" 처리
-                if (packageTypeId !== 0) {
-                    packagingOptions[bookId] = {
-                        packageTypeId: packageTypeId,
-                        quantity: pkgQty
-                    };
-                } else {
-                    packagingOptions[bookId] = {
-                        packageTypeId: null,
-                        quantity: 0
-                    };
-                }
+                packagingOptions[bookId] = {
+                    packageTypeId: parseInt(packageSelect.value, 10),
+                    quantity: packageQuantity,
+                    packagePrice: packagePrice
+                };
             }
         });
 
-        console.log("보낼 데이터:", { bookList, packagingOptions, couponOptions });
+        // 포인트 사용
+        const usePoint = parseInt(document.getElementById("usePoint").value || "0", 10);
+
+        // 서버로 전송할 데이터
+        const requestBody = { userId ,bookList, packagingOptions, couponOptions, usePoint };
+
+        console.log("보낼 데이터:", requestBody);
 
         try {
-            const response = await fetch("/api/order/total", {
+            // POST /api/order/total (백엔드가 total + availablePoints 등을 내려줌)
+            const response = await fetch("/api/shop/order/total", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ bookList, packagingOptions, couponOptions }),
+                body: JSON.stringify(requestBody),
             });
 
             if (response.ok) {
                 const data = await response.json();
                 console.log("서버 응답:", data);
 
-                // 합계 표시
-                document.getElementById("total_price").innerText = `₩${data.total.toLocaleString("ko-KR")}`;
+                // 서버에서 반환한 합계(total)
+                document.getElementById("total_price").innerText
+                    = `₩${data.total.toLocaleString("ko-KR")}`;
+
+                originalCalcPrice = data.originalPrice; // 전역 변수에 저장
+                console.log("Original Price 저장:", originalCalcPrice);
+
+
+                // 서버에서 반환한 availablePoints(남은 포인트, 혹은 현재 포인트)
+                    document.getElementById("availablePoints").innerText = data.availablePoints.toLocaleString("ko-KR");
             } else {
                 console.error("HTTP 오류:", response.statusText);
             }
@@ -296,10 +477,10 @@
             document.getElementById('detailAddress').value = "";
         } else {
             document.getElementById('receiverName').value = selectedOption.getAttribute('data-receiver-name');
+            document.getElementById('receiverNumber').value = selectedOption.getAttribute('data-receiver-number');
             document.getElementById('zipCode').value = selectedOption.getAttribute('data-zip-code');
             document.getElementById('address').value = selectedOption.getAttribute('data-address');
             document.getElementById('detailAddress').value = selectedOption.getAttribute('data-detail-address');
-            document.getElementById('receiverNumber').value = selectedOption.getAttribute('data-receiver-number');
         }
     }
 </script>

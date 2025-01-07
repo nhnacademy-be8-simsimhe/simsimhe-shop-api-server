@@ -23,9 +23,9 @@ public class AddressRequestDto {
     private String postalCode;
 
     @NotNull
-    @Length(min = 5, max = 255)
+    @Length(min = 3, max = 255)
     private String roadAddress;
 
-    @Length(min = 5, max = 255)
+    @Length(min = 0, max = 255)
     private String detailedAddress;
 }

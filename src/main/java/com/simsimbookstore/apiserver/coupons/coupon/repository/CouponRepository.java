@@ -13,7 +13,10 @@ import java.util.Optional;
 public interface CouponRepository extends JpaRepository<Coupon,Long>, CustomCouponRepository {
     Page<Coupon> findByUserUserId(Pageable pageable,Long userId);
 
-    Page<Coupon> findByUserUserIdAndCouponStatusOrderByIssueDate(Pageable pageable, Long userId, CouponStatus couponStatus);
+    Page<Coupon> findByUserUserIdAndCouponStatus(Pageable pageable, Long userId, CouponStatus couponStatus);
 
     Optional<Coupon> findByUserUserIdAndCouponId(Long userId, Long couponId);
+
+    List<Coupon> findByCouponTypeCouponTypeId(Long couponTypeId);
 }
+
