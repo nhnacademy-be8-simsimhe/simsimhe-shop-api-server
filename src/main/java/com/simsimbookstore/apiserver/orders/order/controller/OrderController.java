@@ -18,10 +18,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
-@RestController()
+@RestController
+@RequestMapping("/api/shop/order")
 @RequiredArgsConstructor
 public class OrderController {
 
@@ -30,7 +32,7 @@ public class OrderController {
     private final OrderFacade orderFacade;
 
 
-    @PostMapping("/api/order")
+    @PostMapping
     public ResponseEntity<List<BookListResponseDto>> getOrderPage(
             @RequestBody List<BookListRequestDto> bookListRequestDto) {
 
@@ -38,18 +40,16 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/api/order/total")
+    @PostMapping("/total")
     public ResponseEntity<TotalResponseDto> calculateTotal(@RequestBody TotalRequestDto requestDto) {
-        requestDto.setUserId(1L);
         log.info("요청 데이터 userId: {}", requestDto.getUserId());
-        // 총합 계산 요청
         TotalResponseDto response = orderTotalService.calculateTotal(requestDto);
         log.info("response : {}", response);
-        return ResponseEntity.ok(response); // 명시적으로 JSON 응답 설정
+        return ResponseEntity.ok(response);
     }
 
 
-    @PostMapping("/api/order/prepare")
+    @PostMapping("/prepare")
     public ResponseEntity<?> createPrepareOrder(
             @RequestBody OrderFacadeRequestDto facadeRequestDto
     ) {

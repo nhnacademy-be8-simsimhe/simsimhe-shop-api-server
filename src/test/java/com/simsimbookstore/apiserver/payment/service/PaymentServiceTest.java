@@ -2,6 +2,7 @@ package com.simsimbookstore.apiserver.payment.service;
 
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
+import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.payment.client.PaymentRestTemplate;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmSuccessResponseDto;
