@@ -22,11 +22,4 @@ public class FixCouponResponseDto extends CouponResponseDto{
     // 최소 주문 금액
     private BigDecimal minOrderAmount;
 
-
-    public Object getDiscountInfo() {
-        return Map.of(
-                "minOrderAmount",minOrderAmount,
-                "discountPrice", discountPrice
-        );
-    }
 }

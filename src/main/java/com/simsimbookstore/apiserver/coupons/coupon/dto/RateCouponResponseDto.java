@@ -25,11 +25,4 @@ public class RateCouponResponseDto extends CouponResponseDto{
     private BigDecimal minOrderAmount;
 
 
-    public Object getDiscountInfo() {
-        return Map.of(
-                "discountRate",discountRate,
-                "minOrderAmount",minOrderAmount,
-                "maxDiscountAmount",maxDiscountAmount
-        );
-    }
 }
