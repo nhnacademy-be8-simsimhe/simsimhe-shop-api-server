@@ -34,7 +34,7 @@ public class CustomCouponRepositoryImpl implements CustomCouponRepository {
      * @param pageable
      * @param userId
      * @param bookId
-     * @return 특정 책에 적용 가능한 쿠폰
+     * @return 특정 책에 적용 가능한 쿠폰 페이지
      */
     @Override
     public Page<Coupon> findEligibleCouponToBook(Pageable pageable, Long userId, Long bookId) {
