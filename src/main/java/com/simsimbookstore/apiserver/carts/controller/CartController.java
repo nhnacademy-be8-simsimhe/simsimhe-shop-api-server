@@ -34,7 +34,7 @@ public class CartController {
      * @param requestDtoList
      * @return
      */
-    @PatchMapping("/migrate/user/{userId}")
+    @PutMapping("/migrate/user/{userId}")
     public ResponseEntity CartToDB(@PathVariable(name = "userId") Long userId,
                                    @RequestBody List<CartRequestDto> requestDtoList) {
         cartService.CartToDb(userId, requestDtoList);
