@@ -6,6 +6,7 @@ import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
 import com.simsimbookstore.apiserver.books.bookcategory.entity.BookCategory;
 import com.simsimbookstore.apiserver.books.bookcategory.repository.BookCategoryRepository;
 import com.simsimbookstore.apiserver.books.category.dto.CategoryResponseDto;
+import com.simsimbookstore.apiserver.books.category.entity.Category;
 import com.simsimbookstore.apiserver.coupons.bookcoupon.entity.BookCoupon;
 import com.simsimbookstore.apiserver.coupons.categorycoupon.entity.CategoryCoupon;
 import com.simsimbookstore.apiserver.coupons.coupon.dto.CouponResponseDto;
@@ -304,6 +305,8 @@ public class CouponServiceImpl implements CouponService {
 //                }
 //            }
             for (BookCategory bookCategory : bookCategoryList) {
+                Category catagory = bookCategory.getCatagory();
+
                 Long bookCategoryId = bookCategory.getCatagory().getCategoryId();
                 Long couponCategoryId = categoryCoupon.getCategory().getCategoryId();
                 if (bookCategoryId.equals(couponCategoryId)) {
