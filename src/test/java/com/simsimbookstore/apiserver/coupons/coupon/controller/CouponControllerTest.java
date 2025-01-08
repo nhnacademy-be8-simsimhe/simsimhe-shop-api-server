@@ -58,7 +58,7 @@ class CouponControllerTest {
      * 테스트 메서드: GET /api/coupons/{couponId} - FixCouponResponseDto 반환 시 성공
      */
     @Test
-    @DisplayName("GET /api/coupons/{couponId} - FixCouponResponseDto 반환 시 성공")
+    @DisplayName("GET /api/shop/coupons/{couponId} - FixCouponResponseDto 반환 시 성공")
     void getCoupon_FixCoupon_Success() throws Exception {
         Long couponId = 1001L;
         FixCouponResponseDto couponResponseDto = FixCouponResponseDto.builder()
@@ -76,7 +76,7 @@ class CouponControllerTest {
 
         when(couponService.getCouponById(couponId)).thenReturn(couponResponseDto);
 
-        mockMvc.perform(get("/api/coupons/{couponId}", couponId)
+        mockMvc.perform(get("/api/shop/coupons/{couponId}", couponId)
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -98,7 +98,7 @@ class CouponControllerTest {
      * 테스트 메서드: GET /api/coupons/{couponId} - RateCouponResponseDto 반환 시 성공
      */
     @Test
-    @DisplayName("GET /api/coupons/{couponId} - RateCouponResponseDto 반환 시 성공")
+    @DisplayName("GET /api/shop/coupons/{couponId} - RateCouponResponseDto 반환 시 성공")
     void getCoupon_RateCoupon_Success() throws Exception {
         Long couponId = 1002L;
         RateCouponResponseDto couponResponseDto = RateCouponResponseDto.builder()
@@ -117,7 +117,7 @@ class CouponControllerTest {
 
         when(couponService.getCouponById(couponId)).thenReturn(couponResponseDto);
 
-        mockMvc.perform(get("/api/coupons/{couponId}", couponId)
+        mockMvc.perform(get("/api/shop/coupons/{couponId}", couponId)
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -140,7 +140,7 @@ class CouponControllerTest {
      * 테스트 메서드: GET /api/coupons/{couponId} - 쿠폰 없음
      */
     @Test
-    @DisplayName("GET /api/coupons/{couponId} - 쿠폰 없음")
+    @DisplayName("GET /api/shop/coupons/{couponId} - 쿠폰 없음")
     @Disabled
     void getCoupon_NotFound() throws Exception {
         Long couponId = 9999L;
@@ -148,7 +148,7 @@ class CouponControllerTest {
         when(couponService.getCouponById(couponId))
                 .thenThrow(new NotFoundException("쿠폰(id:" + couponId + ")이 존재하지 않습니다."));
 
-        mockMvc.perform(get("/api/coupons/{couponId}", couponId)
+        mockMvc.perform(get("/api/shop/coupons/{couponId}", couponId)
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isNotFound());
     }
@@ -157,7 +157,7 @@ class CouponControllerTest {
      * 테스트 메서드: GET /api/users/{userId}/coupons/unused?couponTypeId=xxx - FixCouponResponseDto 반환 시 성공
      */
     @Test
-    @DisplayName("GET /api/users/{userId}/coupons/unused?couponTypeId=300 - FixCouponResponseDto 반환 시 성공")
+    @DisplayName("GET /api/shop/users/{userId}/coupons/unused?couponTypeId=300 - FixCouponResponseDto 반환 시 성공")
     void getUnusedCouponByCouponType_FixCoupon_Success() throws Exception {
         Long userId = 1L;
         Long couponTypeId = 300L;
@@ -176,7 +176,7 @@ class CouponControllerTest {
 
         when(couponService.getUnusedCouponByCouponType(userId, couponTypeId)).thenReturn(couponResponseDto);
 
-        mockMvc.perform(get("/api/users/{userId}/coupons/unused", userId)
+        mockMvc.perform(get("/api/shop/users/{userId}/coupons/unused", userId)
                         .param("couponTypeId", String.valueOf(couponTypeId))
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isOk())
@@ -201,7 +201,7 @@ class CouponControllerTest {
      * 테스트 메서드: GET /api/users/{userId}/coupons/unused?couponTypeId=xxx - RateCouponResponseDto 반환 시 성공
      */
     @Test
-    @DisplayName("GET /api/users/{userId}/coupons/unused?couponTypeId=400 - RateCouponResponseDto 반환 시 성공")
+    @DisplayName("GET /api/shop/users/{userId}/coupons/unused?couponTypeId=400 - RateCouponResponseDto 반환 시 성공")
     void getUnusedCouponByCouponType_RateCoupon_Success() throws Exception {
         Long userId = 2L;
         Long couponTypeId = 400L;
@@ -221,7 +221,7 @@ class CouponControllerTest {
 
         when(couponService.getUnusedCouponByCouponType(userId, couponTypeId)).thenReturn(couponResponseDto);
 
-        mockMvc.perform(get("/api/users/{userId}/coupons/unused", userId)
+        mockMvc.perform(get("/api/shop/users/{userId}/coupons/unused", userId)
                         .param("couponTypeId", String.valueOf(couponTypeId))
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isOk())
@@ -245,7 +245,7 @@ class CouponControllerTest {
      * 테스트 메서드: GET /api/users/{userId}/coupons/unused?bookId=xxx - FixCouponResponseDto 반환 시 성공
      */
     @Test
-    @DisplayName("GET /api/users/{userId}/coupons/unused?bookId=200 - FixCouponResponseDto 반환 시 성공")
+    @DisplayName("GET /api/shop/users/{userId}/coupons/unused?bookId=200 - FixCouponResponseDto 반환 시 성공")
     void getEligibleCouponsToBook_FixCoupon_Success() throws Exception {
         Long userId = 1L;
         Long bookId = 200L;
@@ -282,7 +282,7 @@ class CouponControllerTest {
 
         when(couponService.getEligibleCoupons(Mockito.any(Pageable.class), eq(userId), eq(bookId))).thenReturn(couponPage);
 
-        mockMvc.perform(get("/api/users/{userId}/coupons/unused", userId)
+        mockMvc.perform(get("/api/shop/users/{userId}/coupons/unused", userId)
                         .param("bookId", String.valueOf(bookId))
                         .param("sortField", sortField)
                         .param("page", "0")
@@ -325,7 +325,7 @@ class CouponControllerTest {
      * 테스트 메서드: GET /api/users/{userId}/coupons/unused - 유저의 미사용 쿠폰 조회 - Fix 및 Rate 쿠폰 혼합 반환 시 성공
      */
     @Test
-    @DisplayName("GET /api/users/{userId}/coupons/unused - Fix 및 Rate 쿠폰 혼합 반환 시 성공")
+    @DisplayName("GET /api/shop/users/{userId}/coupons/unused - Fix 및 Rate 쿠폰 혼합 반환 시 성공")
     void getUnusedCoupons_MixedCoupons_Success() throws Exception {
         Long userId = 1L;
         String sortField = "issueDate";
@@ -362,7 +362,7 @@ class CouponControllerTest {
 
         when(couponService.getUnusedCoupons(Mockito.any(Pageable.class), eq(userId))).thenReturn(couponPage);
 
-        mockMvc.perform(get("/api/users/{userId}/coupons/unused", userId)
+        mockMvc.perform(get("/api/shop/users/{userId}/coupons/unused", userId)
                         .param("sortField", sortField)
                         .param("page", "0")
                         .param("size", "10")
@@ -409,7 +409,7 @@ class CouponControllerTest {
      * 테스트 메서드: POST /api/coupons/issue - FixCouponResponseDto 반환 시 성공
      */
     @Test
-    @DisplayName("POST /api/coupons/issue - FixCouponResponseDto 반환 시 성공")
+    @DisplayName("POST /api/admin/coupons/issue - FixCouponResponseDto 반환 시 성공")
     void issueCoupons_FixCoupon_Success() throws Exception {
         IssueCouponsRequestDto requestDto = IssueCouponsRequestDto.builder()
                 .userIds(Arrays.asList(1L, 2L))
@@ -448,7 +448,7 @@ class CouponControllerTest {
 
         when(couponService.issueCoupons(anyList(), eq(100L))).thenReturn(couponIds);
 
-        mockMvc.perform(post("/api/coupons/issue")
+        mockMvc.perform(post("/api/admin/coupons/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
@@ -461,7 +461,7 @@ class CouponControllerTest {
      * 테스트 메서드: POST /api/coupons/issue - RateCouponResponseDto 반환 시 성공
      */
     @Test
-    @DisplayName("POST /api/coupons/issue - RateCouponResponseDto 반환 시 성공")
+    @DisplayName("POST /api/admin/coupons/issue - RateCouponResponseDto 반환 시 성공")
     void issueCoupons_RateCoupon_Success() throws Exception {
         IssueCouponsRequestDto requestDto = IssueCouponsRequestDto.builder()
                 .userIds(Arrays.asList(3L, 4L))
@@ -501,7 +501,7 @@ class CouponControllerTest {
 
         when(couponService.issueCoupons(anyList(), eq(200L))).thenReturn(couponIds);
 
-        mockMvc.perform(post("/api/coupons/issue")
+        mockMvc.perform(post("/api/admin/coupons/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
@@ -513,7 +513,7 @@ class CouponControllerTest {
      * 테스트 메서드: POST /api/coupons/issue - 사용자 중 하나가 존재하지 않아 NotFoundException 발생
      */
     @Test
-    @DisplayName("POST /api/coupons/issue - 사용자 없음")
+    @DisplayName("POST /api/admin/coupons/issue - 사용자 없음")
     @Disabled
     void issueCoupons_UserNotFound() throws Exception {
         IssueCouponsRequestDto requestDto = IssueCouponsRequestDto.builder()
@@ -524,7 +524,7 @@ class CouponControllerTest {
         when(couponService.issueCoupons(anyList(), eq(100L)))
                 .thenThrow(new NotFoundException("회원(id:5)이 존재하지 않습니다."));
 
-        mockMvc.perform(post("/api/coupons/issue")
+        mockMvc.perform(post("/api/admin/coupons/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
@@ -535,7 +535,7 @@ class CouponControllerTest {
      * 테스트 메서드: POST /api/users/{userId}/coupons/{couponId}/expired - FixCouponResponseDto 반환 시 성공
      */
     @Test
-    @DisplayName("POST /api/users/{userId}/coupons/{couponId}/expired - FixCouponResponseDto 반환 시 성공")
+    @DisplayName("POST /api/admin/users/{userId}/coupons/{couponId}/expired - FixCouponResponseDto 반환 시 성공")
     void expiredCoupon_FixCoupon_Success() throws Exception {
         Long userId = 1L;
         Long couponId = 1013L;
@@ -554,7 +554,7 @@ class CouponControllerTest {
 
         when(couponService.expireCoupon(userId, couponId)).thenReturn(responseDto);
 
-        mockMvc.perform(post("/api/users/{userId}/coupons/{couponId}/expired", userId, couponId)
+        mockMvc.perform(post("/api/admin/users/{userId}/coupons/{couponId}/expired", userId, couponId)
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -577,7 +577,7 @@ class CouponControllerTest {
      * 테스트 메서드: POST /api/users/{userId}/coupons/{couponId}/expired - RateCouponResponseDto 반환 시 성공
      */
     @Test
-    @DisplayName("POST /api/users/{userId}/coupons/{couponId}/expired - RateCouponResponseDto 반환 시 성공")
+    @DisplayName("POST /api/admin/users/{userId}/coupons/{couponId}/expired - RateCouponResponseDto 반환 시 성공")
     void expiredCoupon_RateCoupon_Success() throws Exception {
         Long userId = 2L;
         Long couponId = 1014L;
@@ -597,7 +597,7 @@ class CouponControllerTest {
 
         when(couponService.expireCoupon(userId, couponId)).thenReturn(responseDto);
 
-        mockMvc.perform(post("/api/users/{userId}/coupons/{couponId}/expired", userId, couponId)
+        mockMvc.perform(post("/api/admin/users/{userId}/coupons/{couponId}/expired", userId, couponId)
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -620,7 +620,7 @@ class CouponControllerTest {
      * 테스트 메서드: POST /api/users/{userId}/coupons/{couponId}/expired - 쿠폰 없음
      */
     @Test
-    @DisplayName("POST /api/users/{userId}/coupons/{couponId}/expired - 쿠폰 없음")
+    @DisplayName("POST /api/admin/users/{userId}/coupons/{couponId}/expired - 쿠폰 없음")
     @Disabled
     void expiredCoupon_NotFound() throws Exception {
         Long userId = 1L;
@@ -629,7 +629,7 @@ class CouponControllerTest {
         when(couponService.expireCoupon(userId, couponId))
                 .thenThrow(new NotFoundException("쿠폰(id:" + couponId + ")이 존재하지 않습니다."));
 
-        mockMvc.perform(post("/api/users/{userId}/coupons/{couponId}/expired", userId, couponId)
+        mockMvc.perform(post("/api/admin/users/{userId}/coupons/{couponId}/expired", userId, couponId)
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isNotFound());
     }
@@ -638,7 +638,7 @@ class CouponControllerTest {
      * 테스트 메서드: POST /api/users/{userId}/coupons/{couponId}/use - FixCouponResponseDto 반환 시 성공
      */
     @Test
-    @DisplayName("POST /api/users/{userId}/coupons/{couponId}/use - FixCouponResponseDto 반환 시 성공")
+    @DisplayName("POST /api/shop/users/{userId}/coupons/{couponId}/use - FixCouponResponseDto 반환 시 성공")
     void useCoupon_FixCoupon_Success() throws Exception {
         Long userId = 1L;
         Long couponId = 1015L;
@@ -657,7 +657,7 @@ class CouponControllerTest {
 
         when(couponService.expireCoupon(userId, couponId)).thenReturn(responseDto);
 
-        mockMvc.perform(post("/api/users/{userId}/coupons/{couponId}/use", userId, couponId)
+        mockMvc.perform(post("/api/shop/users/{userId}/coupons/{couponId}/use", userId, couponId)
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -680,7 +680,7 @@ class CouponControllerTest {
      * 테스트 메서드: POST /api/users/{userId}/coupons/{couponId}/use - RateCouponResponseDto 반환 시 성공
      */
     @Test
-    @DisplayName("POST /api/users/{userId}/coupons/{couponId}/use - RateCouponResponseDto 반환 시 성공")
+    @DisplayName("POST /api/shop/users/{userId}/coupons/{couponId}/use - RateCouponResponseDto 반환 시 성공")
     void useCoupon_RateCoupon_Success() throws Exception {
         Long userId = 2L;
         Long couponId = 1016L;
@@ -700,7 +700,7 @@ class CouponControllerTest {
 
         when(couponService.expireCoupon(userId, couponId)).thenReturn(responseDto);
 
-        mockMvc.perform(post("/api/users/{userId}/coupons/{couponId}/use", userId, couponId)
+        mockMvc.perform(post("/api/shop/users/{userId}/coupons/{couponId}/use", userId, couponId)
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -723,7 +723,7 @@ class CouponControllerTest {
      * 테스트 메서드: POST /api/users/{userId}/coupons/{couponId}/use - 쿠폰 없음
      */
     @Test
-    @DisplayName("POST /api/users/{userId}/coupons/{couponId}/use - 쿠폰 없음")
+    @DisplayName("POST /api/shop/users/{userId}/coupons/{couponId}/use - 쿠폰 없음")
     @Disabled
     void useCoupon_NotFound() throws Exception {
         Long userId = 1L;
@@ -741,14 +741,14 @@ class CouponControllerTest {
      * 테스트 메서드: DELETE /api/users/{userId}/coupons/{couponId} - FixCouponResponseDto 반환 시 성공
      */
     @Test
-    @DisplayName("DELETE /api/users/{userId}/coupons/{couponId} - FixCouponResponseDto 반환 시 성공")
+    @DisplayName("DELETE /api/admin/users/{userId}/coupons/{couponId} - FixCouponResponseDto 반환 시 성공")
     void deleteCoupon_FixCoupon_Success() throws Exception {
         Long userId = 1L;
         Long couponId = 1017L;
 
         doNothing().when(couponService).deleteCoupon(userId, couponId);
 
-        mockMvc.perform(delete("/api/users/{userId}/coupons/{couponId}", userId, couponId)
+        mockMvc.perform(delete("/api/admin/users/{userId}/coupons/{couponId}", userId, couponId)
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isOk());
     }
@@ -757,14 +757,14 @@ class CouponControllerTest {
      * 테스트 메서드: DELETE /api/users/{userId}/coupons/{couponId} - RateCouponResponseDto 반환 시 성공
      */
     @Test
-    @DisplayName("DELETE /api/users/{userId}/coupons/{couponId} - RateCouponResponseDto 반환 시 성공")
+    @DisplayName("DELETE /api/admin/users/{userId}/coupons/{couponId} - RateCouponResponseDto 반환 시 성공")
     void deleteCoupon_RateCoupon_Success() throws Exception {
         Long userId = 2L;
         Long couponId = 1018L;
 
         doNothing().when(couponService).deleteCoupon(userId, couponId);
 
-        mockMvc.perform(delete("/api/users/{userId}/coupons/{couponId}", userId, couponId)
+        mockMvc.perform(delete("/api/admin/users/{userId}/coupons/{couponId}", userId, couponId)
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isOk());
     }
@@ -773,7 +773,7 @@ class CouponControllerTest {
      * 테스트 메서드: DELETE /api/users/{userId}/coupons/{couponId} - 쿠폰 없음
      */
     @Test
-    @DisplayName("DELETE /api/users/{userId}/coupons/{couponId} - 쿠폰 없음")
+    @DisplayName("DELETE /api/admin/users/{userId}/coupons/{couponId} - 쿠폰 없음")
     @Disabled
     void deleteCoupon_NotFound() throws Exception {
         Long userId = 1L;
@@ -782,7 +782,7 @@ class CouponControllerTest {
         doThrow(new NotFoundException("쿠폰(id:" + couponId + ")이 존재하지 않습니다."))
                 .when(couponService).deleteCoupon(userId, couponId);
 
-        mockMvc.perform(delete("/api/users/{userId}/coupons/{couponId}", userId, couponId)
+        mockMvc.perform(delete("/api/admin/users/{userId}/coupons/{couponId}", userId, couponId)
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isNotFound());
     }
@@ -791,7 +791,7 @@ class CouponControllerTest {
      * 테스트 메서드: GET /api/coupons/{couponId}/calculate - 성공
      */
     @Test
-    @DisplayName("GET /api/coupons/{couponId}/calculate - 성공")
+    @DisplayName("GET /api/shop/coupons/{couponId}/calculate - 성공")
     void calDiscountAmount_Success() throws Exception {
         Long couponId = 1019L;
         Long bookId = 300L;
@@ -803,7 +803,7 @@ class CouponControllerTest {
 
         when(couponService.calDiscountAmount(bookId, quantity, couponId)).thenReturn(discountDto);
 
-        mockMvc.perform(get("/api/coupons/{couponId}/calculate", couponId)
+        mockMvc.perform(get("/api/shop/coupons/{couponId}/calculate", couponId)
                         .param("bookId", String.valueOf(bookId))
                         .param("quantity", String.valueOf(quantity))
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
@@ -816,7 +816,7 @@ class CouponControllerTest {
      * 테스트 메서드: GET /api/coupons/{couponId}/calculate - 쿠폰 없음
      */
     @Test
-    @DisplayName("GET /api/coupons/{couponId}/calculate - 쿠폰 없음")
+    @DisplayName("GET /api/shop/coupons/{couponId}/calculate - 쿠폰 없음")
     @Disabled
     void calDiscountAmount_NotFound() throws Exception {
         Long couponId = 9999L;
@@ -826,7 +826,7 @@ class CouponControllerTest {
         when(couponService.calDiscountAmount(bookId, quantity, couponId))
                 .thenThrow(new NotFoundException("쿠폰(id:" + couponId + ")이 존재하지 않습니다."));
 
-        mockMvc.perform(get("/api/coupons/{couponId}/calculate", couponId)
+        mockMvc.perform(get("/api/shop/coupons/{couponId}/calculate", couponId)
                         .param("bookId", String.valueOf(bookId))
                         .param("quantity", String.valueOf(quantity))
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정

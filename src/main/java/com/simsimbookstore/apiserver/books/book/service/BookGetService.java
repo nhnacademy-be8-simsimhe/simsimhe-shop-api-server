@@ -17,6 +17,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class BookGetService {
 
     private final BookRepository bookRepository;
