@@ -9,8 +9,6 @@
 name: Java developCi
 
 on:
-  push:
-    branches: [ "develop" ]
   pull_request:
     branches: [ "develop" ]
 
