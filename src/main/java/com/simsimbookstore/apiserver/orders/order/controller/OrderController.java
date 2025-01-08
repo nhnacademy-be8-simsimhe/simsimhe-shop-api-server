@@ -42,6 +42,8 @@ public class OrderController {
 
     @PostMapping("/total")
     public ResponseEntity<TotalResponseDto> calculateTotal(@RequestBody TotalRequestDto requestDto) {
+        //이따지워라
+        requestDto.setUserId(1L);
         log.info("요청 데이터 userId: {}", requestDto.getUserId());
         TotalResponseDto response = orderTotalService.calculateTotal(requestDto);
         log.info("response : {}", response);
