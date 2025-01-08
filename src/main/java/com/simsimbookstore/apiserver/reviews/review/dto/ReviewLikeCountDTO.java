@@ -15,11 +15,15 @@ public class ReviewLikeCountDTO {
     private String content;
     private LocalDateTime createdAt;
     private String userName;
+    private Long userId;
     private int score;
     private long likeCount;
     private long commentCount;
-
     private List<String> imagePaths;
+    private boolean editable;
+    private boolean deletable;
+    private boolean userLiked;
+
 
     public ReviewLikeCountDTO(Long reviewId, String title, String content, LocalDateTime createdAt, String userName, int score, long likeCount, long commentCount) {
         this.reviewId = reviewId;

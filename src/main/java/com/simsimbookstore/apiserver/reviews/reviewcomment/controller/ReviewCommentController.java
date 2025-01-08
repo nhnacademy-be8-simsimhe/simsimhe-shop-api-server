@@ -42,7 +42,7 @@ public class ReviewCommentController {
             @PathVariable Long commentId,
             @RequestBody ReviewCommentRequestDTO requestDTO) {
 
-        ReviewComment updatedComment = reviewCommentService.updateReviewComment(requestDTO, commentId);
+        ReviewComment updatedComment = reviewCommentService.updateReviewComment(reviewId, commentId, requestDTO);
         return ResponseEntity.ok(updatedComment);
     }
 
