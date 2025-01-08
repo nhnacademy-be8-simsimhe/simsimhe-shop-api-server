@@ -73,7 +73,7 @@ public class Order {
     @Column(name = "delivery_price", nullable = false)
     private BigDecimal deliveryPrice;
 
-    @Column(name = "order_name", nullable = false)
+    @Column(name = "order_name", nullable = true)
     private String orderName;
 
     @Column(name = "sender_name", nullable = false)
