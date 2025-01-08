@@ -5,7 +5,7 @@ import com.simsimbookstore.apiserver.books.book.dto.BookResponseDto;
 import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
-import com.simsimbookstore.apiserver.common.exception.NotFoundException;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
