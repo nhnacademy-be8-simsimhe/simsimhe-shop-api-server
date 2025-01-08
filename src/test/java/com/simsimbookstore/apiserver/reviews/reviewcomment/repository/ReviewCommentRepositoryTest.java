@@ -49,7 +49,7 @@ class ReviewCommentRepositoryTest {
 
         reviewRepository.saveAll(List.of(review1, review2));
 
-        // 댓글 데이터 생성
+
         ReviewComment comment1 = ReviewComment.builder()
                 .content("Comment 1 for Review 1")
                 .created_at(LocalDateTime.now())
@@ -77,7 +77,7 @@ class ReviewCommentRepositoryTest {
         // 리뷰 1에 연결된 댓글 조회
         List<ReviewComment> commentsForReview1 = reviewCommentRepository.findAllByReview(review1);
 
-        // 검증
+
         assertThat(commentsForReview1).hasSize(2);
         assertThat(commentsForReview1).extracting("content")
                 .containsExactlyInAnyOrder("Comment 1 for Review 1", "Comment 2 for Review 1");
@@ -85,7 +85,7 @@ class ReviewCommentRepositoryTest {
         // 리뷰 2에 연결된 댓글 조회
         List<ReviewComment> commentsForReview2 = reviewCommentRepository.findAllByReview(review2);
 
-        // 검증
+
         assertThat(commentsForReview2).hasSize(1);
         assertThat(commentsForReview2).extracting("content")
                 .containsExactly("Comment 1 for Review 2");
@@ -96,7 +96,7 @@ class ReviewCommentRepositoryTest {
     void findAll() {
         List<ReviewComment> allComments = reviewCommentRepository.findAll();
 
-        // 검증
+
         assertThat(allComments).hasSize(3);
         assertThat(allComments).extracting("content")
                 .containsExactlyInAnyOrder(
@@ -117,7 +117,6 @@ class ReviewCommentRepositoryTest {
 
         ReviewComment savedComment = reviewCommentRepository.save(newComment);
 
-        // 검증
         assertThat(savedComment.getReviewCommentId()).isNotNull();
         assertThat(savedComment.getContent()).isEqualTo("New Comment");
 
