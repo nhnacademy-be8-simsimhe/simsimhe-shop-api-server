@@ -12,6 +12,7 @@ import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,24 +46,23 @@ public class ReviewCommentServiceImpl implements ReviewCommentService {
         ReviewComment createComment = ReviewComment.builder()
                 .content(requestDTO.getContent())
                 .created_at(LocalDateTime.now())
+                .update_at(LocalDateTime.now())
                 .review(review)
                 .user(user)
                 .build();
 
 
-
-
         reviewCommentRepository.save(createComment);
 
 
-        ReviewCommentResponseDTO dto = new ReviewCommentResponseDTO(createComment.getReviewCommentId(), createComment.getContent(), createComment.getCreated_at(), createComment.getUpdate_at(), user.getUserName());
+        ReviewCommentResponseDTO dto = new ReviewCommentResponseDTO(createComment.getReviewCommentId(), createComment.getContent(), createComment.getCreated_at(), createComment.getUpdate_at(), user.getUserName(), user.getUserId());
 
 
         return dto;
     }
 
     @Override
-    public ReviewComment updateReviewComment(ReviewCommentRequestDTO dto, Long commentId) {
+    public ReviewComment updateReviewComment(Long reviewId, Long commentId, ReviewCommentRequestDTO dto) {
         ReviewComment existingReviewComment = reviewCommentRepository.findById(commentId)
                 .orElseThrow(()-> new NotFoundException("존재하지 않는 리뷰 댓글입니다."));
 
@@ -107,6 +107,7 @@ public class ReviewCommentServiceImpl implements ReviewCommentService {
     private ReviewCommentResponseDTO convertToDTO(ReviewComment reviewComment) {
         log.info("dto comment id : {}", reviewComment.getReviewCommentId());
         log.info("dto comment content : {}", reviewComment.getContent());
-        return new ReviewCommentResponseDTO(reviewComment.getReviewCommentId(), reviewComment.getContent(), reviewComment.getCreated_at(), reviewComment.getUpdate_at(), reviewComment.getUser().getUserName());
+        log.info("dto comment userId : {}", reviewComment.getUser().getUserId());
+        return new ReviewCommentResponseDTO(reviewComment.getReviewCommentId(), reviewComment.getContent(), reviewComment.getCreated_at(), reviewComment.getUpdate_at(), reviewComment.getUser().getUserName(), reviewComment.getUser().getUserId());
     }
 }

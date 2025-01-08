@@ -23,4 +23,6 @@ public class ReviewCommentResponseDTO {
 
     String userName;
 
+    Long userId;
+
 }

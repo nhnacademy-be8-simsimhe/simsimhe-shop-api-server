@@ -3,6 +3,7 @@ package com.simsimbookstore.apiserver.reviews.reviewimage.service.impl;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.reviews.review.repository.ReviewRepository;
+import com.simsimbookstore.apiserver.reviews.reviewimage.dto.ReviewImgPathResponseDTO;
 import com.simsimbookstore.apiserver.reviews.reviewimage.entity.ReviewImagePath;
 import com.simsimbookstore.apiserver.reviews.reviewimage.repository.ReviewImagePathRepository;
 import org.aspectj.lang.annotation.Before;
@@ -55,27 +56,27 @@ class ReviewImagePathServiceImplTest {
     @Test
     @DisplayName("리뷰 이미지 추가 성공")
     void createReviewImage_success() {
-//        when(reviewRepository.findById(anyLong())).thenReturn(Optional.of(review));
-//        when(reviewImagePathRepository.save(any(ReviewImagePath.class))).thenReturn(reviewImagePath);
-//
-//        ReviewImagePath result = reviewImagePathService.createReviewImage(1L, "/images/review1/image1.jpg");
-//
-//        assertThat(result).isNotNull();
-//        assertThat(result.getImageName()).isEqualTo("/images/review1/image1.jpg");
-//        verify(reviewRepository, times(1)).findById(1L);
-//        verify(reviewImagePathRepository, times(1)).save(any(ReviewImagePath.class));
+        when(reviewRepository.findById(anyLong())).thenReturn(Optional.of(review));
+        when(reviewImagePathRepository.save(any(ReviewImagePath.class))).thenReturn(reviewImagePath);
+
+        List<ReviewImgPathResponseDTO> result = reviewImagePathService.createReviewImage(1L, List.of("/images/review1/image1.jpg"));
+
+        assertThat(result).isNotNull();
+        assertThat(result.get(0).getImageName()).isEqualTo("/images/review1/image1.jpg");
+        verify(reviewRepository, times(1)).findById(1L);
+        verify(reviewImagePathRepository, times(1)).save(any(ReviewImagePath.class));
     }
 
     @Test
     @DisplayName("리뷰 이미지 추가 실패 - 존재하지 않는 리뷰")
     void createReviewImage_reviewNotFound() {
-//        when(reviewRepository.findById(anyLong())).thenReturn(Optional.empty());
-//
-//        assertThatThrownBy(() -> reviewImagePathService.createReviewImage(1L, "/images/review1/image1.jpg"))
-//                .isInstanceOf(NotFoundException.class)
-//                .hasMessage("존재하지 않는 리뷰입니다.");
-//        verify(reviewRepository, times(1)).findById(1L);
-//        verify(reviewImagePathRepository, never()).save(any(ReviewImagePath.class));
+        when(reviewRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> reviewImagePathService.createReviewImage(1L, List.of("/images/review1/image1.jpg")))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 리뷰입니다.");
+        verify(reviewRepository, times(1)).findById(1L);
+        verify(reviewImagePathRepository, never()).save(any(ReviewImagePath.class));
     }
 
     @Test
