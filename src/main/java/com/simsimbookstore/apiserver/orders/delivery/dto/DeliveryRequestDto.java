@@ -50,6 +50,7 @@ public class DeliveryRequestDto {
         return Delivery.builder()
                 .deliveryState(this.deliveryState)
                 .deliveryReceiver(this.deliveryReceiver)
+                .trackingNumber(null)
                 .receiverPhoneNumber(this.receiverPhoneNumber)
                 .postalCode(this.postalCode)
                 .roadAddress(this.roadAddress)
