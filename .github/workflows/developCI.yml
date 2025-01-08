@@ -9,7 +9,7 @@
 name: Java developCi
 
 on:
-  push:
+  pull_request:
     branches: [ "develop" ]
 
 jobs:

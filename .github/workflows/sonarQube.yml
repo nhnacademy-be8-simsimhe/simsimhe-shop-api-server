@@ -1,10 +1,9 @@
 name: Sonar Qube flow
 
 on:
-  push:
+  pull_request:
     branches:
       - main
-
 
 
 jobs:
