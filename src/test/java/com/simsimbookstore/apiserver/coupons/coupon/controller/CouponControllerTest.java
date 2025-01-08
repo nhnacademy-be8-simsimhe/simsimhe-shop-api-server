@@ -82,7 +82,7 @@ class CouponControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.couponId", is(couponId.intValue())))
                 .andExpect(jsonPath("$.couponTypeName", is("Fix Discount")))
-                .andExpect(jsonPath("$.discountInfo.discountPrice", is(10.00)))
+                .andExpect(jsonPath("$.discountPrice", is(10.00)))
                 .andExpect(jsonPath("$.disCountType", is("정액")))
                 .andExpect(jsonPath("$.issueDate", notNullValue()))
                 .andExpect(jsonPath("$.deadline", notNullValue()))
@@ -91,7 +91,7 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.stacking", is(false)))
                 .andExpect(jsonPath("$.couponTargetType", is("전체")))
                 .andExpect(jsonPath("$.couponTargetId", is(nullValue())))
-                .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(50.00)));
+                .andExpect(jsonPath("$.minOrderAmount", is(50.00)));
     }
 
     /**
@@ -123,9 +123,9 @@ class CouponControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.couponId", is(couponId.intValue())))
                 .andExpect(jsonPath("$.couponTypeName", is("Rate Discount")))
-                .andExpect(jsonPath("$.discountInfo.discountRate", is(15.00)))
-                .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(100.00)))
-                .andExpect(jsonPath("$.discountInfo.maxDiscountAmount", is(30.00)))
+                .andExpect(jsonPath("$.discountRate", is(15.00)))
+                .andExpect(jsonPath("$.minOrderAmount", is(100.00)))
+                .andExpect(jsonPath("$.maxDiscountAmount", is(30.00)))
                 .andExpect(jsonPath("$.disCountType", is("정률")))
                 .andExpect(jsonPath("$.issueDate", notNullValue()))
                 .andExpect(jsonPath("$.deadline", notNullValue()))
@@ -185,7 +185,7 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.couponTypeName", is("Fix Discount Type 300")))
                 // description 필드가 DTO에 없으므로 제거하거나 관련 필드로 대체
                 // .andExpect(jsonPath("$.description", is("")))
-                .andExpect(jsonPath("$.discountInfo.discountPrice", is(20.00)))
+                .andExpect(jsonPath("$.discountPrice", is(20.00)))
                 .andExpect(jsonPath("$.disCountType", is("정액")))
                 .andExpect(jsonPath("$.issueDate", notNullValue()))
                 .andExpect(jsonPath("$.deadline", notNullValue()))
@@ -194,7 +194,7 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.stacking", is(false)))
                 .andExpect(jsonPath("$.couponTargetType", is("전체")))
                 .andExpect(jsonPath("$.couponTargetId", is(nullValue())))
-                .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(80.00)));
+                .andExpect(jsonPath("$.minOrderAmount", is(80.00)));
     }
 
     /**
@@ -228,9 +228,9 @@ class CouponControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.couponId", is(1004)))
                 .andExpect(jsonPath("$.couponTypeName", is("Rate Discount Type 400")))
-                .andExpect(jsonPath("$.discountInfo.discountRate", is(10.00)))
-                .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(120.00)))
-                .andExpect(jsonPath("$.discountInfo.maxDiscountAmount", is(25.00)))
+                .andExpect(jsonPath("$.discountRate", is(10.00)))
+                .andExpect(jsonPath("$.minOrderAmount", is(120.00)))
+                .andExpect(jsonPath("$.maxDiscountAmount", is(25.00)))
                 .andExpect(jsonPath("$.disCountType", is("정률")))
                 .andExpect(jsonPath("$.issueDate", notNullValue()))
                 .andExpect(jsonPath("$.deadline", notNullValue()))
@@ -293,7 +293,7 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].couponId", is(1005)))
                 .andExpect(jsonPath("$.content[0].couponTypeName", is("Fix Discount for Book")))
-                .andExpect(jsonPath("$.content[0].discountInfo.discountPrice", is(5.00)))
+                .andExpect(jsonPath("$.content[0].discountPrice", is(5.00)))
                 .andExpect(jsonPath("$.content[0].disCountType", is("정액")))
                 .andExpect(jsonPath("$.content[0].issueDate", notNullValue()))
                 .andExpect(jsonPath("$.content[0].deadline", notNullValue()))
@@ -302,11 +302,11 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.content[0].stacking", is(false)))
                 .andExpect(jsonPath("$.content[0].couponTargetType", is("책")))
                 .andExpect(jsonPath("$.content[0].couponTargetId", is(200)))
-                .andExpect(jsonPath("$.content[0].discountInfo.minOrderAmount", is(40.00)))
-                .andExpect(jsonPath("$.content[0].discountInfo.discountPrice", is(5.00)))
+                .andExpect(jsonPath("$.content[0].minOrderAmount", is(40.00)))
+                .andExpect(jsonPath("$.content[0].discountPrice", is(5.00)))
                 .andExpect(jsonPath("$.content[1].couponId", is(1006)))
                 .andExpect(jsonPath("$.content[1].couponTypeName", is("Another Fix Discount for Book")))
-                .andExpect(jsonPath("$.content[1].discountInfo.discountPrice", is(10.00)))
+                .andExpect(jsonPath("$.content[1].discountPrice", is(10.00)))
                 .andExpect(jsonPath("$.content[1].disCountType", is("정액")))
                 .andExpect(jsonPath("$.content[1].issueDate", notNullValue()))
                 .andExpect(jsonPath("$.content[1].deadline", notNullValue()))
@@ -315,8 +315,8 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.content[1].stacking", is(true)))
                 .andExpect(jsonPath("$.content[1].couponTargetType", is("책")))
                 .andExpect(jsonPath("$.content[1].couponTargetId", is(200)))
-                .andExpect(jsonPath("$.content[1].discountInfo.minOrderAmount", is(60.00)))
-                .andExpect(jsonPath("$.content[1].discountInfo.discountPrice", is(10.00)))
+                .andExpect(jsonPath("$.content[1].minOrderAmount", is(60.00)))
+                .andExpect(jsonPath("$.content[1].discountPrice", is(10.00)))
                 .andExpect(jsonPath("$.totalElements", is(2)))
                 .andExpect(jsonPath("$.totalPages", is(1)));
     }
@@ -373,7 +373,7 @@ class CouponControllerTest {
                 // FixCouponResponseDto 검증
                 .andExpect(jsonPath("$.content[0].couponId", is(1007)))
                 .andExpect(jsonPath("$.content[0].couponTypeName", is("Fix Discount Mixed")))
-                .andExpect(jsonPath("$.content[0].discountInfo.discountPrice", is(15.00)))
+                .andExpect(jsonPath("$.content[0].discountPrice", is(15.00)))
                 .andExpect(jsonPath("$.content[0].disCountType", is("정액")))
                 .andExpect(jsonPath("$.content[0].issueDate", notNullValue()))
                 .andExpect(jsonPath("$.content[0].deadline", notNullValue()))
@@ -382,14 +382,14 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.content[0].stacking", is(false)))
                 .andExpect(jsonPath("$.content[0].couponTargetType", is("전체")))
                 .andExpect(jsonPath("$.content[0].couponTargetId", is(nullValue())))
-                .andExpect(jsonPath("$.content[0].discountInfo.minOrderAmount", is(70.00)))
-                .andExpect(jsonPath("$.content[0].discountInfo.discountPrice", is(15.00)))
+                .andExpect(jsonPath("$.content[0].minOrderAmount", is(70.00)))
+                .andExpect(jsonPath("$.content[0].discountPrice", is(15.00)))
                 // RateCouponResponseDto 검증
                 .andExpect(jsonPath("$.content[1].couponId", is(1008)))
                 .andExpect(jsonPath("$.content[1].couponTypeName", is("Rate Discount Mixed")))
-                .andExpect(jsonPath("$.content[1].discountInfo.discountRate", is(20.00)))
-                .andExpect(jsonPath("$.content[1].discountInfo.minOrderAmount", is(150.00)))
-                .andExpect(jsonPath("$.content[1].discountInfo.maxDiscountAmount", is(50.00)))
+                .andExpect(jsonPath("$.content[1].discountRate", is(20.00)))
+                .andExpect(jsonPath("$.content[1].minOrderAmount", is(150.00)))
+                .andExpect(jsonPath("$.content[1].maxDiscountAmount", is(50.00)))
                 .andExpect(jsonPath("$.content[1].disCountType", is("정률")))
                 .andExpect(jsonPath("$.content[1].issueDate", notNullValue()))
                 .andExpect(jsonPath("$.content[1].deadline", notNullValue()))
@@ -398,9 +398,9 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.content[1].stacking", is(true)))
                 .andExpect(jsonPath("$.content[1].couponTargetType", is("카테고리")))
                 .andExpect(jsonPath("$.content[1].couponTargetId", is(400)))
-                .andExpect(jsonPath("$.content[1].discountInfo.discountRate", is(20.00)))
-                .andExpect(jsonPath("$.content[1].discountInfo.minOrderAmount", is(150.00)))
-                .andExpect(jsonPath("$.content[1].discountInfo.maxDiscountAmount", is(50.00)))
+                .andExpect(jsonPath("$.content[1].discountRate", is(20.00)))
+                .andExpect(jsonPath("$.content[1].minOrderAmount", is(150.00)))
+                .andExpect(jsonPath("$.content[1].maxDiscountAmount", is(50.00)))
                 .andExpect(jsonPath("$.totalElements", is(2)))
                 .andExpect(jsonPath("$.totalPages", is(1)));
     }
@@ -560,9 +560,9 @@ class CouponControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.couponId", is(couponId.intValue())))
                 .andExpect(jsonPath("$.couponTypeName", is("Expired Fix Discount")))
-                .andExpect(jsonPath("$.discountInfo.discountPrice", is(15.00)))
+                .andExpect(jsonPath("$.discountPrice", is(15.00)))
                 .andExpect(jsonPath("$.disCountType", is("정액")))
-                .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(90.00)))
+                .andExpect(jsonPath("$.minOrderAmount", is(90.00)))
                 .andExpect(jsonPath("$.issueDate", notNullValue()))
                 .andExpect(jsonPath("$.deadline", notNullValue()))
                 .andExpect(jsonPath("$.couponStatus", is("만료")))
@@ -570,7 +570,7 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.stacking", is(false)))
                 .andExpect(jsonPath("$.couponTargetType", is("전체")))
                 .andExpect(jsonPath("$.couponTargetId", is(nullValue())))
-                .andExpect(jsonPath("$.discountInfo.discountPrice", is(15.00)));
+                .andExpect(jsonPath("$.discountPrice", is(15.00)));
     }
 
     /**
@@ -603,9 +603,9 @@ class CouponControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.couponId", is(couponId.intValue())))
                 .andExpect(jsonPath("$.couponTypeName", is("Used Rate Discount")))
-                .andExpect(jsonPath("$.discountInfo.discountRate", is(25.00)))
-                .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(200.00)))
-                .andExpect(jsonPath("$.discountInfo.maxDiscountAmount", is(60.00)))
+                .andExpect(jsonPath("$.discountRate", is(25.00)))
+                .andExpect(jsonPath("$.minOrderAmount", is(200.00)))
+                .andExpect(jsonPath("$.maxDiscountAmount", is(60.00)))
                 .andExpect(jsonPath("$.disCountType", is("정률")))
                 .andExpect(jsonPath("$.issueDate", notNullValue()))
                 .andExpect(jsonPath("$.deadline", notNullValue()))
@@ -663,9 +663,9 @@ class CouponControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.couponId", is(couponId.intValue())))
                 .andExpect(jsonPath("$.couponTypeName", is("Used Fix Discount")))
-                .andExpect(jsonPath("$.discountInfo.discountPrice", is(20.00)))
+                .andExpect(jsonPath("$.discountPrice", is(20.00)))
                 .andExpect(jsonPath("$.disCountType", is("정액")))
-                .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(100.00)))
+                .andExpect(jsonPath("$.minOrderAmount", is(100.00)))
                 .andExpect(jsonPath("$.issueDate", notNullValue()))
                 .andExpect(jsonPath("$.deadline", notNullValue()))
                 .andExpect(jsonPath("$.couponStatus", is("사용")))
@@ -673,7 +673,7 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.stacking", is(false)))
                 .andExpect(jsonPath("$.couponTargetType", is("전체")))
                 .andExpect(jsonPath("$.couponTargetId", is(nullValue())))
-                .andExpect(jsonPath("$.discountInfo.discountPrice", is(20.00)));
+                .andExpect(jsonPath("$.discountPrice", is(20.00)));
     }
 
     /**
@@ -706,9 +706,9 @@ class CouponControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.couponId", is(couponId.intValue())))
                 .andExpect(jsonPath("$.couponTypeName", is("Used Rate Discount")))
-                .andExpect(jsonPath("$.discountInfo.discountRate", is(30.00)))
-                .andExpect(jsonPath("$.discountInfo.minOrderAmount", is(250.00)))
-                .andExpect(jsonPath("$.discountInfo.maxDiscountAmount", is(70.00)))
+                .andExpect(jsonPath("$.discountRate", is(30.00)))
+                .andExpect(jsonPath("$.minOrderAmount", is(250.00)))
+                .andExpect(jsonPath("$.maxDiscountAmount", is(70.00)))
                 .andExpect(jsonPath("$.disCountType", is("정률")))
                 .andExpect(jsonPath("$.issueDate", notNullValue()))
                 .andExpect(jsonPath("$.deadline", notNullValue()))

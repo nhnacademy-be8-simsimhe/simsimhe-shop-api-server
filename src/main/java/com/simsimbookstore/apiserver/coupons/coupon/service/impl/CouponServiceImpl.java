@@ -88,7 +88,7 @@ public class CouponServiceImpl implements CouponService {
         if (unusedCoupon.isPresent()) {
             return CouponMapper.toResponse(unusedCoupon.get());
         }
-        return new EmptyCouponResponseDto();
+        return EmptyCouponResponseDto.builder().build();
 
     }
 
