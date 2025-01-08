@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/reviews/{reviewId}/likes")
+@RequestMapping("/api/shop/reviews/{reviewId}/likes")
 @RequiredArgsConstructor
 public class ReviewLikeController {
 
