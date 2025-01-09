@@ -27,13 +27,14 @@ public class BookGetController {
 
     /**
      * 프론트에서 수정하기 위해 책을 단건 조회하는 로직
+     *
      * @param bookId
      * @return
      */
     @GetMapping("/{bookId}/update")
     public ResponseEntity<BookResponseDto> getBookByIdForUpdate(@PathVariable("bookId") Long bookId) {
 
-       BookResponseDto response = bookGetService.getUpdateBook(bookId);
+        BookResponseDto response = bookGetService.getUpdateBook(bookId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -146,6 +147,8 @@ public class BookGetController {
 
         return ResponseEntity.status(HttpStatus.OK).body(booksByTag);
     }
+
+
 
     /**
      * 주문량이 많은 도서 6개 조회
