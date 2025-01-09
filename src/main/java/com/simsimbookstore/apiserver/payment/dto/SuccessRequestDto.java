@@ -13,4 +13,5 @@ public class SuccessRequestDto {
     private String paymentKey;
     private String orderId;
     private BigDecimal amount;
+    private PaymentMethodResponse paymentMethod;  // 사용자가 선택한 결제 방법 추가
 }
