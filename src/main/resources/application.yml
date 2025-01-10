@@ -4,15 +4,26 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 30s
 
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    properties:
+      database-platform: org.hibernate.dialect.MySQLDialect
+      hibernate:
+        format_sql: true
+        show-sql: true
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+
   servlet:
     multipart:
       max-file-size: 100MB
       max-request-size: 100MB
 
-
-
   profiles:
-    active: dev
+    active: dev  # 배포시 prod로 변경
     # 마지막에 실행되는 파일이 앞의 설정을 덮어쓰기 때문에 사용에 주의가 필요
     group:
       prod:
@@ -24,11 +35,16 @@ spring:
           enabled: true
           max-file-size: 10MB
           max-request-size: 10MB
-# 서버 포트 설정
 
+# 서버 포트 설정
 server:
-  port: 8020
+  port: 8010
   shutdown: graceful
+
+eureka:
+  client:
+    fetch-registry: 'true'
+    register-with-eureka: 'true'
 
 secure-key-manager:
   password: simsimbook

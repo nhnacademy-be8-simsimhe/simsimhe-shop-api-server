@@ -68,18 +68,6 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    // 결제 인증 실패
-    @GetMapping("/fail")
-    public ResponseEntity<String> paymentFail(@RequestParam String code,
-                                              @RequestParam String message,
-                                              @RequestParam String orderId) {
-        FailResponseDto failDto = new FailResponseDto(code, message, orderId);
-        // 결제 중단 처리 + 결제 실패
-        paymentService.failPayment(failDto);
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
-    }
-
 //    // 사용자/관리자의 환불 요청 (결제 취소)
 //    @PostMapping("/payment/cancel")
 //    public ResponseEntity<Cancel> canceledPayment(@RequestParam String cancelReason,

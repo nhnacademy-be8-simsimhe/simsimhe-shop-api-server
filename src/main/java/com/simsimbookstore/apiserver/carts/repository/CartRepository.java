@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 public interface CartRepository extends JpaRepository<Cart, Long>, CartCustomRepository {
 
     @Modifying
-    @Query("delete from Cart as c where c.user = :userId")
+    @Query("delete from Cart as c where c.user.userId = :userId")
     void deleteByUserId(@Param("userId") Long userId);
+
 }

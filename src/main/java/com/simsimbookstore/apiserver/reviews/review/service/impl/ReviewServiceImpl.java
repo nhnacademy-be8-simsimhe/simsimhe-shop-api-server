@@ -5,6 +5,7 @@ import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.reviews.review.dto.*;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
+import com.simsimbookstore.apiserver.reviews.review.exception.NotCreateReviewException;
 import com.simsimbookstore.apiserver.reviews.review.repository.ReviewRepository;
 import com.simsimbookstore.apiserver.reviews.review.service.ReviewService;
 import com.simsimbookstore.apiserver.users.user.entity.User;
@@ -37,16 +38,16 @@ public class ReviewServiceImpl implements ReviewService {
 
 
 
-    public boolean canReviewBeCreated(Long userId, Long bookId){
+    public String canReviewBeCreated(Long userId, Long bookId){
 
         long orderCheck = reviewRepository.bookOrderCheck(userId, bookId);
 
         if (orderCheck == 0)
-            return false;
+            return "ORDER_NOT_FOUND";
 
 
         long reviewExists = reviewRepository.alreadyExistCheck(userId, bookId);
-        return reviewExists == 0;
+        return reviewExists == 0 ? "REVIEW_CAN_CREATE" : "REVIEW_ALREADY_EXIST";
     }
 
     public Page<UserReviewsDTO> getUserReviews(Long userId, int page, int size){
@@ -72,6 +73,12 @@ public class ReviewServiceImpl implements ReviewService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 책입니다."));
 
         log.info("canReviewBeCreated : {}", canReviewBeCreated(userId, bookId));
+
+        String canReviewBeCreated = canReviewBeCreated(userId, bookId);
+        if (!canReviewBeCreated.equals("REVIEW_CAN_CREATE")){
+            String message = canReviewBeCreated.equals("REVIEW_ALREADY_EXIST") ? "해당 도서에 대한 리뷰는 한번만 쓸 수 있습니다." : "주문한 도서에 포함되어 있지 않습니다.";
+            throw new NotCreateReviewException(message);
+        }
 
 
         Review review = Review.builder()
@@ -252,13 +259,15 @@ public class ReviewServiceImpl implements ReviewService {
 
 
     public Page<UserAvailableReviewsDTO> convertToUserAvailableReviewsDTO(Page<Object[]> results) {
-        return results.map(obj -> new UserAvailableReviewsDTO(
-                (Long) obj[0],                // reviewId
-                (String) obj[1],              // bookTitle
-                (String) obj[2],              // contributor
-                (String) obj[3],              // book image path
-                obj[4] != null ? ((Timestamp) obj[4]).toLocalDateTime() : null
-        ));
+        return results.map(obj ->
+                UserAvailableReviewsDTO.builder()
+                        .bookId((Long) obj[0])
+                        .title((String) obj[1])
+                        .contributor((String) obj[2])
+                        .bookImagePath((String) obj[3])
+                        .orderDate(obj[4] != null ? ((Timestamp) obj[4]).toLocalDateTime() : null)
+                        .build()
+        );
     }
 
 

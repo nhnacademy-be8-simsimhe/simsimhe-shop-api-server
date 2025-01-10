@@ -4,6 +4,8 @@ package com.simsimbookstore.apiserver.coupons.coupontype.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.CouponPolicy;
+import lombok.experimental.SuperBuilder;
+
 import java.time.LocalDateTime;
 
 
@@ -12,6 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
+@SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "coupon_types")

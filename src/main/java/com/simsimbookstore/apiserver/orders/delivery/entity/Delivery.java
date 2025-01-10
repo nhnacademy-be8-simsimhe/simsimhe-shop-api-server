@@ -46,14 +46,14 @@ public class Delivery {
     @Column(name = "postal_code", nullable = false, length = 5)
     private String postalCode;
 
-    @Column(name = "road_address", nullable = false, length = 30)
+    @Column(name = "road_address", nullable = false, length = 255)
     private String roadAddress;
 
 
-    @Column(name = "detailed_address", nullable = false, length = 30)
+    @Column(name = "detailed_address", nullable = false, length = 255)
     private String detailedAddress;
 
-    @Column(name = "reference", nullable = true, length = 30)
+    @Column(name = "reference", nullable = true, length = 255)
     private String reference;
 
 

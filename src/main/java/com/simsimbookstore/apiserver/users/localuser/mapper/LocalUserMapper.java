@@ -44,6 +44,7 @@ public class LocalUserMapper {
                 .loginId(localUser.getLoginId())
                 .roles(roles)
                 .password(localUser.getPassword())
+                .userStatus(localUser.getUserStatus())
                 .build();
 
         return localUserResponseDto;
