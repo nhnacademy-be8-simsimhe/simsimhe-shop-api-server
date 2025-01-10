@@ -276,6 +276,7 @@ public class CouponServiceImpl implements CouponService {
      * @return 할인금액, 할인 전 금액, 할인 후 금액
      */
     @Override
+    @Transactional
     public DiscountAmountResponseDto calDiscountAmount(Long bookId, Integer quantity, Long couponId) {
         if (quantity < 1) {
             throw new IllegalArgumentException("책의 수량은 0보다 많아야합니다.");
@@ -304,13 +305,26 @@ public class CouponServiceImpl implements CouponService {
 //                    }
 //                }
 //            }
+            Long couponCategoryId = categoryCoupon.getCategory().getCategoryId();
             for (BookCategory bookCategory : bookCategoryList) {
                 Category catagory = bookCategory.getCatagory();
-
-                Long bookCategoryId = bookCategory.getCatagory().getCategoryId();
-                Long couponCategoryId = categoryCoupon.getCategory().getCategoryId();
-                if (bookCategoryId.equals(couponCategoryId)) {
+                // 책의 가장 하위 카테고리와 카테고리 쿠폰의 id가 같은지 확인
+                if (couponCategoryId.equals(catagory.getCategoryId())) {
                     flag = false;
+                    break;
+                }
+
+                Category parent = catagory.getParent();
+                while (Objects.nonNull(parent)) {
+                    catagory = parent;
+                    Long bookCategoryId = catagory.getCategoryId();
+                    //상위 카테고리로 올라가면서 카테고리 쿠폰과 같은 Id인지 검증
+                    if (bookCategoryId.equals(couponCategoryId)) {
+                        flag = false;
+                        break;
+                    }
+
+                    parent = catagory.getParent();
                 }
             }
             if (flag) {

@@ -52,6 +52,7 @@ public class CustomCouponRepositoryImpl implements CustomCouponRepository {
                 .leftJoin(allCoupon).on(couponType.couponTypeId.eq(allCoupon.couponTypeId))
                 .leftJoin(bookCategory).on(bookCategory.book.bookId.eq(bookId))
                 .where(coupon.user.userId.eq(userId)
+                        .and(coupon.couponStatus.eq(CouponStatus.UNUSED))
                         .and(
                                 couponType.instanceOf(CategoryCoupon.class)
                                         .and(categoryCoupon.category.categoryId.eq(bookCategory.catagory.categoryId))
@@ -82,6 +83,7 @@ public class CustomCouponRepositoryImpl implements CustomCouponRepository {
                 .leftJoin(bookCategory).on(bookCategory.book.bookId.eq(bookId))
                 .where(
                         coupon.user.userId.eq(userId)
+                                .and(coupon.couponStatus.eq(CouponStatus.UNUSED))
                                 .and(
                                         couponType.instanceOf(CategoryCoupon.class)
                                                 .and(categoryCoupon.category.categoryId.eq(bookCategory.catagory.categoryId))
