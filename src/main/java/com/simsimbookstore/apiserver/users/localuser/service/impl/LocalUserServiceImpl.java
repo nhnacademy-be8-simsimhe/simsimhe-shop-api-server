@@ -64,7 +64,6 @@ public class LocalUserServiceImpl implements LocalUserService {
         return localUser;
     }
 
-
     //중복 loginId 체크
     @Override
     public boolean existsByLoginId(String loginId) {
