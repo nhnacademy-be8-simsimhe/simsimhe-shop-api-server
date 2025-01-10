@@ -1,24 +1,15 @@
 package com.simsimbookstore.apiserver.reviews.review.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.simsimbookstore.apiserver.common.config.QuerydslConfig;
 import com.simsimbookstore.apiserver.reviews.review.dto.ReviewLikeCountDTO;
 import com.simsimbookstore.apiserver.reviews.review.dto.ReviewRequestDTO;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.reviews.review.service.ReviewService;
-import com.simsimbookstore.apiserver.reviews.reviewcomment.controller.ReviewCommentController;
-import com.simsimbookstore.apiserver.reviews.reviewcomment.service.ReviewCommentService;
+
 import com.simsimbookstore.apiserver.reviews.reviewimage.service.ReviewImagePathService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
@@ -26,15 +17,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+
 import java.time.LocalDateTime;
 import java.util.List;
-
 
 import static org.mockito.ArgumentMatchers.*;
 
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -87,44 +79,47 @@ class ReviewControllerTest {
     }
 
 
-//    @Test
-//    @DisplayName("리뷰 목록 조회 테스트")
-//    void getAllReviewsTest() throws Exception{
-//
-//        Long bookId = 1L;
-//        int page = 0;
-//        int size = 10;
-//
-//        var reviews = List.of(
-//                new ReviewLikeCountDTO(1L, "good book", "I loved this book!", LocalDateTime.now(),"mingyeong", 4,12L, 12L),
-//                new ReviewLikeCountDTO(2L, "great book", "Interesting", LocalDateTime.now(),"hello", 3,20L, 9L)
-//        );
-//
-//        var pageable = PageRequest.of(page, size);
-//        var response = new PageImpl<>(reviews, pageable, reviews.size());
-//
-//
-//        when(reviewService.getReviewsByBookOrderByRecent(eq(bookId), eq(page), eq(size)))
-//                .thenReturn(response);
-//
-//
-//
-//        mockMvc.perform(get("/api/shop/books/{bookId}/reviews", bookId)
-//                        .param("page", String.valueOf(page))
-//                        .param("size", String.valueOf(size))
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.content[0].score").value(5))
-//                .andExpect(jsonPath("$.content[0].title").value("good book"))
-//                .andExpect(jsonPath("$.content[1].score").value(4))
-//                .andExpect(jsonPath("$.content[1].title").value("great book"))
-//                .andExpect(jsonPath("$.content[1].content").value("Interesting"));
-//
-//
-//        verify(reviewService).getReviewsByBookOrderByRecent(eq(bookId), eq(page), eq(size));
-//
-//    }
+    @Test
+    @DisplayName("리뷰 목록 조회 테스트 (최근순)")
+    void getAllReviewsTest() throws Exception{
+
+        Long bookId = 1L;
+        Long userId = 1L;
+        int page = 0;
+        int size = 10;
+
+        var reviews = List.of(
+                new ReviewLikeCountDTO(1L, "good book", "I loved this book!", LocalDateTime.now(),"mingyeong", 4,12L, 12L),
+                new ReviewLikeCountDTO(2L, "great book", "Interesting", LocalDateTime.now(),"hello", 3,20L, 9L)
+        );
+
+        var pageable = PageRequest.of(page, size);
+        var response = new PageImpl<>(reviews, pageable, reviews.size());
+
+
+        when(reviewService.getReviewsByBookOrderByRecent(eq(bookId), eq(userId), eq(page), eq(size)))
+                .thenReturn(response);
+
+
+
+        mockMvc.perform(get("/api/shop/books/{bookId}/reviews/recent", bookId)
+                        .param("userId", String.valueOf(userId))
+                        .param("page", String.valueOf(page))
+                        .param("size", String.valueOf(size))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].score").value(4))
+                .andExpect(jsonPath("$.content[0].title").value("good book"))
+                .andExpect(jsonPath("$.content[1].score").value(3))
+                .andExpect(jsonPath("$.content[1].title").value("great book"))
+                .andExpect(jsonPath("$.content[1].content").value("Interesting"));
+
+
+        verify(reviewService).getReviewsByBookOrderByRecent(eq(bookId), eq(userId), eq(page), eq(size));
+
+    }
 
     @Test
     @DisplayName("리뷰 수정 테스트")

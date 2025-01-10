@@ -15,8 +15,9 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     @Query("select t from Tag as t where t.tagName = :tagName")
     Optional<Tag> findByTagName(@Param("tagName") String tagName);
 
-    Page<Tag> findAll(Pageable pageable);
+    @Query("SELECT t FROM Tag t WHERE t.isActivated=true")
+    Page<Tag> findAllActivated(Pageable pageable);
 
-    @Query("SELECT t FROM Tag t")
-    List<Tag> findAllTags();
+    @Query("SELECT t FROM Tag t WHERE t.isActivated=true ORDER BY t.tagName")
+    List<Tag> findAllActivated();
 }

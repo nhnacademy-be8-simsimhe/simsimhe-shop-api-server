@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Setter
 @Builder
 public class Coupon {
 
@@ -34,7 +35,7 @@ public class Coupon {
     @Column(name = "use_date")
     private LocalDateTime useDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "coupon_type_id", nullable = false)
     private CouponType couponType;
 

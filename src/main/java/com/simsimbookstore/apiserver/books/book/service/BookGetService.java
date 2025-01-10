@@ -5,7 +5,7 @@ import com.simsimbookstore.apiserver.books.book.dto.BookResponseDto;
 import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
-import com.simsimbookstore.apiserver.common.exception.NotFoundException;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +17,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class BookGetService {
 
     private final BookRepository bookRepository;
@@ -163,7 +164,6 @@ public class BookGetService {
      */
     private PageResponse<BookListResponse> getPageResponse(int page,
                                                            Page<BookListResponse> bookPage) {
-
 
         //최대 버튼개수 8개
         int maxPageButtons = 8;

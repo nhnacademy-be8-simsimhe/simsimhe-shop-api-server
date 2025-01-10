@@ -73,7 +73,7 @@ class OrderHistoryControllerTest {
         when(orderHistoryService.getOrderHistory(anyLong(), any(Pageable.class))).thenReturn(mockPage);
 
         // When & Then: API 호출 및 응답 데이터 출력
-        mockMvc.perform(get("/api/users/{userId}/orders", 1L)
+        mockMvc.perform(get("/api/shop/users/{userId}/orders", 1L)
                         .param("page", "0")
                         .param("size", "20")
                         .contentType(MediaType.APPLICATION_JSON))

@@ -3,18 +3,22 @@ package com.simsimbookstore.apiserver.payment.controller;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeImpl;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeRequestDto;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
-import com.simsimbookstore.apiserver.payment.dto.*;
+import com.simsimbookstore.apiserver.payment.dto.ConfirmResponseDto;
+import com.simsimbookstore.apiserver.payment.dto.PaymentMethodResponse;
+import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
+import com.simsimbookstore.apiserver.payment.exception.PaymentMethodNotFoundException;
+import com.simsimbookstore.apiserver.payment.exception.PaymentValidationFailException;
 import com.simsimbookstore.apiserver.payment.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.net.URISyntaxException;
 import java.util.Objects;
 
 @Slf4j
@@ -25,7 +29,9 @@ public class PaymentController {
 
     private final OrderFacadeImpl orderFacade;
     private final PaymentService paymentService;
-//    private final AesUtil aesUtil;
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    private final String HASH_NAME = "Payment";
 
     // 사용자 정보 (amount, orderId) 임시 저장
     @PostMapping("/payment")
@@ -35,50 +41,50 @@ public class PaymentController {
         OrderFacadeResponseDto facadeResponseDto = orderFacade.createPrepareOrder(dto);
 
         // 존재하는 결제 방법인지 확인
-        paymentService.checkPayMethod(facadeResponseDto);
+        if (paymentService.checkPayMethod(facadeResponseDto)) {
 
-        session.setAttribute("orderId", facadeResponseDto.getOrderNumber());
-        session.setAttribute("totalAmount", facadeResponseDto.getTotalPrice());
+            // 임시저장
+            redisTemplate.opsForHash().put(HASH_NAME, "orderId", facadeResponseDto.getOrderNumber());
+            redisTemplate.opsForHash().put(HASH_NAME, "totalAmount", facadeResponseDto.getTotalPrice());
+            redisTemplate.opsForHash().put(HASH_NAME, "method", facadeResponseDto.getMethod());
+            String result = paymentService.createPaymentRequest(facadeResponseDto);
+            return ResponseEntity.ok(result);
+        }
 
-        String result = paymentService.createPaymentRequest(facadeResponseDto);
-
-        return ResponseEntity.ok(result);
+        throw new PaymentMethodNotFoundException("해당하는 결제방법은 존재하지 않습니다");
     }
 
     // Toss에게 받은 결제 인증 성공시 검증 후 결제 승인 요청 -> 결제 완료 -> DB 저장
-    @GetMapping("/success")
-    public ResponseEntity<SuccessRequestDto> paymentSuccess(@RequestParam String paymentKey,
-                                                            @RequestParam String orderId,
-                                                            @RequestParam BigDecimal amount,
-                                                            HttpServletRequest request) {
-        SuccessRequestDto successDto = new SuccessRequestDto(paymentKey, orderId, amount);
-        HttpSession session = request.getSession();
+    @GetMapping("/payment/success")
+    public ResponseEntity<?> paymentSuccess(@RequestParam String paymentKey,
+                                            @RequestParam String orderId,
+                                            @RequestParam BigDecimal amount) {
+
+        String redisOrderId = (String) redisTemplate.opsForHash().get(HASH_NAME, "orderId");
+        BigDecimal redisAmount = (BigDecimal) redisTemplate.opsForHash().get(HASH_NAME, "totalAmount");
+        String userPayMethod = (String) redisTemplate.opsForHash().get(HASH_NAME, "method");
+
+        PaymentMethodResponse paymentMethodResponse = paymentService.getPaymentMethodByName(userPayMethod);
+
+        SuccessRequestDto successDto = new SuccessRequestDto(paymentKey, orderId, amount, paymentMethodResponse);
+
+        ConfirmResponseDto confirmResponseDto;
 
         // 임시 저장값과 같은지 검증
-        if ((Objects.equals(orderId, (String) session.getAttribute("orderId"))) && (Objects.equals(amount, (BigDecimal) session.getAttribute("totalAmount")))) {
-                // 같으면 세션 삭제
-                session.removeAttribute("orderId");
-                session.removeAttribute("totalAmount");
-                    // 결제 승인 요청
-                    ConfirmSuccessResponseDto confirmSuccessResponseDto = paymentService.confirm(successDto);
+        if ((Objects.equals(orderId, redisOrderId)) && (Objects.equals(amount, redisAmount))) {
+            // 같으면 임시 저장 데이터 삭제
+            redisTemplate.opsForHash().delete(HASH_NAME, "orderId");
+            redisTemplate.opsForHash().delete(HASH_NAME, "totalAmount");
+
+            // 결제 승인 요청
+            confirmResponseDto = paymentService.confirm(successDto);
         } else {
             // 검증 실패 시 처리
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            throw new PaymentValidationFailException("요청 orderId, amount 값과 결제 orderId, amount 값이 일치하지 않습니다.");
         }
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(confirmResponseDto);
     }
 
-    // 결제 인증 실패
-    @GetMapping("/fail")
-    public ResponseEntity<String> paymentFail(@RequestParam String code,
-                                              @RequestParam String message,
-                                              @RequestParam String orderId) {
-        FailResponseDto failDto = new FailResponseDto(code, message, orderId);
-        // 결제 중단 처리 + 결제 실패
-        paymentService.failPayment(failDto);
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
-    }
 
 //    // 사용자/관리자의 환불 요청 (결제 취소)
 //    @PostMapping("/payment/cancel")

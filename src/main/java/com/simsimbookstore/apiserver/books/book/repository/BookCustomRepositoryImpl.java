@@ -1,11 +1,12 @@
 package com.simsimbookstore.apiserver.books.book.repository;
 
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.*;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.simsimbookstore.apiserver.books.book.dto.BookListResponse;
 import com.simsimbookstore.apiserver.books.book.dto.BookResponseDto;
+import com.simsimbookstore.apiserver.books.book.entity.BookStatus;
 import com.simsimbookstore.apiserver.books.book.entity.QBook;
 import com.simsimbookstore.apiserver.books.bookcategory.entity.QBookCategory;
 import com.simsimbookstore.apiserver.books.bookcontributor.dto.BookContributorResponsDto;
@@ -22,10 +23,12 @@ import com.simsimbookstore.apiserver.books.tag.domain.QTag;
 import com.simsimbookstore.apiserver.books.tag.dto.TagResponseDto;
 import com.simsimbookstore.apiserver.like.entity.QBookLike;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.QOrderBook;
+import com.simsimbookstore.apiserver.reviews.review.entity.QReview;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.support.PageableExecutionUtils;
 
 
@@ -52,6 +55,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
     QBookLike bookLike = QBookLike.bookLike;
     QOrderBook orderBook = QOrderBook.orderBook;
     QBookImagePath bookImagePath = QBookImagePath.bookImagePath;
+    QReview review = QReview.review;
 
 
     /**
@@ -77,7 +81,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                 .orderBy(book.publicationDate.desc()) // 출판일 기준 최신순 정렬
                 .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId))
                 .innerJoin(bookTag).on(book.bookId.eq(bookTag.book.bookId))
-                .where(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL).and(bookTag.tag.tagName.eq("국내도서")))
+                .where(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL).and(bookTag.tag.tagId.eq(1L)).and(book.bookStatus.ne(BookStatus.DELETED)))
                 .limit(8)                           // 상위 8권만 조회
                 .fetch();                           // 결과 가져오기
     }
@@ -106,6 +110,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
 
                 ))
                 .from(book)
+                .where(book.bookStatus.ne(BookStatus.DELETED))
                 .offset(pageable.getOffset()) // 페이지 시작점
                 .limit(pageable.getPageSize()) // 페이지 크기
                 .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId)
@@ -168,7 +173,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                 .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId)
                         .and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
                 .leftJoin(bookLike).on(book.bookId.eq(bookLike.book.bookId))
-                .where(bookCategory.catagory.categoryId.in(categoryIds))
+                .where(bookCategory.catagory.categoryId.in(categoryIds).and(book.bookStatus.ne(BookStatus.DELETED)))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(book.publicationDate.desc())
@@ -219,7 +224,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                 .innerJoin(bookTag).on(book.bookId.eq(bookTag.book.bookId))
                 .leftJoin(bookLike).on(book.bookId.eq(bookLike.book.bookId))
                 .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId))
-                .where(bookTag.tag.tagId.eq(tagId).and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
+                .where(bookTag.tag.tagId.eq(tagId).and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)).and(book.bookStatus.ne(BookStatus.DELETED)))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(book.bookId.asc())
@@ -242,6 +247,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
     }
 
 
+
     /**
      * 책 상세조회
      *
@@ -253,6 +259,9 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
     public BookResponseDto getBookDetail(Long userId, Long bookId) {
         // 좋아요 여부를 설정
         BooleanExpression isLiked = getLikeExpression(userId);
+
+        // 리뷰가 없어서 평점이 null이면 0으로하고 아니면 평점 계산
+        NumberExpression<Double> score = new CaseBuilder().when(review.score.avg().isNull()).then(0D).otherwise(review.score.avg());
 
         // 책 상세 정보를 조회
         BookResponseDto bookResponse = queryFactory
@@ -272,6 +281,8 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                         isLiked.as("isLiked"),
                         book.bookStatus.as("bookStatus"),
                         book.giftPackaging,
+                        review.count().as("reviewCount"),
+                        score.as("scoreAverage"),
                         // 이미지 경로들 가져오기
                         Expressions.stringTemplate(
                                 "GROUP_CONCAT(CASE WHEN {0} = 'THUMBNAIL' THEN {1} END)",
@@ -284,6 +295,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                 ))
                 .from(book)
                 .leftJoin(bookLike).on(book.bookId.eq(bookLike.book.bookId))
+                .leftJoin(review).on(book.bookId.eq(review.book.bookId))
                 .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId))
                 .where(book.bookId.eq(bookId))
                 .groupBy(book, bookLike)
@@ -400,6 +412,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                         book.bookStatus.as("bookStatus"),
                         book.publisher.as("publisher")))
                 .from(orderBook)
+                .where(book.bookStatus.ne(BookStatus.DELETED))
                 .innerJoin(orderBook.book, book)
                 .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId)
                         .and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
@@ -442,7 +455,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
                 .innerJoin(bookCategory).on(book.bookId.eq(bookCategory.book.bookId))
                 .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId)
                         .and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
-                .where(bookCategory.book.bookId.ne(bookId).and(bookCategory.catagory.categoryId.in(categoryIdList)))
+                .where(bookCategory.book.bookId.ne(bookId).and(bookCategory.catagory.categoryId.in(categoryIdList)).and(book.bookStatus.ne(BookStatus.DELETED)))
                 .distinct()
                 .orderBy(book.viewCount.desc())
                 .limit(5)

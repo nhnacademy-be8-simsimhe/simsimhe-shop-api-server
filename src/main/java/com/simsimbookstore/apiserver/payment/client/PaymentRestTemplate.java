@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
 import com.simsimbookstore.apiserver.payment.config.TossPaymentProperties;
-import com.simsimbookstore.apiserver.payment.dto.ConfirmSuccessResponseDto;
+import com.simsimbookstore.apiserver.payment.dto.ConfirmResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.*;
@@ -76,7 +76,7 @@ public class PaymentRestTemplate {
     }
 
     // 결제 승인 요청
-    public ConfirmSuccessResponseDto confirm(SuccessRequestDto success){
+    public ResponseEntity<ConfirmResponseDto> confirm(SuccessRequestDto success){
         URI uri = URI.create("https://api.tosspayments.com/v1/payments/confirm");
 
         headers.setBasicAuth(encodedAuth);
@@ -96,13 +96,14 @@ public class PaymentRestTemplate {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        ResponseEntity<ConfirmSuccessResponseDto> responseEntity = restTemplate.exchange(
+        ResponseEntity<ConfirmResponseDto> responseEntity = restTemplate.exchange(
                 uri,
                 HttpMethod.POST,
                 request,
-                ConfirmSuccessResponseDto.class
+                ConfirmResponseDto.class
         );
-        return responseEntity.getBody();
+
+        return responseEntity;
     }
 
     // 나중에 멱등키를 사용한다면 키 redis에 15일 저장

@@ -79,7 +79,7 @@ public class AladinApiService {
         XmlMapper xmlMapper = new XmlMapper();
 
         for (String searchTarget : searchTargets) {
-            for (int start = 1; start <= 1; start++) {
+            for (int start = 1; start <= 4; start++) {
                 String url = baseUrl + "&SearchTarget=" + searchTarget + "&start=" + start;
                 System.out.println("Requesting: " + url);
 

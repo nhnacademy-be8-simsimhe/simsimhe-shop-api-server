@@ -40,35 +40,62 @@ public class CartService {
 
     /**
      * 레디스에있는  장바구니 도서들 DB에 넣기 (프론트쪽에서 로그아웃됐을떄)
+     *
      * @param userId
      * @param cartRequestDtoList
      */
+//    public void CartToDb(Long userId, List<CartRequestDto> cartRequestDtoList) {
+//        //장바구니 비우기
+//        cartRepository.deleteByUserId(userId);
+//
+//        Optional<User> optionalUser = userRepository.findById(userId);
+//
+//        if (optionalUser.isPresent()) {
+//            User user = optionalUser.get();
+//
+//            List<Cart> cartList = cartRequestDtoList.stream()
+//                    .map(c -> {
+//                        Optional<Book> optionalBook = bookRepository.findById(Long.valueOf(c.getBookId()));
+//                        if (optionalBook.isPresent()) {
+//                            Book book = optionalBook.get();
+//                            return Cart.builder()
+//                                    .user(user)
+//                                    .book(book)
+//                                    .quantity(c.getQuantity())
+//                                    .build();
+//                        } else {
+//                            throw new NotFoundException("도서 정보가 없습니다");
+//                        }
+//                    }).collect(Collectors.toList());
+//            cartRepository.saveAll(cartList);
+//        }else {
+//            throw new NotFoundException("회원 정보가 없습니다");
+//        }
+//    }
     public void CartToDb(Long userId, List<CartRequestDto> cartRequestDtoList) {
-        //장바구니 비우기
+        // 장바구니 비우기
         cartRepository.deleteByUserId(userId);
 
-        Optional<User> optionalUser = userRepository.findById(userId);
+        // 사용자 엔터티 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("회원 정보가 없습니다: " + userId));
 
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
+        // 장바구니 항목 생성
+        List<Cart> cartList = cartRequestDtoList.stream()
+                .map(c -> {
+                    Book book = bookRepository.findById(Long.valueOf(c.getBookId()))
+                            .orElseThrow(() -> new NotFoundException("도서 정보가 없습니다: " + c.getBookId()));
 
-            List<Cart> cartList = cartRequestDtoList.stream()
-                    .map(c -> {
-                        Optional<Book> optionalBook = bookRepository.findById(Long.valueOf(c.getBookId()));
-                        if (optionalBook.isPresent()) {
-                            Book book = optionalBook.get();
-                            return Cart.builder()
-                                    .user(user)
-                                    .book(book)
-                                    .quantity(c.getQuantity())
-                                    .build();
-                        } else {
-                            throw new NotFoundException("도서 정보가 없습니다");
-                        }
-                    }).collect(Collectors.toList());
-            cartRepository.saveAll(cartList);
-        }else {
-            throw new NotFoundException("회원 정보가 없습니다");
-        }
+                    return Cart.builder()
+                            .user(user) // 조회된 User 엔터티 사용
+                            .book(book)
+                            .quantity(c.getQuantity())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        // 장바구니 저장
+        cartRepository.saveAll(cartList);
     }
+
 }
