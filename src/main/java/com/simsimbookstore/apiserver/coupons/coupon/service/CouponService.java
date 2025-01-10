@@ -20,7 +20,7 @@ public interface CouponService {
     Page<CouponResponseDto> getUnusedCoupons(Pageable pageable, Long userId);
 
     //user의 적용 가능한 쿠폰울 가져온다.
-    Page<CouponResponseDto> getEligibleCoupons(Pageable pageable, Long userId, Long bookId);
+    List<CouponResponseDto> getEligibleCoupons(Long userId, Long bookId);
 
     // user들에게 쿠폰을 발급한다.
     List<Long> issueCoupons(List<Long> userIds, Long couponTypeId);

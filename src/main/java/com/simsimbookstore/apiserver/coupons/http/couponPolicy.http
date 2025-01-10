@@ -3,7 +3,7 @@ GET https://examples.http-client.intellij.net/get
     ?generated-in=IntelliJ IDEA
 
 ### POST couponPolicy(FIX) 생성
-POST http://localhost:8020/api/admin/couponPolicies
+POST http://localhost:8010/api/admin/couponPolicies
 Content-Type: application/json
 
 {
@@ -17,7 +17,7 @@ Content-Type: application/json
 }
 
 ### POST couponPolicy(RATE) 생성
-POST http://localhost:8020/api/admin/couponPolicies
+POST http://localhost:8010/api/admin/couponPolicies
 Content-Type: application/json
 
 {
@@ -31,7 +31,7 @@ Content-Type: application/json
 }
 
 ### POST couponPolicy 생성 - valid 위반
-POST http://localhost:8020/api/admin/couponPolicies
+POST http://localhost:8010/api/admin/couponPolicies
 Content-Type: application/json
 
 {
@@ -45,14 +45,14 @@ Content-Type: application/json
 }
 
 ### DELETE couponPolicy 삭제
-DELETE http://localhost:8020/api/admin/couponPolicies/3
+DELETE http://localhost:8010/api/admin/couponPolicies/3
 
 ### DELETE couponPolicy 삭제 - 없는 ID
-DELETE http://localhost:8020/api/admin/couponPolicies/3
+DELETE http://localhost:8010/api/admin/couponPolicies/3
 
 ### GET getAllCouponPolicy
-GET http://localhost:8020/api/admin/couponPolicies
+GET http://localhost:8010/api/admin/couponPolicies
 
 ### GET getCouponPolicy
-GET http://localhost:8020/api/admin/couponPolicies/4
+GET http://localhost:8010/api/admin/couponPolicies/4
 
