@@ -110,4 +110,11 @@ class AddressRepositoryTest {
         Optional<Address> optionalAddress = addressRepository.findById(testAddress1.getAddressId());
         assertTrue(optionalAddress.isEmpty());
     }
+
+    @Test
+    @DisplayName("유저의 등록된 주소 개수 조회")
+    void countAllByUserUserId(){
+        int addressCount = addressRepository.countAllByUserUserId(testUser.getUserId());
+        assertEquals(2, addressCount);
+    }
 }

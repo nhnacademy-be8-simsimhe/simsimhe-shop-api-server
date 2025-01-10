@@ -9,5 +9,5 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
     // 어드래스 아이디로 검색
     // save
     List<Address> findAllByUserUserId(Long userId);
-
+    int countAllByUserUserId(Long userId);
 }
