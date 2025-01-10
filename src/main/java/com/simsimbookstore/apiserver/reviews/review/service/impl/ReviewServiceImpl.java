@@ -3,9 +3,7 @@ package com.simsimbookstore.apiserver.reviews.review.service.impl;
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
-import com.simsimbookstore.apiserver.reviews.review.dto.ReviewLikeCountDTO;
-import com.simsimbookstore.apiserver.reviews.review.dto.ReviewRequestDTO;
-import com.simsimbookstore.apiserver.reviews.review.dto.ReviewResponseDTO;
+import com.simsimbookstore.apiserver.reviews.review.dto.*;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.reviews.review.repository.ReviewRepository;
 import com.simsimbookstore.apiserver.reviews.review.service.ReviewService;
@@ -23,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -38,6 +37,32 @@ public class ReviewServiceImpl implements ReviewService {
 
 
 
+    public boolean canReviewBeCreated(Long userId, Long bookId){
+
+        long orderCheck = reviewRepository.bookOrderCheck(userId, bookId);
+
+        if (orderCheck == 0)
+            return false;
+
+
+        long reviewExists = reviewRepository.alreadyExistCheck(userId, bookId);
+        return reviewExists == 0;
+    }
+
+    public Page<UserReviewsDTO> getUserReviews(Long userId, int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Object[]> results = reviewRepository.getUserReviews(userId, pageable);
+        return convertToUserReviewsDTO(results);
+    }
+
+    @Override
+    public Page<UserAvailableReviewsDTO> getAvailableReviews(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Object[]> results = reviewRepository.getEligibleBooksForReview(userId, pageable);
+
+        return convertToUserAvailableReviewsDTO(results);
+    }
+
 
     @Override
     public Review createReview(ReviewRequestDTO dto, Long bookId, Long userId) {
@@ -45,6 +70,8 @@ public class ReviewServiceImpl implements ReviewService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 책입니다."));
+
+        log.info("canReviewBeCreated : {}", canReviewBeCreated(userId, bookId));
 
 
         Review review = Review.builder()
@@ -61,6 +88,8 @@ public class ReviewServiceImpl implements ReviewService {
 
         return createReview;
     }
+
+
 
     @Override
     public Review updateReview(ReviewRequestDTO dto, Long reviewId) {
@@ -183,22 +212,55 @@ public class ReviewServiceImpl implements ReviewService {
 
 
     public Page<ReviewLikeCountDTO> convertToReviewLikeCountDTO(Page<Object[]> results,Long userId) {
-        return results.map(obj -> new ReviewLikeCountDTO(
-                (Long) obj[0],                 // reviewId
-                (String) obj[1],              // title
-                (String) obj[2],              // content
-                obj[3] != null ? ((Timestamp) obj[3]).toLocalDateTime() : null,       // createdAt
-                (String) obj[4],              // userName
-                (Long) obj[5],                // userid
-                (Integer) obj[6],             // score
-                ((Long) obj[7]).longValue(), // likeCount
-                ((Long) obj[8]).longValue(), // commentCount
-                obj[9] != null ? Arrays.asList(((String) obj[9]).split(",")) : null,// imagePath
-                ((Long) obj[5]).equals(userId),  // editable
-                ((Long) obj[5]).equals(userId),  // deletable
-                isLikedByUser((Integer)obj[10])   // userLiked
+        return results.map(obj -> ReviewLikeCountDTO.builder()
+                                .reviewId((Long) obj[0])
+                        .title((String) obj[1])
+                        .content((String) obj[2])
+                        .createdAt(obj[3] != null ? ((Timestamp) obj[3]).toLocalDateTime() : null)
+                        .userName((String) obj[4])
+                        .userId((Long) obj[5])
+                        .score((Integer) obj[6])
+                        .likeCount(((Long) obj[7]))
+                        .commentCount(((Long) obj[8]))
+                        .imagePaths(obj[9] != null ? Arrays.asList(((String) obj[9]).split(",")) : null)
+                        .editable(((Long) obj[5]).equals(userId))
+                        .deletable(((Long) obj[5]).equals(userId))
+                        .userLiked(isLikedByUser((Integer)obj[10]))
+                        .build()
+                );
+    }
+
+
+    public Page<UserReviewsDTO> convertToUserReviewsDTO(Page<Object[]> results) {
+        return results.map(obj -> UserReviewsDTO.builder()
+                .reviewId((Long) obj[0])
+                .bookId((Long) obj[1])
+                .bookTitle((String) obj[2])
+                .contributor((String) obj[3])
+                .bookImagePath((String) obj[4])
+                .title((String) obj[5])
+                .content((String) obj[6])
+                .createdAt(obj[7] != null ? ((Timestamp) obj[7]).toLocalDateTime() : null)
+                .userName((String) obj[8])
+                .userId((Long) obj[9])
+                .score((Integer) obj[10])
+                .likeCount(((Long) obj[11]))
+                .commentCount(((Long) obj[12]))
+                .imagePaths(obj[13] != null ? Arrays.asList(((String) obj[13]).split(",")) : null)
+                .build());
+    }
+
+
+    public Page<UserAvailableReviewsDTO> convertToUserAvailableReviewsDTO(Page<Object[]> results) {
+        return results.map(obj -> new UserAvailableReviewsDTO(
+                (Long) obj[0],                // reviewId
+                (String) obj[1],              // bookTitle
+                (String) obj[2],              // contributor
+                (String) obj[3],              // book image path
+                obj[4] != null ? ((Timestamp) obj[4]).toLocalDateTime() : null
         ));
     }
+
 
     public Boolean isLikedByUser(Integer likedByUser) {
 
