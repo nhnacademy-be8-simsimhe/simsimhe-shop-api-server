@@ -10,6 +10,7 @@ import com.simsimbookstore.apiserver.orders.packages.dto.WrapTypeRequestDto;
 import com.simsimbookstore.apiserver.orders.packages.dto.WrapTypeResponseDto;
 import com.simsimbookstore.apiserver.orders.packages.entity.WrapType;
 import com.simsimbookstore.apiserver.orders.packages.repository.WrapTypeRepository;
+import com.simsimbookstore.apiserver.orders.packages.service.impl.WrapTypeServiceImpl;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;

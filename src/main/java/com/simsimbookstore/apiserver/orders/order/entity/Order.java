@@ -9,6 +9,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -19,10 +20,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "orders")
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,10 +37,14 @@ public class Order {
     private Long orderId;
 
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     @OneToOne
     private Delivery delivery;
+
+    @Column(name = "order_number")
+    private String orderNumber;
 
     @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;
@@ -57,11 +64,20 @@ public class Order {
     @Column(name = "order_email", nullable = false, length = 500)
     private String orderEmail;
 
+    @Column(name = "phone_number", nullable = false)
+    private String phoneNumber;
+
     @Column(name = "point_earn", nullable = false)
     private Integer pointEarn;
 
     @Column(name = "delivery_price", nullable = false)
     private BigDecimal deliveryPrice;
+
+    @Column(name = "order_name", nullable = true)
+    private String orderName;
+
+    @Column(name = "sender_name", nullable = false)
+    private String senderName;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "order_state", nullable = false)

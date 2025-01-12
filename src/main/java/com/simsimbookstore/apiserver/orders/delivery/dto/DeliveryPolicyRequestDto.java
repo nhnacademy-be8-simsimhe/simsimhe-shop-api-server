@@ -23,11 +23,16 @@ public class DeliveryPolicyRequestDto {
     @DecimalMin(value = "0.0", inclusive = false, message = "Policy standard price must be greater than 0.")
     private BigDecimal policyStandardPrice;
 
+    @NotNull(message = "Delivery price is required.")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Delivery price must be greater than 0.")
+    private BigDecimal deliveryPrice;
+
     private boolean standardPolicy;
 
     public DeliveryPolicy toEntity() {
         return DeliveryPolicy.builder()
                 .deliveryPolicyName(this.deliveryPolicyName)
+                .deliveryPrice(this.deliveryPrice)
                 .policyStandardPrice(this.policyStandardPrice)
                 .standardPolicy(this.standardPolicy)
                 .build();

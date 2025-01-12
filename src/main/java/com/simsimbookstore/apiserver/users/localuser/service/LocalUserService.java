@@ -1,12 +1,11 @@
 package com.simsimbookstore.apiserver.users.localuser.service;
 
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
-import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRequestDto;
-
-import java.util.Optional;
+import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
+import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
 
 public interface LocalUserService {
-    LocalUser saveLocalUser(LocalUserRequestDto localUserRequestDto);
+    LocalUser saveLocalUser(LocalUserRegisterRequestDto localUserRequestDto);
 
     LocalUser findByLoginId(String loginId);
 

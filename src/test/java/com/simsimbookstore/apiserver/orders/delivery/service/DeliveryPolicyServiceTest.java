@@ -54,7 +54,7 @@ class DeliveryPolicyServiceTest {
     @Test
     @DisplayName("새로운 DeliveryPolicy 저장 테스트")
     void saveDeliveryPolicyTest() {
-        DeliveryPolicyRequestDto dto = new DeliveryPolicyRequestDto("name", BigDecimal.valueOf(1000), false);
+        DeliveryPolicyRequestDto dto = new DeliveryPolicyRequestDto("이름", BigDecimal.valueOf(30000), BigDecimal.valueOf(3000), false);
         deliveryPolicyService.save(dto);
 
         verify(deliveryPolicyRepository, times(1)).save(any(DeliveryPolicy.class));

@@ -8,5 +8,8 @@ public interface DeliveryPolicyService {
     DeliveryPolicy save(DeliveryPolicyRequestDto deliveryPolicyRequestDto);
     void toggleStandardPolicy(Long deliveryPolicyId);
     void deleteDeliveryPolicy(Long deliveryPolicyId);
+
+    DeliveryPolicy getStandardPolicy();
+
     List<DeliveryPolicy> findAll();
 }

@@ -1,193 +1,503 @@
 package com.simsimbookstore.apiserver.orders.orderbook.service.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.simsimbookstore.apiserver.books.book.entity.Book;
-import com.simsimbookstore.apiserver.books.book.entity.BookStatus;
-import com.simsimbookstore.apiserver.books.book.exception.BookOutOfStockException;
+
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
+import com.simsimbookstore.apiserver.books.book.service.BookManagementService;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
+import com.simsimbookstore.apiserver.orders.coupondiscount.dto.CouponDiscountRequestDto;
+import com.simsimbookstore.apiserver.orders.coupondiscount.dto.CouponDiscountResponseDto;
+import com.simsimbookstore.apiserver.orders.coupondiscount.entity.CouponDiscount;
+import com.simsimbookstore.apiserver.orders.coupondiscount.service.CouponDiscountService;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
+import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookResponseDto;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
+import com.simsimbookstore.apiserver.orders.orderbook.exception.OrderBookNotFoundException;
 import com.simsimbookstore.apiserver.orders.orderbook.repository.OrderBookRepository;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
+import com.simsimbookstore.apiserver.orders.packages.dto.PackageRequestDto;
+import com.simsimbookstore.apiserver.orders.packages.dto.PackageResponseDto;
+import com.simsimbookstore.apiserver.orders.packages.entity.Packages;
+import com.simsimbookstore.apiserver.orders.packages.entity.WrapType;
+import com.simsimbookstore.apiserver.orders.packages.service.PackageService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-@DataJpaTest
-@ActiveProfiles("test") // test 프로파일 활성화
-public class OrderBookServiceImplTest {
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-    @Autowired
-    private BookRepository bookRepository;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-    @Autowired
-    private OrderRepository orderRepository;
+import java.math.BigDecimal;
+import java.util.*;
 
-    @Autowired
+
+@ExtendWith(MockitoExtension.class)
+class OrderBookServiceImplTest {
+
+    @Mock
     private OrderBookRepository orderBookRepository;
 
-    private OrderBookServiceImpl orderBookService;
+    @Mock
+    private BookRepository bookRepository;
+
+    @Mock
+    private OrderRepository orderRepository;
+
+    @Mock
+    private BookManagementService bookManagementService;
+
+    @Mock
+    private CouponDiscountService couponDiscountService;
+
+    @Mock
+    private PackageService packageService;
+
+    @InjectMocks
+    private OrderBookServiceImpl orderBookService; // 테스트 대상 서비스
+
+    private Book book;
+    private Order order;
+    private OrderBook orderBook;
 
     @BeforeEach
     void setUp() {
-        orderBookService = new OrderBookServiceImpl(orderBookRepository, bookRepository, orderRepository);
-
-        Book book1 = Book.builder()
-                .title("Test Book 1")
-                .description("Test Description 1")
-                .bookIndex("Index 1")
-                .publisher("Test Publisher 1")
-                .isbn("1234567890123")
-                .quantity(10)
-                .price(new BigDecimal("10000.00"))
-                .saleprice(new BigDecimal("8000.00"))
-                .publicationDate(LocalDate.now())
-                .pages(300)
-                .bookStatus(BookStatus.ONSALE)
-                .viewCount(0L)
+        // 테스트용 Book 객체 생성
+        book = Book.builder()
+                .bookId(1L)
+                .title("Test Book")
                 .build();
-        bookRepository.save(book1);
 
-        Book book2 = Book.builder()
-                .title("Test Book 2")
-                .description("Test Description 2")
-                .bookIndex("Index 2")
-                .publisher("Test Publisher 2")
-                .isbn("1234567890456")
-                .quantity(5)
-                .price(new BigDecimal("12000.00"))
-                .saleprice(new BigDecimal("9000.00"))
-                .publicationDate(LocalDate.now())
-                .pages(200)
-                .bookStatus(BookStatus.ONSALE)
-                .viewCount(0L)
+        // 테스트용 Order 객체 생성
+        order = Order.builder()
+                .orderId(100L)
                 .build();
-        bookRepository.save(book2);
 
-        Order order = Order.builder()
-                .user(null)
-                .delivery(null)
-                .orderDate(LocalDateTime.now())
-                .originalPrice(new BigDecimal("8000.00"))
-                .pointUse(new BigDecimal("100.00"))
-                .totalPrice(new BigDecimal("12900.00"))
-                .deliveryDate(LocalDate.now())
-                .orderEmail("test@example.com")
-                .pointEarn(5)
-                .deliveryPrice(new BigDecimal("5000.00"))
-                .orderState(Order.OrderState.PENDING)
-                .build();
-        orderRepository.save(order);
-
-        OrderBook orderBook = OrderBook.builder()
-                .book(book1)
+        // 테스트용 OrderBook 객체 생성 (ID는 Builder를 통해 설정)
+        orderBook = OrderBook.builder()
+                .orderBookId(200L)
+                .book(book)
                 .order(order)
                 .quantity(2)
-                .salePrice(new BigDecimal("8000.00"))
-                .discountPrice(new BigDecimal("2000.00"))
+                .salePrice(new BigDecimal("10000"))
+                .discountPrice(new BigDecimal("500"))
+                .orderBookState(OrderBook.OrderBookState.PENDING)
+                .packages(new ArrayList<>()) // 초기 패키지 리스트
+                .couponDiscount(null) // 초기 쿠폰 없음
+                .build();
+    }
+
+    @Test
+    @DisplayName("createOrderBooks() - 성공적으로 OrderBook 생성 및 쿠폰/패키지 연결")
+    void testCreateOrderBooks_Success() {
+        // Given
+        CouponDiscountRequestDto couponDto = CouponDiscountRequestDto.builder()
+                .couponId(1L)
+                .couponName("WELCOME")
+                .couponType("FIXED")
+                .discountPrice(new BigDecimal("1000"))
+                .build();
+
+        PackageRequestDto packageDto1 = PackageRequestDto.builder()
+                .packageTypeId(10L)
+                .packageName("GiftBox")
+                .build();
+
+        PackageRequestDto packageDto2 = PackageRequestDto.builder()
+                .packageTypeId(11L)
+                .packageName("Ribbon")
+                .build();
+
+        OrderBookRequestDto dto = OrderBookRequestDto.builder()
+                .orderId(1L)
+                .bookId(1L)
+                .quantity(2)
+                .salePrice(new BigDecimal("10000"))
+                .discountPrice(new BigDecimal("500"))
+                .orderBookState("PENDING")
+                .couponDiscountRequestDto(couponDto)
+                .packagesRequestDtos(Arrays.asList(packageDto1, packageDto2))
+                .build();
+
+        List<OrderBookRequestDto> requestDtos = Collections.singletonList(dto);
+
+        Book book = Book.builder()
+                .bookId(1L)
+                .title("Test Book")
+                .build();
+
+        Order order = Order.builder()
+                .orderId(1L)
+                .build();
+
+        OrderBook savedOrderBook = OrderBook.builder()
+                .orderBookId(200L)
+                .book(book)
+                .order(order)
+                .quantity(2)
+                .salePrice(new BigDecimal("10000"))
+                .discountPrice(new BigDecimal("500"))
                 .orderBookState(OrderBook.OrderBookState.PENDING)
                 .build();
-        orderBookRepository.save(orderBook);
+
+        CouponDiscount couponDiscount = CouponDiscount.builder()
+                .couponDiscountId(1L)
+                .couponName("WELCOME")
+                .couponType("FIXED")
+                .discountPrice(new BigDecimal("1000"))
+                .build();
+
+        Packages savedPackage1 = Packages.builder()
+                .packageId(1L)
+                .packageType("GiftBox")
+                .wrapType(WrapType.builder().packageTypeId(10L).packageName("Gift Wrap").build())
+                .orderBook(savedOrderBook)
+                .build();
+
+        Packages savedPackage2 = Packages.builder()
+                .packageId(2L)
+                .packageType("Ribbon")
+                .wrapType(WrapType.builder().packageTypeId(11L).packageName("Ribbon Wrap").build())
+                .orderBook(savedOrderBook)
+                .build();
+
+        savedOrderBook.addPackage(savedPackage1);
+        savedOrderBook.addPackage(savedPackage2);
+
+        // Mocking
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderBookRepository.save(any(OrderBook.class))).thenReturn(savedOrderBook);
+        when(couponDiscountService.createCouponDiscount(couponDto, savedOrderBook))
+                .thenAnswer(invocation -> {
+                    savedOrderBook.setCouponDiscount(couponDiscount);
+                    return CouponDiscountResponseDto.builder()
+                            .couponDiscountId(1L)
+                            .orderBookId(200L)
+                            .couponName("WELCOME")
+                            .couponType("FIXED")
+                            .discountPrice(new BigDecimal("1000"))
+                            .build();
+                });
+        when(packageService.createPackage(packageDto1, savedOrderBook)).thenReturn(savedPackage1);
+        when(packageService.createPackage(packageDto2, savedOrderBook)).thenReturn(savedPackage2);
+        when(orderBookRepository.findById(200L)).thenReturn(Optional.of(savedOrderBook));
+
+        // When
+        List<OrderBookResponseDto> resultList = orderBookService.createOrderBooks(requestDtos);
+
+        // Then
+        assertNotNull(resultList);
+        assertEquals(1, resultList.size());
+
+        OrderBookResponseDto responseDto = resultList.getFirst();
+        assertEquals(200L, responseDto.getOrderBookId());
+        assertEquals("Test Book", responseDto.getBookTitle());
+        assertEquals(2, responseDto.getQuantity());
+        assertEquals(new BigDecimal("10000"), responseDto.getSalePrice());
+        assertEquals(new BigDecimal("500"), responseDto.getDiscountPrice());
+        assertEquals("PENDING", responseDto.getOrderBookState());
+
+        // 쿠폰 검증
+        assertNotNull(responseDto.getCouponDiscount());
+        assertEquals(1L, responseDto.getCouponDiscount().getCouponDiscountId());
+        assertEquals("WELCOME", responseDto.getCouponDiscount().getCouponName());
+        assertEquals("FIXED", responseDto.getCouponDiscount().getCouponType());
+        assertEquals(new BigDecimal("1000"), responseDto.getCouponDiscount().getDiscountPrice());
+
+        // 패키지 검증
+        assertNotNull(responseDto.getPackages());
+        assertEquals(2, responseDto.getPackages().size());
+
+        PackageResponseDto pkg1 = responseDto.getPackages().getFirst();
+        assertEquals(1L, pkg1.getPackageId());
+        assertEquals("GiftBox", pkg1.getPackageType());
+
+        PackageResponseDto pkg2 = responseDto.getPackages().get(1);
+        assertEquals(2L, pkg2.getPackageId());
+        assertEquals("Ribbon", pkg2.getPackageType());
+
+        // Verify
+        verify(bookRepository, times(1)).findById(1L);
+        verify(orderRepository, times(1)).findById(1L);
+        verify(orderBookRepository, times(1)).save(any(OrderBook.class));
+        verify(couponDiscountService, times(1)).createCouponDiscount(couponDto, savedOrderBook);
+        verify(packageService, times(1)).createPackage(packageDto1, savedOrderBook);
+        verify(packageService, times(1)).createPackage(packageDto2, savedOrderBook);
+        verify(orderBookRepository, times(1)).findById(200L);
+    }
+
+
+
+    @Test
+    @DisplayName("createOrderBooks() - Book 미존재 시 예외 발생")
+    void testCreateOrderBooks_BookNotFound() {
+        // Given
+        OrderBookRequestDto dto = OrderBookRequestDto.builder()
+                .orderId(order.getOrderId())
+                .bookId(999L) // 존재하지 않는 Book ID
+                .quantity(2)
+                .salePrice(new BigDecimal("10000"))
+                .discountPrice(new BigDecimal("500"))
+                .orderBookState("PENDING")
+                .build();
+
+        List<OrderBookRequestDto> requestDtos = Collections.singletonList(dto);
+
+        // Mocking: Book 존재하지 않음
+        when(bookRepository.findById(999L))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(NotFoundException.class, () -> orderBookService.createOrderBooks(requestDtos));
+
+        // Verify: Repository 메서드 호출 여부 확인
+        verify(bookRepository, times(1)).findById(999L);
+        verify(bookManagementService, never()).modifyQuantity(anyLong(), anyInt());
+        verify(orderRepository, never()).findById(anyLong());
+        verify(orderBookRepository, never()).save(any(OrderBook.class));
+        verify(couponDiscountService, never()).createCouponDiscount(any(), any(OrderBook.class));
+        verify(packageService, never()).createPackage(any(), any(OrderBook.class));
     }
 
     @Test
-    void testCreateOrderBooks_Success() {
-        List<OrderBookRequestDto> requestDtos = List.of(
-                OrderBookRequestDto.builder()
-                        .orderId(orderRepository.findAll().getFirst().getOrderId())
-                        .bookId(bookRepository.findAll().get(0).getBookId())
-                        .quantity(2)
-                        .salePrice(new BigDecimal("8000.00"))
-                        .discountPrice(new BigDecimal("2000.00"))
-                        .orderBookState("PENDING")
-                        .build(),
-                OrderBookRequestDto.builder()
-                        .orderId(orderRepository.findAll().getFirst().getOrderId())
-                        .bookId(bookRepository.findAll().get(1).getBookId())
-                        .quantity(3)
-                        .salePrice(new BigDecimal("9000.00"))
-                        .discountPrice(new BigDecimal("3000.00"))
-                        .orderBookState("PENDING")
-                        .build()
-        );
+    @DisplayName("getPackages() - 성공적으로 패키지 목록 조회")
+    void testGetPackages_Success() {
+        Long orderBookId = orderBook.getOrderBookId();
 
-        List<OrderBook> orderBooks = orderBookService.createOrderBooks(requestDtos);
+        when(orderBookRepository.findById(orderBookId))
+                .thenReturn(Optional.of(orderBook));
 
-        assertEquals(2, orderBooks.size());
+        Packages pkg1 = Packages.builder()
+                .packageId(1L)
+                .packageType("GiftBox")
+                .orderBook(orderBook)
+                .build();
 
-        OrderBook orderBook1 = orderBooks.getFirst();
-        assertEquals(2, orderBook1.getQuantity());
-        assertEquals(new BigDecimal("8000.00"), orderBook1.getSalePrice());
-        assertEquals(new BigDecimal("2000.00"), orderBook1.getDiscountPrice());
+        Packages pkg2 = Packages.builder()
+                .packageId(2L)
+                .packageType("Ribbon")
+                .orderBook(orderBook)
+                .build();
 
-        OrderBook orderBook2 = orderBooks.get(1);
-        assertEquals(3, orderBook2.getQuantity());
-        assertEquals(new BigDecimal("9000.00"), orderBook2.getSalePrice());
-        assertEquals(new BigDecimal("3000.00"), orderBook2.getDiscountPrice());
+        orderBook.getPackages().add(pkg1);
+        orderBook.getPackages().add(pkg2);
 
-        Book book1 = bookRepository.findById(bookRepository.findAll().get(0).getBookId()).orElseThrow();
-        assertEquals(8, book1.getQuantity());
+        List<PackageResponseDto> packages = orderBookService.getPackages(orderBookId);
 
-        Book book2 = bookRepository.findById(bookRepository.findAll().get(1).getBookId()).orElseThrow();
-        assertEquals(2, book2.getQuantity());
+        assertNotNull(packages);
+        assertEquals(2, packages.size());
+
+        PackageResponseDto res1 = packages.getFirst();
+        assertEquals(1L, res1.getPackageId());
+        assertEquals("GiftBox", res1.getPackageType());
+
+        PackageResponseDto res2 = packages.get(1);
+        assertEquals(2L, res2.getPackageId());
+        assertEquals("Ribbon", res2.getPackageType());
+
+        verify(orderBookRepository, times(1)).findById(orderBookId);
     }
 
     @Test
-    void testCreateOrderBooks_Failure_OutOfStock() {
-        List<OrderBookRequestDto> requestDtos = List.of(
-                OrderBookRequestDto.builder()
-                        .orderId(orderRepository.findAll().getFirst().getOrderId())
-                        .bookId(bookRepository.findAll().getFirst().getBookId())
-                        .quantity(15) // 재고 초과
-                        .salePrice(new BigDecimal("8000.00"))
-                        .discountPrice(new BigDecimal("2000.00"))
-                        .orderBookState("PENDING")
-                        .build()
-        );
+    @DisplayName("getPackages() - OrderBook 미존재 시 예외 발생")
+    void testGetPackages_Failure_OrderBookNotFound() {
+        // Given
+        Long nonExistentOrderBookId = 999L;
 
-        assertThrows(BookOutOfStockException.class, () -> orderBookService.createOrderBooks(requestDtos));
+        when(orderBookRepository.findById(nonExistentOrderBookId))
+                .thenReturn(Optional.empty());
 
-        Book book1 = bookRepository.findById(bookRepository.findAll().getFirst().getBookId()).orElseThrow();
-        assertEquals(10, book1.getQuantity());
+        // When & Then
+        assertThrows(OrderBookNotFoundException.class, () -> orderBookService.getPackages(nonExistentOrderBookId));
+
+        verify(orderBookRepository, times(1)).findById(nonExistentOrderBookId);
     }
 
     @Test
-    void testGetOrderBook_Success() {
-        Long orderBookId = orderBookRepository.findAll().getFirst().getOrderBookId();
+    @DisplayName("getCouponDiscount() - 쿠폰이 없는 OrderBook 조회 시 null 반환")
+    void testGetCouponDiscount_NoCoupon() {
 
-        OrderBook orderBook = orderBookService.getOrderBook(orderBookId);
+        Long orderBookId = orderBook.getOrderBookId();
+        // 쿠폰 없음
 
-        assertNotNull(orderBook);
-        assertEquals(orderBookId, orderBook.getOrderBookId());
+        when(orderBookRepository.findById(orderBookId))
+                .thenReturn(Optional.of(orderBook));
+
+        CouponDiscountResponseDto dto = orderBookService.getCouponDiscount(orderBookId);
+
+        assertNull(dto);
+
+        verify(orderBookRepository, times(1)).findById(orderBookId);
     }
 
     @Test
+    @DisplayName("getCouponDiscount() - 쿠폰이 있는 OrderBook 조회 시 쿠폰 반환")
+    void testGetCouponDiscount_WithCoupon() {
+        // Given
+        Long orderBookId = orderBook.getOrderBookId();
+        CouponDiscount couponDiscount = CouponDiscount.builder()
+                .couponDiscountId(1L)
+                .couponName("HOLIDAY")
+                .couponType("PERCENTAGE")
+                .discountPrice(new BigDecimal("500"))
+                .orderBook(orderBook)
+                .build();
+
+        orderBook.setCouponDiscount(couponDiscount);
+
+        when(orderBookRepository.findById(orderBookId))
+                .thenReturn(Optional.of(orderBook));
+
+        // When
+        CouponDiscountResponseDto dto = orderBookService.getCouponDiscount(orderBookId);
+
+        // Then
+        assertNotNull(dto);
+        assertEquals(1L, dto.getCouponDiscountId());
+        assertEquals("HOLIDAY", dto.getCouponName());
+        assertEquals("PERCENTAGE", dto.getCouponType());
+        assertEquals(new BigDecimal("500"), dto.getDiscountPrice());
+
+        // Verify: Repository 메서드 호출 여부 확인
+        verify(orderBookRepository, times(1)).findById(orderBookId);
+    }
+
+    @Test
+    @DisplayName("updateOrderBook() - OrderBook 상태 정상 변경")
     void testUpdateOrderBook_Success() {
-        Long orderBookId = orderBookRepository.findAll().getFirst().getOrderBookId();
+        // Given
+        Long orderBookId = orderBook.getOrderBookId();
+        OrderBook.OrderBookState newState = OrderBook.OrderBookState.COMPLETED;
 
-        OrderBook updatedOrderBook = orderBookService.updateOrderBook(orderBookId, OrderBook.OrderBookState.COMPLETED);
+        when(orderBookRepository.findById(orderBookId))
+                .thenReturn(Optional.of(orderBook));
 
-        assertNotNull(updatedOrderBook);
-        assertEquals(OrderBook.OrderBookState.COMPLETED, updatedOrderBook.getOrderBookState());
+        // Mocking: OrderBook 저장 시, 상태 변경된 OrderBook 반환
+        OrderBook updatedOrderBook = OrderBook.builder()
+                .orderBookId(orderBookId)
+                .book(book)
+                .order(order)
+                .quantity(2)
+                .salePrice(new BigDecimal("10000"))
+                .discountPrice(new BigDecimal("500"))
+                .orderBookState(newState)
+                .packages(new ArrayList<>())
+                .couponDiscount(null)
+                .build();
+
+        when(orderBookRepository.save(orderBook)).thenReturn(updatedOrderBook);
+
+        // When
+        OrderBookResponseDto result = orderBookService.updateOrderBook(orderBookId, newState);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("COMPLETED", result.getOrderBookState());
+
+        // Verify: Repository 메서드 호출 여부 확인
+        verify(orderBookRepository, times(1)).findById(orderBookId);
+        verify(orderBookRepository, times(1)).save(orderBook);
     }
 
     @Test
-    void testDeleteOrderBook_Success() {
-        Long orderBookId = orderBookRepository.findAll().getFirst().getOrderBookId();
+    @DisplayName("updateOrderBook() - 존재하지 않는 OrderBook 시 예외 발생")
+    void testUpdateOrderBook_OrderBookNotFound() {
+        // Given
+        Long nonExistentOrderBookId = 999L;
+        OrderBook.OrderBookState newState = OrderBook.OrderBookState.CANCELED;
 
+        when(orderBookRepository.findById(nonExistentOrderBookId))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> orderBookService.updateOrderBook(nonExistentOrderBookId, newState));
+
+        // Verify: Repository 메서드 호출 여부 확인
+        verify(orderBookRepository, times(1)).findById(nonExistentOrderBookId);
+        verify(orderBookRepository, never()).save(any(OrderBook.class));
+    }
+
+    @Test
+    @DisplayName("deleteOrderBook() - 정상적으로 OrderBook 삭제")
+    void testDeleteOrderBook_Success() {
+        // Given
+        Long orderBookId = orderBook.getOrderBookId();
+
+        when(orderBookRepository.findById(orderBookId))
+                .thenReturn(Optional.of(orderBook));
+
+        // When
         orderBookService.deleteOrderBook(orderBookId);
 
-        assertFalse(orderBookRepository.findById(orderBookId).isPresent());
+        // Then
+        // Verify: Repository 메서드 호출 여부 확인
+        verify(orderBookRepository, times(1)).findById(orderBookId);
+        verify(orderBookRepository, times(1)).delete(orderBook);
+    }
+
+    @Test
+    @DisplayName("deleteOrderBook() - 존재하지 않는 OrderBook 시 예외 발생")
+    void testDeleteOrderBook_NotFound() {
+        // Given
+        Long nonExistentOrderBookId = 999L;
+
+        when(orderBookRepository.findById(nonExistentOrderBookId))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(OrderBookNotFoundException.class, () -> orderBookService.deleteOrderBook(nonExistentOrderBookId));
+
+        // Verify: Repository 메서드 호출 여부 확인
+        verify(orderBookRepository, times(1)).findById(nonExistentOrderBookId);
+        verify(orderBookRepository, never()).delete(any(OrderBook.class));
+    }
+
+    @Test
+    @DisplayName("getOrderBook() - 정상적으로 OrderBook 조회")
+    void testGetOrderBook_Success() {
+        // Given
+        Long orderBookId = orderBook.getOrderBookId();
+
+        when(orderBookRepository.findById(orderBookId))
+                .thenReturn(Optional.of(orderBook));
+
+        // When
+        OrderBookResponseDto dto = orderBookService.getOrderBook(orderBookId);
+
+        // Then
+        assertNotNull(dto);
+        assertEquals(orderBookId, dto.getOrderBookId());
+        assertEquals("Test Book", dto.getBookTitle());
+        assertEquals(2, dto.getQuantity());
+        assertEquals(new BigDecimal("10000"), dto.getSalePrice());
+        assertEquals(new BigDecimal("500"), dto.getDiscountPrice());
+        assertEquals("PENDING", dto.getOrderBookState());
+        assertNull(dto.getCouponDiscount());
+        assertTrue(dto.getPackages().isEmpty());
+
+        // Verify: Repository 메서드 호출 여부 확인
+        verify(orderBookRepository, times(1)).findById(orderBookId);
+    }
+
+    @Test
+    @DisplayName("getOrderBook() - 존재하지 않는 OrderBook 조회 시 예외 발생")
+    void testGetOrderBook_NotFound() {
+        // Given
+        Long nonExistentOrderBookId = 999L;
+
+        when(orderBookRepository.findById(nonExistentOrderBookId))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> orderBookService.getOrderBook(nonExistentOrderBookId));
+
+        // Verify: Repository 메서드 호출 여부 확인
+        verify(orderBookRepository, times(1)).findById(nonExistentOrderBookId);
     }
 }
-
-
-

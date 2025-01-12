@@ -6,21 +6,23 @@ import com.simsimbookstore.apiserver.orders.delivery.exception.DeliveryPolicyExc
 import com.simsimbookstore.apiserver.orders.delivery.repository.DeliveryPolicyRepository;
 import com.simsimbookstore.apiserver.orders.delivery.service.DeliveryPolicyService;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class DeliveryPolicyServiceImpl implements DeliveryPolicyService {
 
     private final DeliveryPolicyRepository deliveryPolicyRepository;
 
-
-
-    public DeliveryPolicyServiceImpl(DeliveryPolicyRepository deliveryPolicyRepository) {
-        this.deliveryPolicyRepository = deliveryPolicyRepository;
+    @Override
+    public DeliveryPolicy getStandardPolicy() {
+        return deliveryPolicyRepository.findByStandardPolicyTrue().getFirst();
     }
 
+    @Override
     public List<DeliveryPolicy> findAll() {
         return deliveryPolicyRepository.findAll();
     }

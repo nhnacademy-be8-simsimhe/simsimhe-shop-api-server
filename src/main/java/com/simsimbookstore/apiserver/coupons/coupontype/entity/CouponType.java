@@ -4,6 +4,8 @@ package com.simsimbookstore.apiserver.coupons.coupontype.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.CouponPolicy;
+import lombok.experimental.SuperBuilder;
+
 import java.time.LocalDateTime;
 
 
@@ -12,6 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
+@SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "coupon_types")
@@ -32,24 +35,9 @@ public class CouponType {
     private LocalDateTime deadline;
 
     @Column(name = "coupon_stacking", nullable = false)
-    private boolean couponStacking;
+    private boolean stacking;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coupon_policy_id", nullable = false)
     private CouponPolicy couponPolicy;
-
-//    @Enumerated(EnumType.STRING)
-//    @Column(name = "coupon_target_type", nullable = false)
-//    private CouponTargetType couponTargetType;
-
-//    @Builder
-//    public CouponType(Long couponTypeId, String couponTypeName, Integer period, LocalDateTime deadline, Boolean couponStacking, CouponPolicy couponPolicy) {
-//        this.couponTypeId = couponTypeId;
-//        this.couponTypeName = couponTypeName;
-//        this.period = period;
-//        this.deadline = deadline;
-//        this.couponStacking = couponStacking;
-//        this.couponPolicy = couponPolicy;
-//        //this.couponTargetType = couponTargetType;
-//    }
 }

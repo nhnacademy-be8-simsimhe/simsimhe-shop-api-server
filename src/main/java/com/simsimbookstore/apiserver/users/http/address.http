@@ -1,0 +1,19 @@
+### 단건 조회
+GET http://localhost:8020/api/users/addresses/1
+
+### 리스트 조회
+GET http://localhost:8020/api/users/1/addresses
+
+### 주소 등록
+POST http://localhost:8020/api/users/1/addresses
+Content-Type: application/json
+
+{
+  "alias": "본집",
+  "postalCode": "61459",
+  "roadAddress": "광주광역시 동구 의재로 9",
+  "detailedAddress": "리더스빌 402호"
+}
+
+### 주소 삭제
+DELETE http://localhost:8020/api/users/addresses/1

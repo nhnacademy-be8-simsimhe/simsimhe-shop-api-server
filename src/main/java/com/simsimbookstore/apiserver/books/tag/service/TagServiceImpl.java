@@ -3,10 +3,10 @@ package com.simsimbookstore.apiserver.books.tag.service;
 import com.simsimbookstore.apiserver.books.tag.domain.Tag;
 import com.simsimbookstore.apiserver.books.tag.dto.TagRequestDto;
 import com.simsimbookstore.apiserver.books.tag.dto.TagResponseDto;
-import com.simsimbookstore.apiserver.books.tag.exception.TagNotFoundException;
 import com.simsimbookstore.apiserver.books.tag.mapper.TagMapper;
 import com.simsimbookstore.apiserver.books.tag.repository.TagRepository;
-import jakarta.ws.rs.NotFoundException;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,14 +17,10 @@ import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class TagServiceImpl implements TagService {
 
     private final TagRepository tagRepository;
-
-    public TagServiceImpl(TagRepository tagRepository) {
-        this.tagRepository = tagRepository;
-    }
-
 
     /**
      * 태그를 저장하는 메서드
@@ -34,8 +30,9 @@ public class TagServiceImpl implements TagService {
      */
     @Transactional
     @Override
-    public TagResponseDto saveTag(TagRequestDto tagRequestDto) {
+    public TagResponseDto createTag(TagRequestDto tagRequestDto) {
         Tag tag = TagMapper.toTag(tagRequestDto);
+        //중복처리
         Optional<Tag> optionalTag = tagRepository.findByTagName(tag.getTagName());
 
         if (optionalTag.isPresent()) {
@@ -63,22 +60,24 @@ public class TagServiceImpl implements TagService {
 
     /**
      * 태그 하나 가져오기
+     *
      * @param tagId
      * @return
      */
     @Override
-    public Tag findById(Long tagId) {
+    public Tag getTag(Long tagId) {
         Optional<Tag> optionalTag = tagRepository.findById(tagId);
         if (optionalTag.isPresent()) {
             return optionalTag.get();
         } else {
-            throw new TagNotFoundException("찾는 태그가 없습니다");
+            throw new NotFoundException("찾는 태그가 없습니다");
         }
     }
 
 
     /**
      * 페이지별로 모든 태그가져오기
+     *
      * @param pageable
      * @return
      */
@@ -92,12 +91,23 @@ public class TagServiceImpl implements TagService {
 
     /**
      * 태그삭제
+     *
      * @param tagId
      */
     @Transactional
     @Override
     public void deleteTag(Long tagId) {
-        Tag tag = this.findById(tagId);
+        Tag tag = this.getTag(tagId);
         tagRepository.delete(tag);
+    }
+
+    @Transactional
+    @Override
+    public TagResponseDto updateTag(Long tagId, TagRequestDto requestDto) {
+        Tag tag = this.getTag(tagId);
+        tag.setTagName(requestDto.getTagName());
+        Tag updateTag = tagRepository.save(tag);
+
+        return TagMapper.toTagResponseDto(updateTag);
     }
 }

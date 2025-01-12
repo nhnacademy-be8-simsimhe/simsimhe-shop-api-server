@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Setter
+@Builder
 public class Review {
 
     @Id
@@ -22,19 +22,23 @@ public class Review {
     private Long reviewId;
 
     @Column(nullable = false)
+    @Setter
     private int score;
 
     @Column(nullable = false, length = 200)
+    @Setter
     private String title;
 
     @Lob
     @Column(nullable = false)
+    @Setter
     private String content;
 
     @Column(nullable = false)
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
-    private LocalDateTime update_at;
+    @Setter
+    private LocalDateTime updateAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
@@ -43,7 +47,5 @@ public class Review {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
-
 
 }

@@ -1,0 +1,58 @@
+### GET request to example server
+GET https://examples.http-client.intellij.net/get
+    ?generated-in=IntelliJ IDEA
+
+### POST couponPolicy(FIX) 생성
+POST http://localhost:8020/api/admin/couponPolicies
+Content-Type: application/json
+
+{
+  "couponPolicyName": "Welcome FIX Coupon Policy",
+  "discountType": "정액",
+  "discountPrice": 1000.00,
+  "discountRate": null,
+  "maxDiscountAmount": null,
+  "minOrderAmount": 5000.00,
+  "policyDescription": "생일 정액 쿠폰 정책"
+}
+
+### POST couponPolicy(RATE) 생성
+POST http://localhost:8020/api/admin/couponPolicies
+Content-Type: application/json
+
+{
+  "couponPolicyName": "Welcome RATE Coupon Policy",
+  "discountType": "정률",
+  "discountPrice": null,
+  "discountRate": 20,
+  "maxDiscountAmount": 10000,
+  "minOrderAmount": 5000.00,
+  "policyDescription": "생일 정률 쿠폰 정책"
+}
+
+### POST couponPolicy 생성 - valid 위반
+POST http://localhost:8020/api/admin/couponPolicies
+Content-Type: application/json
+
+{
+  "couponPolicyName": "Coupon Policy Create Valid",
+  "discountType": "정률",
+  "discountPrice": 3000,
+  "discountRate": 20,
+  "maxDiscountAmount": 10000,
+  "minOrderAmount": 5000.00,
+  "policyDescription": "생일 정률 쿠폰 정책"
+}
+
+### DELETE couponPolicy 삭제
+DELETE http://localhost:8020/api/admin/couponPolicies/3
+
+### DELETE couponPolicy 삭제 - 없는 ID
+DELETE http://localhost:8020/api/admin/couponPolicies/3
+
+### GET getAllCouponPolicy
+GET http://localhost:8020/api/admin/couponPolicies
+
+### GET getCouponPolicy
+GET http://localhost:8020/api/admin/couponPolicies/4
+

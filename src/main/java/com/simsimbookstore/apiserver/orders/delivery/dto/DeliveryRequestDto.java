@@ -35,11 +35,11 @@ public class DeliveryRequestDto {
     private String postalCode;
 
     @NotBlank(message = "도로명 주소는 필수입니다.")
-    @Size(max = 30, message = "도로명 주소는 최대 50자까지 가능합니다.")
+    @Size(max = 255, message = "도로명 주소는 최대 255자까지 가능합니다.")
     private String roadAddress;
 
     @NotBlank(message = "상세 주소는 필수입니다.")
-    @Size(max = 30, message = "상세 주소는 최대 50자까지 가능합니다.")
+    @Size(max = 255, message = "상세 주소는 최대 255자까지 가능합니다.")
     private String detailedAddress;
 
     @Size(max = 30, message = "참조 정보는 최대 30자까지 가능합니다.")
@@ -50,8 +50,8 @@ public class DeliveryRequestDto {
         return Delivery.builder()
                 .deliveryState(this.deliveryState)
                 .deliveryReceiver(this.deliveryReceiver)
+                .trackingNumber(null)
                 .receiverPhoneNumber(this.receiverPhoneNumber)
-                .trackingNumber(this.trackingNumber)
                 .postalCode(this.postalCode)
                 .roadAddress(this.roadAddress)
                 .detailedAddress(this.detailedAddress)

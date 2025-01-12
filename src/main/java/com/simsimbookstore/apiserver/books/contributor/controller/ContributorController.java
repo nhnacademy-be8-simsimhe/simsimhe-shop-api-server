@@ -1,11 +1,13 @@
 package com.simsimbookstore.apiserver.books.contributor.controller;
 
+import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.books.contributor.dto.ContributorRequestDto;
 import com.simsimbookstore.apiserver.books.contributor.dto.ContributorResponseDto;
 import com.simsimbookstore.apiserver.books.contributor.entity.Contributor;
 import com.simsimbookstore.apiserver.books.contributor.mapper.ContributorMapper;
 import com.simsimbookstore.apiserver.books.contributor.service.ContributorService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,14 +19,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/admin")
 public class ContributorController {
 
     private final ContributorService contributorService;
-
-    public ContributorController(ContributorService contributorService) {
-        this.contributorService = contributorService;
-    }
 
     /**
      * 기여자 등록
@@ -39,7 +38,7 @@ public class ContributorController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bindingResult.getAllErrors());
         }
 
-        ContributorResponseDto responseDto = contributorService.saveContributor(requestDto);
+        ContributorResponseDto responseDto = contributorService.createContributor(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
@@ -64,10 +63,12 @@ public class ContributorController {
      * @return
      */
     @GetMapping("/contributors")
-    public Page<ContributorResponseDto> getAllContributorPage(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<PageResponse<ContributorResponseDto>> getAllContributorPage(@RequestParam(defaultValue = "1") int page,
                                                               @RequestParam(defaultValue = "2") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return contributorService.getAllContributors(pageable);
+        Pageable pageable = PageRequest.of(page-1, size);
+        PageResponse<ContributorResponseDto> response = contributorService.getAllContributors(pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+
     }
 
     /**
@@ -90,12 +91,19 @@ public class ContributorController {
      */
     @GetMapping("/contributors/{contributorId}")
     public ResponseEntity<?> getContributor(@PathVariable("contributorId") Long contributorId) {
-        Contributor contributor = contributorService.findById(contributorId);
+        Contributor contributor = contributorService.getContributer(contributorId);
         ContributorResponseDto response = ContributorMapper.toResponse(contributor);
         return ResponseEntity.status(HttpStatus.OK).body(response);
 
     }
 
+    /**
+     * 기여자 수정
+     * @param contributorId
+     * @param contributorRequestDto
+     * @param bindingResult
+     * @return
+     */
     @PutMapping("/contributors/{contributorId}")
     public ResponseEntity<?> update(@PathVariable("contributorId") Long contributorId,
                                     @RequestBody @Valid ContributorRequestDto contributorRequestDto,
@@ -105,8 +113,6 @@ public class ContributorController {
         }
         ContributorResponseDto responseDto = contributorService.updateContributor(contributorId, contributorRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
-
-
     }
 
 

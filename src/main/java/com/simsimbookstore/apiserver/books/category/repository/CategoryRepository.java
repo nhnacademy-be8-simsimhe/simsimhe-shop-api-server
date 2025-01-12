@@ -18,8 +18,11 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Query("SELECT c FROM Category c WHERE c.categoryName = :categoryName AND c.parent IS NULL")
     Optional<Category> findByCategoryNameAndParentIsNull(@Param("categoryName") String categoryName);
 
-    @Query("SELECT c FROM Category c ORDER BY c.categoryId ASC")
+    @Query("SELECT c FROM Category c LEFT JOIN FETCH c.parent ORDER BY c.categoryId ASC")
     List<Category> findAllOrderedById();
 
-    Page<Category> findAll(Pageable pageable);
+
+    @Query("SELECT c FROM Category c WHERE c.parent = :parent")
+    List<Category> findAllByParent(@Param("parent") Category parent);
+
 }
