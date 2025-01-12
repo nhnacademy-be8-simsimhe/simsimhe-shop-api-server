@@ -44,23 +44,22 @@ public class OrderListServiceImpl implements OrderListService {
 
     @Override
     public List<BookListResponseDto> createBookOrderWithCoupons(List<BookListResponseDto> bookOrderList, Long userId) {
-        for (BookListResponseDto book : bookOrderList) {
-            // 쿠폰 가져오기
-            Page<CouponResponseDto> couponPage = couponService.getEligibleCoupons(
-                    PageRequest.of(0, 100), // 최대 100개 쿠폰 조회
-                    userId,
-                    book.getBookId()
-            );
+        return bookOrderList.stream()
+                .peek(book -> {
+                    // 페이지 요청 없이 쿠폰 조회
+                    List<CouponResponseDto> eligibleCoupons = couponService.getEligibleCoupons(userId, book.getBookId());
 
-            // 쿠폰 데이터를 변환하여 추가
-            List<OrderCouponResponseDto> coupons = couponPage.getContent().stream()
-                    .map(coupon -> new OrderCouponResponseDto(coupon.getCouponId(), coupon.getCouponTypeName(), coupon.getDisCountType()))
-                    .collect(Collectors.toList());
+                    // 쿠폰 데이터를 변환하여 OrderCouponResponseDto 리스트 생성
+                    List<OrderCouponResponseDto> coupons = eligibleCoupons.stream()
+                            .map(coupon -> new OrderCouponResponseDto(
+                                    coupon.getCouponId(),
+                                    coupon.getCouponTypeName(),
+                                    coupon.getDisCountType()))
+                            .collect(Collectors.toList());
 
-            book.setCoupons(coupons); // 쿠폰 설정 (빈 리스트라도 반드시 설정)
-        }
-
-        return bookOrderList; // 쿠폰이 포함된 책 리스트 반환
-}
+                    book.setCoupons(coupons);  // 쿠폰 설정
+                })
+                .collect(Collectors.toList());
+    }
 
 }
