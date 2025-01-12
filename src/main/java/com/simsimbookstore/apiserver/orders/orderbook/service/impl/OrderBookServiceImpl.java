@@ -3,6 +3,7 @@ package com.simsimbookstore.apiserver.orders.orderbook.service.impl;
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
 import com.simsimbookstore.apiserver.books.book.service.BookManagementService;
+import com.simsimbookstore.apiserver.coupons.coupon.service.CouponService;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.coupondiscount.dto.CouponDiscountResponseDto;
 import com.simsimbookstore.apiserver.orders.coupondiscount.entity.CouponDiscount;
@@ -38,6 +39,7 @@ public class OrderBookServiceImpl implements OrderBookService {
     private final BookManagementService bookManagementService;
     private final CouponDiscountService couponDiscountService;
     private final PackageService packageService;
+    private final CouponService couponService;
 
     @Override
     @Transactional
@@ -57,6 +59,9 @@ public class OrderBookServiceImpl implements OrderBookService {
         // 4. 쿠폰 할인 생성 (CouponDiscountService 사용)
         if (orderBookRequestDto.getCouponDiscountRequestDto() != null) {
             couponDiscountService.createCouponDiscount(orderBookRequestDto.getCouponDiscountRequestDto(), savedOrderBook);
+
+            //쿠폰 사용
+            couponService.useCoupon(order.getUser().getUserId(), orderBookRequestDto.getCouponId());
         }
 
         // 5. 패키지 생성 (PackageService 사용) - 여러 개
@@ -169,7 +174,9 @@ public class OrderBookServiceImpl implements OrderBookService {
 
     @Override
     public String getOrderName(List<OrderBookRequestDto> dtos) {
-
+        if (dtos.size() == 1) {
+            return  bookRepository.findById(dtos.getFirst().getBookId()).orElseThrow().getTitle() + " " + dtos.getFirst().getQuantity() + "권";
+        }
         String title = bookRepository.findById(dtos.getFirst().getBookId()).orElseThrow().getTitle();
         return title + "외 " + String.valueOf(dtos.size()-1) + "권";
     }

@@ -27,13 +27,14 @@ public class BookGetController {
 
     /**
      * 프론트에서 수정하기 위해 책을 단건 조회하는 로직
+     *
      * @param bookId
      * @return
      */
     @GetMapping("/{bookId}/update")
     public ResponseEntity<BookResponseDto> getBookByIdForUpdate(@PathVariable("bookId") Long bookId) {
 
-       BookResponseDto response = bookGetService.getUpdateBook(bookId);
+        BookResponseDto response = bookGetService.getUpdateBook(bookId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -117,35 +118,26 @@ public class BookGetController {
      * @param size
      * @return
      */
+//    @GetMapping("/category/{categoryId}")
+//    public ResponseEntity<PageResponse<BookListResponse>> getBooksByCategory(@PathVariable(name = "categoryId") Long categoryId,
+//                                                                             @RequestParam(required = false) Long userId,
+//                                                                             @RequestParam(defaultValue = "1") int page,
+//                                                                             @RequestParam(defaultValue = "10") int size) {
+//        Pageable pageable = PageRequest.of(page - 1, size);
+//        PageResponse<BookListResponse> booksByCategory = bookGetService.getBooksByCategory(userId, categoryId, pageable);
+//        return ResponseEntity.status(HttpStatus.OK).body(booksByCategory);
+//    }
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<PageResponse<BookListResponse>> getBooksByCategory(@PathVariable(name = "categoryId") Long categoryId,
                                                                              @RequestParam(required = false) Long userId,
                                                                              @RequestParam(defaultValue = "1") int page,
-                                                                             @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
+                                                                             @RequestParam(defaultValue = "10") int size,
+                                                                             @RequestParam(defaultValue = "latest") String sort) {
+        Pageable pageable = this.createPageable(page - 1, size, sort);
         PageResponse<BookListResponse> booksByCategory = bookGetService.getBooksByCategory(userId, categoryId, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(booksByCategory);
     }
 
-    /**
-     * 특정 태그에 속한 도서조회
-     *
-     * @param tagId
-     * @param userId
-     * @param page
-     * @param size
-     * @return
-     */
-    @GetMapping("/tag/{tagId}")
-    public ResponseEntity<PageResponse<BookListResponse>> getBooksByTag(@PathVariable(name = "tagId") Long tagId,
-                                                                        @RequestParam(required = false) Long userId,
-                                                                        @RequestParam(defaultValue = "1") int page,
-                                                                        @RequestParam(defaultValue = "16") int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
-        PageResponse<BookListResponse> booksByTag = bookGetService.getBooksByTag(userId, tagId, pageable);
-
-        return ResponseEntity.status(HttpStatus.OK).body(booksByTag);
-    }
 
     /**
      * 주문량이 많은 도서 6개 조회
@@ -174,4 +166,55 @@ public class BookGetController {
     }
 
 
+    /**
+     * 특정 태그에 속한 도서조회
+     *
+     * @param tagId
+     * @param userId
+     * @param page
+     * @param size
+     * @return
+     */
+//    @GetMapping("/tag/{tagId}")
+//    public ResponseEntity<PageResponse<BookListResponse>> getBooksByTag(@PathVariable(name = "tagId") Long tagId,
+//                                                                        @RequestParam(required = false) Long userId,
+//                                                                        @RequestParam(defaultValue = "1") int page,
+//                                                                        @RequestParam(defaultValue = "16") int size) {
+//        Pageable pageable = PageRequest.of(page - 1, size);
+//        PageResponse<BookListResponse> booksByTag = bookGetService.getBooksByTag(userId, tagId, pageable);
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(booksByTag);
+//    }
+    @GetMapping("/tag/{tagId}")
+    public ResponseEntity<PageResponse<BookListResponse>> getBooksByTag(@PathVariable(name = "tagId") Long tagId,
+                                                                        @RequestParam(required = false) Long userId,
+                                                                        @RequestParam(defaultValue = "1") int page,
+                                                                        @RequestParam(defaultValue = "16") int size,
+                                                                        @RequestParam(defaultValue = "latest") String sort) {
+        Pageable pageable = this.createPageable(page - 1, size, sort);
+        PageResponse<BookListResponse> booksByTag = bookGetService.getBooksByTag(userId, tagId, pageable);
+
+        return ResponseEntity.status(HttpStatus.OK).body(booksByTag);
+    }
+
+    // 동적 정렬을 위한 Pageable 생성 메서드
+    private Pageable createPageable(int page, int size, String sort) {
+        Sort sortOption;
+        switch (sort.toLowerCase()) {
+            case "price_high":
+                sortOption = Sort.by(Sort.Direction.DESC, "price");
+                break;
+            case "price_low":
+                sortOption = Sort.by(Sort.Direction.ASC, "price");
+                break;
+            case "review":
+                sortOption = Sort.by(Sort.Direction.DESC, "reviewCount"); // 리뷰 개수 정렬
+                break;
+            default: // 최신순
+                sortOption = Sort.by(Sort.Direction.DESC, "publicationDate");
+                break;
+        }
+        return PageRequest.of(page, size, sortOption);
+
+    }
 }

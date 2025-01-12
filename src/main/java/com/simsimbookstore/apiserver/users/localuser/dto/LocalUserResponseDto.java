@@ -4,6 +4,7 @@ import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @NoArgsConstructor
@@ -21,4 +22,6 @@ public class LocalUserResponseDto {
     private String password;
 
     private UserStatus userStatus;
+
+    private LocalDateTime latestLoginDate;
 }

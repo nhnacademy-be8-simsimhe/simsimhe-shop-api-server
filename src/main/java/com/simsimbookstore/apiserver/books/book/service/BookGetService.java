@@ -165,7 +165,6 @@ public class BookGetService {
     private PageResponse<BookListResponse> getPageResponse(int page,
                                                            Page<BookListResponse> bookPage) {
 
-
         //최대 버튼개수 8개
         int maxPageButtons = 8;
         int startPage = (int) Math.max(1, bookPage.getNumber() - Math.floor((double) maxPageButtons / 2));

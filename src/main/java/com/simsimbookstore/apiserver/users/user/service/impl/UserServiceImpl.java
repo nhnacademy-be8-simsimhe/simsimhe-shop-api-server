@@ -15,7 +15,6 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RestController;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -85,5 +84,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean existsUser(Long userId) {
         return userRepository.existsById(userId);
+    }
+
+    @Override
+    public Tier getUserTier(Long userId) {
+        return  (getUser(userId).getGrade().getTier());
     }
 }

@@ -129,9 +129,14 @@ class AddressServiceImplTest {
     @DisplayName("주소 삭제 실패 - NotFoundException")
     void deleteAddressNotFound(){
         when(addressRepository.existsById(anyLong())).thenReturn(false);
-
         assertThrows(NotFoundException.class, () -> addressService.deleteAddress(1L));
     }
 
-
+    @Test
+    @DisplayName("유저 주소 개수 조회")
+    void getCountAddresses(){
+        when(addressRepository.countAllByUserUserId(testUser.getUserId())).thenReturn(1);
+        addressService.getCountAddresses(testUser.getUserId());
+        verify(addressRepository, times(1)).countAllByUserUserId(testUser.getUserId());
+    }
 }
