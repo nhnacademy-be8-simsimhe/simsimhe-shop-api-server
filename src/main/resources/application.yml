@@ -38,7 +38,7 @@ spring:
 
 # 서버 포트 설정
 server:
-  port: 8020
+  port: 8010
   shutdown: graceful
 
 eureka:

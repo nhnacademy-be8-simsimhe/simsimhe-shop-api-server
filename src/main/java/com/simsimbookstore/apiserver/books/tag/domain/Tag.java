@@ -22,4 +22,6 @@ public class Tag {
     @Column(name = "tag_name", nullable = false, length = 10)
     private String tagName;
 
+    private boolean isActivated;
+
 }

@@ -12,7 +12,7 @@ public interface ReviewCommentService {
 
     ReviewCommentResponseDTO createReviewComment(ReviewCommentRequestDTO requestDTO, Long reviewId, Long userId);
 
-    ReviewComment updateReviewComment(ReviewCommentRequestDTO dto, Long commentId);
+    ReviewComment updateReviewComment(Long reviewId, Long commentId, ReviewCommentRequestDTO dto);
 
     ReviewComment getReviewCommentById(Long commentId);
 

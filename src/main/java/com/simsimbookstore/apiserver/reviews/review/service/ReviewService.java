@@ -26,4 +26,7 @@ public interface ReviewService {
 
 
     boolean isPhotoReview(Long reviewId);
+    Page<UserReviewsDTO> getUserReviews(Long userId, int page, int size);
+    Page<UserAvailableReviewsDTO> getAvailableReviews(Long userId, int page, int size);
+
 }

@@ -87,16 +87,12 @@ public class CouponController {
      * 유저가 가지고 있는 쿠폰 중 특정 책(bookId)에 적용 가능한 쿠폰을 Page로 응답한다.
      * @param userId
      * @param bookId
-     * @param sortField 쿠폰 정렬기준 (null일 경우 발급일(issueDate)를 기준으로 정렬함)
-     * @param pageable
      * @return 적용가능한 쿠폰 Page
      */
     @GetMapping(value = "/shop/users/{userId}/coupons/unused",params = "bookId")
-    public ResponseEntity<Page<CouponResponseDto>> getEligibleCouponsToBook(@PathVariable Long userId,
-                                                                            @RequestParam Long bookId,
-                                                                            @RequestParam(required = false) String sortField,
-                                                                            Pageable pageable) {
-        Page<CouponResponseDto> eligibleCoupons = couponService.getEligibleCoupons(setPageable(pageable, sortField), userId, bookId);
+    public ResponseEntity<List<CouponResponseDto>> getEligibleCouponsToBook(@PathVariable Long userId,
+                                                                            @RequestParam Long bookId) {
+        List<CouponResponseDto> eligibleCoupons = couponService.getEligibleCoupons(userId, bookId);
         return ResponseEntity.status(HttpStatus.OK).body(eligibleCoupons);
 
     }
@@ -118,9 +114,9 @@ public class CouponController {
      * @param couponId
      * @return 만료된 쿠폰
      */
-    @PostMapping("/admin/users/{userId}/coupons/{couponId}/expired")
+    @PostMapping("/admin/users/{userId}/coupons/expired")
     public ResponseEntity<CouponResponseDto> expiredCoupon(@PathVariable Long userId,
-                                                           @PathVariable Long couponId) {
+                                                           @RequestParam Long couponId) {
         CouponResponseDto expireCoupon = couponService.expireCoupon(userId, couponId);
         return ResponseEntity.status(HttpStatus.OK).body(expireCoupon);
     }
@@ -131,10 +127,10 @@ public class CouponController {
      * @param couponId
      * @return 사용한 쿠폰
      */
-    @PostMapping("/shop/users/{userId}/coupons/{couponId}/use")
+    @PostMapping("/shop/users/{userId}/coupons/use")
     public ResponseEntity<CouponResponseDto> useCoupon(@PathVariable Long userId,
-                                                       @PathVariable Long couponId) {
-        CouponResponseDto useCoupon = couponService.expireCoupon(userId, couponId);
+                                                       @RequestParam Long couponId) {
+        CouponResponseDto useCoupon = couponService.useCoupon(userId, couponId);
         return ResponseEntity.status(HttpStatus.OK).body(useCoupon);
     }
 

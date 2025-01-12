@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CustomCouponRepository {
-    Page<Coupon> findEligibleCouponToBook(Pageable pageable, Long userId, Long bookId);
+    List<Coupon> findEligibleCouponToBook(Long userId, Long bookId);
 
     Optional<Coupon> findUnusedCouponByUserAndType(Long userId, Long couponTypeId);
 }

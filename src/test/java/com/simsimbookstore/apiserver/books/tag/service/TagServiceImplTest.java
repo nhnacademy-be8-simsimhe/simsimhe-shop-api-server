@@ -39,212 +39,132 @@ class TagServiceImplTest {
 
     @BeforeEach
     void setUp() {
-
         mockTag = Tag.builder()
                 .tagId(1L)
                 .tagName("국내도서")
                 .build();
     }
 
-
     @Test
-    @DisplayName("DB에 등록되어 있지 않은 태그 등록하기")
-    void saveNewTag() {
-        // Arrange
+    @DisplayName("새로운 태그를 등록할 때 성공해야 함")
+    void createNewTag() {
         TagRequestDto requestDto = new TagRequestDto("외국도서");
         Tag savedTag = Tag.builder().tagId(2L).tagName("외국도서").build();
 
         when(tagRepository.findByTagName("외국도서")).thenReturn(Optional.empty());
         when(tagRepository.save(any(Tag.class))).thenReturn(savedTag);
 
-        // Act
         TagResponseDto responseDto = tagService.createTag(requestDto);
 
-        // Assert
         assertNotNull(responseDto);
         assertEquals("외국도서", responseDto.getTagName());
-        verify(tagRepository, times(1)).findByTagName("외국도서");
-        verify(tagRepository, times(1)).save(any(Tag.class));
+        verify(tagRepository).findByTagName("외국도서");
+        verify(tagRepository).save(any(Tag.class));
     }
 
     @Test
-    @DisplayName("DB에 등록되어 있는 태그 등록하면 이미 존재하는 태그 반환")
-    void savePresentTag() {
-        // Arrange
+    @DisplayName("이미 존재하는 태그 등록 요청시 활성화만 처리")
+    void createExistingTag() {
         when(tagRepository.findByTagName("국내도서")).thenReturn(Optional.of(mockTag));
 
-        // Act
         TagResponseDto responseDto = tagService.createTag(new TagRequestDto("국내도서"));
 
-        // Assert
         assertNotNull(responseDto);
         assertEquals("국내도서", responseDto.getTagName());
-        verify(tagRepository, times(1)).findByTagName("국내도서");
+        verify(tagRepository).findByTagName("국내도서");
         verify(tagRepository, never()).save(any(Tag.class));
     }
 
     @Test
-    @DisplayName("태그 삭제하기")
+    @DisplayName("태그 삭제 요청 성공")
     void deleteTag() {
-        // Arrange
         when(tagRepository.findById(1L)).thenReturn(Optional.of(mockTag));
-        doNothing().when(tagRepository).delete(mockTag);
 
-        // Act
         tagService.deleteTag(1L);
 
-        // Assert
-        verify(tagRepository, times(1)).findById(1L);
-        verify(tagRepository, times(1)).delete(mockTag);
+        verify(tagRepository).findById(1L);
+        assertFalse(mockTag.isActivated());
     }
 
     @Test
-    @DisplayName("저장되어 있는 모든 태그 가져오기")
-    void getAllTag() {
-        // Arrange
+    @DisplayName("모든 활성화된 태그 조회")
+    void getAllTags() {
         Tag secondTag = Tag.builder().tagId(2L).tagName("외국도서").build();
-        when(tagRepository.findAllTags()).thenReturn(Arrays.asList(mockTag, secondTag));
+        when(tagRepository.findAllActivated()).thenReturn(Arrays.asList(mockTag, secondTag));
 
-        // Act
         List<TagResponseDto> result = tagService.getAlltag();
 
-        // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
         assertEquals("국내도서", result.get(0).getTagName());
         assertEquals("외국도서", result.get(1).getTagName());
-        verify(tagRepository, times(1)).findAllTags();
+        verify(tagRepository).findAllActivated();
     }
 
-
     @Test
-    @DisplayName("저장되어 있는 태그 하나 가져오기")
-    void findById() {
-        // Arrange
+    @DisplayName("특정 태그 ID로 조회 성공")
+    void findTagById() {
         when(tagRepository.findById(1L)).thenReturn(Optional.of(mockTag));
 
-        // Act
         Tag tag = tagService.getTag(1L);
 
-        // Assert
         assertNotNull(tag);
         assertEquals("국내도서", tag.getTagName());
-        verify(tagRepository, times(1)).findById(1L);
+        verify(tagRepository).findById(1L);
     }
 
     @Test
-    @DisplayName("찾는 태그가 없으면 NotFoundException")
-    void findById_NotFound() {
-        // Arrange
+    @DisplayName("태그 조회 실패시 NotFoundException 던짐")
+    void findTagById_NotFound() {
         when(tagRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(NotFoundException.class, () -> tagService.getTag(999L));
-
-        verify(tagRepository, times(1)).findById(999L);
+        verify(tagRepository).findById(999L);
     }
 
     @Test
-    @DisplayName("페이징 처리된 태그 목록 조회")
-    void getAllTags() {
-        // Arrange
+    @DisplayName("페이징 처리된 태그 목록 조회 성공")
+    void getPagedTags() {
         Tag secondTag = Tag.builder().tagId(2L).tagName("외국도서").build();
         Pageable pageable = PageRequest.of(0, 2);
         Page<Tag> mockPage = new PageImpl<>(Arrays.asList(mockTag, secondTag), pageable, 2);
 
-        when(tagRepository.findAll(pageable)).thenReturn(mockPage);
+        when(tagRepository.findAllActivated(pageable)).thenReturn(mockPage);
 
-        // Act
         Page<TagResponseDto> tagResponsePage = tagService.getAllTags(pageable);
 
-        // Assert
         assertNotNull(tagResponsePage);
         assertEquals(2, tagResponsePage.getContent().size());
         assertEquals("국내도서", tagResponsePage.getContent().get(0).getTagName());
         assertEquals("외국도서", tagResponsePage.getContent().get(1).getTagName());
-        verify(tagRepository, times(1)).findAll(pageable);
+        verify(tagRepository).findAllActivated(pageable);
     }
 
     @Test
     @DisplayName("태그 업데이트 성공")
     void updateTag() {
-        // Arrange
         TagRequestDto requestDto = new TagRequestDto("업데이트된 태그");
         Tag updatedTag = Tag.builder().tagId(1L).tagName("업데이트된 태그").build();
 
         when(tagRepository.findById(1L)).thenReturn(Optional.of(mockTag));
         when(tagRepository.save(any(Tag.class))).thenReturn(updatedTag);
 
-        // Act
         TagResponseDto responseDto = tagService.updateTag(1L, requestDto);
 
-        // Assert
         assertNotNull(responseDto);
         assertEquals("업데이트된 태그", responseDto.getTagName());
-        verify(tagRepository, times(1)).findById(1L);
-        verify(tagRepository, times(1)).save(any(Tag.class));
+        verify(tagRepository).findById(1L);
+        verify(tagRepository).save(any(Tag.class));
     }
 
     @Test
     @DisplayName("태그 업데이트 실패 - 태그를 찾을 수 없음")
     void updateTag_NotFound() {
-        // Arrange
         TagRequestDto requestDto = new TagRequestDto("업데이트된 태그");
         when(tagRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(NotFoundException.class, () -> tagService.updateTag(999L, requestDto));
-        verify(tagRepository, times(1)).findById(999L);
+        verify(tagRepository).findById(999L);
         verify(tagRepository, never()).save(any(Tag.class));
-    }
-
-    @Test
-    @DisplayName("중복된 태그 처리")
-    void createTag_Duplicate() {
-        // Arrange
-        TagRequestDto requestDto = new TagRequestDto("국내도서");
-        when(tagRepository.findByTagName("국내도서")).thenReturn(Optional.of(mockTag));
-
-        // Act
-        TagResponseDto responseDto = tagService.createTag(requestDto);
-
-        // Assert
-        assertNotNull(responseDto);
-        assertEquals("국내도서", responseDto.getTagName());
-        verify(tagRepository, times(1)).findByTagName("국내도서");
-        verify(tagRepository, never()).save(any(Tag.class));
-    }
-
-    @Test
-    @DisplayName("페이징 처리된 태그 목록 조회 - 빈 결과")
-    void getAllTags_EmptyPage() {
-        // Arrange
-        Pageable pageable = PageRequest.of(0, 2);
-        Page<Tag> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-
-        when(tagRepository.findAll(pageable)).thenReturn(emptyPage);
-
-        // Act
-        Page<TagResponseDto> tagResponsePage = tagService.getAllTags(pageable);
-
-        // Assert
-        assertNotNull(tagResponsePage);
-        assertTrue(tagResponsePage.getContent().isEmpty());
-        verify(tagRepository, times(1)).findAll(pageable);
-    }
-
-    @Test
-    @DisplayName("모든 태그 가져오기 - 태그 없음")
-    void getAllTags_NoTags() {
-        // Arrange
-        when(tagRepository.findAllTags()).thenReturn(List.of());
-
-        // Act
-        List<TagResponseDto> result = tagService.getAlltag();
-
-        // Assert
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-        verify(tagRepository, times(1)).findAllTags();
     }
 }

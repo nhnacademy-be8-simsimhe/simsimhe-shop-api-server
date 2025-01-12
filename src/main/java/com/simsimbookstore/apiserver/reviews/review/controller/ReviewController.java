@@ -30,6 +30,7 @@ public class ReviewController {
 
     @PostMapping
     public ResponseEntity<ReviewResponseDTO> createReview(@PathVariable Long bookId, @RequestParam Long userId, @RequestParam(value = "images", required = false) List<MultipartFile> files,  @Valid @RequestBody ReviewRequestDTO reviewRequestDTO){
+
         Review review = reviewService.createReview(reviewRequestDTO, bookId, userId);
         ReviewResponseDTO response = new ReviewResponseDTO(
                 review.getReviewId(),
@@ -59,29 +60,30 @@ public class ReviewController {
         return ResponseEntity.ok(reviews);
     }
 
-    @GetMapping("/score")
-    public ResponseEntity<?> getAllReviewsOrderByScore(@PathVariable Long bookId,
-                                           @RequestParam(defaultValue = "0") int page,
-                                           @RequestParam(defaultValue = "10") int size) {
-        var reviews = reviewService.getReviewsByBookOrderByScore(bookId, page, size);
-        return ResponseEntity.ok(reviews);
-    }
-
-    @GetMapping("/like")
-    public ResponseEntity<?> getAllReviewsOrderByLike(@PathVariable Long bookId,
-                                                       @RequestParam(defaultValue = "0") int page,
-                                                       @RequestParam(defaultValue = "10") int size) {
-        var reviews = reviewService.getReviewsByBookOrderByLike(bookId, page, size);
-        return ResponseEntity.ok(reviews);
-    }
+//    @GetMapping("/score")
+//    public ResponseEntity<?> getAllReviewsOrderByScore(@PathVariable Long bookId,
+//                                           @RequestParam(defaultValue = "0") int page,
+//                                           @RequestParam(defaultValue = "10") int size) {
+//        var reviews = reviewService.getReviewsByBookOrderByScore(bookId, page, size);
+//        return ResponseEntity.ok(reviews);
+//    }
+//
+//    @GetMapping("/like")
+//    public ResponseEntity<?> getAllReviewsOrderByLike(@PathVariable Long bookId,
+//                                                       @RequestParam(defaultValue = "0") int page,
+//                                                       @RequestParam(defaultValue = "10") int size) {
+//        var reviews = reviewService.getReviewsByBookOrderByLike(bookId, page, size);
+//        return ResponseEntity.ok(reviews);
+//    }
 
 
     @GetMapping("/recent")
     public ResponseEntity<?> getAllReviewsOrderByRecent(@PathVariable Long bookId,
+                                                        @RequestParam Long userId,
                                                       @RequestParam(defaultValue = "0") int page,
                                                       @RequestParam(defaultValue = "10") int size) {
         log.info("bookId : {}", bookId);
-        var reviews = reviewService.getReviewsByBookOrderByRecent(bookId, page, size);
+        var reviews = reviewService.getReviewsByBookOrderByRecent(bookId,userId, page, size);
 
         return ResponseEntity.ok(reviews);
     }

@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/objects")
+@RequestMapping("/api/shop/objects")
 public class ObjectController {
 
     private final ObjectServiceImpl objectService;

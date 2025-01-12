@@ -12,7 +12,6 @@ public enum BookStatus {
 
     private final String status;
 
-
     BookStatus(String status) {
         this.status = status;
     }
