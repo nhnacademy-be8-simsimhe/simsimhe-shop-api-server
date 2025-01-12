@@ -42,6 +42,8 @@ public class BookListResponse {
 
     private boolean giftPackaging;
 
+    private Long reviewCount; //리뷰 개수
+
     private List<BookContributorResponsDto> contributorList;
 
 
