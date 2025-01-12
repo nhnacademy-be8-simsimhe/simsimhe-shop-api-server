@@ -17,9 +17,8 @@ import org.springframework.data.domain.Pageable;
 public class PointHistoryCustomRepositoryImpl implements PointHistoryCustomRepository {
     private final JPAQueryFactory queryFactory;
 
-
     @Override
-    public Page<PointHistoryResponseDto> getPointHistoriesByUserId(Long userId, Pageable pageable) {
+    public List<PointHistoryResponseDto> getPointHistoriesByUserId(Long userId, Pageable pageable) {
         // Q클래스 선언 (QueryDSL을 위한)
         QPointHistory qPointHistory = QPointHistory.pointHistory;
         QOrderPointManage qOrderPointManage = QOrderPointManage.orderPointManage;
@@ -49,13 +48,6 @@ public class PointHistoryCustomRepositoryImpl implements PointHistoryCustomRepos
                 .orderBy(qPointHistory.created_at.desc())
                 .fetch();
 
-        // total count
-        Long total = queryFactory
-                .select(qPointHistory.count())
-                .from(qPointHistory)
-                .where(qPointHistory.user.userId.eq(userId))
-                .fetchOne();
-
         // 추가: orderId, reviewId 를 보고 "origin" 필드 세팅
         content.forEach(dto -> {
             if (dto.getOrderId() != null) {
@@ -67,6 +59,7 @@ public class PointHistoryCustomRepositoryImpl implements PointHistoryCustomRepos
             }
         });
 
-        return new PageImpl<>(content, pageable, total);
+        return content;
     }
 }
+

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/admin/pointPolicies")
-public class PointPolicyController {
+public class PointPolicyAdminController {
 
     private final PointPolicyService pointPolicyService;
 

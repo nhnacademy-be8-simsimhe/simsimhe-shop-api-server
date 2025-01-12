@@ -4,6 +4,7 @@ import com.simsimbookstore.apiserver.coupons.coupon.dto.CouponResponseDto;
 import com.simsimbookstore.apiserver.coupons.coupon.service.CouponService;
 import com.simsimbookstore.apiserver.orders.order.dto.BookListRequestDto;
 import com.simsimbookstore.apiserver.orders.order.dto.BookListResponseDto;
+import com.simsimbookstore.apiserver.orders.order.dto.OrderCouponResponseDto;
 import com.simsimbookstore.apiserver.orders.order.service.Impl.OrderListServiceImpl;
 import com.simsimbookstore.apiserver.orders.packages.dto.WrapTypeResponseDto;
 import com.simsimbookstore.apiserver.orders.packages.service.impl.WrapTypeServiceImpl;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,43 +39,38 @@ public class OrderTestController {
 
     @GetMapping("/api/test/order")
     public String testOrderPage(Model model) {
-        Long userId = 1L; // 고정된 테스트용 userId
-        log.info("testOrderPage 호출 시 userId: {}", userId);
-        // 테스트용 BookListRequestDto 데이터 생성
-        List<BookListRequestDto> testDtoList = new ArrayList<>();
-        testDtoList.add(new BookListRequestDto(1L, 2)); // bookId=1, quantity=2
-        testDtoList.add(new BookListRequestDto(2L, 1)); // bookId=2, quantity=1
+        Long userId = 1L; // 테스트용 userId
 
-        // orderPage 메서드에 전달
-        List<BookListResponseDto> bookOrderList = orderListService.toBookOrderList(testDtoList);
+        // 테스트용 BookListRequestDto 데이터 생성
+        List<BookListRequestDto> testDtoList = List.of(
+                new BookListRequestDto(1L, 2),
+                new BookListRequestDto(2L, 1)
+        );
+
+        // 책 주문 리스트 생성 및 쿠폰 포함
+        List<BookListResponseDto> bookOrderList = orderListService.createBookOrderWithCoupons(
+                orderListService.toBookOrderList(testDtoList),
+                userId
+        );
+
+        log.info("Book Order List: {}", bookOrderList);
+        for (BookListResponseDto book : bookOrderList) {
+            log.info("Book ID: {}, Coupons: {}", book.getBookId(), book.getCoupons());
+        }
+
+
+        // 추가 데이터
         List<WrapTypeResponseDto> wrapTypes = wrapTypeService.getAllWrapTypes();
         List<AddressResponseDto> addresses = addressService.getAddresses(userId);
         BigDecimal userPoints = pointHistoryService.getUserPoints(userId);
-        Map<Long, List<CouponResponseDto>> couponsByBook = new HashMap<>();
 
-        for (BookListResponseDto book : bookOrderList) {
-            // 필요에 따라 pageable을 PageRequest.of(0, 10) 등의 방식으로 생성 가능
-            Page<CouponResponseDto> couponPage = couponService.getEligibleCoupons(
-                    PageRequest.of(0, 20),  // 한 번에 20개까지 가져온다고 가정
-                    userId,
-                    book.getBookId()
-            );
-            List<CouponResponseDto> couponList = couponPage.getContent();
-            couponsByBook.put(book.getBookId(), couponList);
-            log.info("Book ID: {}", book.getBookId());
-            log.info("Coupons for Book ID {}: {}", book.getBookId(), couponList);
-        }
-        for (AddressResponseDto a : addresses) {
-            log.info("Addresses: {}", a.getRoadAddress());
-        }
-
-
+        // 모델에 데이터 추가
         model.addAttribute("userId", userId);
-        model.addAttribute("bookOrderList", bookOrderList);
+        model.addAttribute("bookOrderList", bookOrderList); // 쿠폰 포함된 책 리스트
         model.addAttribute("wrapTypes", wrapTypes);
         model.addAttribute("addresses", addresses);
         model.addAttribute("availablePoints", userPoints);
-        model.addAttribute("couponsByBook", couponsByBook);
+
         return "payTest"; // payTest.html 렌더링
     }
 }

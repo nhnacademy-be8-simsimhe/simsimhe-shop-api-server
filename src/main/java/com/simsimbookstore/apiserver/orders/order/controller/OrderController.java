@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -33,17 +34,23 @@ public class OrderController {
 
 
     @PostMapping
-    public ResponseEntity<List<BookListResponseDto>> getOrderPage(
+    public ResponseEntity<List<BookListResponseDto>> getGuestOrderPage(
             @RequestBody List<BookListRequestDto> bookListRequestDto) {
 
         List<BookListResponseDto> response = orderListService.toBookOrderList(bookListRequestDto);
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/{userId}")
+    public ResponseEntity<List<BookListResponseDto>> getMemberOrderPage(
+            @PathVariable Long userId,
+            @RequestBody List<BookListRequestDto> bookListRequestDto) {
+        List<BookListResponseDto> response = orderListService.createBookOrderWithCoupons(orderListService.toBookOrderList(bookListRequestDto), userId);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/total")
     public ResponseEntity<TotalResponseDto> calculateTotal(@RequestBody TotalRequestDto requestDto) {
-        //이따지워라
-        requestDto.setUserId(1L);
         log.info("요청 데이터 userId: {}", requestDto.getUserId());
         TotalResponseDto response = orderTotalService.calculateTotal(requestDto);
         log.info("response : {}", response);

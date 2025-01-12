@@ -25,6 +25,5 @@ public interface ReviewService {
     void deleteReview(Long reviewId);
 
 
-
-
+    boolean isPhotoReview(Long reviewId);
 }

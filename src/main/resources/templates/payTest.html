@@ -51,6 +51,7 @@
 
 <!-- 주문 목록 영역 -->
 <div id="order_id">
+    <br><br>
     <ul>
         <!-- 책 목록 반복 -->
         <th:block th:each="bookOrder : ${bookOrderList}">
@@ -71,63 +72,33 @@
                     <span>수량: </span>
                     <!-- 여기서 class="book-quantity"로 설정 -->
                     <span class="book-quantity" th:text="${bookOrder.quantity}"></span>
-                </div>
 
-                <!-- 쿠폰 선택 영역 -->
-                <div>
-                    <h5>쿠폰 선택</h5>
+                    <!-- 쿠폰 선택 -->
+                    <div>
+                        <h5>쿠폰 선택</h5>
 
-                    <!-- 쿠폰 목록이 있을 때 -->
-                    <th:block th:if="${couponsByBook[bookOrder.bookId] != null
-                                     and #lists.size(couponsByBook[bookOrder.bookId]) > 0}">
-                        <select id="coupon-${bookOrder.bookId}" class="form-select coupon-select">
-                            <!-- 기본 옵션 -->
-                            <option value="">쿠폰 선택</option>
-
-                            <!-- 실제 쿠폰 목록 -->
-                            <th:block th:each="coupon : ${couponsByBook[bookOrder.bookId]}">
-                                <!-- switch문으로 disCountType(정률/정액) 분기 -->
-                                <th:block th:switch="${coupon.disCountType}">
-                                    <!-- "정률"인 경우 -->
-                                    <th:block th:case="'정률'">
-                                        <option th:value="${coupon.couponId}"
-                                                th:data-discount="${coupon.discountRate}"
-                                                th:data-type="RATE"
-                                                th:text="${coupon.couponTypeName
-                                                          + ' - '
-                                                          + coupon.discountRate + '%'}">
-                                        </option>
-                                    </th:block>
-
-                                    <!-- "정액"인 경우 -->
-                                    <th:block th:case="'정액'">
-                                        <option th:value="${coupon.couponId}"
-                                                th:data-discount="${coupon.discountPrice}"
-                                                th:data-type="FIX"
-                                                th:text="${coupon.couponTypeName
-                                                          + ' - '
-                                                          + coupon.discountPrice + '원'}">
-                                        </option>
-                                    </th:block>
-
-                                    <!-- 그 외 (혹시 모를 케이스) -->
-                                    <th:block th:case="*">
-                                        <option th:value="${coupon.couponId}"
-                                                th:text="${coupon.couponTypeName
-                                                          + ' - 알 수 없는 할인 유형('
-                                                          + coupon.disCountType + ')'}">
-                                        </option>
-                                    </th:block>
+                        <!-- 쿠폰이 존재하는 경우 -->
+                        <th:block th:if="${bookOrder.coupons != null}">
+                            <select th:id="'coupon-' + ${bookOrder.bookId}" class="form-select coupon-select">
+                                <option value="">쿠폰 선택</option>
+                                <!-- 쿠폰 반복 -->
+                                <th:block th:each="coupon : ${bookOrder.coupons}">
+                                    <option
+                                            th:value="${coupon.couponId}"
+                                            th:text="${coupon.couponTypeName}"
+                                            th:attr="data-discount-type=${coupon.getDiscountType()}">
+                                        <!-- 쿠폰 타입 이름 -->
+                                    </option>
                                 </th:block>
-                            </th:block>
-                        </select>
-                    </th:block>
+                            </select>
 
-                    <!-- 쿠폰 목록이 없을 때 -->
-                    <th:block th:if="${couponsByBook[bookOrder.bookId] == null
-                                     or #lists.size(couponsByBook[bookOrder.bookId]) == 0}">
-                        <p>사용 가능한 쿠폰이 없습니다.</p>
-                    </th:block>
+                        </th:block>
+
+                        <!-- 쿠폰이 없는 경우 -->
+                        <th:block th:if="${bookOrder.coupons == null || bookOrder.coupons.isEmpty()}">
+                            <p>사용 가능한 쿠폰이 없습니다.</p>
+                        </th:block>
+                    </div>
                 </div>
 
                 <!-- 포장 선택 -->
@@ -153,9 +124,14 @@
                 </div>
                 <br><br>
             </li>
+
+            <!-- 할인액 표시 -->
+            <span th:id="'discount-' + ${bookOrder.bookId}" class="text-muted">할인액: ₩0</span>
+
         </th:block>
     </ul>
 </div>
+
 
 <!-- 포인트 사용 -->
 <div class="p-3 border rounded-3 mb-4">
@@ -257,7 +233,6 @@
             // 쿠폰 정보
             const couponSelect = document.getElementById(`coupon-${bookId}`);
             const couponId = couponSelect && couponSelect.value ? parseInt(couponSelect.value, 10) : null;
-            // (정률/정액 구분해서 data-discount를 읽을 수도 있지만, 여기서는 굳이 안 보내도 됨)
             const discountPrice = couponId
                 ? parseFloat(couponSelect.options[couponSelect.selectedIndex].getAttribute("data-discount") || "0")
                 : 0;
@@ -283,17 +258,31 @@
                 orderBookState: "PENDING",
                 couponDiscountRequestDto: couponId
                     ? {
+
                         couponId: couponId,
-                        couponName: couponSelect.options[couponSelect.selectedIndex].textContent,
-                        couponType: couponSelect.options[couponSelect.selectedIndex].getAttribute("data-type"),
+                        couponName: couponSelect.options[couponSelect.selectedIndex].textContent.trim(), // 쿠폰 이름
+                        couponType: couponSelect.options[couponSelect.selectedIndex].getAttribute("data-discount-type") || null, // 할인 타입
                         discountPrice: discountPrice
+
                     }
                     : null,
                 packagesRequestDtos: packagesRequestDtos
             });
+
+
         });
 
         let method = selectedPaymentMethod || null;
+
+        try {
+            if (selectedPaymentMethod === "CARD") {
+                method = "CARD";
+            } else if (selectedPaymentMethod === "TRANSFER") {
+                method = "TRANSFER";
+            }
+        } catch (error) {
+            console.error("결제 요청 중 에러 발생: ", error);
+        }
 
         // 주문 요청 DTO
         const orderFacadeRequestDto = {
@@ -306,9 +295,9 @@
         console.log("Order Data:", orderFacadeRequestDto);
 
         // 서버로 주문 데이터 전송
-        fetch("/api/payment", {
+        fetch("/api/shop/payment", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(orderFacadeRequestDto)
         })
             .then(response => {
@@ -340,7 +329,6 @@
 <!-- 확인용 로그 -->
 <script th:inline="javascript">
     console.log("Book Order List: ", [[${bookOrderList}]]);
-    console.log("Coupon List: ", [[${couponsByBook}]]);
     console.log("Wrap Types: ", [[${wrapTypes}]]);
 </script>
 
@@ -394,17 +382,20 @@
                 quantity: quantity
             });
 
-            // 쿠폰
             const couponSelect = document.getElementById(`coupon-${bookId}`);
+
+            // couponSelect가 있으면
             if (couponSelect) {
-                console.log(`Book ID: ${bookId}, Select Element:`, couponSelect);
-                console.log(`Selected Option:`, couponSelect.options[couponSelect.selectedIndex]);
-                const selectedValue = couponSelect.value;
-                console.log(`Selected Value for Book ID ${bookId}: ${selectedValue}`);
-                if (selectedValue) {
-                    couponOptions[bookId] = parseInt(selectedValue, 10);
+                // 실제 value 값이 있을 때만 couponOptions에 넣음
+                if (couponSelect.value) {
+                    couponOptions[bookId] = parseInt(couponSelect.value, 10);
+                    console.log(`Book ID: ${bookId}, Selected Coupon ID: ${couponSelect.value}`);
+                } else {
+                    console.log(`No coupon selected for Book ID: ${bookId}`);
                 }
-            } else {
+            }
+            // couponSelect가 없으면
+            else {
                 console.log(`Coupon Select not found for Book ID: ${bookId}`);
             }
 
@@ -423,6 +414,8 @@
             }
         });
 
+
+
         // 포인트
         const usePoint = parseInt(document.getElementById("usePoint").value || "0", 10);
         console.log("Collected couponOptions:", couponOptions);
@@ -439,7 +432,7 @@
         try {
             const response = await fetch("/api/shop/order/total", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(requestBody),
             });
 
@@ -450,7 +443,6 @@
                 // 합계 표시
                 document.getElementById("total_price").innerText
                     = `₩${data.total.toLocaleString("ko-KR")}`;
-
                 // 책 원가격
                 originalCalcPrice = data.originalPrice || 0;
                 console.log("Original Price 저장:", originalCalcPrice);
@@ -461,15 +453,19 @@
                         = data.availablePoints.toLocaleString("ko-KR");
                 }
 
-                // (옵션) 책별 할인액 표시 등
-                // if (data.couponUsageDtos) {
-                //   data.couponUsageDtos.forEach(usage => {
-                //     const discountSpan = document.getElementById(`discount-${usage.bookId}`);
-                //     if (discountSpan) {
-                //       discountSpan.innerText = `할인액: ₩${usage.discount.toLocaleString("ko-KR")}`;
-                //     }
-                //   });
-                // }
+                // 서버에서 반환된 할인 정보로 업데이트 (보완)
+                if (data.couponDiscountDetails) {
+                    data.couponDiscountDetails.forEach(usage => {
+                        const discountSpan = document.getElementById(`discount-${usage.bookId}`);
+                        if (discountSpan) {
+                            const discountValue = parseFloat(usage.discount); // 문자열을 숫자로 변환
+                            discountSpan.innerText = `할인액: ₩${discountValue.toLocaleString("ko-KR")}`;
+                        } else {
+                            console.warn(`Discount span not found for bookId: ${usage.bookId}`);
+                        }
+                    });
+                }
+
 
             } else {
                 console.error("HTTP 오류:", response.statusText);

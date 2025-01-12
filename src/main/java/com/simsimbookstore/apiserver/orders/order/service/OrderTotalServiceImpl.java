@@ -40,6 +40,7 @@ public class OrderTotalServiceImpl implements OrderTotalService{
         List<BookListResponseDto> bookOrderList = orderListService.toBookOrderList(requestDto.getBookList());
 
         BigDecimal total = BigDecimal.ZERO;
+        BigDecimal notPointUseTotal = BigDecimal.ZERO;
         BigDecimal originalPrice = BigDecimal.ZERO;
         BigDecimal discountedPrice = BigDecimal.ZERO;
 
@@ -50,7 +51,6 @@ public class OrderTotalServiceImpl implements OrderTotalService{
         for (BookListResponseDto book : bookOrderList) {
             BigDecimal bookOriginalTotal = book.getPrice().multiply(BigDecimal.valueOf(book.getQuantity()));
             originalPrice = originalPrice.add(bookOriginalTotal);
-
             BigDecimal bookTotal = bookOriginalTotal;
 
             // 포장 비용 계산
@@ -78,10 +78,13 @@ public class OrderTotalServiceImpl implements OrderTotalService{
 
                     BigDecimal discountAmount = discountDto.getDiscountAmount();
 
+                    log.info("쿠폰 할인 금액 : {}", discountAmount);
+
                     String name = (String) couponService.getCouponById(couponId).getCouponTypeName();
 
                     // 책 금액(bookTotal)에서 할인액만큼 차감
                     bookTotal = bookTotal.subtract(discountAmount);
+                    log.info("쿠폰 할인액 : {}", discountAmount);
                     // 전체 할인액 누적
                     log.info("쿠폰 합산");
                     CouponUsageDto usageDto = CouponUsageDto.builder()
@@ -103,17 +106,15 @@ public class OrderTotalServiceImpl implements OrderTotalService{
 
             total = total.add(bookTotal);
         }
+        BigDecimal deliveryPrice = calculateDeliveryPrice(originalPrice);
+        // 배송비 추가
+        total = total.add(deliveryPrice);
+        notPointUseTotal = total;
 
         // 포인트 사용 검증
         pointHistoryService.validateUsePoints(requestDto.getUserId(), requestDto.getUsePoint());
         BigDecimal userPoints = pointHistoryService.getUserPoints(requestDto.getUserId());
         total = total.subtract(requestDto.getUsePoint());
-
-        // 배송비 계산 (할인되지 않은 책 가격 기준)
-        BigDecimal deliveryPrice = calculateDeliveryPrice(originalPrice);
-
-        // 배송비 추가
-        total = total.add(deliveryPrice);
 
         log.info("Final total: {}", total);
         return TotalResponseDto.builder()
@@ -123,6 +124,7 @@ public class OrderTotalServiceImpl implements OrderTotalService{
                 .originalPrice(originalPrice)
                 .usePoint(requestDto.getUsePoint())
                 .couponDiscountDetails(couponUsageDtos)
+                .notPointUseTotal(notPointUseTotal)
                 .build();
     }
 

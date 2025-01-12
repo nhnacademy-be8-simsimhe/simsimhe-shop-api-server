@@ -9,6 +9,7 @@ import com.simsimbookstore.apiserver.reviews.review.dto.ReviewResponseDTO;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.reviews.review.repository.ReviewRepository;
 import com.simsimbookstore.apiserver.reviews.review.service.ReviewService;
+import com.simsimbookstore.apiserver.reviews.reviewimage.repository.ReviewImagePathRepository;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final ReviewImagePathRepository reviewImagePathRepository;
 
 
 
@@ -182,5 +184,8 @@ public class ReviewServiceImpl implements ReviewService {
         ));
     }
 
-
+    @Override
+    public boolean isPhotoReview(Long reviewId) {
+        return reviewImagePathRepository.findById(reviewId).isPresent();
+    }
 }
