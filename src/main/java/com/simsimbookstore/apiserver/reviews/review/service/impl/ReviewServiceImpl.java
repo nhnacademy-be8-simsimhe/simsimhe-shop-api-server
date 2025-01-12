@@ -8,6 +8,7 @@ import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.reviews.review.exception.NotCreateReviewException;
 import com.simsimbookstore.apiserver.reviews.review.repository.ReviewRepository;
 import com.simsimbookstore.apiserver.reviews.review.service.ReviewService;
+import com.simsimbookstore.apiserver.reviews.reviewimage.repository.ReviewImagePathRepository;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +18,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 
@@ -35,6 +33,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final ReviewImagePathRepository reviewImagePathRepository;
 
 
 
@@ -276,5 +275,8 @@ public class ReviewServiceImpl implements ReviewService {
         return likedByUser != null && likedByUser == 1;
     }
 
-
+    @Override
+    public boolean isPhotoReview(Long reviewId) {
+        return reviewImagePathRepository.findById(reviewId).isPresent();
+    }
 }

@@ -14,7 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.ArrayList;
-import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -34,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.hamcrest.Matchers.*;
 
-class PointPolicyControllerTest {
+class PointPolicyAdminControllerTest {
 
     private MockMvc mockMvc;
 
@@ -45,7 +44,7 @@ class PointPolicyControllerTest {
     @BeforeEach
     void setUp() {
         pointPolicyService = mock(PointPolicyService.class);
-        PointPolicyController controller = new PointPolicyController(pointPolicyService);
+        PointPolicyAdminController controller = new PointPolicyAdminController(pointPolicyService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
         objectMapper = new ObjectMapper();
     }

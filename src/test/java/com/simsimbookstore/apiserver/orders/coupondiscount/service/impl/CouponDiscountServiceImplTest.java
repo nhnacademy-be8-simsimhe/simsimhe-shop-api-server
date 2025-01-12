@@ -1,14 +1,24 @@
 package com.simsimbookstore.apiserver.orders.coupondiscount.service.impl;
 
+import static java.time.LocalDateTime.now;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.simsimbookstore.apiserver.coupons.allcoupon.entity.AllCoupon;
+import com.simsimbookstore.apiserver.coupons.coupon.entity.Coupon;
+import com.simsimbookstore.apiserver.coupons.coupon.entity.CouponStatus;
+import com.simsimbookstore.apiserver.coupons.coupon.repository.CouponRepository;
+import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.CouponPolicy;
+import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.DisCountType;
+import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponType;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.coupondiscount.dto.CouponDiscountRequestDto;
 import com.simsimbookstore.apiserver.orders.coupondiscount.dto.CouponDiscountResponseDto;
 import com.simsimbookstore.apiserver.orders.coupondiscount.entity.CouponDiscount;
 import com.simsimbookstore.apiserver.orders.coupondiscount.repository.CouponDiscountRepository;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
-import com.simsimbookstore.apiserver.orders.orderbook.repository.OrderBookRepository;
+import com.simsimbookstore.apiserver.users.user.entity.User;
+import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +41,12 @@ class CouponDiscountServiceImplTest {
     @Mock
     private CouponDiscountRepository couponDiscountRepository;
 
+    @Mock
+    private CouponRepository couponRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
 
     @InjectMocks
     private CouponDiscountServiceImpl couponDiscountService;
@@ -46,14 +62,43 @@ class CouponDiscountServiceImplTest {
 
     @Test
     void createCouponDiscount_Success() {
-        // given
+
+        CouponPolicy couponPolicyFix = CouponPolicy.builder()
+                .couponPolicyId(1L)
+                .couponPolicyName("Fixed Discount Policy")
+                .discountType(DisCountType.FIX)
+                .discountPrice(new BigDecimal("5000"))
+                .policyDescription("Fixed discount policy description")
+                .build();
+
+        AllCoupon allCoupon = AllCoupon.builder()
+                .couponTypeId(102L)
+                .couponTypeName("All Category Discount")
+                .deadline(LocalDateTime.now().plusDays(10))
+                .stacking(false)
+                .couponPolicy(couponPolicyFix)
+                .build();
+
+        Coupon mockCoupon = Coupon.builder()
+                .couponId(1L)
+                .issueDate(LocalDateTime.now().minusDays(10))
+                .deadline(LocalDateTime.now().plusDays(10))
+                .couponStatus(CouponStatus.UNUSED)
+                .couponType(allCoupon)
+                .user(mock(User.class))
+                .build();
+
+        when(couponRepository.findById(1L)).thenReturn(Optional.of(mockCoupon));
+
         CouponDiscountRequestDto dto = CouponDiscountRequestDto.builder()
+                .couponId(1L) // Ensure couponId is provided
                 .couponName("WELCOME")
                 .couponType("FIXED")
                 .discountPrice(new BigDecimal("1000"))
                 .build();
 
         CouponDiscount savedCoupon = CouponDiscount.builder()
+                .coupon(mockCoupon)
                 .couponDiscountId(1L)
                 .orderBook(orderBook)
                 .couponName("WELCOME")
@@ -70,7 +115,6 @@ class CouponDiscountServiceImplTest {
         assertEquals("WELCOME", result.getCouponName());
         verify(couponDiscountRepository, times(1)).save(ArgumentMatchers.any(CouponDiscount.class));
     }
-
     @Test
     void findById_Success() {
         CouponDiscount couponDiscount = CouponDiscount.builder()

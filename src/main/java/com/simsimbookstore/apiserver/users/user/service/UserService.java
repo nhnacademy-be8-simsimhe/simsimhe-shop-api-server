@@ -18,4 +18,6 @@ public interface UserService {
     User getUserWithGradeAndRoles(Long userId);
 
     boolean existsUser(Long userId);
+
+    Tier getUserTier(Long userId);
 }
