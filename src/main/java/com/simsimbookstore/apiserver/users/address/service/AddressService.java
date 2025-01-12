@@ -14,10 +14,10 @@ public interface AddressService {
     List<AddressResponseDto> getAddresses(Long userId);
 
     // 유저 저장
-    @Transactional
     AddressResponseDto createAddress(Long userId, AddressRequestDto addressRequestDto);
 
     // 주소 삭제
-    @Transactional
     void deleteAddress(Long addressId);
+
+    int getCountAddresses(Long userId);
 }

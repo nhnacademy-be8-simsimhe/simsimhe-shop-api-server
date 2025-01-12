@@ -10,12 +10,11 @@ import com.simsimbookstore.apiserver.users.address.service.AddressService;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.service.UserService;
 import java.util.List;
+import java.util.Objects;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -65,5 +64,10 @@ public class AddressServiceImpl implements AddressService {
             throw new NotFoundException("Not founded address with ID: " + addressId);
         }
         addressRepository.deleteById(addressId);
+    }
+
+    @Override
+    public int getCountAddresses(Long userId) {
+        return addressRepository.countAllByUserUserId(userId);
     }
 }
