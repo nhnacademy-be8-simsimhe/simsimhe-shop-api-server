@@ -23,11 +23,14 @@ import com.simsimbookstore.apiserver.point.service.PointPolicyService;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.reviews.review.repository.ReviewRepository;
 import com.simsimbookstore.apiserver.reviews.review.service.ReviewService;
+import com.simsimbookstore.apiserver.reviews.reviewimage.entity.ReviewImagePath;
+import com.simsimbookstore.apiserver.reviews.reviewimage.repository.ReviewImagePathRepository;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.service.UserService;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -46,8 +49,8 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     private final OrderRepository orderRepository;
     private final OrderPointManageRepository orderPointManageRepository;
     private final ReviewPointManageRepository reviewPointManageRepository;
+    private final ReviewImagePathRepository reviewImagePathRepository;
     private final ReviewRepository reviewRepository;
-    private final ReviewService reviewService;
 
     /**
      * 사용자 포인트 히스토리를 페이지네이션하여 반환합니다.
@@ -59,7 +62,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     @Override
     public PageResponse<PointHistoryResponseDto> getUserPointHistory(Long userId, Pageable pageable) {
         List<PointHistoryResponseDto> content = pointHistoryRepository.getPointHistoriesByUserId(userId, pageable);
-        for(PointHistoryResponseDto dto : content) {
+        for (PointHistoryResponseDto dto : content) {
             log.info(dto.toString());
         }
         long totalElements = pointHistoryRepository.findByUserUserId(userId).size();
@@ -109,6 +112,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     }
 
     @Override
+    @Transactional
     public PointHistory orderPoint(OrderPointRequestDto requestDto) {
         User user = userService.getUser(requestDto.getUserId());
         OrderPointCalculateRequestDto dto = OrderPointCalculateRequestDto.builder()
@@ -151,9 +155,6 @@ public class PointHistoryServiceImpl implements PointHistoryService {
                 .build());
 
 
-
-
-
         order.setPointEarn(earnPoints.intValue());
         order.setPointUse(pointUse);
 
@@ -161,10 +162,12 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     }
 
     @Override
+    @Transactional
     public PointHistory reviewPoint(ReviewPointCalculateRequestDto dto) {
         User user = userService.getUser(dto.getUserId());
         BigDecimal earnPoints = calculateEarnReviewPoints(dto);
-        Review review = reviewRepository.findById(dto.getReviewId()).orElseThrow(() -> new NotFoundException("Review not found"));
+        Review review = reviewRepository.findById(dto.getReviewId())
+                .orElseThrow(() -> new NotFoundException("Review not found"));
 
         // 1. PointHistory 엔티티 저장
         PointHistory save = pointHistoryRepository.save(PointHistory.builder()
@@ -189,6 +192,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
         return pointHistoryRepository.save(PointHistory.builder()
                 .pointType(PointHistory.PointType.EARN)
                 .amount(signPointValue.intValue())
+                .pointDescription("SIGNUP POINT")
                 .created_at(now())
                 .user(user)
                 .build());
@@ -252,14 +256,24 @@ public class PointHistoryServiceImpl implements PointHistoryService {
      * 리뷰id, 유저id를 가지고 리뷰포인트 정책에 있는 적립포인트를 반환한다
      */
     public BigDecimal calculateEarnReviewPoints(ReviewPointCalculateRequestDto dto) {
+        log.info("userId = {}", dto.getUserId());
         PointPolicy.EarningMethod earningMethod;
+
         Review review = reviewRepository.findById(dto.getReviewId())
                 .orElseThrow(() -> new NotFoundException("Review not found"));
 
-        if (reviewService.isPhotoReview(review.getReviewId())) {
-            earningMethod = tierToEarningMethodMap.get("PHOTOREVIEW");
-        } else {
+        List<ReviewImagePath> imagePaths = reviewImagePathRepository.findByReview(review);
+        if (imagePaths == null || imagePaths.isEmpty()) {
+            // 사진이 없으므로 일반 리뷰
             earningMethod = tierToEarningMethodMap.get("REVIEW");
+        } else {
+            // 사진이 하나 이상 존재하므로 포토 리뷰
+            earningMethod = tierToEarningMethodMap.get("PHOTOREVIEW");
+        }
+
+        // earningMethod가 null이면 정책을 찾지 못한 것이므로 예외 처리
+        if (earningMethod == null) {
+            throw new IllegalArgumentException("해당 리뷰 정책을 찾을 수 없습니다.");
         }
 
         return pointHistoryService.getPolicy(earningMethod).getEarningValue();

@@ -2,6 +2,7 @@ package com.simsimbookstore.apiserver.users.localuser.service.impl;
 
 import com.simsimbookstore.apiserver.exception.AlreadyExistException;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
+import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.service.GradeService;
 import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
@@ -27,11 +28,15 @@ public class LocalUserServiceImpl implements LocalUserService {
 
     private final RoleService roleService;
     private final GradeService gradeService;
+    private final PointHistoryService pointHistoryService;
 
-    public LocalUserServiceImpl(LocalUserRepository localUserRepository, RoleService roleService, GradeService gradeService) {
+
+    public LocalUserServiceImpl(LocalUserRepository localUserRepository, RoleService roleService, GradeService gradeService,
+                                PointHistoryService pointHistoryService) {
         this.localUserRepository = localUserRepository;
         this.roleService = roleService;
         this.gradeService = gradeService;
+        this.pointHistoryService = pointHistoryService;
     }
 
     @Transactional
@@ -53,7 +58,9 @@ public class LocalUserServiceImpl implements LocalUserService {
 
         localUser.addUserRole(userRole);
 
-        localUserRepository.save(localUser);
+        LocalUser save = localUserRepository.save(localUser);
+
+        pointHistoryService.signupPoint(save);
 
         return localUser;
     }

@@ -2,6 +2,8 @@ package com.simsimbookstore.apiserver.point.controller;
 
 import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.point.dto.PointHistoryResponseDto;
+import com.simsimbookstore.apiserver.point.dto.ReviewPointCalculateRequestDto;
+import com.simsimbookstore.apiserver.point.entity.PointHistory;
 import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import java.math.BigDecimal;
 import java.util.List;
@@ -13,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,6 +51,13 @@ public class PointHistoryController {
     public ResponseEntity<BigDecimal> getPoint(@PathVariable Long userId) {
         BigDecimal userPoints = pointHistoryService.getUserPoints(userId);
         return ResponseEntity.status(HttpStatus.OK).body(userPoints);
+    }
+
+    @PostMapping("/reviewPoint")
+    public ResponseEntity<Long> earnReviewPoint(@RequestParam Long userId, @RequestParam Long reviewId) {
+        PointHistory pointHistory =
+                pointHistoryService.reviewPoint(new ReviewPointCalculateRequestDto(reviewId ,userId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(pointHistory.getPointHistoryId());
     }
 
 }
