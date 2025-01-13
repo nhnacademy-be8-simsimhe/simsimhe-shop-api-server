@@ -244,19 +244,17 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.10</version> <!-- 최신 버전 확인 필요 -->
+                <version>0.8.12</version>
                 <executions>
-                    <!-- Prepare JaCoCo agent before running tests -->
                     <execution>
-                        <id>prepare-agent</id>
+                        <id>jacoco-initialize</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
-                    <!-- Generate the report after tests -->
                     <execution>
-                        <id>report</id>
-                        <phase>verify</phase>
+                        <id>jacoco-site</id>
+                        <phase>package</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
