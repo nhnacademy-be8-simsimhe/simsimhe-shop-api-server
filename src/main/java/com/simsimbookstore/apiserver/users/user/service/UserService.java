@@ -1,6 +1,7 @@
 package com.simsimbookstore.apiserver.users.user.service;
 
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
+import com.simsimbookstore.apiserver.users.user.dto.UserResponse;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import org.springframework.data.domain.Pageable;
