@@ -31,7 +31,6 @@ public class CustomCouponRepositoryImpl implements CustomCouponRepository {
 
     /**
      * 유저가 가지고 있는 쿠폰 중에서 특정 책에 적용 가능한 쿠폰만 Page로 반환한다.
-     * @param pageable
      * @param userId
      * @param bookId
      * @return 특정 책에 적용 가능한 쿠폰 페이지

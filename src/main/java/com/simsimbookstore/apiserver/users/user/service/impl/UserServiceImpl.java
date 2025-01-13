@@ -10,9 +10,11 @@ import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import com.simsimbookstore.apiserver.users.user.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
@@ -86,4 +88,15 @@ public class UserServiceImpl implements UserService {
     public boolean existsUser(Long userId) {
         return userRepository.existsById(userId);
     }
+
+    @Override
+    public List<User> getAllActiveUser() {
+        return userRepository.findAllByUserStatus(UserStatus.ACTIVE);
+    }
+
+
+
+
+
+
 }

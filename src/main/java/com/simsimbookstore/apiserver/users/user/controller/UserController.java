@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequestMapping("/api/users")
 @RestController
 public class UserController {
@@ -28,7 +30,7 @@ public class UserController {
     public ResponseEntity<?> updateStatus(
             @PathVariable Long userId,
             @RequestBody @Valid UserStatusUpdateRequestDto requestDto
-    ){
+    ) {
         userService.updateUserStatus(userId, requestDto.getStatus());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -37,16 +39,16 @@ public class UserController {
     public ResponseEntity<?> updateGrade(
             @PathVariable Long userId,
             @RequestBody @Valid UserGradeUpdateRequestDto requestDto
-    ){
+    ) {
         User response = userService.updateUserGrade(userId, requestDto.getTier());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PutMapping("/{userId}/latestLoginDate")
     public ResponseEntity<?> updateLatestLoginDate(
-              @PathVariable Long userId,
-              @RequestBody @Valid UserLatestLoginDateUpdateRequestDto requestDto
-    ){
+            @PathVariable Long userId,
+            @RequestBody @Valid UserLatestLoginDateUpdateRequestDto requestDto
+    ) {
         User user = userService.updateUserLatestLoginDate(userId, requestDto.getLatestLoginDate());
         UserResponse response = UserMapper.toResponse(user);
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -59,4 +61,12 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.OK).body(userResponse);
     }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<User>> getActiveUser() {
+        List<User> allActiveUser = userService.getAllActiveUser();
+        return ResponseEntity.status(HttpStatus.OK).body(allActiveUser);
+    }
+
+
 }

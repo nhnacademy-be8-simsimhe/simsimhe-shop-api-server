@@ -3,8 +3,10 @@ package com.simsimbookstore.apiserver.users.user.service;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface UserService {
     User updateUserStatus(Long userId, UserStatus userStatus);
@@ -18,4 +20,6 @@ public interface UserService {
     User getUserWithGradeAndRoles(Long userId);
 
     boolean existsUser(Long userId);
+
+    List<User> getAllActiveUser();
 }
