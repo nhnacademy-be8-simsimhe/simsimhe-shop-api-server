@@ -22,4 +22,6 @@ public interface UserService {
     boolean existsUser(Long userId);
 
     List<User> getAllActiveUser();
+
+    List<User> getUserByBirthMonth(String monthStr);
 }

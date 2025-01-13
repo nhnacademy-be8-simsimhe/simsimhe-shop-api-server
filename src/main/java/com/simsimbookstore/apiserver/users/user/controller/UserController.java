@@ -68,5 +68,10 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(allActiveUser);
     }
 
+    @GetMapping(params = "birthMonth")
+    public ResponseEntity<List<User>> getAllUserByBirth(@RequestParam("birthMonth") String birthMonth) {
+        List<User> userByBirthMonth = userService.getUserByBirthMonth(birthMonth);
+        return ResponseEntity.status(HttpStatus.OK).body(userByBirthMonth);
+    }
 
 }

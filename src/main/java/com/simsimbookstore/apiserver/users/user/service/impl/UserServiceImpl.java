@@ -94,9 +94,20 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAllByUserStatus(UserStatus.ACTIVE);
     }
 
-
-
-
+    @Override
+    public List<User> getUserByBirthMonth(String monthStr) {
+        boolean isNumeric = monthStr.chars().allMatch(Character::isDigit);
+        // 문자열이 숫자인지 확인
+        if (!isNumeric) {
+            throw new IllegalArgumentException("month는 숫자여야 합니다.");
+        }
+        // 1과 12사이 숫자인지 확인
+        int month = Integer.parseInt(monthStr);
+        if (month > 12 || month < 1) {
+            throw new IllegalArgumentException("month는 1과 12 사이 숫자여야합니다.");
+        }
+        return userRepository.findAllByBirthMonth(month);
+    }
 
 
 }
