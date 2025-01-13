@@ -33,7 +33,7 @@ public class CouponController {
      * @param couponId
      * @return 쿠폰
      */
-    @GetMapping("/shop/coupons/{couponId}")
+    @GetMapping("/admin/coupons/{couponId}")
     public ResponseEntity<CouponResponseDto> getCoupon(@PathVariable Long couponId) {
         CouponResponseDto couponById = couponService.getCouponById(couponId);
         return ResponseEntity.status(HttpStatus.OK).body(couponById);
