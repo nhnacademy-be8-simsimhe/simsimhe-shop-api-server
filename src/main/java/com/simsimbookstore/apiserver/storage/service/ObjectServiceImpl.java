@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.storage.config.ObjectStorageConfig;
 import com.simsimbookstore.apiserver.storage.exception.ObjectStorageException;
 import com.simsimbookstore.apiserver.storage.exception.ObjectStorageTokenException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -118,13 +120,15 @@ public class ObjectServiceImpl {
             name = fileName;
             // 파일 업로드
             uploadFileToStorage(url, inputStream, tokenId);
-            uploadedFileNames.add(fileName);
+            uploadedFileNames.add(url);
         } catch (IOException e) {
             throw new ObjectStorageException("Failed to upload file from URL: " + fileUrl);
         }
 
-        return name;
+        return uploadedFileNames.getFirst();
     }
+
+
     /*
         - 주어진 MultipartFile의 확장자가 허용된 이미지 확장자인지 검증
      */
