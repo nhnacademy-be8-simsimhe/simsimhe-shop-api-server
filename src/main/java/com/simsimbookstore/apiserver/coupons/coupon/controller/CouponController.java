@@ -33,7 +33,7 @@ public class CouponController {
      * @param couponId
      * @return 쿠폰
      */
-    @GetMapping("/admin/coupons/{couponId}")
+    @GetMapping("/shop/coupons/{couponId}")
     public ResponseEntity<CouponResponseDto> getCoupon(@PathVariable Long couponId) {
         CouponResponseDto couponById = couponService.getCouponById(couponId);
         return ResponseEntity.status(HttpStatus.OK).body(couponById);
@@ -45,7 +45,7 @@ public class CouponController {
      * @param couponTypeId
      * @return 미사용된 쿠폰
      */
-    @GetMapping(value = "/shop/users/{userId}/coupons/unused",params = "couponTypeId")
+    @GetMapping(value = "/admin/users/{userId}/coupons/unused",params = "couponTypeId")
     public ResponseEntity<CouponResponseDto> getUnusedCouponByCouponType(@PathVariable Long userId,
                                                                        @RequestParam Long couponTypeId) {
         CouponResponseDto unusedCoupon = couponService.getUnusedCouponByCouponType(userId, couponTypeId);
