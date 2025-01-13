@@ -37,8 +37,10 @@ public class TagServiceImpl implements TagService {
 
         if (optionalTag.isPresent()) {
             Tag findTag = optionalTag.get();
+            findTag.setActivated(true);
             return TagMapper.toTagResponseDto(findTag);
         } else {
+            tag.setActivated(true);
             Tag saveTag = tagRepository.save(tag);
             return TagMapper.toTagResponseDto(saveTag);
         }
@@ -51,7 +53,7 @@ public class TagServiceImpl implements TagService {
      */
     @Override
     public List<TagResponseDto> getAlltag() {
-        List<Tag> tags = tagRepository.findAllTags();
+        List<Tag> tags = tagRepository.findAllActivated();
         return tags.stream()
                 .map(TagMapper::toTagResponseDto)
                 .toList();
@@ -84,7 +86,7 @@ public class TagServiceImpl implements TagService {
     @Override
     public Page<TagResponseDto> getAllTags(Pageable pageable) {
         //1. 페이징된 Tag 엔티티 조회
-        Page<Tag> tagPage = tagRepository.findAll(pageable);
+        Page<Tag> tagPage = tagRepository.findAllActivated(pageable);
         // 2. Tag 엔티티를 TagResponseDto로 변환
         return tagPage.map(TagMapper::toTagResponseDto); // Page<TagResponseDto> 반환
     }
@@ -98,7 +100,7 @@ public class TagServiceImpl implements TagService {
     @Override
     public void deleteTag(Long tagId) {
         Tag tag = this.getTag(tagId);
-        tagRepository.delete(tag);
+        tag.setActivated(false);
     }
 
     @Transactional

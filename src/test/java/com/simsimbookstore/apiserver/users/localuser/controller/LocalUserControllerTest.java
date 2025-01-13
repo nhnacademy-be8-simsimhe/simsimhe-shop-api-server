@@ -80,6 +80,7 @@ class LocalUserControllerTest {
                 .createdAt(testUserRequestDto.getCreatedAt())
                 .loginId(testUserRequestDto.getLoginId())
                 .password(testUserRequestDto.getPassword())
+                .latestLoginDate(LocalDateTime.now())
                 .build();
     }
 
@@ -132,6 +133,7 @@ class LocalUserControllerTest {
                 .andExpect(jsonPath("$.userId").value(responseDto.getUserId()))
                 .andExpect(jsonPath("$.loginId").value(responseDto.getLoginId()))
                 .andExpect(jsonPath("$.password").value(responseDto.getPassword()))
-                .andExpect(jsonPath("$.userStatus").value(responseDto.getUserStatus().toString()));
+                .andExpect(jsonPath("$.userStatus").value(responseDto.getUserStatus().toString()))
+                .andExpect(jsonPath("$.latestLoginDate").exists()); // Nullable
     }
 }

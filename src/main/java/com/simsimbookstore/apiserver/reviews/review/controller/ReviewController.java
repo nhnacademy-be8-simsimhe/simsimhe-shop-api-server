@@ -30,6 +30,7 @@ public class ReviewController {
 
     @PostMapping
     public ResponseEntity<ReviewResponseDTO> createReview(@PathVariable Long bookId, @RequestParam Long userId, @RequestParam(value = "images", required = false) List<MultipartFile> files,  @Valid @RequestBody ReviewRequestDTO reviewRequestDTO){
+
         Review review = reviewService.createReview(reviewRequestDTO, bookId, userId);
         ReviewResponseDTO response = new ReviewResponseDTO(
                 review.getReviewId(),

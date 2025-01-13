@@ -28,6 +28,7 @@ public class LocalUserMapper {
                 .password(requestDto.getPassword())
                 .loginId(requestDto.getLoginId())
                 .userRoleList(new HashSet<>())
+                .latestLoginDate(LocalDateTime.now())
                 .build();
         return localUser;
     }
@@ -45,6 +46,7 @@ public class LocalUserMapper {
                 .roles(roles)
                 .password(localUser.getPassword())
                 .userStatus(localUser.getUserStatus())
+                .latestLoginDate(localUser.getLatestLoginDate())
                 .build();
 
         return localUserResponseDto;

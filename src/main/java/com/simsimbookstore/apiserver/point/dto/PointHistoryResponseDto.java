@@ -21,4 +21,9 @@ public class PointHistoryResponseDto {
     private Long orderId;
     private Long reviewId;//review_id OR order_id
     private String description;
+
+    @Override
+    public String toString() {
+        return pointType.name() + " " + amount + " " + createdAt + " " + sourceType + " " + orderId + " " + reviewId + " " + description;
+    }
 }

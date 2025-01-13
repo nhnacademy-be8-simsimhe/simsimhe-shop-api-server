@@ -5,7 +5,11 @@ import com.simsimbookstore.apiserver.users.address.dto.AddressResponseDto;
 import com.simsimbookstore.apiserver.users.address.entity.Address;
 import com.simsimbookstore.apiserver.users.address.service.AddressService;
 import jakarta.validation.Valid;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,10 +48,16 @@ public class AddressController {
 
     // 주소 등록
     @PostMapping("{userId}/addresses")
-    public ResponseEntity<?> createAddress(
+    public ResponseEntity<?> addAddress(
             @PathVariable Long userId,
             @RequestBody @Valid AddressRequestDto requestDto
     ) {
+        int countAddresses = addressService.getCountAddresses(userId);
+
+        if (countAddresses >= 10) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("최대 10개의 주소만 등록할 수 있습니다.");
+        }
+
         AddressResponseDto address = addressService.createAddress(userId, requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(address);
     }

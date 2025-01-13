@@ -7,7 +7,8 @@ import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.payment.client.PaymentRestTemplate;
-import com.simsimbookstore.apiserver.payment.dto.ConfirmSuccessResponseDto;
+import com.simsimbookstore.apiserver.payment.dto.ConfirmResponseDto;
+import com.simsimbookstore.apiserver.payment.dto.PaymentMethodResponse;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
 import com.simsimbookstore.apiserver.payment.entity.Payment;
 import com.simsimbookstore.apiserver.payment.entity.PaymentMethod;
@@ -17,6 +18,7 @@ import com.simsimbookstore.apiserver.payment.repository.PaymentRepository;
 import com.simsimbookstore.apiserver.payment.repository.PaymentStatusRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -34,11 +36,9 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final PaymentMethodRepository paymentMethodRepository;
 
-
     // method DB에 있는지 확인
-    public void checkPayMethod(OrderFacadeResponseDto facadeResponseDto) {
-        paymentMethodRepository.findByPaymentMethod(facadeResponseDto.getMethod())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 결제 방법입니다."));
+    public boolean checkPayMethod(OrderFacadeResponseDto facadeResponseDto) {
+        return paymentMethodRepository.existsByPaymentMethod(facadeResponseDto.getMethod());
     }
 
     // 결제 요청 객체 생성
@@ -58,37 +58,68 @@ public class PaymentService {
     }
 
     // 결제 승인 요청
-    public ConfirmSuccessResponseDto confirm(SuccessRequestDto successDto) {
-        ConfirmSuccessResponseDto response = paymentRestTemplate.confirm(successDto);   //성공
-        savePayment(response);
-        return response;
+    public ConfirmResponseDto confirm(SuccessRequestDto successDto) {
+        ResponseEntity<ConfirmResponseDto> response = paymentRestTemplate.confirm(successDto);
+
+        boolean isSuccess = response.getStatusCode().is2xxSuccessful();
+
+        // 승인 성공
+        if (isSuccess) {
+            savePayment(response.getBody(), PaymentMethod.createPaymentMethod(successDto.getPaymentMethod()));
+        }
+        // 승인 실패
+        else {
+            PaymentStatus status = paymentStatusRepository.findByPaymentStatusName("FAIL")
+                    .orElseThrow(() -> new NotFoundException("FAIL 상태가 존재하지 않습니다."));
+
+            Order order = orderRepository.findByOrderNumber((response.getBody()).getOrderId())
+                    .orElseThrow(() -> new NotFoundException("존재하지 않는 OrderNumber 입니다."));
+
+            Payment payment = Payment.builder()
+                    .paymentKey(successDto.getPaymentKey())
+                    .paymentStatus(status)
+                    .paymentDate(LocalDateTime.now())
+                    .errorCode(response.getBody().getCode())
+                    .errorMessage(response.getBody().getMessage())
+                    .paymentMethod(PaymentMethod.createPaymentMethod(successDto.getPaymentMethod()))
+                    .order(order)
+                    .build();
+
+            paymentRepository.save(payment);
+        }
+
+        return response.getBody();
     }
 
     // 결제 완료된 객체 저장
-    private void savePayment(ConfirmSuccessResponseDto confirmSuccessResponseDto) {
+    private void savePayment(ConfirmResponseDto confirmResponseDto, PaymentMethod userMethod) {
         PaymentStatus status = paymentStatusRepository.findByPaymentStatusName("SUCCESS")
                 .orElseThrow(() -> new NotFoundException("SUCCESS 상태가 존재하지 않습니다."));
-        Order order = orderRepository.findByOrderNumber(confirmSuccessResponseDto.getOrderId())
+        Order order = orderRepository.findByOrderNumber(confirmResponseDto.getOrderId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 OrderNumber 입니다."));
 
-        PaymentMethod paymentMethod = paymentMethodRepository.findByPaymentMethod(confirmSuccessResponseDto.getMethod())
-                .orElseThrow(() -> new NotFoundException("해당 결제 수단이 존재하지 않습니다."));
-
         ZoneId seoulZone = ZoneId.of("Asia/Seoul");
-        ZonedDateTime zonedDateTime = ZonedDateTime.parse(confirmSuccessResponseDto.getApprovedAt());
+        ZonedDateTime zonedDateTime = ZonedDateTime.parse(confirmResponseDto.getApprovedAt());
         LocalDateTime dateTime = zonedDateTime.withZoneSameInstant(seoulZone).toLocalDateTime();
 
         // Payment 객체 생성 (빌더 패턴 사용)
         Payment payment = Payment.builder()
-                .paymentKey(confirmSuccessResponseDto.getPaymentKey())
+                .paymentKey(confirmResponseDto.getPaymentKey())
                 .paymentDate(dateTime)
                 .paymentStatus(status)
                 .order(order)
-                .paymentMethod(paymentMethod)
+                .paymentMethod(userMethod)
+                .tossReturnMethod(confirmResponseDto.getTossReturnMethod())  // toss가 반환해주는 결제 방법 저장
                 .build();
 
         // Payment 저장
         paymentRepository.save(payment);
+    }
+
+    public PaymentMethodResponse getPaymentMethodByName(String name){
+        PaymentMethod paymentMethod = paymentMethodRepository.findByPaymentMethod(name).orElseThrow();
+
+        return PaymentMethodResponse.changeEntityToDto(paymentMethod);
     }
 
     // 환불을 위한 주문 번호로 paymentKey 조회

@@ -24,4 +24,7 @@ public interface UserService {
     List<User> getAllActiveUser();
 
     List<User> getUserByBirthMonth(String monthStr);
+
+    Tier getUserTier(Long userId);
+
 }
