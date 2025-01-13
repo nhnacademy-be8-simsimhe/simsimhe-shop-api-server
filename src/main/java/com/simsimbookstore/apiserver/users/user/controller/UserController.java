@@ -63,14 +63,14 @@ public class UserController {
     }
 
     @GetMapping("/active")
-    public ResponseEntity<List<User>> getActiveUser() {
-        List<User> allActiveUser = userService.getAllActiveUser();
+    public ResponseEntity<List<UserResponse>> getActiveUser() {
+        List<UserResponse> allActiveUser = userService.getAllActiveUser();
         return ResponseEntity.status(HttpStatus.OK).body(allActiveUser);
     }
 
     @GetMapping(params = "birthMonth")
-    public ResponseEntity<List<User>> getAllUserByBirth(@RequestParam("birthMonth") String birthMonth) {
-        List<User> userByBirthMonth = userService.getUserByBirthMonth(birthMonth);
+    public ResponseEntity<List<UserResponse>> getAllUserByBirth(@RequestParam("birthMonth") String birthMonth) {
+        List<UserResponse> userByBirthMonth = userService.getUserByBirthMonth(birthMonth);
         return ResponseEntity.status(HttpStatus.OK).body(userByBirthMonth);
     }
 

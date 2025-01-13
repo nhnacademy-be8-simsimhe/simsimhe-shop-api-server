@@ -1,9 +1,11 @@
 package com.simsimbookstore.apiserver.users.user.service.impl;
 
 import com.simsimbookstore.apiserver.exception.NotFoundException;
+import com.simsimbookstore.apiserver.users.UserMapper;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
+import com.simsimbookstore.apiserver.users.user.dto.UserResponse;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
@@ -89,12 +91,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getAllActiveUser() {
-        return userRepository.findAllByUserStatus(UserStatus.ACTIVE);
+    public List<UserResponse> getAllActiveUser() {
+        List<User> users = userRepository.findAllByUserStatus(UserStatus.ACTIVE);
+        return users.stream().map(UserMapper::toResponse).toList();
     }
 
     @Override
-    public List<User> getUserByBirthMonth(String monthStr) {
+    public List<UserResponse> getUserByBirthMonth(String monthStr) {
         boolean isNumeric = monthStr.chars().allMatch(Character::isDigit);
         // 문자열이 숫자인지 확인
         if (!isNumeric) {
@@ -105,7 +108,8 @@ public class UserServiceImpl implements UserService {
         if (month > 12 || month < 1) {
             throw new IllegalArgumentException("month는 1과 12 사이 숫자여야합니다.");
         }
-        return userRepository.findAllByBirthMonth(month);
+        List<User> users = userRepository.findAllByBirthMonth(month);
+        return users.stream().map(UserMapper::toResponse).toList();
     }
 
     public Tier getUserTier(Long userId) {
