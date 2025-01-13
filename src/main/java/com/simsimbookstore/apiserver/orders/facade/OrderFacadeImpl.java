@@ -1,6 +1,8 @@
 package com.simsimbookstore.apiserver.orders.facade;
 
 
+import static java.time.LocalTime.now;
+
 import com.simsimbookstore.apiserver.orders.delivery.dto.DeliveryRequestDto;
 import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
 import com.simsimbookstore.apiserver.orders.delivery.service.DeliveryService;
@@ -13,7 +15,17 @@ import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
 import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
 import com.simsimbookstore.apiserver.point.dto.OrderPointRequestDto;
 import com.simsimbookstore.apiserver.point.service.PointHistoryService;
+import com.simsimbookstore.apiserver.users.grade.entity.Tier;
+import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
+import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
+import com.simsimbookstore.apiserver.users.localuser.mapper.LocalUserMapper;
+import com.simsimbookstore.apiserver.users.localuser.service.LocalUserService;
+import com.simsimbookstore.apiserver.users.role.entity.RoleName;
+import com.simsimbookstore.apiserver.users.user.entity.Gender;
+import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,10 +42,14 @@ public class OrderFacadeImpl implements OrderFacade {
     private final DeliveryService deliveryService;
     private final PointHistoryService pointHistoryService;
     private final OrderRepository orderRepository;
+    private final LocalUserService localUserService;
 
     @Override
     @Transactional
     public OrderFacadeResponseDto createPrepareOrder(OrderFacadeRequestDto facadeRequestDto) {
+
+        Long guestId = 0L;
+
         // 배송 요청 데이터 로깅
         DeliveryRequestDto deliveryReq = facadeRequestDto.getDeliveryRequestDto();
         log.info("Received DeliveryRequestDto: {}", deliveryReq);
@@ -42,8 +58,13 @@ public class OrderFacadeImpl implements OrderFacade {
         Delivery delivery = deliveryService.createDelivery(deliveryReq);
         log.info("Created Delivery: {}", delivery);
 
+        //비회원 일때
+        if (facadeRequestDto.memberOrderRequestDto.getUserId() == null) {
+            guestId = prepareUser(facadeRequestDto);
+        }
         // 주문 요청 데이터 로깅
         MemberOrderRequestDto orderReq = facadeRequestDto.getMemberOrderRequestDto();
+        orderReq.setUserId(guestId);
         orderReq.setDeliveryId(delivery.getDeliveryId());
         log.info("Received MemberOrderRequestDto: {}", orderReq);
 
@@ -98,5 +119,31 @@ public class OrderFacadeImpl implements OrderFacade {
         return response;
     }
 
+
+    @Transactional
+    public Long prepareUser(OrderFacadeRequestDto dto) {
+        if (dto.getMemberOrderRequestDto().getUserId() == null) {
+            String uuid = UUID.randomUUID().toString();
+            String uuid2 = UUID.randomUUID().toString().substring(0, 6);
+            LocalUserRegisterRequestDto localUserDto = LocalUserRegisterRequestDto.builder()
+                    .userName("GUEST" + uuid.substring(0, 8))
+                    .email("GEUST" + uuid.substring(0, 6) + "@" + uuid2 + ".com")
+                    .loginId("SIMSIMGUEST" + uuid.substring(0, 16))
+                    .gender(Gender.MALE)
+                    .tier(Tier.STANDARD)
+                    .roleName(RoleName.GUEST)
+                    .password(uuid)
+                    .latestLoginDate(null)
+                    .birth(LocalDate.now())
+                    .mobileNumber(null)
+                    .userStatus(UserStatus.ACTIVE)
+                    .build();
+            LocalUser guest = localUserService.saveLocalUser(localUserDto);
+
+            return guest.getUserId();
+        } else {
+            return dto.getMemberOrderRequestDto().getUserId();
+        }
+    }
 }
 

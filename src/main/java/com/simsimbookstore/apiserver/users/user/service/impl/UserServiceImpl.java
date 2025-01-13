@@ -4,11 +4,18 @@ import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
+import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
+import com.simsimbookstore.apiserver.users.localuser.mapper.LocalUserMapper;
+import com.simsimbookstore.apiserver.users.role.entity.Role;
+import com.simsimbookstore.apiserver.users.role.entity.RoleName;
+import com.simsimbookstore.apiserver.users.role.service.RoleService;
+import com.simsimbookstore.apiserver.users.user.dto.GuestUserRequestDto;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import com.simsimbookstore.apiserver.users.user.service.UserService;
 
+import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -22,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final GradeRepository gradeRepository;
+    private final RoleService roleService;
 
     @Transactional
     @Override
@@ -89,5 +97,23 @@ public class UserServiceImpl implements UserService {
     @Override
     public Tier getUserTier(Long userId) {
         return  (getUser(userId).getGrade().getTier());
+    }
+
+    public User createUser(GuestUserRequestDto dto) {
+        User user = User.builder()
+                .userName(dto.getUserName())
+                .mobileNumber(dto.getMobileNumber())
+                .email(dto.getEmail())
+                .birth(dto.getBirth())
+                .gender(dto.getGender())
+                // .grade(guestGrade) // 게스트 등급 지정 시
+                // .isSocialLogin(false) // 비회원이므로 소셜로그인X
+                .build();
+
+        Role role = roleService.findByRoleName(RoleName.GUEST);
+        UserRole userRole = UserRole.builder()
+                .role(role)
+                .build();
+        user.addUserRole(userRole);
     }
 }
