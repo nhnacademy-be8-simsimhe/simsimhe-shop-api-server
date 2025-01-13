@@ -5,6 +5,7 @@ import com.simsimbookstore.apiserver.users.UserMapper;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
+import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.user.dto.UserResponse;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
@@ -92,7 +93,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponse> getAllActiveUser() {
-        List<User> users = userRepository.findAllByUserStatus(UserStatus.ACTIVE);
+        List<User> users = userRepository.findAllByUserStatus(UserStatus.ACTIVE, RoleName.USER);
         return users.stream().map(UserMapper::toResponse).toList();
     }
 
@@ -108,7 +109,7 @@ public class UserServiceImpl implements UserService {
         if (month > 12 || month < 1) {
             throw new IllegalArgumentException("month는 1과 12 사이 숫자여야합니다.");
         }
-        List<User> users = userRepository.findAllByBirthMonth(month);
+        List<User> users = userRepository.findAllByBirthMonth(month, RoleName.USER);
         return users.stream().map(UserMapper::toResponse).toList();
     }
 

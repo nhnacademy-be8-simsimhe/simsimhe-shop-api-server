@@ -1,6 +1,7 @@
 package com.simsimbookstore.apiserver.users.user.repository;
 
 
+import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -14,11 +15,11 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+    @Query("SELECT DISTINCT u FROM User u JOIN u.userRoleList ur JOIN ur.role r WHERE u.userStatus = :status AND r.roleName = :roleName")
+    List<User> findAllByUserStatus(@Param("status") UserStatus status, @Param("roleName") RoleName roleName);
 
-    List<User> findAllByUserStatus(UserStatus userStatus);
-
-    @Query("SELECT u FROM User u WHERE u.birth IS NOT NULL AND MONTH(u.birth) = :month")
-    List<User> findAllByBirthMonth(@Param("month") int month);
+    @Query("SELECT DISTINCT u FROM User u JOIN u.userRoleList ur JOIN ur.role r WHERE u.birth IS NOT NULL AND MONTH(u.birth) = :month AND r.roleName = :roleName")
+    List<User> findAllByBirthMonth(@Param("month") int month, @Param("roleName") RoleName roleName);
 
 
     @EntityGraph(attributePaths = {"grade", "userRoleList", "userRoleList.role"})
