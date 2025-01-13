@@ -21,8 +21,11 @@ import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.mapper.LocalUserMapper;
 import com.simsimbookstore.apiserver.users.localuser.service.LocalUserService;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
+import com.simsimbookstore.apiserver.users.user.dto.GuestUserRequestDto;
 import com.simsimbookstore.apiserver.users.user.entity.Gender;
+import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
+import com.simsimbookstore.apiserver.users.user.service.UserService;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -42,14 +45,14 @@ public class OrderFacadeImpl implements OrderFacade {
     private final DeliveryService deliveryService;
     private final PointHistoryService pointHistoryService;
     private final OrderRepository orderRepository;
-    private final LocalUserService localUserService;
+    private final UserService userService;
 
     @Override
     @Transactional
     public OrderFacadeResponseDto createPrepareOrder(OrderFacadeRequestDto facadeRequestDto) {
 
         Long guestId = 0L;
-
+        MemberOrderRequestDto orderReq = new MemberOrderRequestDto();
         // 배송 요청 데이터 로깅
         DeliveryRequestDto deliveryReq = facadeRequestDto.getDeliveryRequestDto();
         log.info("Received DeliveryRequestDto: {}", deliveryReq);
@@ -61,13 +64,15 @@ public class OrderFacadeImpl implements OrderFacade {
         //비회원 일때
         if (facadeRequestDto.memberOrderRequestDto.getUserId() == null) {
             guestId = prepareUser(facadeRequestDto);
+            orderReq = facadeRequestDto.getMemberOrderRequestDto();
+            orderReq.setUserId(guestId);
+            orderReq.setDeliveryId(delivery.getDeliveryId());
+        } else {
+            orderReq = facadeRequestDto.getMemberOrderRequestDto();
+            orderReq.setDeliveryId(delivery.getDeliveryId());
         }
-        // 주문 요청 데이터 로깅
-        MemberOrderRequestDto orderReq = facadeRequestDto.getMemberOrderRequestDto();
-        orderReq.setUserId(guestId);
-        orderReq.setDeliveryId(delivery.getDeliveryId());
-        log.info("Received MemberOrderRequestDto: {}", orderReq);
 
+        // 주문 요청 데이터 로깅
         // 2. 주문 생성
         OrderResponseDto orderResponseDto = memberOrderService.createOrder(orderReq);
         log.info("Created Order: {}", orderResponseDto);
@@ -123,23 +128,10 @@ public class OrderFacadeImpl implements OrderFacade {
     @Transactional
     public Long prepareUser(OrderFacadeRequestDto dto) {
         if (dto.getMemberOrderRequestDto().getUserId() == null) {
-            String uuid = UUID.randomUUID().toString();
-            String uuid2 = UUID.randomUUID().toString().substring(0, 6);
-            LocalUserRegisterRequestDto localUserDto = LocalUserRegisterRequestDto.builder()
-                    .userName("GUEST" + uuid.substring(0, 8))
-                    .email("GEUST" + uuid.substring(0, 6) + "@" + uuid2 + ".com")
-                    .loginId("SIMSIMGUEST" + uuid.substring(0, 16))
-                    .gender(Gender.MALE)
-                    .tier(Tier.STANDARD)
-                    .roleName(RoleName.GUEST)
-                    .password(uuid)
-                    .latestLoginDate(null)
-                    .birth(LocalDate.now())
-                    .mobileNumber(null)
-                    .userStatus(UserStatus.ACTIVE)
-                    .build();
-            LocalUser guest = localUserService.saveLocalUser(localUserDto);
+            GuestUserRequestDto guestDto = GuestUserRequestDto.builder()
+                    .userName(dto.memberOrderRequestDto.getSenderName()).build();
 
+            User guest = userService.createGuest(guestDto);
             return guest.getUserId();
         } else {
             return dto.getMemberOrderRequestDto().getUserId();

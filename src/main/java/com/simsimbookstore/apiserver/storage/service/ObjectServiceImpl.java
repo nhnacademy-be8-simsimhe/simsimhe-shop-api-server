@@ -118,12 +118,12 @@ public class ObjectServiceImpl {
             name = fileName;
             // 파일 업로드
             uploadFileToStorage(url, inputStream, tokenId);
-            uploadedFileNames.add(fileName);
+            uploadedFileNames.add(url);
         } catch (IOException e) {
             throw new ObjectStorageException("Failed to upload file from URL: " + fileUrl);
         }
 
-        return name;
+        return uploadedFileNames.getFirst();
     }
     /*
         - 주어진 MultipartFile의 확장자가 허용된 이미지 확장자인지 검증

@@ -1,6 +1,7 @@
 package com.simsimbookstore.apiserver.users.user.service;
 
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
+import com.simsimbookstore.apiserver.users.user.dto.GuestUserRequestDto;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 
@@ -20,4 +21,6 @@ public interface UserService {
     boolean existsUser(Long userId);
 
     Tier getUserTier(Long userId);
+
+    User createGuest(GuestUserRequestDto dto);
 }
