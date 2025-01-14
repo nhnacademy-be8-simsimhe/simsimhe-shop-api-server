@@ -28,6 +28,12 @@ import java.util.Map;
 public class CouponController {
     private final CouponService couponService;
 
+
+    @GetMapping("/admin/coupons")
+    public ResponseEntity<Page<CouponResponseDto>> getTotalCoupons(Pageable pageable) {
+        Page<CouponResponseDto> totalCoupons = couponService.getTotalCoupons(setPageable(pageable,null));
+        return ResponseEntity.status(HttpStatus.OK).body(totalCoupons);
+    }
     /**
      * 특정 쿠폰(couponId) 하나를 응답한다.
      * @param couponId
@@ -60,7 +66,7 @@ public class CouponController {
      * @param pageable
      * @return 유저의 쿠폰 Page
      */
-    @GetMapping("/shop/users/{userId}/coupons")
+    @GetMapping("/admin/users/{userId}/coupons")
     public ResponseEntity<Page<CouponResponseDto>> getCoupons(@PathVariable Long userId,
                                                         @RequestParam(required = false) String sortField,
                                                         Pageable pageable) {
@@ -168,7 +174,7 @@ public class CouponController {
         return PageRequest.of(
                 pageable.getPageNumber(),
                 10, //페이지 사이즈를 10으로 고정
-                Sort.by(Sort.Direction.ASC, sortBy)
+                Sort.by(Sort.Direction.DESC, sortBy)
         );
     }
 }
