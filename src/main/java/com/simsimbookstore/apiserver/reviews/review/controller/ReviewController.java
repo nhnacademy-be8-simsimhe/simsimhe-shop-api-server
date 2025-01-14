@@ -1,7 +1,6 @@
 package com.simsimbookstore.apiserver.reviews.review.controller;
 
 
-import com.simsimbookstore.apiserver.reviews.review.dto.ReviewLikeCountDTO;
 import com.simsimbookstore.apiserver.reviews.review.dto.ReviewRequestDTO;
 import com.simsimbookstore.apiserver.reviews.review.dto.ReviewResponseDTO;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
