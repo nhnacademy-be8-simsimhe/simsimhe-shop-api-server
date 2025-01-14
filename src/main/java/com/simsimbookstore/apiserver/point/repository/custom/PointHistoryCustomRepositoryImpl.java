@@ -33,6 +33,7 @@ public class PointHistoryCustomRepositoryImpl implements PointHistoryCustomRepos
                         qPointHistory.amount.as("amount"),
                         qPointHistory.created_at.as("createdAt"),
                         // 주문 ID
+                        qPointHistory.pointDescription.as("description"),
                         qOrderPointManage.order.orderId.as("orderId"),
                         // 리뷰 ID
                         qReviewPointManage.review.reviewId.as("reviewId")

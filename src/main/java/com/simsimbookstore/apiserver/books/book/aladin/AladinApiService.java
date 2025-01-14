@@ -18,6 +18,9 @@ import com.simsimbookstore.apiserver.books.contributor.entity.Contributor;
 import com.simsimbookstore.apiserver.books.contributor.repository.ContributorRepositroy;
 import com.simsimbookstore.apiserver.books.tag.domain.Tag;
 import com.simsimbookstore.apiserver.books.tag.repository.TagRepository;
+import com.simsimbookstore.apiserver.storage.service.ObjectServiceImpl;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,9 +28,10 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class AladinApiService {
 
     private final RestTemplate restTemplate;
@@ -39,31 +43,10 @@ public class AladinApiService {
     private final CategoryRepository categoryRepository;
     private final BookCategoryRepository bookCategoryRepository;
     private final BookImageRepoisotry bookImageRepoisotry;
-
-    public AladinApiService(RestTemplate restTemplate, BookRepository bookRepository,
-                            TagRepository tagRepository, BookTagRepository bookTagRepository,
-                            ContributorRepositroy contributorRepositroy, BookContributorRepository bookContributorRepository,
-                            CategoryRepository categoryRepository, BookCategoryRepository bookCategoryRepository, BookImageRepoisotry bookImageRepoisotry) {
-        this.restTemplate = restTemplate;
-        this.bookRepository = bookRepository;
-        this.tagRepository = tagRepository;
-        this.bookTagRepository = bookTagRepository;
-        this.contributorRepositroy = contributorRepositroy;
-        this.bookContributorRepository = bookContributorRepository;
-        this.categoryRepository = categoryRepository;
-        this.bookCategoryRepository = bookCategoryRepository;
-        this.bookImageRepoisotry = bookImageRepoisotry;
-    }
+    private final ObjectServiceImpl objectService;
 
     @Transactional
     public void fetchAndSaveBestsellerBooks() throws Exception {
-//        String baseUrl = "https://www.aladin.co.kr/ttb/api/ItemList.aspx"
-//                + "?ttbkey=ttbchlim201008001"
-//                + "&QueryType=Bestseller"
-//                + "&MaxResults=50"
-//                + "&output=xml"
-//                + "&Version=20131101";
-
         String baseUrl = "https://www.aladin.co.kr/ttb/api/ItemList.aspx"
                 + "?ttbkey=ttbchlim201008001"
                 + "&QueryType=Bestseller"
@@ -74,14 +57,14 @@ public class AladinApiService {
 
 
         // 다양한 SearchTarget 값을 정의
-        String[] searchTargets = {"Book", "Foreign", "Music", "DVD", "Used", "eBook"};
+        String[] searchTargets = {"Book", "Foreign", "Music", "DVD"};
+
 
         XmlMapper xmlMapper = new XmlMapper();
 
         for (String searchTarget : searchTargets) {
             for (int start = 1; start <= 4; start++) {
                 String url = baseUrl + "&SearchTarget=" + searchTarget + "&start=" + start;
-                System.out.println("Requesting: " + url);
 
                 String response = restTemplate.getForObject(url, String.class);
                 AladinApiXmlResponse apiResponse = xmlMapper.readValue(response, AladinApiXmlResponse.class);
@@ -114,14 +97,18 @@ public class AladinApiService {
         if (imagePath == null || imagePath.isEmpty()) {
             return;
         }
+        try {
+            String uploadedImageUrl = objectService.uploadObjects(imagePath);
+            BookImagePath bookImagePath = BookImagePath.builder()
+                    .book(book)
+                    .imagePath(uploadedImageUrl)
+                    .imageType(BookImagePath.ImageType.THUMBNAIL)
+                    .build();
 
-        BookImagePath bookImagePath = BookImagePath.builder()
-                .book(book)
-                .imagePath(imagePath)
-                .imageType(BookImagePath.ImageType.THUMBNAIL)
-                .build();
-
-        bookImageRepoisotry.save(bookImagePath);
+            bookImageRepoisotry.save(bookImagePath);
+        } catch (Exception e) {
+            log.error("Failed to upload and save image");
+        }
 
     }
 
@@ -165,7 +152,7 @@ public class AladinApiService {
 
     private void saveTags(Book book, String tagName) {
         Tag tag = tagRepository.findByTagName(tagName)
-                .orElseGet(() -> tagRepository.save(Tag.builder().tagName(tagName).build()));
+                .orElseGet(() -> tagRepository.save(Tag.builder().tagName(tagName).isActivated(true).build()));
         bookTagRepository.save(BookTag.builder().book(book).tag(tag).build());
     }
 

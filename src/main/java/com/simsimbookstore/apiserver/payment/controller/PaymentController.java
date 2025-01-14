@@ -69,7 +69,6 @@ public class PaymentController {
         SuccessRequestDto successDto = new SuccessRequestDto(paymentKey, orderId, amount, paymentMethodResponse);
 
         ConfirmResponseDto confirmResponseDto;
-
         // 임시 저장값과 같은지 검증
         if ((Objects.equals(orderId, redisOrderId)) && (Objects.equals(amount, redisAmount))) {
             // 같으면 임시 저장 데이터 삭제
@@ -78,6 +77,8 @@ public class PaymentController {
 
             // 결제 승인 요청
             confirmResponseDto = paymentService.confirm(successDto);
+            //재고소모,쿠폰사용,포인트적립소모
+            orderFacade.completeOrder(orderId);
         } else {
             // 검증 실패 시 처리
             throw new PaymentValidationFailException("요청 orderId, amount 값과 결제 orderId, amount 값이 일치하지 않습니다.");
