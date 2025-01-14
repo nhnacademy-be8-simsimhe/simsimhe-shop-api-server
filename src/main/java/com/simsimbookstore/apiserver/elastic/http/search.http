@@ -107,8 +107,8 @@ Content-Type: application/json
 }
 
 
-### simsimhe-books에 데이터 json으로 뽑아낸 데이터 저장
-POST localhost:8010/elastic/document/save
+### simsimhe-books에서 json으로 뽑아낸 데이터 저장
+POST localhost:8010/api/shop/elastic/document/save
 Content-Type: application/json
 
 
@@ -125,7 +125,7 @@ Content-Type:application/json
 
 
 ### books 인덱스에서 title이 hello인 document 가져오기
-GET localhost:8010/elastic/document?word=한강
+GET localhost:8010/api/shop/elastic/document?keyword=한강
 
 
 
