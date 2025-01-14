@@ -109,9 +109,9 @@ public class CouponController {
      * @return 발행된 쿠폰들
      */
     @PostMapping("/admin/coupons/issue")
-    public ResponseEntity<Map<String,List<Long>>> issueCoupons(@Valid @RequestBody IssueCouponsRequestDto requestDto) {
-        List<Long> issueCouponIds = couponService.issueCoupons(requestDto.getUserIds(), requestDto.getCouponTypeId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("couponIds",issueCouponIds));
+    public ResponseEntity<Void> issueCoupons(@Valid @RequestBody IssueCouponsRequestDto requestDto) {
+        couponService.issueCoupons(requestDto.getUserIds(), requestDto.getCouponTypeId());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**

@@ -25,7 +25,7 @@ public interface CouponService {
     List<CouponResponseDto> getEligibleCoupons(Long userId, Long bookId);
 
     // user들에게 쿠폰을 발급한다.
-    List<Long> issueCoupons(List<Long> userIds, Long couponTypeId);
+    void issueCoupons(List<Long> userIds, Long couponTypeId);
 
     // 쿠폰종류에 해당하는 모든 쿠폰을 만료시킨다.
 //    void expireAllCoupons(Long couponTypeId); <- couponTypeService에서
