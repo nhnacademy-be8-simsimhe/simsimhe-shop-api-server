@@ -3,7 +3,6 @@ package com.simsimbookstore.apiserver.users.localuser.service.impl;
 import com.simsimbookstore.apiserver.coupons.coupon.service.CouponService;
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponType;
 import com.simsimbookstore.apiserver.exception.AlreadyExistException;
-import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.service.GradeService;
@@ -20,8 +19,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import java.util.List;
 import java.util.Objects;
+
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor

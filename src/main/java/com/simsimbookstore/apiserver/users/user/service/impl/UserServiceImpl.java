@@ -105,6 +105,7 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+
     @Override
     public boolean existsUser(Long userId) {
         return userRepository.existsById(userId);
