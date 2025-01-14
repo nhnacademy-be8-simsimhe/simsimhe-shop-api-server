@@ -1,5 +1,7 @@
 package com.simsimbookstore.apiserver.orders.delivery.service.impl;
 
+import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
+import com.simsimbookstore.apiserver.orders.delivery.dto.DeliveryDetailResponseDto;
 import com.simsimbookstore.apiserver.orders.delivery.dto.DeliveryRequestDto;
 import com.simsimbookstore.apiserver.orders.delivery.dto.DeliveryResponseDto;
 import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
@@ -8,6 +10,8 @@ import com.simsimbookstore.apiserver.orders.delivery.exception.DeliveryStateUpda
 import com.simsimbookstore.apiserver.orders.delivery.repository.DeliveryRepository;
 import com.simsimbookstore.apiserver.orders.delivery.service.DeliveryService;
 import java.util.EnumSet;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,11 +33,11 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     @Transactional(readOnly = true)
-    public DeliveryResponseDto getDeliveryById(Long deliveryId) {
+    public DeliveryDetailResponseDto getDeliveryById(Long deliveryId) {
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found with ID: " + deliveryId));
 
-        return DeliveryResponseDto.fromEntity(delivery);
+        return DeliveryDetailResponseDto.fromEntity(delivery);
     }
 
 
@@ -66,6 +70,44 @@ public class DeliveryServiceImpl implements DeliveryService {
         deliveryRepository.deleteById(deliveryId);
     }
 
+    @Override
+    public PageResponse<DeliveryResponseDto> getAllDelivery(Pageable pageable) {
+        Page<Delivery> deliveryPage = deliveryRepository.findAll(pageable);
+
+        Page<DeliveryResponseDto> dtoPage = deliveryPage.map(DeliveryResponseDto::fromEntity);
+
+        return new PageResponse<DeliveryResponseDto>().getPageResponse(
+                pageable.getPageNumber() + 1,
+                10,
+                dtoPage
+        );
+    }
+
+    @Override
+    public PageResponse<DeliveryResponseDto> getDeliveriesByState (Delivery.DeliveryState state, Pageable pageable) {
+        Page<Delivery> deliveryPage = deliveryRepository.findByDeliveryState(state, pageable);
+
+        Page<DeliveryResponseDto> dtoPage = deliveryPage.map(DeliveryResponseDto::fromEntity);
+
+        return new PageResponse<DeliveryResponseDto>().getPageResponse(
+                pageable.getPageNumber() + 1,
+                10,
+                dtoPage
+        );
+    }
+
+    @Override
+    public DeliveryResponseDto updateTrackingNumber(Long deliveryId, Integer trackingNumber) {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found with ID: " + deliveryId));
+
+        delivery.setTrackingNumber(trackingNumber);  // 트래킹 번호 업데이트
+        deliveryRepository.save(delivery);
+
+        return DeliveryResponseDto.fromEntity(delivery);
+    }
+
+
     private void validateDeliveryState(Delivery.DeliveryState newDeliveryState) {
         if (newDeliveryState == null) {
             throw new DeliveryStateUpdateException("새로운 배송 상태는 null 일 수 없습니다.");
@@ -75,4 +117,5 @@ public class DeliveryServiceImpl implements DeliveryService {
             throw new DeliveryStateUpdateException("유효하지 않은 배송 상태입니다: " + newDeliveryState);
         }
     }
+
 }
