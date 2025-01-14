@@ -67,6 +67,7 @@ class LocalUserServiceTest {
     LocalUserRegisterRequestDto testUser;
     Grade testGrade;
     UserRole testUserRole;
+    LocalUser localUser;
 
     @BeforeEach
     void setUp() {
@@ -95,16 +96,21 @@ class LocalUserServiceTest {
                 .role(testRole)
                 .build();
 
+        localUser = LocalUser.builder()
+                .userId(1L)
+                .build();
+
     }
 
     @Test
     @DisplayName("로컬 유저 저장 테스트")
     void testSaveLocalUser() {
         when(roleService.findByRoleName(RoleName.USER)).thenReturn(new Role(1L, RoleName.USER));
-
-        LocalUser localUser = localUserService.saveLocalUser(testUser);
-        lenient().when(pointHistoryService.signupPoint(localUser)).thenReturn(null);
+        when(localUserRepository.save(any())).thenReturn(localUser);
         when(couponService.issueCoupons(anyList(), anyLong())).thenReturn(null);
+        LocalUser localUser = localUserService.saveLocalUser(testUser);
+
+        lenient().when(pointHistoryService.signupPoint(localUser)).thenReturn(null);
         verify(localUserRepository, times(1)).save(any(LocalUser.class));
     }
 
