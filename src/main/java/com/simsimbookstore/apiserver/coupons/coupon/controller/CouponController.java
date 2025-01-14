@@ -28,6 +28,12 @@ import java.util.Map;
 public class CouponController {
     private final CouponService couponService;
 
+
+    @GetMapping("/admin/coupons")
+    public ResponseEntity<Page<CouponResponseDto>> getTotalCoupons(Pageable pageable) {
+        Page<CouponResponseDto> totalCoupons = couponService.getTotalCoupons(setPageable(pageable,null));
+        return ResponseEntity.status(HttpStatus.OK).body(totalCoupons);
+    }
     /**
      * 특정 쿠폰(couponId) 하나를 응답한다.
      * @param couponId

@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface CouponService {
+    //모든 쿠폰을 페이지로 가져온다.
+    Page<CouponResponseDto> getTotalCoupons(Pageable pageable);
     // couponId로 쿠폰을 가져온다.
     CouponResponseDto getCouponById( Long couponId);
     // couponType의 사용되지 않은 쿠폰을 가져옵니다.

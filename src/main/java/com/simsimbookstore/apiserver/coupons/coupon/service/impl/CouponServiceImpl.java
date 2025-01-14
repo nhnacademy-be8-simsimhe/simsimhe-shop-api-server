@@ -55,6 +55,11 @@ public class CouponServiceImpl implements CouponService {
     private final BookCategoryRepository bookCategoryRepository;
     private final BookGetService bookGetService;
 
+    @Override
+    public Page<CouponResponseDto> getTotalCoupons(Pageable pageable) {
+        Page<Coupon> totalCoupons = couponRepository.findAll(pageable);
+        return totalCoupons.map(CouponMapper::toResponse);
+    }
     /**
      * couponId로 쿠폰을 가져온다.
      * @param couponId
