@@ -42,7 +42,7 @@ public class ElasticController {
 
     @PostMapping("/document/save")
     public ResponseEntity<?> saveAll(){
-        elasticService.saveAll("simsim_test.json");
+        elasticService.saveAll("simsim.json");
         return ResponseEntity.ok("all data is saved");
     }
 
