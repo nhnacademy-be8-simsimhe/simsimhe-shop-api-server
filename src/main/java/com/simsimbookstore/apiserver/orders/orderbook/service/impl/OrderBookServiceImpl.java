@@ -2,7 +2,6 @@ package com.simsimbookstore.apiserver.orders.orderbook.service.impl;
 
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
-import com.simsimbookstore.apiserver.books.book.service.BookManagementService;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.coupondiscount.dto.CouponDiscountResponseDto;
 import com.simsimbookstore.apiserver.orders.coupondiscount.entity.CouponDiscount;

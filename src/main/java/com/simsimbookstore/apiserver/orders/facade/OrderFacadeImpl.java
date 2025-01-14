@@ -127,7 +127,7 @@ public class OrderFacadeImpl implements OrderFacade {
         for (OrderBook orderBook : orderBookList) {
             // 3. 재고 수정
             bookManagementService.modifyQuantity(orderBook.getOrderBookId(), -orderBook.getQuantity());
-
+            orderBook.setOrderBookState(OrderBook.OrderBookState.DELIVERY_READY);
             // 4. 쿠폰 사용 처리
             CouponDiscount couponDiscount = orderBook.getCouponDiscount(); // 연관된 CouponDiscount 가져오기
             if (couponDiscount != null) { // CouponDiscount가 있는 경우에만 처리
@@ -143,6 +143,10 @@ public class OrderFacadeImpl implements OrderFacade {
                 .orderId(order.getOrderId())
                 .userId(order.getUser().getUserId()) // 사용자 ID로 포인트 적립
                 .build());
+
+        order.setOrderState(Order.OrderState.DELIVERY_READY);
+        order.getDelivery().setDeliveryState(Delivery.DeliveryState.READY);
+
     }
     /**
      * 비회원 주문을 위한 비회원 생성

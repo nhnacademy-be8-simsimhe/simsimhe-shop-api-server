@@ -9,6 +9,8 @@ import com.simsimbookstore.apiserver.orders.delivery.dto.DeliveryStateUpdateRequ
 import com.simsimbookstore.apiserver.orders.delivery.dto.DeliveryTrackingNumberRequestDto;
 import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
 import com.simsimbookstore.apiserver.orders.delivery.service.DeliveryService;
+import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +23,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/admin/deliveries")
 public class DeliveryAdminController {
 
     private final DeliveryService deliveryService;
-
-    public DeliveryAdminController(DeliveryService deliveryService) {
-        this.deliveryService = deliveryService;
-    }
 
     // 상세 조회
     @GetMapping("/{id}")
