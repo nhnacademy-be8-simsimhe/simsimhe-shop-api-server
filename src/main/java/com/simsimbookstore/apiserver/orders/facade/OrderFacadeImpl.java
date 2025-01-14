@@ -1,8 +1,10 @@
 package com.simsimbookstore.apiserver.orders.facade;
 
-
-import static java.time.LocalTime.now;
-
+import com.simsimbookstore.apiserver.books.book.service.BookManagementService;
+import com.simsimbookstore.apiserver.coupons.coupon.entity.Coupon;
+import com.simsimbookstore.apiserver.coupons.coupon.service.CouponService;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
+import com.simsimbookstore.apiserver.orders.coupondiscount.entity.CouponDiscount;
 import com.simsimbookstore.apiserver.orders.delivery.dto.DeliveryRequestDto;
 import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
 import com.simsimbookstore.apiserver.orders.delivery.service.DeliveryService;
@@ -12,23 +14,15 @@ import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.orders.order.service.MemberOrderService;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
+import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
 import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
 import com.simsimbookstore.apiserver.point.dto.OrderPointRequestDto;
 import com.simsimbookstore.apiserver.point.service.PointHistoryService;
-import com.simsimbookstore.apiserver.users.grade.entity.Tier;
-import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
-import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
-import com.simsimbookstore.apiserver.users.localuser.mapper.LocalUserMapper;
-import com.simsimbookstore.apiserver.users.localuser.service.LocalUserService;
-import com.simsimbookstore.apiserver.users.role.entity.RoleName;
+
 import com.simsimbookstore.apiserver.users.user.dto.GuestUserRequestDto;
-import com.simsimbookstore.apiserver.users.user.entity.Gender;
 import com.simsimbookstore.apiserver.users.user.entity.User;
-import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.service.UserService;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -46,13 +40,15 @@ public class OrderFacadeImpl implements OrderFacade {
     private final PointHistoryService pointHistoryService;
     private final OrderRepository orderRepository;
     private final UserService userService;
+    private final BookManagementService bookManagementService;
+    private final CouponService couponService;
 
     @Override
     @Transactional
     public OrderFacadeResponseDto createPrepareOrder(OrderFacadeRequestDto facadeRequestDto) {
 
-        Long guestId = 0L;
-        MemberOrderRequestDto orderReq = new MemberOrderRequestDto();
+        Long guestId;
+        MemberOrderRequestDto orderReq;
         // 배송 요청 데이터 로깅
         DeliveryRequestDto deliveryReq = facadeRequestDto.getDeliveryRequestDto();
         log.info("Received DeliveryRequestDto: {}", deliveryReq);
@@ -100,10 +96,6 @@ public class OrderFacadeImpl implements OrderFacade {
             }
         }
 
-        pointHistoryService.orderPoint(OrderPointRequestDto.builder()
-                .orderId(orderResponseDto.getOrderId())
-                .userId(facadeRequestDto.getMemberOrderRequestDto().getUserId())
-                .build());
 
         // 4. 응답 생성
         String orderName = orderBookService.getOrderName(orderBookReqs);
@@ -124,6 +116,40 @@ public class OrderFacadeImpl implements OrderFacade {
         return response;
     }
 
+    @Transactional
+    public void completeOrder(String orderNumber) {
+        // 1. 주문 번호로 Order 조회
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+
+        // 2. Order에 속한 OrderBook 리스트 조회
+        List<OrderBook> orderBookList = orderBookService.getOrderBooks(order.getOrderId());
+        for (OrderBook orderBook : orderBookList) {
+            // 3. 재고 수정
+            bookManagementService.modifyQuantity(orderBook.getOrderBookId(), -orderBook.getQuantity());
+
+            // 4. 쿠폰 사용 처리
+            CouponDiscount couponDiscount = orderBook.getCouponDiscount(); // 연관된 CouponDiscount 가져오기
+            if (couponDiscount != null) { // CouponDiscount가 있는 경우에만 처리
+                Coupon coupon = couponDiscount.getCoupon(); // CouponDiscount에서 Coupon 가져오기
+                if (coupon != null) {
+                    couponService.useCoupon(order.getUser().getUserId(), coupon.getCouponId());
+                }
+            }
+        }
+
+        // 5. 포인트 적립 처리
+        pointHistoryService.orderPoint(OrderPointRequestDto.builder()
+                .orderId(order.getOrderId())
+                .userId(order.getUser().getUserId()) // 사용자 ID로 포인트 적립
+                .build());
+    }
+    /**
+     * 비회원 주문을 위한 비회원 생성
+     *
+     * @param //OrderFacadeRequsetDto
+     * @return Guest userId
+     */
 
     @Transactional
     public Long prepareUser(OrderFacadeRequestDto dto) {
