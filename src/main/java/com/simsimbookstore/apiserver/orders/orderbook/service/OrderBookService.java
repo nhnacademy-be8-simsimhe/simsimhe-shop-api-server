@@ -29,4 +29,6 @@ public interface OrderBookService {
     String getOrderName(List<OrderBookRequestDto> dtos);
 
     OrderBookResponseDto toOrderBookResponseDto(OrderBook orderBook);
+
+    List<OrderBook> getOrderBooks(Long orderId);
 }

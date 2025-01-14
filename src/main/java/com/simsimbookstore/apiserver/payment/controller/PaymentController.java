@@ -53,6 +53,9 @@ public class PaymentController {
                                             @RequestParam BigDecimal amount) {
         // 결제 승인 요청
         ConfirmResponseDto confirmResponseDto = paymentService.confirm(paymentKey, orderId, amount);
+            
+      //재고소모,쿠폰사용,포인트적립소모
+        orderFacade.completeOrder(orderId);
         return ResponseEntity.status(HttpStatus.CREATED).body(confirmResponseDto);
     }
 

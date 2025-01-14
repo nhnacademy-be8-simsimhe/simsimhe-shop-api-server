@@ -19,8 +19,6 @@ import com.simsimbookstore.apiserver.orders.order.service.MemberOrderService;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookResponseDto;
 import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
-import com.simsimbookstore.apiserver.point.dto.OrderPointRequestDto;
-import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import java.math.BigDecimal;
 
 import java.util.List;
@@ -42,9 +40,6 @@ class OrderFacadeServiceImplTest {
 
     @Mock
     private DeliveryService deliveryService;
-
-    @Mock
-    private PointHistoryService pointHistoryService;
 
     @Mock
     private OrderRepository orderRepository;
@@ -114,7 +109,6 @@ class OrderFacadeServiceImplTest {
         verify(orderBookService, times(orderBookReqList.size())).createOrderBook(any(OrderBookRequestDto.class));
         verify(orderBookService, times(1)).getOrderName(orderBookReqList);
         verify(orderRepository, times(1)).findById(mockOrderResponse.getOrderId());
-        verify(pointHistoryService, times(1)).orderPoint(any(OrderPointRequestDto.class));
 
         assertNotNull(result);
         assertEquals(mockOrderResponse.getOrderNumber(), result.getOrderNumber());

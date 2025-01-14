@@ -26,6 +26,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -57,6 +58,7 @@ public class OrderBook {
     @Column(name = "discount_price", nullable = false)
     private BigDecimal discountPrice;
 
+    @Setter
     @Column(name ="order_book_state")
     @Enumerated(EnumType.STRING)
     private OrderBookState orderBookState;
@@ -70,7 +72,8 @@ public class OrderBook {
 
 
     public enum OrderBookState {
-        PENDING,          // 주문대기
+        PENDING,          //결제대기
+        DELIVERY_READY,   // 배송대기
         IN_DELIVERY,      // 배송중
         COMPLETED,        // 완료
         RETURNED,         // 반품

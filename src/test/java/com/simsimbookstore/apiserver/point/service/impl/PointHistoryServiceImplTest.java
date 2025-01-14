@@ -20,6 +20,7 @@ import com.simsimbookstore.apiserver.reviews.review.dto.ReviewRequestDTO;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.reviews.review.repository.ReviewRepository;
 import com.simsimbookstore.apiserver.reviews.review.service.ReviewService;
+import com.simsimbookstore.apiserver.reviews.reviewimage.repository.ReviewImagePathRepository;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.service.UserService;
@@ -61,6 +62,9 @@ class PointHistoryServiceImplTest {
 
     @Mock
     private OrderPointManageRepository orderPointManageRepository;
+
+    @Mock
+    private ReviewImagePathRepository reviewImagePathRepository;
 
     @InjectMocks
     private PointHistoryServiceImpl pointHistoryService;
@@ -213,8 +217,12 @@ class PointHistoryServiceImplTest {
                         .available(true)
                         .description("Review points")
                         .build());
-
+        
+        when(reviewImagePathRepository.findByReview(any())).thenReturn(null);
         PointHistory result = pointHistoryService.reviewPoint(new ReviewPointCalculateRequestDto(userId, reviewId));
+
+
+
 
         assertNotNull(result);
         assertEquals(PointHistory.PointType.EARN, result.getPointType());

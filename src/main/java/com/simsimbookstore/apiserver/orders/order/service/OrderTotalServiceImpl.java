@@ -37,92 +37,111 @@ public class OrderTotalServiceImpl implements OrderTotalService{
         log.info("requestDto = {}", requestDto);
         log.info("couponOptions = {}", requestDto.getCouponOptions());
 
+        // 먼저 책 목록을 가져옵니다.
         List<BookListResponseDto> bookOrderList = orderListService.toBookOrderList(requestDto.getBookList());
 
         BigDecimal total = BigDecimal.ZERO;
-        BigDecimal notPointUseTotal = BigDecimal.ZERO;
         BigDecimal originalPrice = BigDecimal.ZERO;
-        BigDecimal discountedPrice = BigDecimal.ZERO;
 
         List<CouponUsageDto> couponUsageDtos = new ArrayList<>();
-        Map<Long, BigDecimal> couponDiscountDetails = new HashMap<>();
 
-        // 책 가격 및 포장 비용 계산
+        // 책 가격 + 포장 비용 등 계산
         for (BookListResponseDto book : bookOrderList) {
+
+            // 1) 각 책의 원래 총액
             BigDecimal bookOriginalTotal = book.getPrice().multiply(BigDecimal.valueOf(book.getQuantity()));
             originalPrice = originalPrice.add(bookOriginalTotal);
             BigDecimal bookTotal = bookOriginalTotal;
 
-            // 포장 비용 계산
+            // 2) 포장 비용
             if (requestDto.getPackagingOptions() != null) {
                 TotalRequestDto.PackagingRequestDto packaging = requestDto.getPackagingOptions().get(book.getBookId());
                 if (packaging != null && packaging.getPackageTypeId() != null) {
-                    BigDecimal packagingCost = wrapTypeService.getWrapTypeById(packaging.getPackageTypeId()).getPackagePrice();
-                    log.info("Packaging cost: BookId={}, TypeId={}, Quantity={}, Cost={}",
-                            book.getBookId(), packaging.getPackageTypeId(), packaging.getQuantity(), packagingCost);
+                    BigDecimal packagingCost = wrapTypeService
+                            .getWrapTypeById(packaging.getPackageTypeId())
+                            .getPackagePrice();
                     bookTotal = bookTotal.add(packagingCost.multiply(BigDecimal.valueOf(packaging.getQuantity())));
                 }
             }
 
-            if (requestDto.getCouponOptions() != null
-                    && requestDto.getCouponOptions().containsKey(book.getBookId())) {
-                log.info("쿠폰진입");
-                Long couponId = requestDto.getCouponOptions().get(book.getBookId());
-                try {
-                    // 쿠폰 할인 금액 계산
-                    DiscountAmountResponseDto discountDto = couponService.calDiscountAmount(
-                            book.getBookId(),
-                            book.getQuantity(),
-                            couponId
-                    );
+            // 3) 쿠폰 할인: 회원만 적용 (userId != null)
+            if (requestDto.getUserId() != null) {
+                // 쿠폰 옵션이 있는지 확인
+                if (requestDto.getCouponOptions() != null
+                        && requestDto.getCouponOptions().containsKey(book.getBookId())) {
 
-                    BigDecimal discountAmount = discountDto.getDiscountAmount();
+                    Long couponId = requestDto.getCouponOptions().get(book.getBookId());
+                    try {
+                        // 쿠폰 할인 계산
+                        DiscountAmountResponseDto discountDto = couponService.calDiscountAmount(
+                                book.getBookId(),
+                                book.getQuantity(),
+                                couponId
+                        );
+                        BigDecimal discountAmount = discountDto.getDiscountAmount();
 
-                    log.info("쿠폰 할인 금액 : {}", discountAmount);
+                        // bookTotal에서 할인액 차감
+                        bookTotal = bookTotal.subtract(discountAmount);
 
-                    String name = (String) couponService.getCouponById(couponId).getCouponTypeName();
+                        // CouponUsageDto 생성
+                        String couponName = couponService.getCouponById(couponId).getCouponTypeName();
+                        CouponUsageDto usageDto = CouponUsageDto.builder()
+                                .bookId(book.getBookId())
+                                .couponName(couponName)
+                                .couponId(couponId)
+                                .discount(discountAmount)
+                                .build();
+                        couponUsageDtos.add(usageDto);
 
-                    // 책 금액(bookTotal)에서 할인액만큼 차감
-                    bookTotal = bookTotal.subtract(discountAmount);
-                    log.info("쿠폰 할인액 : {}", discountAmount);
-                    // 전체 할인액 누적
-                    log.info("쿠폰 합산");
-                    CouponUsageDto usageDto = CouponUsageDto.builder()
-                            .bookId(book.getBookId())
-                            .couponName(name)
-                            .couponId(couponId)
-                            .discount(discountAmount)
-                            .build();
-                    couponUsageDtos.add(usageDto);
-                    // 책별 할인액 저장
-                    couponDiscountDetails.put(book.getBookId(), discountAmount);
-
-                } catch (Exception e) {
-                    // 쿠폰이 적용 불가능할 경우, 예외처리나 로그 남기기
-                    // 예: throw e;  또는 log.warn(...)
-                    log.warn("쿠폰 적용 에러: bookId={}, couponId={}, msg={}", book.getBookId(), couponId, e.getMessage());
+                        log.info("쿠폰 적용 bookId={}, couponId={}, discount={}",
+                                book.getBookId(), couponId, discountAmount);
+                    } catch (Exception e) {
+                        log.warn("쿠폰 적용 에러: bookId={}, couponId={}, msg={}",
+                                book.getBookId(), couponId, e.getMessage());
+                    }
                 }
+            } else {
+                // userId == null → 비회원이면 쿠폰 로직 스킵
+                // 필요하다면 로그만 남기기
+                log.info("비회원 - 쿠폰 적용 스킵 for bookId={}", book.getBookId());
             }
 
+            // 책별 계산 완료 → 전체 합계에 더함
             total = total.add(bookTotal);
         }
+
+        // 4) 배송비 계산
         BigDecimal deliveryPrice = calculateDeliveryPrice(originalPrice);
-        // 배송비 추가
         total = total.add(deliveryPrice);
-        notPointUseTotal = total;
 
-        // 포인트 사용 검증
-        pointHistoryService.validateUsePoints(requestDto.getUserId(), requestDto.getUsePoint());
-        BigDecimal userPoints = pointHistoryService.getUserPoints(requestDto.getUserId());
-        total = total.subtract(requestDto.getUsePoint());
+        // "포인트 사용 전" 금액
+        BigDecimal notPointUseTotal = total;
 
+        // 5) 포인트 사용: 회원만 가능
+        BigDecimal userPoints = BigDecimal.ZERO; // 기본값
+        if (requestDto.getUserId() != null) {
+            // 포인트 사용 가능여부 검증
+            pointHistoryService.validateUsePoints(requestDto.getUserId(), requestDto.getUsePoint());
+            // 현재 회원 포인트 조회
+            userPoints = pointHistoryService.getUserPoints(requestDto.getUserId());
+            // 총액에서 포인트 차감
+            total = total.subtract(requestDto.getUsePoint());
+        } else {
+            // 비회원은 포인트 사용 X
+            // 요청값을 0으로 강제 세팅(혹은 무시)
+            requestDto.setUsePoint(BigDecimal.ZERO);
+            log.info("비회원 - 포인트 로직 스킵");
+        }
+
+        // 최종 합계
         log.info("Final total: {}", total);
+
         return TotalResponseDto.builder()
                 .total(total)
-                .availablePoints(userPoints)
+                .availablePoints(userPoints)  // 회원이면 실제 값, 비회원이면 0
                 .deliveryPrice(deliveryPrice)
                 .originalPrice(originalPrice)
-                .usePoint(requestDto.getUsePoint())
+                .usePoint(requestDto.getUsePoint())  // 비회원이면 0
                 .couponDiscountDetails(couponUsageDtos)
                 .notPointUseTotal(notPointUseTotal)
                 .build();
@@ -131,18 +150,16 @@ public class OrderTotalServiceImpl implements OrderTotalService{
     @Override
     public BigDecimal calculateDeliveryPrice(BigDecimal total) {
         DeliveryPolicy standardPolicy = deliveryPolicyService.getStandardPolicy();
-
         BigDecimal deliveryPrice = standardPolicy.getDeliveryPrice();
 
         if (total.compareTo(standardPolicy.getPolicyStandardPrice()) < 0) {
-            total = total.add(standardPolicy.getDeliveryPrice());
-            log.info("Total is below the standard price. Added delivery price: {}", standardPolicy.getDeliveryPrice());
+            // 기준 금액 미만이면 배송비 추가
+            log.info("Total is below the standard price. Delivery price: {}", deliveryPrice);
         } else {
+            // 기준 금액 이상이면 무료배송
             deliveryPrice = BigDecimal.ZERO;
             log.info("Total exceeds the standard price. Delivery is free.");
         }
-
         return deliveryPrice;
     }
-
 }
