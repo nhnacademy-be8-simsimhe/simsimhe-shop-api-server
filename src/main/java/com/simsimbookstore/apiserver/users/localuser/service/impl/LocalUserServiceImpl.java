@@ -12,6 +12,7 @@ import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.role.service.RoleService;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.service.LocalUserService;
+import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,11 +28,13 @@ public class LocalUserServiceImpl implements LocalUserService {
 
     private final RoleService roleService;
     private final GradeService gradeService;
+    private final UserRepository userRepository;
 
-    public LocalUserServiceImpl(LocalUserRepository localUserRepository, RoleService roleService, GradeService gradeService) {
+    public LocalUserServiceImpl(LocalUserRepository localUserRepository, RoleService roleService, GradeService gradeService, UserRepository userRepository) {
         this.localUserRepository = localUserRepository;
         this.roleService = roleService;
         this.gradeService = gradeService;
+        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -53,7 +56,7 @@ public class LocalUserServiceImpl implements LocalUserService {
 
         localUser.addUserRole(userRole);
 
-        localUserRepository.save(localUser);
+        LocalUser save = localUserRepository.save(localUser);
 
         return localUser;
     }
