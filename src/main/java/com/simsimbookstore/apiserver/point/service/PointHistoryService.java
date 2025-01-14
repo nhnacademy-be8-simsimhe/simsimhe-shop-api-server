@@ -32,4 +32,6 @@ public interface PointHistoryService {
     PointHistory updatePoint(Long pointHistoryId, Integer newAmount);
 
     BigDecimal calculateEarnOrderPoints(OrderPointCalculateRequestDto dto);
+
+    BigDecimal refundPoint(Long orderId);
 }

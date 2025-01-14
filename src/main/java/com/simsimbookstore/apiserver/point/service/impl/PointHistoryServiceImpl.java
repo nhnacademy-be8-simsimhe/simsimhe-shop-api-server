@@ -22,7 +22,6 @@ import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import com.simsimbookstore.apiserver.point.service.PointPolicyService;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.reviews.review.repository.ReviewRepository;
-import com.simsimbookstore.apiserver.reviews.review.service.ReviewService;
 import com.simsimbookstore.apiserver.reviews.reviewimage.entity.ReviewImagePath;
 import com.simsimbookstore.apiserver.reviews.reviewimage.repository.ReviewImagePathRepository;
 import com.simsimbookstore.apiserver.users.user.entity.User;
@@ -30,7 +29,7 @@ import com.simsimbookstore.apiserver.users.user.service.UserService;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -249,6 +248,16 @@ public class PointHistoryServiceImpl implements PointHistoryService {
         // 정책 조회 및 포인트 계산
         BigDecimal rate = pointHistoryService.getPolicy(EarningMethod).getEarningValue();
         return originalPrice.multiply(rate);
+    }
+
+    @Override
+    public BigDecimal refundPoint(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(()-> new NotFoundException("order Not Found"));
+        //total+point use
+        BigDecimal pointUse = order.getPointUse();
+        BigDecimal totalPrice = order.getTotalPrice();
+        BigDecimal refundPoints = pointUse.add(totalPrice);
+        return BigDecimal.ZERO;
     }
 
 
