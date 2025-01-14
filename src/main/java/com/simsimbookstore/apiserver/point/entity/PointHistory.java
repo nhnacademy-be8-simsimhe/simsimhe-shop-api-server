@@ -44,6 +44,9 @@ public class PointHistory {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime created_at;
 
+    @Column(name = "point_description", nullable = true)
+    private String pointDescription;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

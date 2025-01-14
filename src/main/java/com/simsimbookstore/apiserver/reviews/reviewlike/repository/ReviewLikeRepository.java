@@ -4,8 +4,6 @@ import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.reviews.reviewlike.entity.ReviewLike;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.w3c.dom.stylesheets.LinkStyle;
-
 import java.util.List;
 import java.util.Optional;
 

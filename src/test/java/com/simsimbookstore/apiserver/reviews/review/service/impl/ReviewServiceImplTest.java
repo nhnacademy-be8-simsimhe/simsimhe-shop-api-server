@@ -65,7 +65,10 @@ class ReviewServiceImplTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(reviewRepository.bookOrderCheck(userId, bookId)).thenReturn(1L);
+        when(reviewRepository.alreadyExistCheck(userId, bookId)).thenReturn(0L);
         when(reviewRepository.save(any(Review.class))).thenReturn(review);
+
 
         Review result = reviewService.createReview(dto, bookId, userId);
 

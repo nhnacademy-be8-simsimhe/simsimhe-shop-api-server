@@ -31,13 +31,12 @@ public class CustomCouponRepositoryImpl implements CustomCouponRepository {
 
     /**
      * 유저가 가지고 있는 쿠폰 중에서 특정 책에 적용 가능한 쿠폰만 Page로 반환한다.
-     * @param pageable
      * @param userId
      * @param bookId
      * @return 특정 책에 적용 가능한 쿠폰 페이지
      */
     @Override
-    public Page<Coupon> findEligibleCouponToBook(Pageable pageable, Long userId, Long bookId) {
+    public List<Coupon> findEligibleCouponToBook(Long userId, Long bookId) {
         QCoupon coupon = QCoupon.coupon;
         QCouponType couponType = QCouponType.couponType;
         QCategoryCoupon categoryCoupon = QCategoryCoupon.categoryCoupon;
@@ -50,12 +49,10 @@ public class CustomCouponRepositoryImpl implements CustomCouponRepository {
                 .leftJoin(categoryCoupon).on(couponType.couponTypeId.eq(categoryCoupon.couponTypeId))
                 .leftJoin(bookCoupon).on(couponType.couponTypeId.eq(bookCoupon.couponTypeId))
                 .leftJoin(allCoupon).on(couponType.couponTypeId.eq(allCoupon.couponTypeId))
-                .leftJoin(bookCategory).on(bookCategory.book.bookId.eq(bookId))
                 .where(coupon.user.userId.eq(userId)
                         .and(coupon.couponStatus.eq(CouponStatus.UNUSED))
                         .and(
                                 couponType.instanceOf(CategoryCoupon.class)
-                                        .and(categoryCoupon.category.categoryId.eq(bookCategory.catagory.categoryId))
                                         .or(
                                                 couponType.instanceOf(BookCoupon.class)
                                                         .and(bookCoupon.book.bookId.eq(bookId))
@@ -67,37 +64,8 @@ public class CustomCouponRepositoryImpl implements CustomCouponRepository {
                 )
                 .orderBy(coupon.issueDate.asc());
 
-        // 페이징 적용: limit과 offset 설정
-        query.offset(pageable.getOffset());
-        query.limit(pageable.getPageSize());
 
-        List<Coupon> coupons = query.fetch();
-
-        // 전체 카운트 조회
-        JPAQuery<Long> countQuery = jpaQueryFactory.select(coupon.count())
-                .from(coupon)
-                .join(coupon.couponType, couponType)
-                .leftJoin(categoryCoupon).on(couponType.couponTypeId.eq(categoryCoupon.couponTypeId))
-                .leftJoin(bookCoupon).on(couponType.couponTypeId.eq(bookCoupon.couponTypeId))
-                .leftJoin(allCoupon).on(couponType.couponTypeId.eq(allCoupon.couponTypeId))
-                .leftJoin(bookCategory).on(bookCategory.book.bookId.eq(bookId))
-                .where(
-                        coupon.user.userId.eq(userId)
-                                .and(coupon.couponStatus.eq(CouponStatus.UNUSED))
-                                .and(
-                                        couponType.instanceOf(CategoryCoupon.class)
-                                                .and(categoryCoupon.category.categoryId.eq(bookCategory.catagory.categoryId))
-                                                .or(
-                                                        couponType.instanceOf(BookCoupon.class)
-                                                                .and(bookCoupon.book.bookId.eq(bookId))
-                                                )
-                                                .or(
-                                                        couponType.instanceOf(AllCoupon.class)
-                                                )
-                                )
-                );
-        Long total = countQuery.fetchOne();
-        return new PageImpl<>(coupons, pageable, total);
+        return query.fetch();
     }
 
     /**

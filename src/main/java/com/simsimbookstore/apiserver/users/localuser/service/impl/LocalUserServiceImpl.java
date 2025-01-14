@@ -1,7 +1,7 @@
 package com.simsimbookstore.apiserver.users.localuser.service.impl;
 
 import com.simsimbookstore.apiserver.exception.AlreadyExistException;
-import com.simsimbookstore.apiserver.exception.NotFoundException;
+import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.service.GradeService;
 import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
@@ -12,12 +12,10 @@ import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.role.service.RoleService;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.service.LocalUserService;
-import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
 
 @Transactional(readOnly = true)
 @Service
@@ -28,13 +26,15 @@ public class LocalUserServiceImpl implements LocalUserService {
 
     private final RoleService roleService;
     private final GradeService gradeService;
-    private final UserRepository userRepository;
+    private final PointHistoryService pointHistoryService;
 
-    public LocalUserServiceImpl(LocalUserRepository localUserRepository, RoleService roleService, GradeService gradeService, UserRepository userRepository) {
+
+    public LocalUserServiceImpl(LocalUserRepository localUserRepository, RoleService roleService, GradeService gradeService,
+                                PointHistoryService pointHistoryService) {
         this.localUserRepository = localUserRepository;
         this.roleService = roleService;
         this.gradeService = gradeService;
-        this.userRepository = userRepository;
+        this.pointHistoryService = pointHistoryService;
     }
 
     @Transactional
@@ -57,6 +57,8 @@ public class LocalUserServiceImpl implements LocalUserService {
         localUser.addUserRole(userRole);
 
         LocalUser save = localUserRepository.save(localUser);
+
+        pointHistoryService.signupPoint(save);
 
         return localUser;
     }

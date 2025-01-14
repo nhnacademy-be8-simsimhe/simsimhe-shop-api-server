@@ -73,7 +73,7 @@ public class Order {
     @Column(name = "delivery_price", nullable = false)
     private BigDecimal deliveryPrice;
 
-    @Column(name = "order_name", nullable = true)
+    @Column(name = "order_name")
     private String orderName;
 
     @Column(name = "sender_name", nullable = false)
@@ -85,6 +85,7 @@ public class Order {
 
     public enum OrderState {
         PENDING,           // 주문대기
+        DELIVERY_READY,     // 배송준비
         IN_DELIVERY,       // 배송중
         COMPLETED,         // 완료
         RETURNED,          // 반품
