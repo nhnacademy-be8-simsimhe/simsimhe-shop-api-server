@@ -1,16 +1,18 @@
 package com.simsimbookstore.apiserver.elastic.controller;
 
 
+import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.elastic.entity.SearchBook;
 import com.simsimbookstore.apiserver.elastic.service.ElasticService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
-@RequestMapping("/elastic")
+@RequestMapping("/api/shop/elastic")
 @RestController
 @RequiredArgsConstructor
 public class ElasticController {
@@ -32,10 +34,7 @@ public class ElasticController {
         List<String> tags = (List<String>) payload.get("tags");
 
 
-//        TestBook book = new TestBook(0L, id, title, author, tags);
-//        testElasticService.saveBook("books", book);
-
-        SearchBook book = new SearchBook(id, title, description,author, tags, date,salePrice,bookSellCount,reviewCount);
+        SearchBook book = new SearchBook(id, title, description,author, "",tags, date,salePrice,bookSellCount,reviewCount);
         elasticService.createBook(book);
 
         return ResponseEntity.ok().build();
@@ -47,30 +46,16 @@ public class ElasticController {
         return ResponseEntity.ok("all data is saved");
     }
 
-//
-//    @PostMapping("/document/{id}")
-//    public SearchBook updateData(@PathVariable String id, @RequestBody Map<String, Object> updateFields){
-//
-//        return testElasticService.updateBook("books", id, updateFields);
-//    }
-
-
 
 
     @GetMapping("/document")
-    public List<SearchBook> getDatas(@RequestParam String word){
-        return elasticService.searchBookByWord(word);
-//        return testElasticService.searchByWord("simsimhe-books",word);
+    public PageResponse<SearchBook> getDatas(@RequestParam String keyword, @RequestParam(defaultValue = "popular") String sort, @RequestParam(defaultValue = "0") int page){
+
+        return elasticService.searchBookByWord(keyword, sort, page);
+
     }
 
 
-//    @DeleteMapping("/document")
-//    public ResponseEntity deleteData(){
-//
-//        testElasticService.deleteAll("books");
-//
-//        return ResponseEntity.ok().build();
-//    }
 
     @DeleteMapping("/document/{id}")
     public ResponseEntity deleteData(@PathVariable String id){
