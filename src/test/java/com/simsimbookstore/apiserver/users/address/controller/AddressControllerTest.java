@@ -6,8 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.users.address.dto.AddressRequestDto;
@@ -51,7 +50,7 @@ class AddressControllerTest {
     Address testAddress1;
     Address testAddress2;
 
-    AddressRequestDto testAddressRequestDto;
+    AddressRequestDto testAddressRequestDto1;
     @BeforeEach
     void setUp() {
         Grade testGrade = Grade.builder()
@@ -87,7 +86,7 @@ class AddressControllerTest {
                 .detailedAddress("쌍용아파트 102동 1602호")
                 .build();
 
-        testAddressRequestDto = AddressRequestDto.builder()
+        testAddressRequestDto1 = AddressRequestDto.builder()
                 .alias("본집")
                 .postalCode("21953")
                 .roadAddress("인천광역시 연수구 청량로 210")
@@ -138,7 +137,7 @@ class AddressControllerTest {
         when(addressService.createAddress(anyLong(), any(AddressRequestDto.class))).thenReturn(addressResponseDto);
         mockMvc.perform(post("/api/users/{userId}/addresses",1L)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(testAddressRequestDto)))
+                .content(objectMapper.writeValueAsString(testAddressRequestDto1)))
 
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.addressId").value(testAddress1.getAddressId()));
@@ -148,5 +147,37 @@ class AddressControllerTest {
     void deleteAddress() throws Exception {
         mockMvc.perform(delete("/api/users/addresses/{addressId}", 1L))
                 .andExpect(status().isOk());
+    }
+
+
+    @Test
+    @DisplayName("10개 미만의 주소 등록 시 성공")
+    void addAddressLessThan10() throws Exception {
+        when(addressService.getCountAddresses(anyLong())).thenReturn(9);
+
+        AddressResponseDto responseDto = AddressMapper.responseDtoFrom(testAddress1);
+        when(addressService.createAddress(anyLong(), any(AddressRequestDto.class))).thenReturn(responseDto);
+
+
+        mockMvc.perform(post("/api/users/{usersId}/addresses",1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(testAddressRequestDto1)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.alias").value(responseDto.getAlias()))
+                .andExpect(jsonPath("$.postalCode").value(responseDto.getPostalCode()))
+                .andExpect(jsonPath("$.roadAddress").value(responseDto.getRoadAddress()))
+                .andExpect(jsonPath("$.detailedAddress").value(responseDto.getDetailedAddress()));
+    }
+
+    @Test
+    @DisplayName("10개 이상의 주소 등록 시 BadRequest")
+    void addAddressMoreThan10() throws Exception{
+        when(addressService.getCountAddresses(anyLong())).thenReturn(10);
+
+        mockMvc.perform(post("/api/users/{usersId}/addresses",1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(testAddressRequestDto1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("최대 10개의 주소만 등록할 수 있습니다."));
     }
 }

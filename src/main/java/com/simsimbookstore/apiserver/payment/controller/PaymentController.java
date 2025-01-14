@@ -3,18 +3,26 @@ package com.simsimbookstore.apiserver.payment.controller;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeImpl;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeRequestDto;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
-import com.simsimbookstore.apiserver.payment.dto.*;
+import com.simsimbookstore.apiserver.payment.dto.ConfirmResponseDto;
+import com.simsimbookstore.apiserver.payment.dto.PaymentMethodResponse;
+import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
+import com.simsimbookstore.apiserver.payment.exception.InvalidPaymentDataException;
+import com.simsimbookstore.apiserver.payment.exception.PaymentMethodNotFoundException;
+import com.simsimbookstore.apiserver.payment.exception.PaymentValidationFailException;
+import com.simsimbookstore.apiserver.payment.processor.PaymentProcessor;
 import com.simsimbookstore.apiserver.payment.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.net.URISyntaxException;
 import java.util.Objects;
 
 @Slf4j
@@ -25,48 +33,32 @@ public class PaymentController {
 
     private final OrderFacadeImpl orderFacade;
     private final PaymentService paymentService;
-//    private final AesUtil aesUtil;
 
     // 사용자 정보 (amount, orderId) 임시 저장
     @PostMapping("/payment")
-    public ResponseEntity<String> paymentInitiate(@RequestBody OrderFacadeRequestDto dto, HttpServletRequest request) {
-        HttpSession session = request.getSession(true);
-
+    public ResponseEntity<String> paymentInitiate(@Valid @RequestBody OrderFacadeRequestDto dto,
+                                                  BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new InvalidPaymentDataException("필드의 값이 잘못되었습니다.");
+        }
         OrderFacadeResponseDto facadeResponseDto = orderFacade.createPrepareOrder(dto);
-
-        // 존재하는 결제 방법인지 확인
-        paymentService.checkPayMethod(facadeResponseDto);
-
-        session.setAttribute("orderId", facadeResponseDto.getOrderNumber());
-        session.setAttribute("totalAmount", facadeResponseDto.getTotalPrice());
-
         String result = paymentService.createPaymentRequest(facadeResponseDto);
-
         return ResponseEntity.ok(result);
     }
 
     // Toss에게 받은 결제 인증 성공시 검증 후 결제 승인 요청 -> 결제 완료 -> DB 저장
-    @GetMapping("/success")
-    public ResponseEntity<SuccessRequestDto> paymentSuccess(@RequestParam String paymentKey,
-                                                            @RequestParam String orderId,
-                                                            @RequestParam BigDecimal amount,
-                                                            HttpServletRequest request) {
-        SuccessRequestDto successDto = new SuccessRequestDto(paymentKey, orderId, amount);
-        HttpSession session = request.getSession();
-
-        // 임시 저장값과 같은지 검증
-        if ((Objects.equals(orderId, (String) session.getAttribute("orderId"))) && (Objects.equals(amount, (BigDecimal) session.getAttribute("totalAmount")))) {
-                // 같으면 세션 삭제
-                session.removeAttribute("orderId");
-                session.removeAttribute("totalAmount");
-                    // 결제 승인 요청
-                    ConfirmSuccessResponseDto confirmSuccessResponseDto = paymentService.confirm(successDto);
-        } else {
-            // 검증 실패 시 처리
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    @GetMapping("/payment/success")
+    public ResponseEntity<?> paymentSuccess(@RequestParam String paymentKey,
+                                            @RequestParam String orderId,
+                                            @RequestParam BigDecimal amount) {
+        // 결제 승인 요청
+        ConfirmResponseDto confirmResponseDto = paymentService.confirm(paymentKey, orderId, amount);
+            
+      //재고소모,쿠폰사용,포인트적립소모
+        orderFacade.completeOrder(orderId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(confirmResponseDto);
     }
+
 
 //    // 사용자/관리자의 환불 요청 (결제 취소)
 //    @PostMapping("/payment/cancel")

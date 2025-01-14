@@ -1,7 +1,6 @@
 package com.simsimbookstore.apiserver.reviews.review.dto;
 
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
-import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

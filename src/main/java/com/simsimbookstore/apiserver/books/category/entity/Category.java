@@ -27,13 +27,15 @@ public class Category {
     @Column(name = "category_name", nullable = false, length = 50)
     private String categoryName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id")
     private Category parent;
 
     @OneToMany(mappedBy = "parent")
     @ToString.Exclude
     private List<Category> children = new ArrayList<>(); // 자식 카테고리 목록
+
+
 
     public void addChildCategory(Category child) {
         this.children.add(child);

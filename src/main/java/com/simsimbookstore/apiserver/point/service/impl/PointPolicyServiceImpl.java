@@ -6,6 +6,8 @@ import com.simsimbookstore.apiserver.point.dto.PointPolicyResponseDto;
 import com.simsimbookstore.apiserver.point.entity.PointPolicy;
 import com.simsimbookstore.apiserver.point.repository.PointPolicyRepository;
 import com.simsimbookstore.apiserver.point.service.PointPolicyService;
+import com.simsimbookstore.apiserver.users.grade.entity.Tier;
+import com.simsimbookstore.apiserver.users.user.service.UserService;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PointPolicyServiceImpl implements PointPolicyService {
 
     private final PointPolicyRepository pointPolicyRepository;
+    private final UserService userService;
 
     /**
      * 특정 EarningMethod 로, 사용 가능한( isAvailable = true ) Policy 하나 조회
@@ -79,5 +82,15 @@ public class PointPolicyServiceImpl implements PointPolicyService {
     @Transactional
     public void deletePolicy(Long pointPolicyId) {
         pointPolicyRepository.deleteById(pointPolicyId);
+    }
+
+
+    @Override
+    public PointPolicyResponseDto getUserPolicy(Long userId) {
+        Tier tier = userService.getUserWithGradeAndRoles(userId).getGrade().getTier();
+
+        String orderTier = "ORDER_"+tier.name();
+
+        return getPolicy(PointPolicy.EarningMethod.valueOf(orderTier));
     }
 }

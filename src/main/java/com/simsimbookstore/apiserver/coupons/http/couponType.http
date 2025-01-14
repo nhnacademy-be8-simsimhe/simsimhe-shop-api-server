@@ -17,17 +17,17 @@ Content-Type: application/json
 }
 
 ### POST couponType 생성 - 카테고리
-POST http://localhost:8020/api/admin/couponTypes
+POST http://localhost:8010/api/admin/couponTypes
 Content-Type: application/json
 
 {
-  "couponTypeName": "카테고리 쿠폰",
+  "couponTypeName": "카테고리 쿠폰 targetId 10",
   "period": null,
   "deadline": "2025-06-29T00:00:00",
   "stacking": false,
   "couponPolicyId": 4,
   "couponTargetType": "카테고리",
-  "targetId": 1
+  "targetId": 10
 }
 
 ### POST couponType 생성 - 전체

@@ -36,4 +36,6 @@ public abstract class CouponResponseDto {
     private DisCountType disCountType;
 
 
+
+    
 }

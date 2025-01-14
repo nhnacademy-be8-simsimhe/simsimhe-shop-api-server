@@ -23,6 +23,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -49,10 +50,10 @@ public class User {
     @Column(name = "user_name", length = 50)
     private String userName;
 
-    @Column(name = "mobile_number", length = 15, unique = true)
+    @Column(name = "mobile_number", length = 15)
     private String mobileNumber;
 
-    @Column(nullable = false, length = 20, unique = true)
+    @Column(nullable = false, length = 20)
     private String email;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -84,6 +85,9 @@ public class User {
     private Set<UserRole> userRoleList = new HashSet<>();
 
     public void addUserRole(UserRole userRole) {
+        if (Objects.isNull(userRoleList)) {
+            userRoleList = new HashSet<>();
+        }
         userRoleList.add(userRole);
         userRole.setUser(this);
     }

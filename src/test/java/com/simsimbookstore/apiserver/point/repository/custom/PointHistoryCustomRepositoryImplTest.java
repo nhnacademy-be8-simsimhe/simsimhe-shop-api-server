@@ -28,6 +28,7 @@ import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -81,30 +82,28 @@ class PointHistoryCustomRepositoryImplTest {
 
     @BeforeEach
     void setUp() {
-
         Grade standardGrade = Grade.builder()
                 .tier(Tier.STANDARD)
                 .minAmount(BigDecimal.valueOf(0))
                 .maxAmount(BigDecimal.valueOf(100000))
                 .build();
-        standardGrade = gradeRepository.save(standardGrade); // 먼저 저장
+        standardGrade = gradeRepository.save(standardGrade);
 
         testUser = LocalUser.builder()
                 .userName("John Doe")
                 .email("johndoe@example.com")
                 .createdAt(LocalDateTime.now())
                 .userStatus(UserStatus.ACTIVE)
-                .grade(standardGrade) // 저장된 Grade 참조
+                .grade(standardGrade)
                 .loginId("test")
                 .password("test")
                 .build();
         localUserRepository.save(testUser);
     }
 
-
     @Test
-    @DisplayName("사용자의 포인트 히스토리를 조회하고 페이지네이션을 검증한다.")
-    void getPointHistoriesByUserId_ShouldReturnPagedResult() {
+    @DisplayName("사용자의 포인트 히스토리를 조회하고 데이터를 검증한다.")
+    void getPointHistoriesByUserId_ShouldReturnResultAsList() {
         Long userId = 1L;
 
         Book book = Book.builder()
@@ -112,19 +111,18 @@ class PointHistoryCustomRepositoryImplTest {
                 .description("This is a detailed description of the sample book.")
                 .bookIndex("Index of the book.")
                 .publisher("Sample Publisher")
-                .isbn("1234567890123") // 13자리 ISBN
+                .isbn("1234567890123")
                 .quantity(100)
                 .price(BigDecimal.valueOf(50000))
                 .saleprice(BigDecimal.valueOf(45000))
                 .publicationDate(LocalDate.of(2025, 1, 1))
                 .giftPackaging(true)
                 .pages(300)
-                .bookStatus(BookStatus.ONSALE) // Enum 값 설정
+                .bookStatus(BookStatus.ONSALE)
                 .viewCount(0L)
                 .build();
 
         Book savedBook = bookRepository.save(book);
-
 
         PointHistory pointHistory1 = PointHistory.builder()
                 .user(testUser)
@@ -138,7 +136,6 @@ class PointHistoryCustomRepositoryImplTest {
                 .amount(-50)
                 .created_at(LocalDateTime.of(2025, 1, 3, 15, 0))
                 .build();
-
         PointHistory pointHistory3 = PointHistory.builder()
                 .user(testUser)
                 .pointType(PointHistory.PointType.EARN)
@@ -203,26 +200,27 @@ class PointHistoryCustomRepositoryImplTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<PointHistoryResponseDto> result = pointHistoryRepository.getPointHistoriesByUserId(userId, pageable);
+        List<PointHistoryResponseDto> result = pointHistoryRepository.getPointHistoriesByUserId(userId, pageable);
+
+        // then
         assertEquals(1, orderPointManageRepository.count());
         assertEquals(1, reviewPointManageRepository.count());
         assertEquals(3, pointHistoryRepository.count());
 
-        // then
         assertNotNull(result);
+        assertEquals(3, result.size());
 
-
-        PointHistoryResponseDto first = result.getContent().getFirst();
+        PointHistoryResponseDto first = result.get(0);
         assertNotNull(first);
         assertEquals("NONE", first.getSourceType());
         assertEquals(3000, first.getAmount()); // PointHistory3
 
-        PointHistoryResponseDto second = result.getContent().get(1);
+        PointHistoryResponseDto second = result.get(1);
         assertNotNull(second);
         assertEquals("REVIEW", second.getSourceType());
         assertEquals(-50, second.getAmount()); // PointHistory2
 
-        PointHistoryResponseDto third = result.getContent().get(2);
+        PointHistoryResponseDto third = result.get(2);
         assertNotNull(third);
         assertEquals("ORDER", third.getSourceType());
         assertEquals(100, third.getAmount()); // PointHistory1

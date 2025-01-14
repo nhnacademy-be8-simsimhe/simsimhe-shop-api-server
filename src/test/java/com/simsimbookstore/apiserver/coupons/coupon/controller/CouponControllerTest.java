@@ -251,7 +251,6 @@ class CouponControllerTest {
         Long bookId = 200L;
         String sortField = "issueDate";
 
-        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, sortField));
         List<CouponResponseDto> couponList = Arrays.asList(
                 FixCouponResponseDto.builder()
                         .couponId(1005L)
@@ -278,47 +277,41 @@ class CouponControllerTest {
                         .minOrderAmount(new BigDecimal("60.00"))
                         .build()
         );
-        Page<CouponResponseDto> couponPage = new PageImpl<>(couponList, pageable, couponList.size());
 
-        when(couponService.getEligibleCoupons(Mockito.any(Pageable.class), eq(userId), eq(bookId))).thenReturn(couponPage);
+        when(couponService.getEligibleCoupons(eq(userId), eq(bookId))).thenReturn(couponList);
 
         mockMvc.perform(get("/api/shop/users/{userId}/coupons/unused", userId)
                         .param("bookId", String.valueOf(bookId))
-                        .param("sortField", sortField)
-                        .param("page", "0")
-                        .param("size", "10")
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[0].couponId", is(1005)))
-                .andExpect(jsonPath("$.content[0].couponTypeName", is("Fix Discount for Book")))
-                .andExpect(jsonPath("$.content[0].discountPrice", is(5.00)))
-                .andExpect(jsonPath("$.content[0].disCountType", is("정액")))
-                .andExpect(jsonPath("$.content[0].issueDate", notNullValue()))
-                .andExpect(jsonPath("$.content[0].deadline", notNullValue()))
-                .andExpect(jsonPath("$.content[0].couponStatus", is("미사용")))
-                .andExpect(jsonPath("$.content[0].couponTypeName", is("Fix Discount for Book")))
-                .andExpect(jsonPath("$.content[0].stacking", is(false)))
-                .andExpect(jsonPath("$.content[0].couponTargetType", is("책")))
-                .andExpect(jsonPath("$.content[0].couponTargetId", is(200)))
-                .andExpect(jsonPath("$.content[0].minOrderAmount", is(40.00)))
-                .andExpect(jsonPath("$.content[0].discountPrice", is(5.00)))
-                .andExpect(jsonPath("$.content[1].couponId", is(1006)))
-                .andExpect(jsonPath("$.content[1].couponTypeName", is("Another Fix Discount for Book")))
-                .andExpect(jsonPath("$.content[1].discountPrice", is(10.00)))
-                .andExpect(jsonPath("$.content[1].disCountType", is("정액")))
-                .andExpect(jsonPath("$.content[1].issueDate", notNullValue()))
-                .andExpect(jsonPath("$.content[1].deadline", notNullValue()))
-                .andExpect(jsonPath("$.content[1].couponStatus", is("미사용")))
-                .andExpect(jsonPath("$.content[1].couponTypeName", is("Another Fix Discount for Book")))
-                .andExpect(jsonPath("$.content[1].stacking", is(true)))
-                .andExpect(jsonPath("$.content[1].couponTargetType", is("책")))
-                .andExpect(jsonPath("$.content[1].couponTargetId", is(200)))
-                .andExpect(jsonPath("$.content[1].minOrderAmount", is(60.00)))
-                .andExpect(jsonPath("$.content[1].discountPrice", is(10.00)))
-                .andExpect(jsonPath("$.totalElements", is(2)))
-                .andExpect(jsonPath("$.totalPages", is(1)));
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].couponId", is(1005)))
+                .andExpect(jsonPath("$[0].couponTypeName", is("Fix Discount for Book")))
+                .andExpect(jsonPath("$[0].discountPrice", is(5.00)))
+                .andExpect(jsonPath("$[0].disCountType", is("정액")))
+                .andExpect(jsonPath("$[0].issueDate", notNullValue()))
+                .andExpect(jsonPath("$[0].deadline", notNullValue()))
+                .andExpect(jsonPath("$[0].couponStatus", is("미사용")))
+                .andExpect(jsonPath("$[0].couponTypeName", is("Fix Discount for Book")))
+                .andExpect(jsonPath("$[0].stacking", is(false)))
+                .andExpect(jsonPath("$[0].couponTargetType", is("책")))
+                .andExpect(jsonPath("$[0].couponTargetId", is(200)))
+                .andExpect(jsonPath("$[0].minOrderAmount", is(40.00)))
+                .andExpect(jsonPath("$[0].discountPrice", is(5.00)))
+                .andExpect(jsonPath("$[1].couponId", is(1006)))
+                .andExpect(jsonPath("$[1].couponTypeName", is("Another Fix Discount for Book")))
+                .andExpect(jsonPath("$[1].discountPrice", is(10.00)))
+                .andExpect(jsonPath("$[1].disCountType", is("정액")))
+                .andExpect(jsonPath("$[1].issueDate", notNullValue()))
+                .andExpect(jsonPath("$[1].deadline", notNullValue()))
+                .andExpect(jsonPath("$[1].couponStatus", is("미사용")))
+                .andExpect(jsonPath("$[1].couponTypeName", is("Another Fix Discount for Book")))
+                .andExpect(jsonPath("$[1].stacking", is(true)))
+                .andExpect(jsonPath("$[1].couponTargetType", is("책")))
+                .andExpect(jsonPath("$[1].couponTargetId", is(200)))
+                .andExpect(jsonPath("$[1].minOrderAmount", is(60.00)))
+                .andExpect(jsonPath("$[1].discountPrice", is(10.00)));
     }
 
     /**
@@ -554,7 +547,7 @@ class CouponControllerTest {
 
         when(couponService.expireCoupon(userId, couponId)).thenReturn(responseDto);
 
-        mockMvc.perform(post("/api/admin/users/{userId}/coupons/{couponId}/expired", userId, couponId)
+        mockMvc.perform(post("/api/admin/users/{userId}/coupons/expired?couponId={couponId}", userId, couponId)
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -597,7 +590,7 @@ class CouponControllerTest {
 
         when(couponService.expireCoupon(userId, couponId)).thenReturn(responseDto);
 
-        mockMvc.perform(post("/api/admin/users/{userId}/coupons/{couponId}/expired", userId, couponId)
+        mockMvc.perform(post("/api/admin/users/{userId}/coupons/expired?couponId={couponId}", userId, couponId)
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -655,9 +648,9 @@ class CouponControllerTest {
                 .minOrderAmount(new BigDecimal("100.00"))
                 .build();
 
-        when(couponService.expireCoupon(userId, couponId)).thenReturn(responseDto);
+        when(couponService.useCoupon(userId, couponId)).thenReturn(responseDto);
 
-        mockMvc.perform(post("/api/shop/users/{userId}/coupons/{couponId}/use", userId, couponId)
+        mockMvc.perform(post("/api/shop/users/{userId}/coupons/use?couponId={couponId}", userId, couponId)
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -698,9 +691,9 @@ class CouponControllerTest {
                 .minOrderAmount(new BigDecimal("250.00"))
                 .build();
 
-        when(couponService.expireCoupon(userId, couponId)).thenReturn(responseDto);
+        when(couponService.useCoupon(userId, couponId)).thenReturn(responseDto);
 
-        mockMvc.perform(post("/api/shop/users/{userId}/coupons/{couponId}/use", userId, couponId)
+        mockMvc.perform(post("/api/shop/users/{userId}/coupons/use?couponId={couponId}", userId, couponId)
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

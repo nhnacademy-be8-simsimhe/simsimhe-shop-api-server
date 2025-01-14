@@ -3,6 +3,7 @@ package com.simsimbookstore.apiserver.coupons.coupon.service.impl;
 import com.simsimbookstore.apiserver.books.book.dto.BookResponseDto;
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
+import com.simsimbookstore.apiserver.books.book.service.BookGetService;
 import com.simsimbookstore.apiserver.books.bookcategory.entity.BookCategory;
 import com.simsimbookstore.apiserver.books.bookcategory.repository.BookCategoryRepository;
 import com.simsimbookstore.apiserver.books.category.dto.CategoryResponseDto;
@@ -41,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +53,13 @@ public class CouponServiceImpl implements CouponService {
     private final BookRepository bookRepository;
     private final CouponTypeRepository couponTypeRepository;
     private final BookCategoryRepository bookCategoryRepository;
+    private final BookGetService bookGetService;
 
+    @Override
+    public Page<CouponResponseDto> getTotalCoupons(Pageable pageable) {
+        Page<Coupon> totalCoupons = couponRepository.findAll(pageable);
+        return totalCoupons.map(CouponMapper::toResponse);
+    }
     /**
      * couponId로 쿠폰을 가져온다.
      * @param couponId
@@ -135,26 +143,54 @@ public class CouponServiceImpl implements CouponService {
 
     /**
      * 유저가 가지고 있는 쿠폰 중 특정 책에 적용 가능한 쿠폰을 Page로 가져온다.
-     * @param pageable
      * @param userId
      * @param bookId
      * @throws IllegalArgumentException id가 0이거나 null일 경우
      * @throws NotFoundException 회원, 도서가 존재하지 않을 경우
      * @return 적용가능한 쿠폰 패이지
      */
+    @Transactional
     @Override
-    public Page<CouponResponseDto> getEligibleCoupons(Pageable pageable, Long userId, Long bookId) {
+    public List<CouponResponseDto> getEligibleCoupons(Long userId, Long bookId) {
         //userId null 체크
         validateId(userId);
         //bookId null 체크
         validateId(bookId);
 
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")이 존재하지 않습니다."));
-        bookRepository.findByBookId(bookId).orElseThrow(() -> new NotFoundException("도서(id:" + bookId + ")이 존재하지 않습니다."));
+        Book book = bookRepository.findByBookId(bookId).orElseThrow(() -> new NotFoundException("도서(id:" + bookId + ")이 존재하지 않습니다."));
+        List<Coupon> coupons = couponRepository.findEligibleCouponToBook(userId, book.getBookId()); //유저의 모든 전체쿠폰, 모든 카테고리 쿠폰, 책에 적용가능한 책 쿠폰을 가져온다.
 
-        Page<Coupon> couponPage = couponRepository.findEligibleCouponToBook(pageable, userId, bookId);
-        return couponPage.map(CouponMapper::toResponse);
+        //책의 정보를 가지고 와서 책이 속한 카테고리 Id를 모두 가지고 온다.
+        BookResponseDto bookDetail = bookGetService.getBookDetail(null, book.getBookId());
+        List<Long> categoryIdList = bookDetail.getCategoryList().stream()
+                .flatMap(List::stream)
+                .map(CategoryResponseDto::getCategoryId) // 각 CategoryResponseDto에서 ID 추출
+                .toList();
+
+        List<Coupon> eligibleCoupons = new ArrayList<>();
+
+        // 유저의 카테고리 쿠폰이 책에 적용 가능한지 확인한다.
+        for (Coupon coupon : coupons) {
+            if (coupon.getCouponType() instanceof CategoryCoupon categoryCoupon) {
+                Long targetId = categoryCoupon.getCategory().getCategoryId();
+                for (Long categoryId : categoryIdList) {
+                    //카테고리 쿠폰의 targetId와 일치하면 List에 저장
+                    if (targetId.equals(categoryId)) {
+                        eligibleCoupons.add(coupon);
+                        break;
+                    }
+                }
+                // 카테고리 쿠폰이 아니라면 List에 저장
+            } else {
+                eligibleCoupons.add(coupon);
+            }
+        }
+
+
+        return eligibleCoupons.stream().map(CouponMapper::toResponse).toList();
     }
+
 
     /**
      * 유저들에게 쿠폰을 발행한다.
@@ -276,6 +312,7 @@ public class CouponServiceImpl implements CouponService {
      * @return 할인금액, 할인 전 금액, 할인 후 금액
      */
     @Override
+    @Transactional
     public DiscountAmountResponseDto calDiscountAmount(Long bookId, Integer quantity, Long couponId) {
         if (quantity < 1) {
             throw new IllegalArgumentException("책의 수량은 0보다 많아야합니다.");
@@ -304,13 +341,26 @@ public class CouponServiceImpl implements CouponService {
 //                    }
 //                }
 //            }
+            Long couponCategoryId = categoryCoupon.getCategory().getCategoryId();
             for (BookCategory bookCategory : bookCategoryList) {
                 Category catagory = bookCategory.getCatagory();
-
-                Long bookCategoryId = bookCategory.getCatagory().getCategoryId();
-                Long couponCategoryId = categoryCoupon.getCategory().getCategoryId();
-                if (bookCategoryId.equals(couponCategoryId)) {
+                // 책의 가장 하위 카테고리와 카테고리 쿠폰의 id가 같은지 확인
+                if (couponCategoryId.equals(catagory.getCategoryId())) {
                     flag = false;
+                    break;
+                }
+
+                Category parent = catagory.getParent();
+                while (Objects.nonNull(parent)) {
+                    catagory = parent;
+                    Long bookCategoryId = catagory.getCategoryId();
+                    //상위 카테고리로 올라가면서 카테고리 쿠폰과 같은 Id인지 검증
+                    if (bookCategoryId.equals(couponCategoryId)) {
+                        flag = false;
+                        break;
+                    }
+
+                    parent = catagory.getParent();
                 }
             }
             if (flag) {

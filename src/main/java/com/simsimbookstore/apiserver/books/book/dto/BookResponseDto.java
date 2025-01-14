@@ -54,6 +54,12 @@ public class BookResponseDto {
 
     private boolean giftPackaging;
 
+    private Long reviewCount; //리뷰 개수
+
+    private Double scoreAverage; //리뷰 평점 없으면 0점
+
+
+
     private List<BookContributorResponsDto> contributorResponsDtos;
     private List<List<CategoryResponseDto>> categoryList;
     private List<TagResponseDto> tagList;

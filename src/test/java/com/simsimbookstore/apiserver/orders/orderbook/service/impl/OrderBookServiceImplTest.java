@@ -14,13 +14,17 @@ import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookResponseDto;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
-import com.simsimbookstore.apiserver.orders.orderbook.exception.OrderBookNotFoundException;
 import com.simsimbookstore.apiserver.orders.orderbook.repository.OrderBookRepository;
 import com.simsimbookstore.apiserver.orders.packages.dto.PackageRequestDto;
 import com.simsimbookstore.apiserver.orders.packages.dto.PackageResponseDto;
 import com.simsimbookstore.apiserver.orders.packages.entity.Packages;
 import com.simsimbookstore.apiserver.orders.packages.entity.WrapType;
 import com.simsimbookstore.apiserver.orders.packages.service.PackageService;
+import com.simsimbookstore.apiserver.users.grade.entity.Grade;
+import com.simsimbookstore.apiserver.users.grade.entity.Tier;
+import com.simsimbookstore.apiserver.users.user.entity.User;
+import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,6 +68,9 @@ class OrderBookServiceImplTest {
     private Book book;
     private Order order;
     private OrderBook orderBook;
+    User testUser;
+    Grade standardGrade;
+    Grade royalGrade;
 
     @BeforeEach
     void setUp() {
@@ -73,22 +80,46 @@ class OrderBookServiceImplTest {
                 .title("Test Book")
                 .build();
 
-        // 테스트용 Order 객체 생성
-        order = Order.builder()
-                .orderId(100L)
+        // 테스트용 User 객체 생성
+        testUser = User.builder()
+                .userId(1L)
+                .userName("John Doe")
+                .email("johndoe@example.com")
+                .createdAt(LocalDateTime.now())
+                .userStatus(UserStatus.ACTIVE)
+                .latestLoginDate(LocalDateTime.now())
+                .grade(standardGrade)
                 .build();
 
-        // 테스트용 OrderBook 객체 생성 (ID는 Builder를 통해 설정)
+        // 테스트용 Order 객체 생성 (User 연결)
+        order = Order.builder()
+                .orderId(100L)
+                .user(testUser)  // User 설정
+                .build();
+
+        // 테스트용 OrderBook 객체 생성
         orderBook = OrderBook.builder()
                 .orderBookId(200L)
                 .book(book)
-                .order(order)
+                .order(order)  // Order 연결
                 .quantity(2)
                 .salePrice(new BigDecimal("10000"))
                 .discountPrice(new BigDecimal("500"))
                 .orderBookState(OrderBook.OrderBookState.PENDING)
                 .packages(new ArrayList<>()) // 초기 패키지 리스트
                 .couponDiscount(null) // 초기 쿠폰 없음
+                .build();
+
+        standardGrade = Grade.builder()
+                .tier(Tier.STANDARD)
+                .minAmount(BigDecimal.valueOf(0))
+                .maxAmount(BigDecimal.valueOf(100000))
+                .build();
+
+        royalGrade = Grade.builder()
+                .tier(Tier.ROYAL)
+                .minAmount(BigDecimal.valueOf(0))
+                .maxAmount(BigDecimal.valueOf(100000))
                 .build();
     }
 
@@ -133,6 +164,7 @@ class OrderBookServiceImplTest {
 
         Order order = Order.builder()
                 .orderId(1L)
+                .user(testUser)
                 .build();
 
         OrderBook savedOrderBook = OrderBook.builder()
@@ -187,8 +219,8 @@ class OrderBookServiceImplTest {
         when(packageService.createPackage(packageDto1, savedOrderBook)).thenReturn(savedPackage1);
         when(packageService.createPackage(packageDto2, savedOrderBook)).thenReturn(savedPackage2);
         when(orderBookRepository.findById(200L)).thenReturn(Optional.of(savedOrderBook));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
-        // When
         List<OrderBookResponseDto> resultList = orderBookService.createOrderBooks(requestDtos);
 
         // Then
@@ -231,7 +263,6 @@ class OrderBookServiceImplTest {
         verify(packageService, times(1)).createPackage(packageDto2, savedOrderBook);
         verify(orderBookRepository, times(1)).findById(200L);
     }
-
 
 
     @Test
@@ -313,8 +344,7 @@ class OrderBookServiceImplTest {
         when(orderBookRepository.findById(nonExistentOrderBookId))
                 .thenReturn(Optional.empty());
 
-        // When & Then
-        assertThrows(OrderBookNotFoundException.class, () -> orderBookService.getPackages(nonExistentOrderBookId));
+        assertThrows(NotFoundException.class, () -> orderBookService.getPackages(nonExistentOrderBookId));
 
         verify(orderBookRepository, times(1)).findById(nonExistentOrderBookId);
     }
@@ -416,7 +446,7 @@ class OrderBookServiceImplTest {
                 .thenReturn(Optional.empty());
 
         // When & Then
-        assertThrows(IllegalArgumentException.class, () -> orderBookService.updateOrderBook(nonExistentOrderBookId, newState));
+        assertThrows(NotFoundException.class, () -> orderBookService.updateOrderBook(nonExistentOrderBookId, newState));
 
         // Verify: Repository 메서드 호출 여부 확인
         verify(orderBookRepository, times(1)).findById(nonExistentOrderBookId);
@@ -451,7 +481,7 @@ class OrderBookServiceImplTest {
                 .thenReturn(Optional.empty());
 
         // When & Then
-        assertThrows(OrderBookNotFoundException.class, () -> orderBookService.deleteOrderBook(nonExistentOrderBookId));
+        assertThrows(NotFoundException.class, () -> orderBookService.deleteOrderBook(nonExistentOrderBookId));
 
         // Verify: Repository 메서드 호출 여부 확인
         verify(orderBookRepository, times(1)).findById(nonExistentOrderBookId);
@@ -494,10 +524,8 @@ class OrderBookServiceImplTest {
         when(orderBookRepository.findById(nonExistentOrderBookId))
                 .thenReturn(Optional.empty());
 
-        // When & Then
-        assertThrows(IllegalArgumentException.class, () -> orderBookService.getOrderBook(nonExistentOrderBookId));
+        assertThrows(NotFoundException.class, () -> orderBookService.getOrderBook(nonExistentOrderBookId));
 
-        // Verify: Repository 메서드 호출 여부 확인
         verify(orderBookRepository, times(1)).findById(nonExistentOrderBookId);
     }
 }
