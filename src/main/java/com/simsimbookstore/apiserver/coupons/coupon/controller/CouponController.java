@@ -168,7 +168,7 @@ public class CouponController {
         return PageRequest.of(
                 pageable.getPageNumber(),
                 10, //페이지 사이즈를 10으로 고정
-                Sort.by(Sort.Direction.ASC, sortBy)
+                Sort.by(Sort.Direction.DESC, sortBy)
         );
     }
 }
