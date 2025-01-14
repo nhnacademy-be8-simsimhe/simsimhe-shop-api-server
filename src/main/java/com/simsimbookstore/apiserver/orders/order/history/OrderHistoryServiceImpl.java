@@ -1,5 +1,6 @@
 package com.simsimbookstore.apiserver.orders.order.history;
 
+import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.orders.order.dto.OrderHistoryResponseDto;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
@@ -16,10 +17,14 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
     private final OrderRepository orderRepository;
 
     @Override
-    public Page<OrderHistoryResponseDto> getOrderHistory(Long userId, Pageable pageable) {
+    public PageResponse<OrderHistoryResponseDto> getOrderHistory(Long userId, Pageable pageable) {
         Page<Order> orderPage = orderRepository.findByUserUserIdOrderByOrderDateDesc(userId, pageable);
 
-        return orderPage.map(this::convertToDto);
+        Page<OrderHistoryResponseDto> dtoOrder = orderPage.map(this::convertToDto);
+
+        return new PageResponse<OrderHistoryResponseDto>().getPageResponse(
+                pageable.getPageNumber() + 1, 10, dtoOrder
+        );
     }
 
     private OrderHistoryResponseDto convertToDto(Order order) {
@@ -30,8 +35,8 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
                 .orderAmount(order.getTotalPrice())
                 .orderState(order.getOrderState())
                 .trackingNumber(safeGetTrackingNumber(order))
-                .orderUserName(safeGetUserName(order))
-                .receiverName(safeGetReceiverName(order))
+                .orderUserName(order.getUser().getUserName())
+                .receiverName(order.getDelivery().getDeliveryReceiver())
                 .build();
     }
 
@@ -41,13 +46,7 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
                 : null;
     }
 
-    private String safeGetUserName(Order order) {
-        return order.getUser() != null ? order.getUser().getUserName() : "Unknown User";
-    }
 
-    private String safeGetReceiverName(Order order) {
-        return order.getDelivery() != null ? order.getDelivery().getDeliveryReceiver() : "Unknown Receiver";
-    }
 }
 
 
