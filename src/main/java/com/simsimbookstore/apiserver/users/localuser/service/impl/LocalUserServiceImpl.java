@@ -1,7 +1,6 @@
 package com.simsimbookstore.apiserver.users.localuser.service.impl;
 
 import com.simsimbookstore.apiserver.exception.AlreadyExistException;
-import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.service.GradeService;
@@ -17,7 +16,6 @@ import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
 
 @Transactional(readOnly = true)
 @Service
