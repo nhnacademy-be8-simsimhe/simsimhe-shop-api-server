@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 @Setter
 @Table(name = "coupon_policies")
 public class CouponPolicy {
+    public static final Long WELCOME_POLICY = 2L;
 
     @Id
     @Column(name = "coupon_policy_id")

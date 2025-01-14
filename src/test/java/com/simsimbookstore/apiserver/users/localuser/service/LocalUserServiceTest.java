@@ -60,6 +60,7 @@ class LocalUserServiceTest {
     @Mock
     private PointHistoryService pointHistoryService;
 
+
     LocalUserRegisterRequestDto testUser;
     Grade testGrade;
     UserRole testUserRole;
@@ -99,6 +100,7 @@ class LocalUserServiceTest {
 
         LocalUser localUser = localUserService.saveLocalUser(testUser);
         lenient().when(pointHistoryService.signupPoint(localUser)).thenReturn(null);
+        when()
         verify(localUserRepository, times(1)).save(any(LocalUser.class));
     }
 
