@@ -439,14 +439,13 @@ class CouponControllerTest {
 //        );
         List<Long> couponIds = List.of(1009L, 1010L);
 
-        when(couponService.issueCoupons(anyList(), eq(100L))).thenReturn(couponIds);
+        doNothing().when(couponService).issueCoupons(anyList(), eq(100L));
 
         mockMvc.perform(post("/api/admin/coupons/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(status().isCreated());
 
     }
 
@@ -489,17 +488,15 @@ class CouponControllerTest {
 //                        .minOrderAmount(new BigDecimal("180.00"))
 //                        .build()
 //        );
-        List<Long> couponIds = List.of(1009L, 1010L);
 
 
-        when(couponService.issueCoupons(anyList(), eq(200L))).thenReturn(couponIds);
+        doNothing().when(couponService).issueCoupons(anyList(), anyLong());
 
         mockMvc.perform(post("/api/admin/coupons/issue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto))
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(status().isCreated());
     }
 
     /**
@@ -514,8 +511,10 @@ class CouponControllerTest {
                 .couponTypeId(100L)
                 .build();
 
-        when(couponService.issueCoupons(anyList(), eq(100L)))
-                .thenThrow(new NotFoundException("회원(id:5)이 존재하지 않습니다."));
+
+        doThrow(new NotFoundException("회원(id:5)이 존재하지 않습니다."))
+                .when(couponService)
+                .issueCoupons(anyList(), eq(100L));
 
         mockMvc.perform(post("/api/admin/coupons/issue")
                         .contentType(MediaType.APPLICATION_JSON)

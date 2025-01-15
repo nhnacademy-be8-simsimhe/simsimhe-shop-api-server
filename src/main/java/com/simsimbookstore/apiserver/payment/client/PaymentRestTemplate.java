@@ -28,6 +28,8 @@ public class PaymentRestTemplate {
     private final String successUrl;
     private final String failUrl;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     public PaymentRestTemplate(TossPaymentProperties tossPaymentProperties) {
         headers = new HttpHeaders();
         restTemplate = new RestTemplate();
@@ -56,8 +58,6 @@ public class PaymentRestTemplate {
         map.put("customerEmail", dto.getEmail());
         map.put("customerName", dto.getUserName()); // 사용자 이름
         map.put("customerMobilePhone", dto.getPhoneNumber());
-
-        ObjectMapper objectMapper = new ObjectMapper();
 
         HttpEntity<String> request = null;
         try {
@@ -88,8 +88,6 @@ public class PaymentRestTemplate {
         map.put("orderId", success.getOrderId());
         map.put("amount", String.valueOf(success.getAmount()));
 
-        ObjectMapper objectMapper = new ObjectMapper();
-
         HttpEntity<String> request = null;
         try {
             request = new HttpEntity<>(objectMapper.writeValueAsString(map), headers);
@@ -114,9 +112,7 @@ public class PaymentRestTemplate {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-        ObjectMapper objectMapper = new ObjectMapper();
         HttpEntity<String> request = null;
-
         try {
             request = new HttpEntity<>(objectMapper.writeValueAsString(cancelReason), headers);
         } catch (JsonProcessingException e) {

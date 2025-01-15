@@ -28,7 +28,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -58,7 +57,7 @@ public class AladinApiService {
 
 
         // 다양한 SearchTarget 값을 정의
-        String[] searchTargets = {"Book", "Foreign", "Music", "DVD", "Used", "eBook"};
+        String[] searchTargets = {"Book", "Foreign", "Music", "DVD"};
 
 
         XmlMapper xmlMapper = new XmlMapper();
@@ -66,7 +65,6 @@ public class AladinApiService {
         for (String searchTarget : searchTargets) {
             for (int start = 1; start <= 4; start++) {
                 String url = baseUrl + "&SearchTarget=" + searchTarget + "&start=" + start;
-                System.out.println("Requesting: " + url);
 
                 String response = restTemplate.getForObject(url, String.class);
                 AladinApiXmlResponse apiResponse = xmlMapper.readValue(response, AladinApiXmlResponse.class);
