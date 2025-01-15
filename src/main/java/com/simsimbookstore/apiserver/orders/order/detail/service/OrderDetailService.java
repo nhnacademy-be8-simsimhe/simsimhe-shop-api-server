@@ -52,7 +52,7 @@ public class OrderDetailService {
         // order_book (책 주문 리스트)
         List<OrderDetailProduct> orderDetailProducts = new ArrayList<>();
 
-        List<OrderBook> orderBooks = orderBookRepository.findAllByOrder(order.getOrderId());
+        List<OrderBook> orderBooks = orderBookRepository.findByOrderOrderId(order.getOrderId());
         Book book;
         for(OrderBook orderBook : orderBooks) {
             // 책 제목
