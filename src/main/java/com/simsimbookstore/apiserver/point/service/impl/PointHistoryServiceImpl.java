@@ -132,7 +132,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
                     .user(user)
                     .build());
 
-            OrderPointManage orderPointManageUse1 = orderPointManageRepository.save(OrderPointManage.builder()
+            orderPointManageRepository.save(OrderPointManage.builder()
                     .pointHistory(use)
                     .order(order)
                     .build());
@@ -146,9 +146,9 @@ public class PointHistoryServiceImpl implements PointHistoryService {
                 .created_at(now())
                 .user(user)
                 .build());
-        // 2. OrderPointManage 엔티티 생성 및
+        // 2. OrderPointManage 엔티티 생성
 
-        OrderPointManage orderPointManage2 = orderPointManageRepository.save(OrderPointManage.builder()
+        orderPointManageRepository.save(OrderPointManage.builder()
                 .pointHistory(save)
                 .order(order)
                 .build());
@@ -256,8 +256,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
         //total+point use
         BigDecimal pointUse = order.getPointUse();
         BigDecimal totalPrice = order.getTotalPrice();
-        BigDecimal refundPoints = pointUse.add(totalPrice);
-        return BigDecimal.ZERO;
+        return pointUse.add(totalPrice);
     }
 
 
