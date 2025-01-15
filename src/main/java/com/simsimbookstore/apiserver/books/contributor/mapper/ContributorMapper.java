@@ -6,7 +6,11 @@ import com.simsimbookstore.apiserver.books.contributor.entity.Contributor;
 
 public class ContributorMapper {
 
-    public static ContributorResponseDto toResponse(Contributor contributor){
+    private ContributorMapper() {
+        throw new UnsupportedOperationException("ContributorMapper는 인스턴스화 할수없음");
+    }
+
+    public static ContributorResponseDto toResponse(Contributor contributor) {
         return ContributorResponseDto.builder()
                 .contributorId(contributor.getContributorId())
                 .contributorName(contributor.getContributorName())
@@ -14,7 +18,7 @@ public class ContributorMapper {
                 .build();
     }
 
-    public static Contributor toContributor(ContributorRequestDto contributorRequestDto){
+    public static Contributor toContributor(ContributorRequestDto contributorRequestDto) {
         return Contributor.builder()
                 .contributorName(contributorRequestDto.getContributorName())
                 .contributorRole(contributorRequestDto.getContributorRole())

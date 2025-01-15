@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -63,6 +64,7 @@ class BookManagementServiceTest {
 
     @Mock
     private BookContributorRepository bookContributorRepository;
+
 
     @Test
     void testRegisterBook() {

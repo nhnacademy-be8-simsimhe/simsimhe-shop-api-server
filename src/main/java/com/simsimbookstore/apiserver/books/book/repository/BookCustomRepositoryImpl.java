@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.simsimbookstore.apiserver.books.book.repository.BookConst.*;
+
 @RequiredArgsConstructor
 public class BookCustomRepositoryImpl implements BookCustomRepository {
 
@@ -55,21 +57,22 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
     /**
      * 가장 최근에 출판된 책 8권을 조회하는 메서드(국내도서)
      * 출판일 기준으로 orderBy
+     *
      * @return
      */
     @Override
     public List<BookListResponse> getNewBookList() {
         return queryFactory
                 .select(Projections.fields(BookListResponse.class,
-                        book.bookId.as("bookId"),                  // Book 엔티티의 ID
-                        bookImagePath.imagePath.as("imagePath"),
-                        book.title.as("title"),                // 책 제목
-                        book.publicationDate.as("publicationDate"), // 출판일
-                        book.price.as("price"),                // 가격
-                        book.saleprice.as("saleprice"),        // 세일 가격
-                        book.publisher.as("publisher"),   // 출판사 이름
-                        book.bookStatus.as("bookStatus"),      // 책 상태
-                        book.quantity.as("quantity")            // 재고 수량
+                        book.bookId.as(BOOK_ID),                  // Book 엔티티의 ID
+                        bookImagePath.imagePath.as(IMAGE_PATH),
+                        book.title.as(TITLE),                // 책 제목
+                        book.publicationDate.as(PUBLICATION_DATE), // 출판일
+                        book.price.as(PRICE),                // 가격
+                        book.saleprice.as(SALE_PRICE),        // 세일 가격
+                        book.publisher.as(PUBLISHER),   // 출판사 이름
+                        book.bookStatus.as(BOOK_STATUS),      // 책 상태
+                        book.quantity.as(QUANTITY)            // 재고 수량
                 ))
                 .from(book)
                 .orderBy(book.publicationDate.desc()) // 출판일 기준 최신순 정렬
@@ -91,16 +94,16 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
 
         List<BookListResponse> content = queryFactory
                 .select(Projections.fields(BookListResponse.class,
-                        book.bookId.as("bookId"),
-                        bookImagePath.imagePath.as("imagePath"),
-                        book.title.as("title"),
-                        book.publicationDate.as("publicationDate"),
-                        book.price.as("price"),
-                        book.saleprice.as("saleprice"),
-                        book.publisher.as("publisher"),
-                        book.bookStatus.as("bookStatus"),
+                        book.bookId.as(BOOK_ID),
+                        bookImagePath.imagePath.as(IMAGE_PATH),
+                        book.title.as(TITLE),
+                        book.publicationDate.as(PUBLICATION_DATE),
+                        book.price.as(PRICE),
+                        book.saleprice.as(SALE_PRICE),
+                        book.publisher.as(PUBLISHER),
+                        book.bookStatus.as(BOOK_STATUS),
                         book.giftPackaging,
-                        book.quantity.as("quantity")
+                        book.quantity.as(QUANTITY)
 
                 ))
                 .from(book)
@@ -152,17 +155,17 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
         // 책 리스트 조회
         List<BookListResponse> content = queryFactory
                 .select(Projections.fields(BookListResponse.class,
-                        book.bookId.as("bookId"),
-                        bookImagePath.imagePath.as("imagePath"),
-                        book.title.as("title"),
-                        book.publicationDate.as("publicationDate"),
-                        book.price.as("price"),
-                        book.saleprice.as("saleprice"),
-                        book.publisher.as("publisher"),
-                        book.bookStatus.as("bookStatus"),
-                        book.quantity.as("quantity"),
-                        review.count().coalesce(0L).as("reviewCount"), // 리뷰 개수 추가
-                        isLiked.as("isLiked")
+                        book.bookId.as(BOOK_ID),
+                        bookImagePath.imagePath.as(IMAGE_PATH),
+                        book.title.as(TITLE),
+                        book.publicationDate.as(PUBLICATION_DATE),
+                        book.price.as(PRICE),
+                        book.saleprice.as(SALE_PRICE),
+                        book.publisher.as(PUBLISHER),
+                        book.bookStatus.as(BOOK_STATUS),
+                        book.quantity.as(QUANTITY),
+                        review.count().coalesce(0L).as(REVIEW_COUNT), // 리뷰 개수 추가
+                        isLiked.as(IS_LIKED)
                 ))
                 .from(book)
                 .innerJoin(bookCategory).on(book.bookId.eq(bookCategory.book.bookId))
@@ -241,17 +244,17 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
         // 데이터 조회
         List<BookListResponse> content = queryFactory
                 .selectDistinct(Projections.fields(BookListResponse.class,
-                        book.bookId.as("bookId"),
-                        book.title.as("title"),
-                        book.publicationDate.as("publicationDate"),
-                        book.price.as("price"),
-                        book.saleprice.as("saleprice"),
-                        book.publisher.as("publisher"),
-                        book.bookStatus.as("bookStatus"),
-                        book.quantity.as("quantity"),
-                        bookImagePath.imagePath.as("imagePath"),
-                        review.count().coalesce(0L).as("reviewCount"), // 리뷰 개수 추가
-                        isLiked.as("isLiked")
+                        book.bookId.as(BOOK_ID),
+                        book.title.as(TITLE),
+                        book.publicationDate.as(PUBLICATION_DATE),
+                        book.price.as(PRICE),
+                        book.saleprice.as(SALE_PRICE),
+                        book.publisher.as(PUBLISHER),
+                        book.bookStatus.as(BOOK_STATUS),
+                        book.quantity.as(QUANTITY),
+                        bookImagePath.imagePath.as(IMAGE_PATH),
+                        review.count().coalesce(0L).as(REVIEW_COUNT), // 리뷰 개수 추가
+                        isLiked.as(IS_LIKED)
                 ))
                 .from(book)
                 .innerJoin(bookTag).on(book.bookId.eq(bookTag.book.bookId))
@@ -348,32 +351,32 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
         // 책 상세 정보를 조회
         BookResponseDto bookResponse = queryFactory
                 .select(Projections.fields(BookResponseDto.class,
-                        book.bookId.as("bookId"),
-                        book.title.as("title"),
-                        book.description.as("description"),
-                        book.bookIndex.as("bookIndex"),
-                        book.publisher.as("publisher"),
-                        book.isbn.as("isbn"),
-                        book.viewCount.as("viewCount"),
-                        book.price.as("price"),
-                        book.saleprice.as("saleprice"),
-                        book.publicationDate.as("publicationDate"),
-                        book.pages.as("pages"),
-                        book.quantity.as("quantity"),
-                        isLiked.as("isLiked"),
-                        book.bookStatus.as("bookStatus"),
+                        book.bookId.as(BOOK_ID),
+                        book.title.as(TITLE),
+                        book.description.as(DESCRIPTION),
+                        book.bookIndex.as(BOOK_INDEX),
+                        book.publisher.as(PUBLISHER),
+                        book.isbn.as(ISBN),
+                        book.viewCount.as(VIEW_COUNT),
+                        book.price.as(PRICE),
+                        book.saleprice.as(SALE_PRICE),
+                        book.publicationDate.as(PUBLICATION_DATE),
+                        book.pages.as(PAGES),
+                        book.quantity.as(QUANTITY),
+                        isLiked.as(IS_LIKED),
+                        book.bookStatus.as(BOOK_STATUS),
                         book.giftPackaging,
-                        review.count().as("reviewCount"),
-                        score.as("scoreAverage"),
+                        review.count().as(REVIEW_COUNT),
+                        score.as(SCORE_AVERAGE),
                         // 이미지 경로들 가져오기
                         Expressions.stringTemplate(
                                 "GROUP_CONCAT(CASE WHEN {0} = 'THUMBNAIL' THEN {1} END)",
                                 bookImagePath.imageType, bookImagePath.imagePath
-                        ).as("thumbnailImage"),
+                        ).as(THUMBNAIL_IMAGE),
                         Expressions.stringTemplate(
                                 "GROUP_CONCAT(CASE WHEN {0} = 'DETAIL' THEN {1} END)",
                                 bookImagePath.imageType, bookImagePath.imagePath
-                        ).as("detailImage")
+                        ).as(DETAIL_IMAGE)
                 ))
                 .from(book)
                 .leftJoin(bookLike).on(book.bookId.eq(bookLike.book.bookId))
@@ -427,12 +430,12 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
         // 좋아요한 책 데이터 조회
         List<BookListResponse> bookList = queryFactory
                 .select(Projections.fields(BookListResponse.class,
-                        book.bookId.as("bookId"),           // 책 ID
-                        book.title.as("title"),             // 책 제목
-                        book.bookStatus.as("bookStatus"),   // 책 상태
-                        book.quantity.as("quantity"),       // 책 재고
-                        bookImagePath.imagePath.as("imagePath"),
-                        isLiked.as("isLiked"),
+                        book.bookId.as(BOOK_ID),           // 책 ID
+                        book.title.as(TITLE),             // 책 제목
+                        book.bookStatus.as(BOOK_STATUS),   // 책 상태
+                        book.quantity.as(QUANTITY),       // 책 재고
+                        bookImagePath.imagePath.as(IMAGE_PATH),
+                        isLiked.as(IS_LIKED),
                         book.publisher,
                         book.price,
                         book.saleprice
@@ -484,15 +487,15 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
     @Override
     public List<BookListResponse> getPopularityBook() {
         return queryFactory.select(Projections.fields(BookListResponse.class,
-                        book.bookId.as("bookId"),
-                        book.title.as("title"),
-                        bookImagePath.imagePath.min().as("imagePath"), // 이미지 경로를 하나만 가져오도록 수정
-                        book.publicationDate.as("publicationDate"),
-                        book.quantity.as("quantity"),
-                        book.price.as("price"),
-                        book.saleprice.as("saleprice"),
-                        book.bookStatus.as("bookStatus"),
-                        book.publisher.as("publisher")))
+                        book.bookId.as(BOOK_ID),
+                        book.title.as(TITLE),
+                        bookImagePath.imagePath.min().as(IMAGE_PATH), // 이미지 경로를 하나만 가져오도록 수정
+                        book.publicationDate.as(PUBLICATION_DATE),
+                        book.quantity.as(QUANTITY),
+                        book.price.as(PRICE),
+                        book.saleprice.as(SALE_PRICE),
+                        book.bookStatus.as(BOOK_STATUS),
+                        book.publisher.as(PUBLISHER)))
                 .from(orderBook)
                 .where(book.bookStatus.ne(BookStatus.DELETED))
                 .innerJoin(orderBook.book, book)
@@ -525,7 +528,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
     public List<BookListResponse> getRecommendBook(List<Long> categoryIdList, Long bookId) {
         return queryFactory.select(Projections.fields(BookListResponse.class
                         , book.bookId
-                        , bookImagePath.imagePath.as("imagePath")
+                        , bookImagePath.imagePath.as(IMAGE_PATH)
                         , book.title
                         , book.quantity
                         , book.saleprice

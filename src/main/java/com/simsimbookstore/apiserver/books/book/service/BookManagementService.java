@@ -25,16 +25,18 @@ import com.simsimbookstore.apiserver.books.tag.domain.Tag;
 import com.simsimbookstore.apiserver.books.tag.repository.TagRepository;
 import com.simsimbookstore.apiserver.exception.BadRequestException;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
+import com.simsimbookstore.apiserver.storage.service.ObjectServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class BookManagementService {
 
     private final BookRepository bookRepository;
@@ -44,7 +46,6 @@ public class BookManagementService {
     private final TagRepository tagRepository;
     private final ContributorRepositroy contributorRepositroy;
     private final BookContributorRepository bookContributorRepository;
-    private final BookImageRepoisotry bookImageRepoisotry;
 
 
     /**
@@ -75,10 +76,10 @@ public class BookManagementService {
         //도서기여자 연관관계 매핑
         this.saveBookContributor(book, bookRequestDto.getContributoridList());
 
-        //this.saveBookImages(book, thumbnail, details);
 
         return BookMapper.toResponseDto(saveBook);
     }
+
 
     /**
      * 도서수정(도서의 상태는 변경x)
@@ -133,7 +134,6 @@ public class BookManagementService {
         } else {
             throw new NotFoundException("도서 정보가 없습니다");
         }
-
     }
 
     /**
@@ -215,6 +215,7 @@ public class BookManagementService {
         }
     }
 
+
     /**
      * 도서의 상태만  변경하는 메서드
      *
@@ -288,7 +289,6 @@ public class BookManagementService {
             throw new NotFoundException("책 정보가 없습니다");
         }
     }
-
 
 
 }
