@@ -4,7 +4,6 @@ package com.simsimbookstore.apiserver.carts.controller;
 import com.simsimbookstore.apiserver.carts.dto.CartRequestDto;
 import com.simsimbookstore.apiserver.carts.dto.CartResponseDto;
 import com.simsimbookstore.apiserver.carts.service.CartService;
-import jakarta.ws.rs.Path;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

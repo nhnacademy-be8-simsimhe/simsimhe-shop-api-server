@@ -3,6 +3,7 @@ package com.simsimbookstore.apiserver.coupons.coupon.service.impl;
 import com.simsimbookstore.apiserver.books.book.dto.BookResponseDto;
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
+import com.simsimbookstore.apiserver.books.book.service.BookGetService;
 import com.simsimbookstore.apiserver.books.bookcategory.entity.BookCategory;
 import com.simsimbookstore.apiserver.books.bookcategory.repository.BookCategoryRepository;
 import com.simsimbookstore.apiserver.books.category.dto.CategoryResponseDto;
@@ -60,6 +61,8 @@ class CouponServiceImplTest {
     private BookRepository bookRepository;
     @Mock
     private CouponTypeRepository couponTypeRepository;
+    @Mock
+    private BookGetService bookGetService;
     @Mock
     private BookCategoryRepository bookCategoryRepository;
     @InjectMocks
@@ -462,113 +465,7 @@ class CouponServiceImplTest {
 
     // ### 2.5. `getEligibleCoupons` 메서드 테스트
 
-    @Test
-    @DisplayName("getEligibleCoupons : 유효한 입력으로 적용 가능한 쿠폰을 성공적으로 조회")
-    void getEligibleCoupons_ValidInput_ReturnsEligibleCoupons() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Long userId = 1L;
-        Long bookId = 200L;
 
-        // 사용자 조회 시 정상적으로 반환
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user1));
-
-        // 책 조회 시 정상적으로 반환
-        when(bookRepository.findByBookId(bookId)).thenReturn(Optional.of(book));
-
-        // Eligible Coupons 존재
-        Coupon eligibleCoupon1 = Coupon.builder()
-                .couponId(1001L)
-                .user(user1)
-                .couponType(bookCoupon)
-                .issueDate(FIXED_NOW)
-                .deadline(getDeadline(bookCoupon))
-                .couponStatus(CouponStatus.UNUSED)
-                .useDate(null)
-                .build();
-
-        Coupon eligibleCoupon2 = Coupon.builder()
-                .couponId(1002L)
-                .user(user1)
-                .couponType(categoryCoupon)
-                .issueDate(FIXED_NOW)
-                .deadline(getDeadline(categoryCoupon))
-                .couponStatus(CouponStatus.UNUSED)
-                .useDate(null)
-                .build();
-
-        List<Coupon> eligibleCoupons = Arrays.asList(eligibleCoupon1, eligibleCoupon2);
-        Page<Coupon> couponPage = new PageImpl<>(eligibleCoupons, pageable, eligibleCoupons.size());
-
-        when(couponRepository.findEligibleCouponToBook(pageable, userId, bookId)).thenReturn(couponPage);
-
-        Page<CouponResponseDto> responsePage = couponService.getEligibleCoupons(pageable, userId, bookId);
-
-        assertNotNull(responsePage);
-        assertEquals(2, responsePage.getTotalElements());
-
-        // First Eligible Coupon
-        CouponResponseDto firstDto = responsePage.getContent().get(0);
-        assertTrue(firstDto instanceof FixCouponResponseDto);
-        FixCouponResponseDto fixDto = (FixCouponResponseDto) firstDto;
-        assertEquals("Book Discount", fixDto.getCouponTypeName());
-        assertEquals(DisCountType.FIX, fixDto.getDisCountType());
-        assertEquals(new BigDecimal("5000"), fixDto.getDiscountPrice());
-        assertEquals(new BigDecimal("20000"), fixDto.getMinOrderAmount());
-
-        // Second Eligible Coupon
-        CouponResponseDto secondDto = responsePage.getContent().get(1);
-        assertTrue(secondDto instanceof RateCouponResponseDto);
-        RateCouponResponseDto rateDto = (RateCouponResponseDto) secondDto;
-        assertEquals("Category Discount", rateDto.getCouponTypeName());
-        assertEquals(DisCountType.RATE, rateDto.getDisCountType());
-        assertEquals(new BigDecimal("20"), rateDto.getDiscountRate());
-        assertEquals(new BigDecimal("8000"), rateDto.getMaxDiscountAmount());
-        assertEquals(new BigDecimal("20000"), rateDto.getMinOrderAmount());
-    }
-
-    @Test
-    @DisplayName("getEligibleCoupons : 유저가 존재하지 않을 때 NotFoundException 발생")
-    void getEligibleCoupons_UserNotFound_ThrowsNotFoundException() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Long userId = 3L; // 존재하지 않는 유저 ID
-        Long bookId = 200L;
-
-        // 사용자 조회 시 Optional.empty() 반환
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            couponService.getEligibleCoupons(pageable, userId, bookId);
-        });
-
-        assertEquals("회원(id:3)이 존재하지 않습니다.", exception.getMessage());
-
-        // 책 조회 및 쿠폰 조회가 호출되지 않았는지 검증
-        verify(bookRepository, never()).findByBookId(anyLong());
-        verify(couponRepository, never()).findEligibleCouponToBook(any(Pageable.class), anyLong(), anyLong());
-    }
-
-    @Test
-    @DisplayName("getEligibleCoupons : 책이 존재하지 않을 때 NotFoundException 발생")
-    void getEligibleCoupons_BookNotFound_ThrowsNotFoundException() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Long userId = 1L;
-        Long bookId = 9999L; // 존재하지 않는 책 ID
-
-        // 사용자 조회 시 정상적으로 반환
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user1));
-
-        // 책 조회 시 Optional.empty() 반환
-        when(bookRepository.findByBookId(bookId)).thenReturn(Optional.empty());
-
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            couponService.getEligibleCoupons(pageable, userId, bookId);
-        });
-
-        assertEquals("도서(id:9999)이 존재하지 않습니다.", exception.getMessage());
-
-        // 쿠폰 조회가 호출되지 않았는지 검증
-        verify(couponRepository, never()).findEligibleCouponToBook(any(Pageable.class), anyLong(), anyLong());
-    }
 
     // ### 2.6. `issueCoupons` 메서드 테스트
 
@@ -631,22 +528,7 @@ class CouponServiceImplTest {
         // 쿠폰 저장 Mock 설정
         when(couponRepository.save(any(Coupon.class))).thenReturn(coupon1, coupon2, coupon3);
 
-        List<Long> issuedCouponIds = couponService.issueCoupons(userIds, couponTypeId);
-
-        assertNotNull(issuedCouponIds);
-        assertEquals(3, issuedCouponIds.size());
-
-        // First Issued Coupon
-        Long firstId = issuedCouponIds.get(0);
-        assertEquals(1001L, firstId);
-
-        // Second Issued Coupon
-        Long secondId = issuedCouponIds.get(1);
-        assertEquals(1002L, secondId);
-
-        // Third Issued Coupon
-        Long thirdId = issuedCouponIds.get(2);
-        assertEquals(1003L, thirdId);
+        couponService.issueCoupons(userIds, couponTypeId);
 
         // 쿠폰 저장이 3번 호출되었는지 검증
         verify(couponRepository, times(3)).save(any(Coupon.class));
@@ -1174,6 +1056,317 @@ class CouponServiceImplTest {
         // 쿠폰 저장이 호출되지 않았는지 검증
         verify(couponRepository, times(1)).findByUserUserIdAndCouponId(userId, couponId);
         verify(couponRepository, never()).save(any(Coupon.class));
+    }
+
+    @Test
+    @DisplayName("getEligibleCoupons : 유효한 userId와 bookId로 적격 쿠폰을 성공적으로 조회")
+    void testGetEligibleCoupons_Successful() {
+        // Given
+        Long userId = user1.getUserId();
+        Long bookId = book.getBookId();
+
+        // Coupon 엔티티 생성
+        Coupon coupon1 = Coupon.builder()
+                .couponId(1000L)
+                .issueDate(FIXED_NOW.minusDays(1))
+                .deadline(FIXED_NOW.plusDays(30))
+                .couponStatus(CouponStatus.UNUSED)
+                .couponType(bookCoupon)
+                .user(user1)
+                .build();
+
+        Coupon coupon2 = Coupon.builder()
+                .couponId(1001L)
+                .issueDate(FIXED_NOW.minusDays(2))
+                .deadline(FIXED_NOW.plusDays(45))
+                .couponStatus(CouponStatus.UNUSED)
+                .couponType(categoryCoupon)
+                .user(user1)
+                .build();
+
+        Coupon coupon3 = Coupon.builder()
+                .couponId(1002L)
+                .issueDate(FIXED_NOW.minusDays(3))
+                .deadline(FIXED_NOW.plusDays(15))
+                .couponStatus(CouponStatus.UNUSED)
+                .couponType(allCoupon)
+                .user(user1)
+                .build();
+
+        List<Coupon> mockCoupons = Arrays.asList(coupon1, coupon2, coupon3);
+
+        // Mocking
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user1));
+        when(bookRepository.findByBookId(bookId)).thenReturn(Optional.of(book));
+        when(couponRepository.findEligibleCouponToBook(userId, bookId)).thenReturn(mockCoupons);
+
+        // 도서의 카테고리 정보 설정
+        CategoryResponseDto categoryResponse = new CategoryResponseDto();
+        categoryResponse.setCategoryId(1L);
+        List<List<CategoryResponseDto>> categoryLists = Collections.singletonList(
+                Collections.singletonList(categoryResponse)
+        );
+
+        BookResponseDto bookDetail = new BookResponseDto();
+        bookDetail.setCategoryList(categoryLists);
+        when(bookGetService.getBookDetail(null, bookId)).thenReturn(bookDetail);
+
+        // CouponMapper.toResponse는 정적 메서드로 가정하고 실제 동작을 사용
+
+        // When
+        List<CouponResponseDto> eligibleCoupons = couponService.getEligibleCoupons(userId, bookId);
+
+        // Then
+        assertNotNull(eligibleCoupons);
+        assertEquals(3, eligibleCoupons.size());
+
+        List<Long> expectedCouponIds = Arrays.asList(1000L, 1001L, 1002L);
+        List<Long> actualCouponIds = eligibleCoupons.stream()
+                .map(CouponResponseDto::getCouponId)
+                .toList();
+
+        assertTrue(actualCouponIds.containsAll(expectedCouponIds));
+    }
+
+    /**
+     * 테스트: 존재하지 않는 userId로 조회 시 NotFoundException 발생
+     */
+    @Test
+    @DisplayName("getEligibleCoupons : 존재하지 않는 userId로 조회 시 NotFoundException 발생")
+    void testGetEligibleCoupons_UserNotFound() {
+        // Given
+        Long userId = 999L; // 존재하지 않는 사용자 ID
+        Long bookId = book.getBookId();
+
+        // Mocking
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        // When & Then
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            couponService.getEligibleCoupons(userId, bookId);
+        });
+
+        assertEquals("회원(id:999)이 존재하지 않습니다.", exception.getMessage());
+    }
+
+    /**
+     * 테스트: 존재하지 않는 bookId로 조회 시 NotFoundException 발생
+     */
+    @Test
+    @DisplayName("getEligibleCoupons : 존재하지 않는 bookId로 조회 시 NotFoundException 발생")
+    void testGetEligibleCoupons_BookNotFound() {
+        // Given
+        Long userId = user1.getUserId();
+        Long bookId = 999L; // 존재하지 않는 도서 ID
+
+        // Mocking
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user1));
+        when(bookRepository.findByBookId(bookId)).thenReturn(Optional.empty());
+
+        // When & Then
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            couponService.getEligibleCoupons(userId, bookId);
+        });
+
+        assertEquals("도서(id:999)이 존재하지 않습니다.", exception.getMessage());
+    }
+
+    /**
+     * 테스트: 적격한 쿠폰이 없을 경우 빈 목록 반환
+     */
+    @Test
+    @DisplayName("getEligibleCoupons : 적격한 쿠폰이 없을 경우 빈 목록 반환")
+    void testGetEligibleCoupons_NoEligibleCoupons() {
+        // Given
+        Long userId = user1.getUserId();
+        Long bookId = book.getBookId();
+
+        // Mocking
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user1));
+        when(bookRepository.findByBookId(bookId)).thenReturn(Optional.of(book));
+        when(couponRepository.findEligibleCouponToBook(userId, bookId)).thenReturn(Collections.emptyList());
+
+        // 도서의 카테고리 정보 설정 (카테고리 없음)
+        BookResponseDto bookDetail = new BookResponseDto();
+        bookDetail.setCategoryList(Collections.emptyList());
+        when(bookGetService.getBookDetail(null, bookId)).thenReturn(bookDetail);
+
+        // When
+        List<CouponResponseDto> eligibleCoupons = couponService.getEligibleCoupons(userId, bookId);
+
+        // Then
+        assertNotNull(eligibleCoupons);
+        assertTrue(eligibleCoupons.isEmpty());
+    }
+
+    /**
+     * 테스트: 카테고리 쿠폰이 도서의 카테고리와 일치하지 않을 경우 제외
+     */
+    @Test
+    @DisplayName("getEligibleCoupons : 카테고리 쿠폰이 도서의 카테고리와 일치하지 않을 경우 제외")
+    void testGetEligibleCoupons_CategoryCouponNotApplicable() {
+        // Given
+        Long userId = user1.getUserId();
+        Long bookId = book.getBookId();
+
+        // 적용 불가능한 CategoryCoupon 생성 (카테고리 ID 2L, 도서의 카테고리 ID는 1L)
+        CategoryCoupon nonApplicableCategoryCoupon = CategoryCoupon.builder()
+                .couponTypeId(103L)
+                .couponTypeName("Non-Applicable Category Discount")
+                .period(0)
+                .deadline(FIXED_NOW.plusDays(30))
+                .stacking(false)
+                .couponPolicy(couponPolicyRate)
+                .category(Category.builder()
+                        .categoryId(2L)
+                        .categoryName("Other Category")
+                        .build())
+                .build();
+
+        // Coupon 엔티티 생성
+        Coupon coupon = Coupon.builder()
+                .couponId(1003L)
+                .issueDate(FIXED_NOW.minusDays(5))
+                .deadline(FIXED_NOW.plusDays(30))
+                .couponStatus(CouponStatus.UNUSED)
+                .couponType(nonApplicableCategoryCoupon)
+                .user(user1)
+                .build();
+
+        List<Coupon> mockCoupons = Collections.singletonList(coupon);
+
+        // Mocking
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user1));
+        when(bookRepository.findByBookId(bookId)).thenReturn(Optional.of(book));
+        when(couponRepository.findEligibleCouponToBook(userId, bookId)).thenReturn(mockCoupons);
+
+        // 도서의 카테고리 정보 설정 (카테고리 ID 1L)
+        CategoryResponseDto categoryResponse = new CategoryResponseDto();
+        categoryResponse.setCategoryId(1L);
+        List<List<CategoryResponseDto>> categoryLists = Collections.singletonList(
+                Collections.singletonList(categoryResponse)
+        );
+
+        BookResponseDto bookDetail = new BookResponseDto();
+        bookDetail.setCategoryList(categoryLists);
+        when(bookGetService.getBookDetail(null, bookId)).thenReturn(bookDetail);
+
+        // When
+        List<CouponResponseDto> eligibleCoupons = couponService.getEligibleCoupons(userId, bookId);
+
+        // Then
+        assertNotNull(eligibleCoupons);
+        assertTrue(eligibleCoupons.isEmpty());
+    }
+
+    /**
+     * 테스트: 일부 적격 쿠폰과 일부 비적격 쿠폰이 있을 때, 적격 쿠폰만 반환
+     */
+    @Test
+    @DisplayName("getEligibleCoupons : 일부 적격 쿠폰과 일부 비적격 쿠폰이 있을 때, 적격 쿠폰만 반환")
+    void testGetEligibleCoupons_MixedEligibleAndNonEligibleCoupons() {
+        // Given
+        Long userId = user1.getUserId();
+        Long bookId = book.getBookId();
+
+        // 적용 가능한 CategoryCoupon 생성 (카테고리 ID 1L)
+        CategoryCoupon applicableCategoryCoupon = CategoryCoupon.builder()
+                .couponTypeId(104L)
+                .couponTypeName("Applicable Category Discount")
+                .period(0)
+                .deadline(FIXED_NOW.plusDays(30))
+                .stacking(false)
+                .couponPolicy(couponPolicyRate)
+                .category(Category.builder()
+                        .categoryId(1L)
+                        .categoryName("Test Category")
+                        .build())
+                .build();
+
+        // 적용 불가능한 CategoryCoupon 생성 (카테고리 ID 2L)
+        CategoryCoupon nonApplicableCategoryCoupon = CategoryCoupon.builder()
+                .couponTypeId(105L)
+                .couponTypeName("Non-Applicable Category Discount")
+                .period(0)
+                .deadline(FIXED_NOW.plusDays(30))
+                .stacking(false)
+                .couponPolicy(couponPolicyRate)
+                .category(Category.builder()
+                        .categoryId(2L)
+                        .categoryName("Other Category")
+                        .build())
+                .build();
+
+        // 적용 가능한 AllCoupon 생성
+        AllCoupon applicableAllCoupon = AllCoupon.builder()
+                .couponTypeId(106L)
+                .couponTypeName("Applicable All Category Discount")
+                .period(0)
+                .deadline(FIXED_NOW.plusDays(15))
+                .stacking(false)
+                .couponPolicy(couponPolicyRate)
+                .build();
+
+        // Coupon 엔티티 생성
+        Coupon coupon1 = Coupon.builder()
+                .couponId(1004L)
+                .issueDate(FIXED_NOW.minusDays(1))
+                .deadline(FIXED_NOW.plusDays(30))
+                .couponStatus(CouponStatus.UNUSED)
+                .couponType(applicableCategoryCoupon)
+                .user(user1)
+                .build();
+
+        Coupon coupon2 = Coupon.builder()
+                .couponId(1005L)
+                .issueDate(FIXED_NOW.minusDays(2))
+                .deadline(FIXED_NOW.plusDays(30))
+                .couponStatus(CouponStatus.UNUSED)
+                .couponType(nonApplicableCategoryCoupon)
+                .user(user1)
+                .build();
+
+        Coupon coupon3 = Coupon.builder()
+                .couponId(1006L)
+                .issueDate(FIXED_NOW.minusDays(3))
+                .deadline(FIXED_NOW.plusDays(15))
+                .couponStatus(CouponStatus.UNUSED)
+                .couponType(applicableAllCoupon)
+                .user(user1)
+                .build();
+
+        List<Coupon> mockCoupons = Arrays.asList(coupon1, coupon2, coupon3);
+
+        // Mocking
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user1));
+        when(bookRepository.findByBookId(bookId)).thenReturn(Optional.of(book));
+        when(couponRepository.findEligibleCouponToBook(userId, bookId)).thenReturn(mockCoupons);
+
+        // 도서의 카테고리 정보 설정 (카테고리 ID 1L)
+        CategoryResponseDto categoryResponse = new CategoryResponseDto();
+        categoryResponse.setCategoryId(1L);
+        List<List<CategoryResponseDto>> categoryLists = Collections.singletonList(
+                Collections.singletonList(categoryResponse)
+        );
+
+        BookResponseDto bookDetail = new BookResponseDto();
+        bookDetail.setCategoryList(categoryLists);
+        when(bookGetService.getBookDetail(null, bookId)).thenReturn(bookDetail);
+
+        // When
+        List<CouponResponseDto> eligibleCoupons = couponService.getEligibleCoupons(userId, bookId);
+
+        // Then
+        assertNotNull(eligibleCoupons);
+        assertEquals(2, eligibleCoupons.size());
+
+        List<Long> expectedCouponIds = Arrays.asList(1004L, 1006L);
+        List<Long> actualCouponIds = eligibleCoupons.stream()
+                .map(CouponResponseDto::getCouponId)
+                .toList();
+
+        assertTrue(actualCouponIds.containsAll(expectedCouponIds));
+        assertFalse(actualCouponIds.contains(1005L));
     }
 
     // Helper method to calculate deadline based on CouponType's period or deadline

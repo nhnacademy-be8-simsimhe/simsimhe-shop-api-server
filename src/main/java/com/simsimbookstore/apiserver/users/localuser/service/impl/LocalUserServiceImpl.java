@@ -1,7 +1,9 @@
 package com.simsimbookstore.apiserver.users.localuser.service.impl;
 
+import com.simsimbookstore.apiserver.coupons.coupon.service.CouponService;
+import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponType;
 import com.simsimbookstore.apiserver.exception.AlreadyExistException;
-import com.simsimbookstore.apiserver.exception.NotFoundException;
+import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.service.GradeService;
 import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
@@ -13,12 +15,17 @@ import com.simsimbookstore.apiserver.users.role.service.RoleService;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.service.LocalUserService;
 import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
+import java.util.List;
 import java.util.Objects;
 
+
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 @Service
 public class LocalUserServiceImpl implements LocalUserService {
 
@@ -27,12 +34,9 @@ public class LocalUserServiceImpl implements LocalUserService {
 
     private final RoleService roleService;
     private final GradeService gradeService;
+    private final PointHistoryService pointHistoryService;
+    private final CouponService couponService;
 
-    public LocalUserServiceImpl(LocalUserRepository localUserRepository, RoleService roleService, GradeService gradeService) {
-        this.localUserRepository = localUserRepository;
-        this.roleService = roleService;
-        this.gradeService = gradeService;
-    }
 
     @Transactional
     @Override
@@ -53,7 +57,12 @@ public class LocalUserServiceImpl implements LocalUserService {
 
         localUser.addUserRole(userRole);
 
-        localUserRepository.save(localUser);
+        LocalUser save = localUserRepository.save(localUser);
+
+        pointHistoryService.signupPoint(save);
+
+        // 회원가입 시 welcome 쿠폰을 발급
+        couponService.issueCoupons(List.of(save.getUserId()), CouponType.WELCOME_COUPON_TYPE);
 
         return localUser;
     }
@@ -63,7 +72,6 @@ public class LocalUserServiceImpl implements LocalUserService {
         LocalUser localUser = localUserRepository.findByLoginId(loginId);
         return localUser;
     }
-
 
     //중복 loginId 체크
     @Override

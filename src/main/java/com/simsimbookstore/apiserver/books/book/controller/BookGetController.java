@@ -1,21 +1,16 @@
 package com.simsimbookstore.apiserver.books.book.controller;
 
-
 import com.simsimbookstore.apiserver.books.book.dto.BookListResponse;
 import com.simsimbookstore.apiserver.books.book.dto.BookResponseDto;
 import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.books.book.service.BookGetService;
-import jakarta.ws.rs.Path;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -70,7 +65,7 @@ public class BookGetController {
      * 도서 상세조회
      *
      * @param bookId
-     * @param userId
+     * @param userId 사용자가 도서 좋아요를 눌렀는지 확인하려고
      * @return
      */
     @GetMapping("/{bookId}")
@@ -122,32 +117,12 @@ public class BookGetController {
     public ResponseEntity<PageResponse<BookListResponse>> getBooksByCategory(@PathVariable(name = "categoryId") Long categoryId,
                                                                              @RequestParam(required = false) Long userId,
                                                                              @RequestParam(defaultValue = "1") int page,
-                                                                             @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
+                                                                             @RequestParam(defaultValue = "10") int size,
+                                                                             @RequestParam(defaultValue = "latest") String sort) {
+        Pageable pageable = this.createPageable(page - 1, size, sort);
         PageResponse<BookListResponse> booksByCategory = bookGetService.getBooksByCategory(userId, categoryId, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(booksByCategory);
     }
-
-    /**
-     * 특정 태그에 속한 도서조회
-     *
-     * @param tagId
-     * @param userId
-     * @param page
-     * @param size
-     * @return
-     */
-    @GetMapping("/tag/{tagId}")
-    public ResponseEntity<PageResponse<BookListResponse>> getBooksByTag(@PathVariable(name = "tagId") Long tagId,
-                                                                        @RequestParam(required = false) Long userId,
-                                                                        @RequestParam(defaultValue = "1") int page,
-                                                                        @RequestParam(defaultValue = "16") int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
-        PageResponse<BookListResponse> booksByTag = bookGetService.getBooksByTag(userId, tagId, pageable);
-
-        return ResponseEntity.status(HttpStatus.OK).body(booksByTag);
-    }
-
 
 
     /**
@@ -177,4 +152,45 @@ public class BookGetController {
     }
 
 
+    /**
+     * 특정 태그에 속한 도서조회
+     *
+     * @param tagId
+     * @param userId
+     * @param page
+     * @param size
+     * @return
+     */
+    @GetMapping("/tag/{tagId}")
+    public ResponseEntity<PageResponse<BookListResponse>> getBooksByTag(@PathVariable(name = "tagId") Long tagId,
+                                                                        @RequestParam(required = false) Long userId,
+                                                                        @RequestParam(defaultValue = "1") int page,
+                                                                        @RequestParam(defaultValue = "16") int size,
+                                                                        @RequestParam(defaultValue = "latest") String sort) { //정렬 기본은 최신순으로
+        Pageable pageable = this.createPageable(page - 1, size, sort);
+        PageResponse<BookListResponse> booksByTag = bookGetService.getBooksByTag(userId, tagId, pageable);
+
+        return ResponseEntity.status(HttpStatus.OK).body(booksByTag);
+    }
+
+    // 동적 정렬을 위한 Pageable 생성 메서드
+    private Pageable createPageable(int page, int size, String sort) {
+        Sort sortOption;
+        switch (sort.toLowerCase()) {
+            case "price_high":
+                sortOption = Sort.by(Sort.Direction.DESC, "price");
+                break;
+            case "price_low":
+                sortOption = Sort.by(Sort.Direction.ASC, "price");
+                break;
+            case "review":
+                sortOption = Sort.by(Sort.Direction.DESC, "reviewCount"); // 리뷰 개수 정렬
+                break;
+            default: // 최신순
+                sortOption = Sort.by(Sort.Direction.DESC, "publicationDate");
+                break;
+        }
+        return PageRequest.of(page, size, sortOption);
+
+    }
 }

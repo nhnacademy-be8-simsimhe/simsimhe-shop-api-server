@@ -29,6 +29,8 @@ public class PaymentRestTemplate {
     private final String successUrl;
     private final String failUrl;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     public PaymentRestTemplate(TossPaymentProperties tossPaymentProperties) {
         headers = new HttpHeaders();
         restTemplate = new RestTemplate();

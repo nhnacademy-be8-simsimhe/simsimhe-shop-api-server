@@ -1,5 +1,6 @@
 package com.simsimbookstore.apiserver.orders.coupondiscount.service.impl;
 
+import com.simsimbookstore.apiserver.coupons.coupon.repository.CouponRepository;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.coupondiscount.dto.CouponDiscountRequestDto;
 import com.simsimbookstore.apiserver.orders.coupondiscount.dto.CouponDiscountResponseDto;
@@ -18,11 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class CouponDiscountServiceImpl implements CouponDiscountService {
 
     private final CouponDiscountRepository couponDiscountRepository;
+    private final CouponRepository couponRepository;
 
     /**
      * 쿠폰 할인 생성
      */
     @Override
+    @Transactional
     public CouponDiscountResponseDto createCouponDiscount(CouponDiscountRequestDto requestDto, OrderBook orderBook) {
         // (1) 기존 쿠폰 삭제(선택적)
         if (orderBook.getCouponDiscount() != null) {
@@ -30,8 +33,9 @@ public class CouponDiscountServiceImpl implements CouponDiscountService {
             orderBook.setCouponDiscount(null);
         }
 
-        // (2) 새 쿠폰 생성
+        // (2) 새 쿠폰 할인 생성
         CouponDiscount couponDiscount = CouponDiscount.builder()
+                .coupon(couponRepository.findById(requestDto.getCouponId()).orElseThrow())
                 .orderBook(orderBook)
                 .couponName(requestDto.getCouponName())
                 .couponType(requestDto.getCouponType())
@@ -59,8 +63,9 @@ public class CouponDiscountServiceImpl implements CouponDiscountService {
     /**
      * 쿠폰 할인 삭제
      */
-    @Transactional
+
     @Override
+    @Transactional
     public void deleteById(Long id) {
         CouponDiscount couponDiscount = couponDiscountRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("CouponDiscount not found"));

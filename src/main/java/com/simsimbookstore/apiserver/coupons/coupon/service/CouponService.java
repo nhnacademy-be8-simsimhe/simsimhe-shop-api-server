@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface CouponService {
+    //모든 쿠폰을 페이지로 가져온다.
+    Page<CouponResponseDto> getTotalCoupons(Pageable pageable);
     // couponId로 쿠폰을 가져온다.
     CouponResponseDto getCouponById( Long couponId);
     // couponType의 사용되지 않은 쿠폰을 가져옵니다.
@@ -20,10 +22,10 @@ public interface CouponService {
     Page<CouponResponseDto> getUnusedCoupons(Pageable pageable, Long userId);
 
     //user의 적용 가능한 쿠폰울 가져온다.
-    Page<CouponResponseDto> getEligibleCoupons(Pageable pageable, Long userId, Long bookId);
+    List<CouponResponseDto> getEligibleCoupons(Long userId, Long bookId);
 
     // user들에게 쿠폰을 발급한다.
-    List<Long> issueCoupons(List<Long> userIds, Long couponTypeId);
+    void issueCoupons(List<Long> userIds, Long couponTypeId);
 
     // 쿠폰종류에 해당하는 모든 쿠폰을 만료시킨다.
 //    void expireAllCoupons(Long couponTypeId); <- couponTypeService에서

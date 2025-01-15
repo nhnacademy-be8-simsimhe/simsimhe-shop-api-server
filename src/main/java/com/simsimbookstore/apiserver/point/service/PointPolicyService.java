@@ -23,4 +23,6 @@ public interface PointPolicyService {
 
     @Transactional
     void deletePolicy(Long pointPolicyId);
+
+    PointPolicyResponseDto getUserPolicy(Long userId);
 }
