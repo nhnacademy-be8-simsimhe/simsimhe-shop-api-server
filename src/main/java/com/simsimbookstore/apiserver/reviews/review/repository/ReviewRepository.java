@@ -19,6 +19,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Review> findAllByBook(Book book, Pageable pageable);
 
 
+
     Page<ReviewLikeCountDTO> findAllByUser(User user, Pageable pageable);
 
 

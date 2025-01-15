@@ -61,7 +61,7 @@ public class ReviewCommentController {
      * 전체 댓글 조회 (해당 리뷰에 대한)
      */
     @GetMapping
-    public ResponseEntity<?> getReviewComments(
+    public ResponseEntity<Page<ReviewCommentResponseDTO>> getReviewComments(
             @PathVariable Long reviewId,
       @RequestParam(defaultValue = "0") int page,
     @RequestParam(defaultValue = "10") int size){

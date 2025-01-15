@@ -5,7 +5,6 @@ import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.elastic.entity.SearchBook;
 import com.simsimbookstore.apiserver.elastic.service.ElasticService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +20,7 @@ public class ElasticController {
 
 
     @PostMapping("/document")
-    public ResponseEntity saveData(@RequestBody Map<String, Object> payload){
+    public ResponseEntity<?> saveData(@RequestBody Map<String, Object> payload){
 
         Long id = Long.parseLong(payload.get("id").toString());
         String title = payload.get("title").toString();
@@ -49,7 +48,7 @@ public class ElasticController {
 
 
     @GetMapping("/document")
-    public PageResponse<SearchBook> getDatas(@RequestParam String keyword, @RequestParam(defaultValue = "popular") String sort, @RequestParam(defaultValue = "0") int page){
+    public PageResponse<SearchBook> getDatas(@RequestParam String keyword, @RequestParam(defaultValue = "popular") String sort, @RequestParam(defaultValue = "1") int page){
 
         return elasticService.searchBookByWord(keyword, sort, page);
 
@@ -58,7 +57,7 @@ public class ElasticController {
 
 
     @DeleteMapping("/document/{id}")
-    public ResponseEntity deleteData(@PathVariable String id){
+    public ResponseEntity<?> deleteData(@PathVariable String id){
 
         elasticService.deleteBook(id);
 

@@ -15,9 +15,7 @@ public interface ReviewService {
     Review updateReview(ReviewRequestDTO dto, Long reviewId);
 
     Page<Review> getAllReviews(Long bookId, int page, int size);
-    //Page<ReviewLikeCountDTO> getReviewsByBookOrderByScore(Long bookId, int page, int size);
-    //Page<ReviewLikeCountDTO> getReviewsByBookOrderByLike(Long bookId, int page, int size);
-   // Page<ReviewLikeCountDTO> getReviewsByBookOrderByRecent(Long bookId, int page, int size);
+    
 
     Page<ReviewLikeCountDTO> getReviewsByBookOrderByRecent(Long bookId, Long userId, int page, int size);
 
