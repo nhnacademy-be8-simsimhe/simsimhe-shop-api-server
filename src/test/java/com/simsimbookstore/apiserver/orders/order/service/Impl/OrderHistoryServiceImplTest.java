@@ -31,7 +31,6 @@ class OrderHistoryServiceImplTest {
     @Mock
     private OrderRepository orderRepository;
 
-    @Mock
     @InjectMocks
     private OrderHistoryServiceImpl orderHistoryService;
 
