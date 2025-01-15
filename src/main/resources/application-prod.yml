@@ -13,3 +13,8 @@ payment:
     secret_api_key : test_sk_LkKEypNArW1PydoJnX5j3lmeaxYG
     success_url : "https://simsimbook.store/payments/success"
     fail_url : "https://simsimbook.store/payments/fail"
+
+rabbitmq:
+  secret-key: 7bcf9993624c4ccf9140a44e40608808
+  port: 5672
+  virtual-host: vh1_prod
