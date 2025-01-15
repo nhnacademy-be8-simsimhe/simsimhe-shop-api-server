@@ -1,10 +1,8 @@
 package com.simsimbookstore.apiserver.orders.order.history;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-
 import static org.mockito.Mockito.when;
 
+import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.orders.order.dto.OrderHistoryResponseDto;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import java.math.BigDecimal;
@@ -66,32 +64,43 @@ class OrderHistoryControllerTest {
                         .build()
         );
 
-        Pageable pageable = PageRequest.of(0, 20);
+        // Page 객체를 생성
+        Pageable pageable = PageRequest.of(0, 20); // 0부터 시작하는 페이지 번호
         Page<OrderHistoryResponseDto> mockPage = new PageImpl<>(content, pageable, 46);
 
-        // Mock 설정
-        when(orderHistoryService.getOrderHistory(anyLong(), any(Pageable.class))).thenReturn(mockPage);
+        // PageResponse 객체를 생성
+        PageResponse<OrderHistoryResponseDto> mockPageResponse = new PageResponse<>(
+                mockPage.getContent(),
+                1, // 클라이언트에 노출되는 1부터 시작하는 페이지 번호
+                1, // 시작 페이지
+                3, // 끝 페이지
+                mockPage.getTotalPages(), // 전체 페이지 수
+                mockPage.getTotalElements() // 총 데이터 수
+        );
 
-        // When & Then: API 호출 및 응답 데이터 출력
+        // Mock 설정
+        when(orderHistoryService.getOrderHistory(1L, pageable)).thenReturn(mockPageResponse);
+
+        // When & Then: API 호출 및 검증
         mockMvc.perform(get("/api/shop/users/{userId}/orders", 1L)
-                        .param("page", "0")
+                        .param("page", "1") // 클라이언트 요청은 page=1
                         .param("size", "20")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print()) // 응답 데이터 출력
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].orderNumber").value("ORD001"))
-                .andExpect(jsonPath("$.content[0].orderDate").value("2025-01-01T19:00:00"))
-                .andExpect(jsonPath("$.content[0].orderName").value("aaa"))
-                .andExpect(jsonPath("$.content[0].orderAmount").value(49500.00))
-                .andExpect(jsonPath("$.content[0].orderState").value("COMPLETED"))
-                .andExpect(jsonPath("$.content[0].trackingNumber").isEmpty())
-                .andExpect(jsonPath("$.content[0].orderUserName").value("test"))
-                .andExpect(jsonPath("$.content[0].receiverName").value("Unknown Receiver"))
-                .andExpect(jsonPath("$.pageable.pageNumber").value(0))
-                .andExpect(jsonPath("$.pageable.pageSize").value(20))
-                .andExpect(jsonPath("$.totalElements").value(46))
-                .andExpect(jsonPath("$.totalPages").value(3));
+                .andExpect(jsonPath("$.data[0].orderNumber").value("ORD001"))
+                .andExpect(jsonPath("$.data[0].orderDate").value("2025-01-01T19:00:00"))
+                .andExpect(jsonPath("$.data[0].orderName").value("aaa"))
+                .andExpect(jsonPath("$.data[0].orderAmount").value(49500.00))
+                .andExpect(jsonPath("$.data[0].orderState").value("COMPLETED"))
+                .andExpect(jsonPath("$.data[0].trackingNumber").isEmpty())
+                .andExpect(jsonPath("$.data[0].orderUserName").value("test"))
+                .andExpect(jsonPath("$.data[0].receiverName").value("Unknown Receiver"))
+                .andExpect(jsonPath("$.currentPage").value(1))
+                .andExpect(jsonPath("$.startPage").value(1))
+                .andExpect(jsonPath("$.endPage").value(3))
+                .andExpect(jsonPath("$.totalPage").value(3))
+                .andExpect(jsonPath("$.totalElements").value(46));
     }
-
 }
 
