@@ -14,7 +14,6 @@ import com.simsimbookstore.apiserver.books.bookcategory.entity.BookCategory;
 import com.simsimbookstore.apiserver.books.bookcategory.repository.BookCategoryRepository;
 import com.simsimbookstore.apiserver.books.bookcontributor.entity.BookContributor;
 import com.simsimbookstore.apiserver.books.bookcontributor.repository.BookContributorRepository;
-import com.simsimbookstore.apiserver.books.bookimage.repoitory.BookImageRepoisotry;
 import com.simsimbookstore.apiserver.books.booktag.entity.BookTag;
 import com.simsimbookstore.apiserver.books.booktag.repositry.BookTagRepository;
 import com.simsimbookstore.apiserver.books.category.entity.Category;
@@ -25,7 +24,6 @@ import com.simsimbookstore.apiserver.books.tag.domain.Tag;
 import com.simsimbookstore.apiserver.books.tag.repository.TagRepository;
 import com.simsimbookstore.apiserver.exception.BadRequestException;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
-import com.simsimbookstore.apiserver.storage.service.ObjectServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -67,8 +65,8 @@ public class BookManagementService {
         Book saveBook = bookRepository.save(book);
 
         //도서 카테고리 연관관계 매핑(가장 하위 카테고리만 가져옴)
-        List<Long> lowestCategoryId = bookRepository.getLowestCategoryId(bookRequestDto.getCategoryIdList());
-        this.saveBookCategory(lowestCategoryId, book);
+        //List<Long> lowestCategoryId = bookRepository.getLowestCategoryId(bookRequestDto.getCategoryIdList());
+        this.saveBookCategory(bookRequestDto.getCategoryIdList(), book);
 
         //도서 태그 연관관계 매핑
         this.saveBookTag(book, bookRequestDto.getTagIdList());
@@ -116,8 +114,8 @@ public class BookManagementService {
             if (!requestDto.getCategoryIdList().isEmpty()) {
                 Optional.of(requestDto.getCategoryIdList()).ifPresent(categoryIdList -> {
                     bookCategoryRepository.deleteByBookId(bookId);
-                    List<Long> lowestCategoryId = bookRepository.getLowestCategoryId(categoryIdList);
-                    this.saveBookCategory(lowestCategoryId, book);
+                    //List<Long> lowestCategoryId = bookRepository.getLowestCategoryId(categoryIdList);
+                    this.saveBookCategory(categoryIdList, book);
                 });
             }
 

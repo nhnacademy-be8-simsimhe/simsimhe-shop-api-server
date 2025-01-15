@@ -88,7 +88,7 @@ class BookManagementServiceTest {
 
         Book mockBook = mock(Book.class);
         when(bookRepository.save(any(Book.class))).thenReturn(mockBook);
-        when(bookRepository.getLowestCategoryId(anyList())).thenReturn(List.of(1L));
+        //when(bookRepository.getLowestCategoryId(anyList())).thenReturn(List.of(1L));
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(mock(Category.class)));
         when(tagRepository.findById(2L)).thenReturn(Optional.of(mock(Tag.class)));
         when(contributorRepositroy.findById(3L)).thenReturn(Optional.of(mock(Contributor.class)));
@@ -113,7 +113,7 @@ class BookManagementServiceTest {
                 .categoryIdList(List.of(1L)) // 존재하지 않는 카테고리 ID
                 .build();
 
-        when(bookRepository.getLowestCategoryId(anyList())).thenReturn(List.of(1L));
+        //when(bookRepository.getLowestCategoryId(anyList())).thenReturn(List.of(1L));
         when(categoryRepository.findById(1L)).thenReturn(Optional.empty()); // 카테고리 없음
 
         // Act & Assert

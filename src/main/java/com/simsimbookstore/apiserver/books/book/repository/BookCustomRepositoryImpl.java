@@ -401,17 +401,18 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
      */
     @Override
     public List<Long> getLowestCategoryId(List<Long> categoryIdList) {
-        if (categoryIdList == null || categoryIdList.isEmpty()) {
-            return List.of();
-        }
 
+        // 자식 카테고리가 없는 조건
         return queryFactory
                 .select(category.categoryId)
                 .from(category)
                 .where(category.categoryId.in(categoryIdList)
                         .and(category.children.isEmpty())) // 자식 카테고리가 없는 조건
                 .fetch();
+
     }
+
+
 
 
     /**
