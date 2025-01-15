@@ -148,6 +148,25 @@ public class OrderFacadeImpl implements OrderFacade {
         order.getDelivery().setDeliveryState(Delivery.DeliveryState.READY);
 
     }
+
+    @Transactional
+    @Override
+    public Order orderRefund(Long orderId) {
+
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new NotFoundException("Order not found"));
+        List<OrderBook> orderBooks = orderBookService.getOrderBooks(orderId);
+        Delivery delivery = order.getDelivery();
+        order.setOrderState(Order.OrderState.PAYMENT_CANCELED);
+        delivery.setDeliveryState(Delivery.DeliveryState.CANCEL);
+        for(OrderBook orderBook : orderBooks) {
+            orderBook.setOrderBookState(OrderBook.OrderBookState.CANCELED);
+        }
+
+        pointHistoryService.refundPoint(orderId);
+
+        return order;
+    }
+
     /**
      * 비회원 주문을 위한 비회원 생성
      *
@@ -155,8 +174,7 @@ public class OrderFacadeImpl implements OrderFacade {
      * @return Guest userId
      */
 
-    @Transactional
-    public Long prepareUser(OrderFacadeRequestDto dto) {
+    protected Long prepareUser(OrderFacadeRequestDto dto) {
         if (dto.getMemberOrderRequestDto().getUserId() == null) {
             GuestUserRequestDto guestDto = GuestUserRequestDto.builder()
                     .userName(dto.memberOrderRequestDto.getSenderName()).build();

@@ -168,19 +168,19 @@ public class PointHistoryServiceImpl implements PointHistoryService {
         Review review = reviewRepository.findById(dto.getReviewId())
                 .orElseThrow(() -> new NotFoundException("Review not found"));
 
-        // 1. PointHistory 엔티티 저장
+        // 1. PointHistory
         PointHistory save = pointHistoryRepository.save(PointHistory.builder()
                 .pointType(PointHistory.PointType.EARN)
                 .amount(earnPoints.intValue())
                 .created_at(now())
                 .user(user)
                 .build());
-        // 2. ReviewPointManage 엔티티 생성 및
-        ReviewPointManage reviewPointManage =
-                reviewPointManageRepository.save(ReviewPointManage.builder()
-                        .pointHistory(save)
-                        .review(review)
-                        .build());
+
+        // 2. ReviewPointManage
+        reviewPointManageRepository.save(ReviewPointManage.builder()
+                .pointHistory(save)
+                .review(review)
+                .build());
 
         return save;
     }
@@ -240,19 +240,19 @@ public class PointHistoryServiceImpl implements PointHistoryService {
                 .getOriginalPrice();
 
         // 티어를 Map으로  매핑
-        PointPolicy.EarningMethod EarningMethod = tierToEarningMethodMap.get(tier);
-        if (EarningMethod == null) {
+        PointPolicy.EarningMethod earningMethod = tierToEarningMethodMap.get(tier);
+        if (earningMethod == null) {
             throw new IllegalArgumentException("Invalid Tier: " + tier);
         }
 
         // 정책 조회 및 포인트 계산
-        BigDecimal rate = pointHistoryService.getPolicy(EarningMethod).getEarningValue();
+        BigDecimal rate = pointHistoryService.getPolicy(earningMethod).getEarningValue();
         return originalPrice.multiply(rate);
     }
 
     @Override
     public BigDecimal refundPoint(Long orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow(()-> new NotFoundException("order Not Found"));
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new NotFoundException("order Not Found"));
         //total+point use
         BigDecimal pointUse = order.getPointUse();
         BigDecimal totalPrice = order.getTotalPrice();

@@ -64,7 +64,8 @@ public class Delivery {
         IN_PROGRESS,    // 배송중
         COMPLETED,      // 배송완료
         RETURNED,       // 반품
-        ERROR           // 배송오류
+        ERROR,      // 배송오류
+        CANCEL
     }
 
     @JsonCreator
