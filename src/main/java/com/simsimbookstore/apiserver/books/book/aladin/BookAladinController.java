@@ -10,8 +10,6 @@ public class BookAladinController {
 
     private final AladinApiService aladinApiService;
 
-
-
     /**
      * 알라딘 api로 데이터베이스에 삽입
      * @return

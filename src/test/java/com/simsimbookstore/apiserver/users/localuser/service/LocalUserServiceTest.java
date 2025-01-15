@@ -9,7 +9,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.simsimbookstore.apiserver.coupons.coupon.service.CouponService;
 import com.simsimbookstore.apiserver.exception.AlreadyExistException;
+import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.service.GradeService;
@@ -56,9 +58,16 @@ class LocalUserServiceTest {
     @Mock
     private GradeService gradeService;
 
+    @Mock
+    private PointHistoryService pointHistoryService;
+
+    @Mock
+    private CouponService couponService;
+
     LocalUserRegisterRequestDto testUser;
     Grade testGrade;
     UserRole testUserRole;
+    LocalUser localUser;
 
     @BeforeEach
     void setUp() {
@@ -86,15 +95,22 @@ class LocalUserServiceTest {
         testUserRole = UserRole.builder()
                 .role(testRole)
                 .build();
+
+        localUser = LocalUser.builder()
+                .userId(1L)
+                .build();
+
     }
 
     @Test
     @DisplayName("로컬 유저 저장 테스트")
     void testSaveLocalUser() {
-        when(roleService.findByRoleName(RoleName.USER)).thenReturn(new Role(1L,RoleName.USER));
+        when(roleService.findByRoleName(RoleName.USER)).thenReturn(new Role(1L, RoleName.USER));
+        when(localUserRepository.save(any())).thenReturn(localUser);
 
-        localUserService.saveLocalUser(testUser);
+        LocalUser localUser = localUserService.saveLocalUser(testUser);
 
+        lenient().when(pointHistoryService.signupPoint(localUser)).thenReturn(null);
         verify(localUserRepository, times(1)).save(any(LocalUser.class));
     }
 

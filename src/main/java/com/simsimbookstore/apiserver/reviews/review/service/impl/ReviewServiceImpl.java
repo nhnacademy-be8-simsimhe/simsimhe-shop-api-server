@@ -3,6 +3,8 @@ package com.simsimbookstore.apiserver.reviews.review.service.impl;
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
+import com.simsimbookstore.apiserver.point.dto.ReviewPointCalculateRequestDto;
+import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import com.simsimbookstore.apiserver.reviews.review.dto.*;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.reviews.review.exception.NotCreateReviewException;
@@ -11,6 +13,7 @@ import com.simsimbookstore.apiserver.reviews.review.service.ReviewService;
 import com.simsimbookstore.apiserver.reviews.reviewimage.repository.ReviewImagePathRepository;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,13 +31,15 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private final ReviewImagePathRepository reviewImagePathRepository;
-
+    private final PointHistoryService pointHistoryService;
+    private final EntityManager em;
 
 
     public String canReviewBeCreated(Long userId, Long bookId){
@@ -63,7 +68,7 @@ public class ReviewServiceImpl implements ReviewService {
         return convertToUserAvailableReviewsDTO(results);
     }
 
-
+    @Transactional
     @Override
     public Review createReview(ReviewRequestDTO dto, Long bookId, Long userId) {
         User user = userRepository.findById(userId)
@@ -92,11 +97,15 @@ public class ReviewServiceImpl implements ReviewService {
 
         Review createReview = reviewRepository.save(review);
 
+        //리뷰 포인트 적립
+//        ReviewPointCalculateRequestDto pointDto = new ReviewPointCalculateRequestDto (createReview.getReviewId(), userId);
+//        pointHistoryService.reviewPoint(pointDto);
+
         return createReview;
     }
 
 
-
+    @Transactional
     @Override
     public Review updateReview(ReviewRequestDTO dto, Long reviewId) {
 
@@ -208,7 +217,7 @@ public class ReviewServiceImpl implements ReviewService {
         throw new NotFoundException("존재하지 않는 책입니다.");
     }
 
-
+    @Transactional
     @Override
     public void deleteReview(Long reviewId) {
         Review existingReview = reviewRepository.findById(reviewId)
