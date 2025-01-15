@@ -55,6 +55,11 @@ public class CouponServiceImpl implements CouponService {
     private final BookCategoryRepository bookCategoryRepository;
     private final BookGetService bookGetService;
 
+    @Override
+    public Page<CouponResponseDto> getTotalCoupons(Pageable pageable) {
+        Page<Coupon> totalCoupons = couponRepository.findAll(pageable);
+        return totalCoupons.map(CouponMapper::toResponse);
+    }
     /**
      * couponId로 쿠폰을 가져온다.
      * @param couponId
@@ -198,7 +203,7 @@ public class CouponServiceImpl implements CouponService {
      */
     @Override
     @Transactional
-    public List<Long> issueCoupons(List<Long> userIds, Long couponTypeId) {
+    public void issueCoupons(List<Long> userIds, Long couponTypeId) {
         List<Long> result = new ArrayList<>();
         validateId(couponTypeId);
         CouponType couponType = couponTypeRepository.findById(couponTypeId).orElseThrow(() -> new NotFoundException("쿠폰 정책(id:" + couponTypeId + ")이 존재하지 않습니다.1"));
@@ -227,8 +232,6 @@ public class CouponServiceImpl implements CouponService {
             result.add(savedCoupon.getCouponId());
 
         }
-        return result;
-
     }
 
     /**

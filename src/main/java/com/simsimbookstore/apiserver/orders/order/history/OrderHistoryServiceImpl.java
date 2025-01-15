@@ -19,8 +19,8 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
 
     @Override
     public PageResponse<OrderHistoryResponseDto> getOrderHistory(Long userId, Pageable pageable) {
-        log.info("Start fetching order history for userId: {}, with pageable: {}", userId, pageable);
 
+        log.info("Start fetching order history for userId: {}, with pageable: {}", userId, pageable);
         Page<Order> orderPage = orderRepository.findByUserUserIdOrderByOrderDateDesc(userId, pageable);
         log.info("Fetched {} orders for userId: {}", orderPage.getTotalElements(), userId);
 
@@ -28,6 +28,7 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
 
 
         log.info("Converted orders to DTOs. Total DTOs: {}", response.getTotalElements());
+
 
         return new PageResponse<OrderHistoryResponseDto>().getPageResponse(
                 pageable.getPageNumber() + 1,
@@ -44,8 +45,8 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
                 .orderAmount(order.getTotalPrice())
                 .orderState(order.getOrderState())
                 .trackingNumber(safeGetTrackingNumber(order))
-                .orderUserName(safeGetUserName(order))
-                .receiverName(safeGetReceiverName(order))
+                .orderUserName(order.getUser().getUserName())
+                .receiverName(order.getDelivery().getDeliveryReceiver())
                 .build();
     }
 
@@ -55,13 +56,7 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
                 : null;
     }
 
-    private String safeGetUserName(Order order) {
-        return order.getUser() != null ? order.getUser().getUserName() : "Unknown User";
-    }
 
-    private String safeGetReceiverName(Order order) {
-        return order.getDelivery() != null ? order.getDelivery().getDeliveryReceiver() : "Unknown Receiver";
-    }
 }
 
 
