@@ -107,7 +107,7 @@ class LocalUserServiceTest {
     void testSaveLocalUser() {
         when(roleService.findByRoleName(RoleName.USER)).thenReturn(new Role(1L, RoleName.USER));
         when(localUserRepository.save(any())).thenReturn(localUser);
-        when(couponService.issueCoupons(anyList(), anyLong())).thenReturn(null);
+
         LocalUser localUser = localUserService.saveLocalUser(testUser);
 
         lenient().when(pointHistoryService.signupPoint(localUser)).thenReturn(null);

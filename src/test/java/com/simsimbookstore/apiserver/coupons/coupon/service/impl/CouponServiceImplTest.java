@@ -528,22 +528,7 @@ class CouponServiceImplTest {
         // 쿠폰 저장 Mock 설정
         when(couponRepository.save(any(Coupon.class))).thenReturn(coupon1, coupon2, coupon3);
 
-        List<Long> issuedCouponIds = couponService.issueCoupons(userIds, couponTypeId);
-
-        assertNotNull(issuedCouponIds);
-        assertEquals(3, issuedCouponIds.size());
-
-        // First Issued Coupon
-        Long firstId = issuedCouponIds.get(0);
-        assertEquals(1001L, firstId);
-
-        // Second Issued Coupon
-        Long secondId = issuedCouponIds.get(1);
-        assertEquals(1002L, secondId);
-
-        // Third Issued Coupon
-        Long thirdId = issuedCouponIds.get(2);
-        assertEquals(1003L, thirdId);
+        couponService.issueCoupons(userIds, couponTypeId);
 
         // 쿠폰 저장이 3번 호출되었는지 검증
         verify(couponRepository, times(3)).save(any(Coupon.class));
