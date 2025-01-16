@@ -5,9 +5,9 @@ import com.simsimbookstore.apiserver.orders.facade.OrderFacadeRequestDto;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
 import com.simsimbookstore.apiserver.orders.order.dto.BookListRequestDto;
 import com.simsimbookstore.apiserver.orders.order.dto.BookListResponseDto;
-import com.simsimbookstore.apiserver.orders.order.dto.OrderResponseDto;
 import com.simsimbookstore.apiserver.orders.order.dto.TotalRequestDto;
 import com.simsimbookstore.apiserver.orders.order.dto.TotalResponseDto;
+import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.service.OrderListService;
 import com.simsimbookstore.apiserver.orders.order.service.OrderTotalService;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
@@ -78,6 +78,16 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * 포인트 환불 버튼
+     * @param orderId
+     * @return 포인트 환불된거 주문 리턴
+     */
+
+    @PostMapping("/point-refund")
+    public ResponseEntity<Order> pointRefund(Long orderId) {
+        return ResponseEntity.ok(orderFacade.orderRefund(orderId));
+    }
 }
 
 

@@ -12,6 +12,7 @@ import com.simsimbookstore.apiserver.orders.order.dto.MemberOrderRequestDto;
 import com.simsimbookstore.apiserver.orders.order.dto.OrderResponseDto;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
+import com.simsimbookstore.apiserver.orders.order.service.GuestOrderService;
 import com.simsimbookstore.apiserver.orders.order.service.MemberOrderService;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
@@ -19,10 +20,6 @@ import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
 import com.simsimbookstore.apiserver.point.dto.OrderPointRequestDto;
 import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 
-import com.simsimbookstore.apiserver.users.role.entity.Role;
-import com.simsimbookstore.apiserver.users.user.dto.GuestUserRequestDto;
-import com.simsimbookstore.apiserver.users.user.entity.User;
-import com.simsimbookstore.apiserver.users.user.service.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,9 +37,9 @@ public class OrderFacadeImpl implements OrderFacade {
     private final DeliveryService deliveryService;
     private final PointHistoryService pointHistoryService;
     private final OrderRepository orderRepository;
-    private final UserService userService;
     private final BookManagementService bookManagementService;
     private final CouponService couponService;
+    private final GuestOrderService guestOrderService;
 
     @Override
     @Transactional
@@ -60,7 +57,7 @@ public class OrderFacadeImpl implements OrderFacade {
 
         //비회원 일때
         if (facadeRequestDto.memberOrderRequestDto.getUserId() == null) {
-            guestId = prepareUser(facadeRequestDto);
+            guestId = guestOrderService.prepareUser(facadeRequestDto);
             orderReq = facadeRequestDto.getMemberOrderRequestDto();
             orderReq.setUserId(guestId);
             orderReq.setDeliveryId(delivery.getDeliveryId());
@@ -110,7 +107,7 @@ public class OrderFacadeImpl implements OrderFacade {
                 .email(orderReq.getOrderEmail())
                 .phoneNumber(orderReq.getPhoneNumber())
                 .method(facadeRequestDto.getMethod())
-                .userName("이름")
+                .userName(facadeRequestDto.getMemberOrderRequestDto().getSenderName())
                 .build();
 
         log.info("OrderFacadeResponseDto created: {}", response);
@@ -194,24 +191,5 @@ public class OrderFacadeImpl implements OrderFacade {
         return order;
     }
 
-
-    /**
-     * 비회원 주문을 위한 비회원 생성
-     *
-     * @param //OrderFacadeRequsetDto
-     * @return Guest userId
-     */
-
-    protected Long prepareUser(OrderFacadeRequestDto dto) {
-        if (dto.getMemberOrderRequestDto().getUserId() == null) {
-            GuestUserRequestDto guestDto = GuestUserRequestDto.builder()
-                    .userName(dto.memberOrderRequestDto.getSenderName()).build();
-
-            User guest = userService.createGuest(guestDto);
-            return guest.getUserId();
-        } else {
-            return dto.getMemberOrderRequestDto().getUserId();
-        }
-    }
 }
 

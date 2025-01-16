@@ -29,7 +29,6 @@ import com.simsimbookstore.apiserver.users.user.service.UserService;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -256,7 +255,14 @@ public class PointHistoryServiceImpl implements PointHistoryService {
         //total+point use
         BigDecimal pointUse = order.getPointUse();
         BigDecimal totalPrice = order.getTotalPrice();
-        return pointUse.add(totalPrice);
+        BigDecimal save = pointUse.add(totalPrice);
+        pointHistoryRepository.save( PointHistory.builder()
+                .user(order.getUser())
+                .amount(save.intValue())
+                .created_at(now())
+                .pointType(PointHistory.PointType.EARN)
+                .build());
+        return save;
     }
 
 
