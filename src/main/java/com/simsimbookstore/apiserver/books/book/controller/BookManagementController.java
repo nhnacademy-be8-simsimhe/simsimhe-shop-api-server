@@ -7,13 +7,17 @@ import com.simsimbookstore.apiserver.books.book.dto.BookStatusResponseDto;
 import com.simsimbookstore.apiserver.books.book.service.BookManagementService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/admin/shop/books")
 @RequiredArgsConstructor
+@Slf4j
 public class BookManagementController {
 
     private final BookManagementService bookManagementService;
@@ -28,8 +32,18 @@ public class BookManagementController {
     public ResponseEntity<BookResponseDto> createBook(@RequestBody @Valid BookRequestDto requestDto) {
         BookResponseDto bookResponseDto = bookManagementService.registerBook(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(bookResponseDto);
-
     }
+//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<BookResponseDto> createBook(
+//            @RequestPart("requestDto") @Valid BookRequestDto requestDto,
+//            @RequestPart("thumbnail") MultipartFile thumbnail
+//    ) {
+//        System.out.println("📌 Received BookRequestDto: " + requestDto);
+//        System.out.println("📌 Received File: " + thumbnail.getOriginalFilename());
+//        BookResponseDto bookResponseDto = bookManagementService.registerBook(requestDto, thumbnail);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(bookResponseDto);
+//    }
+
 
     /**
      * 도서 수정인데 도서 상태는 수정 안되게 되어있음
