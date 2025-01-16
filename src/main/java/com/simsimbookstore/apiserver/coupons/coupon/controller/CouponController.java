@@ -169,6 +169,19 @@ public class CouponController {
         return ResponseEntity.status(HttpStatus.OK).body(discountAmountResponseDto);
     }
 
+    @GetMapping("/admin/coupons/expired")
+    public ResponseEntity<List<CouponResponseDto>> getExpiredCoupons() {
+        List<CouponResponseDto> coupons = couponService.getExpiredCoupons();
+        return ResponseEntity.status(HttpStatus.OK).body(coupons);
+    }
+
+    @GetMapping("/admin/coupons/unused/deadline-pass")
+    public ResponseEntity<List<CouponResponseDto>> getUnusedButDeadlinePassedCoupon() {
+        List<CouponResponseDto> coupons = couponService.getUnusedButDeadlinePassedCoupon();
+        return ResponseEntity.status(HttpStatus.OK).body(coupons);
+    }
+
+
     private Pageable setPageable(Pageable pageable, String sortField) {
         String sortBy = (StringUtils.isEmpty(sortField) && StringUtils.isBlank(sortField) ? "issueDate" : sortField);
         return PageRequest.of(

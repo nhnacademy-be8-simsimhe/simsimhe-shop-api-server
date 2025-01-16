@@ -426,7 +426,7 @@ class CouponServiceImplTest {
         List<Coupon> coupons = Collections.singletonList(coupon1);
         Page<Coupon> couponPage = new PageImpl<>(coupons, pageable, coupons.size());
 
-        when(couponRepository.findByUserUserIdAndCouponStatus(pageable, userId, CouponStatus.UNUSED))
+        when(couponRepository.findByUserUserIdAndCouponStatusAndDeadlineBeforeNow( userId, CouponStatus.UNUSED,pageable))
                 .thenReturn(couponPage);
 
         Page<CouponResponseDto> responsePage = couponService.getUnusedCoupons(pageable, userId);
@@ -460,7 +460,7 @@ class CouponServiceImplTest {
         assertEquals("회원(id:3)이 존재하지 않습니다.", exception.getMessage());
 
         // UNUSED 쿠폰 조회가 호출되지 않았는지 검증
-        verify(couponRepository, never()).findByUserUserIdAndCouponStatus(any(Pageable.class), anyLong(), any(CouponStatus.class));
+        verify(couponRepository, never()).findByUserUserIdAndCouponStatusAndDeadlineBeforeNow(anyLong(), any(CouponStatus.class), any(Pageable.class));
     }
 
     // ### 2.5. `getEligibleCoupons` 메서드 테스트

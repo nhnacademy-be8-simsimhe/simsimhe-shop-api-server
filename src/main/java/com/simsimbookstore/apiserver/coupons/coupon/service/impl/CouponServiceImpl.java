@@ -15,6 +15,7 @@ import com.simsimbookstore.apiserver.coupons.coupon.dto.DiscountAmountResponseDt
 import com.simsimbookstore.apiserver.coupons.coupon.dto.EmptyCouponResponseDto;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.Coupon;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.CouponStatus;
+import com.simsimbookstore.apiserver.coupons.exception.AlreadyCouponDeadlinePassed;
 import com.simsimbookstore.apiserver.coupons.exception.AlreadyCouponUsed;
 import com.simsimbookstore.apiserver.coupons.exception.InapplicableCoupon;
 import com.simsimbookstore.apiserver.coupons.exception.InsufficientOrderAmountException;
@@ -137,8 +138,19 @@ public class CouponServiceImpl implements CouponService {
         validateId(userId);
         //유저 확인
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("회원(id:"+userId+")이 존재하지 않습니다."));
-        Page<Coupon> couponPage = couponRepository.findByUserUserIdAndCouponStatus(pageable, userId, CouponStatus.UNUSED);
+        Page<Coupon> couponPage = couponRepository.findByUserUserIdAndCouponStatusAndDeadlineBeforeNow(userId, CouponStatus.UNUSED, pageable);
         return couponPage.map(CouponMapper::toResponse);
+    }
+    @Override
+    public List<CouponResponseDto> getExpiredCoupons() {
+        List<Coupon> coupons = couponRepository.findByCouponStatus(CouponStatus.EXPIRED);
+        return coupons.stream().map(CouponMapper::toResponse).toList();
+    }
+
+    @Override
+    public List<CouponResponseDto> getUnusedButDeadlinePassedCoupon() {
+        List<Coupon> coupons = couponRepository.findUnusedAndExpiredCoupons();
+        return coupons.stream().map(CouponMapper::toResponse).toList();
     }
 
     /**
@@ -172,6 +184,11 @@ public class CouponServiceImpl implements CouponService {
 
         // 유저의 카테고리 쿠폰이 책에 적용 가능한지 확인한다.
         for (Coupon coupon : coupons) {
+            //유효기간이 지났는지 확인하고 지났으면 만료처리
+            if (coupon.getDeadline().isBefore(LocalDateTime.now())) {
+                coupon.expire();
+                continue;
+            }
             if (coupon.getCouponType() instanceof CategoryCoupon categoryCoupon) {
                 Long targetId = categoryCoupon.getCategory().getCategoryId();
                 for (Long categoryId : categoryIdList) {
@@ -274,6 +291,10 @@ public class CouponServiceImpl implements CouponService {
         Coupon coupon = couponRepository.findByUserUserIdAndCouponId(userId, couponId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")은 쿠폰(id:" + couponId + ")을 가지고 있지 않습니다."));
         if (coupon.getCouponStatus() != CouponStatus.UNUSED) {
             throw new AlreadyCouponUsed("회원(id:" + userId + ")의 쿠폰(id:" + couponId + ")은 이미 사용된 쿠폰입니다.");
+        }
+        if (coupon.getDeadline().isBefore(LocalDateTime.now())) {
+            coupon.expire();
+            throw new AlreadyCouponDeadlinePassed("쿠폰(id:" + couponId + ")은 이미 사용기간이 지났습니다. 쿠폰을 만료 처리합니다.");
         }
         coupon.use();
 

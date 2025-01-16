@@ -38,6 +38,7 @@ public class LocalUserServiceImpl implements LocalUserService {
     private final CouponService couponService;
 
 
+
     @Transactional
     @Override
     public LocalUser saveLocalUser(LocalUserRegisterRequestDto localUserRequestDto) {

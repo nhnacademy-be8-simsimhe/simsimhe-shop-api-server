@@ -13,7 +13,7 @@ public class CouponMqConsumer {
     private final CouponService couponService;
 
     @RabbitListener(queues = COUPON_QUEUE_NAME)
-    public void issueBirthDayCoupon(IssueCouponsRequestDto requestDto) {
+    public void issueCoupon(IssueCouponsRequestDto requestDto) {
         couponService.issueCoupons(requestDto.getUserIds(), requestDto.getCouponTypeId());
         // 실패했을 때 어떻게 MQ 보상처리 할 것인지
     }
