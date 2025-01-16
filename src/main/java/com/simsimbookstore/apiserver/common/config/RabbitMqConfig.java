@@ -1,6 +1,6 @@
 package com.simsimbookstore.apiserver.common.config;
 
-import com.simsimbookstore.apiserver.common.dto.RabbitMqProperty;
+import com.simsimbookstore.apiserver.common.dto.RabbitmqProperty;
 import com.simsimbookstore.apiserver.coupons.mqConsumer.CouponMqConsumer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.Binding;
@@ -26,13 +26,13 @@ public class RabbitMqConfig {
     public static final String EXCHANGE_NAME = "simsimbooks.exchange";
     public static final String COUPON_ISSUE_QUEUE_ROUTING_KEY = "routing_key_issue_coupon";
 
-    private final RabbitMqProperty rabbitMqProperty;
+    private final RabbitmqProperty rabbitMqProperty;
     private final Map<String, String> secretMap = new HashMap<>();
     private final KeyConfig keyConfig;
 
 
     @Bean
-    public Map<String,String> setDecryptedRabbitMqSecret(){
+    public Map<String, String> setDecryptedRabbitMqSecret() {
         String secretKey = keyConfig.keyStore(rabbitMqProperty.getSecretKey());
         String[] split = secretKey.split("\n");
         for (String s : split) {
@@ -55,6 +55,7 @@ public class RabbitMqConfig {
         factory.setVirtualHost(rabbitMqProperty.getVirtualHost());
         return factory;
     }
+
     // 메시지 컨버터
     @Bean
     public Jackson2JsonMessageConverter messageConverter() {
@@ -82,6 +83,7 @@ public class RabbitMqConfig {
     public Queue couponQueue() { //쿠폰 큐
         return new Queue(CouponMqConsumer.COUPON_QUEUE_NAME, true);
     }
+
     @Bean
     public DirectExchange directExchange() { //Exchange
         return new DirectExchange(EXCHANGE_NAME);

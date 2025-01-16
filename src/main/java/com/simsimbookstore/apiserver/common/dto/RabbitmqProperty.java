@@ -11,5 +11,7 @@ import org.springframework.stereotype.Component;
 @Setter
 @Getter
 public class RabbitmqProperty {
-    String data;
+    private String secretKey;
+    private Integer port;
+    private String virtualHost;
 }
