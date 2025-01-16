@@ -147,7 +147,7 @@ public class CouponController {
      * @return
      */
     @DeleteMapping("/admin/users/{userId}/coupons/{couponId}")
-    public ResponseEntity deleteCoupon(@PathVariable  Long userId,
+    public ResponseEntity<Void> deleteCoupon(@PathVariable  Long userId,
                                        @PathVariable Long couponId) {
         couponService.deleteCoupon(userId, couponId);
 

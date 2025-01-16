@@ -26,10 +26,10 @@ Content-Type: application/json
 }
 
 ### GET getCoupon - 특정 쿠폰 하나 가져오기
-GET http://localhost:8010/api/shop/coupons/8
+GET http://localhost:8010/api/shop/coupons/125
 
 ### GET getUnusedCouponByCouponType - 유저가 가진 특정 쿠폰 타입 쿠폰 중 미사용 쿠폰을 가져온다.
-GET http://localhost:8010/api/shop/users/1/coupons/unused?couponTypeId=19
+GET http://localhost:8010/api/shop/users/1/coupons/unused?couponTypeId=2
 
 ### GET getCoupons - 유저가 가진 쿠폰들을 가져온다
 GET http://localhost:8010/api/shop/users/1/coupons

@@ -81,12 +81,12 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    public Queue couponIssueQueue() { //쿠폰 큐
-        return new Queue(CouponMqConsumer.COUPON_QUEUE_NAME, true);
+    public Queue couponIssueQueue() {
+        return new Queue(CouponMqConsumer.COUPON_ISSUE_QUEUE_NAME, true);
     }
     @Bean
     public Queue couponExpireQueue() {
-        return new Queue("simsimbooks.coupon.expire.queue", true);
+        return new Queue(COUPON_EXPIRE_QUEUE_ROUTING_KEY, true);
     }
     @Bean
     public Queue couponDeleteQueue() {
