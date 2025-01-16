@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -64,6 +65,7 @@ class BookManagementServiceTest {
     @Mock
     private BookContributorRepository bookContributorRepository;
 
+
     @Test
     void testRegisterBook() {
         // Arrange
@@ -86,7 +88,7 @@ class BookManagementServiceTest {
 
         Book mockBook = mock(Book.class);
         when(bookRepository.save(any(Book.class))).thenReturn(mockBook);
-        when(bookRepository.getLowestCategoryId(anyList())).thenReturn(List.of(1L));
+        //when(bookRepository.getLowestCategoryId(anyList())).thenReturn(List.of(1L));
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(mock(Category.class)));
         when(tagRepository.findById(2L)).thenReturn(Optional.of(mock(Tag.class)));
         when(contributorRepositroy.findById(3L)).thenReturn(Optional.of(mock(Contributor.class)));
@@ -111,7 +113,7 @@ class BookManagementServiceTest {
                 .categoryIdList(List.of(1L)) // 존재하지 않는 카테고리 ID
                 .build();
 
-        when(bookRepository.getLowestCategoryId(anyList())).thenReturn(List.of(1L));
+        //when(bookRepository.getLowestCategoryId(anyList())).thenReturn(List.of(1L));
         when(categoryRepository.findById(1L)).thenReturn(Optional.empty()); // 카테고리 없음
 
         // Act & Assert
@@ -177,7 +179,7 @@ class BookManagementServiceTest {
         titleField.set(existingBook, "Old Title");
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(existingBook));
-        when(bookRepository.getLowestCategoryId(anyList())).thenReturn(List.of(2L));
+       // when(bookRepository.getLowestCategoryId(anyList())).thenReturn(List.of(2L));
 
         // Category 생성
         Constructor<Category> categoryConstructor = Category.class.getDeclaredConstructor();

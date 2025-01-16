@@ -14,7 +14,6 @@ import com.simsimbookstore.apiserver.books.bookcategory.entity.BookCategory;
 import com.simsimbookstore.apiserver.books.bookcategory.repository.BookCategoryRepository;
 import com.simsimbookstore.apiserver.books.bookcontributor.entity.BookContributor;
 import com.simsimbookstore.apiserver.books.bookcontributor.repository.BookContributorRepository;
-import com.simsimbookstore.apiserver.books.bookimage.repoitory.BookImageRepoisotry;
 import com.simsimbookstore.apiserver.books.booktag.entity.BookTag;
 import com.simsimbookstore.apiserver.books.booktag.repositry.BookTagRepository;
 import com.simsimbookstore.apiserver.books.category.entity.Category;
@@ -26,15 +25,16 @@ import com.simsimbookstore.apiserver.books.tag.repository.TagRepository;
 import com.simsimbookstore.apiserver.exception.BadRequestException;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class BookManagementService {
 
     private final BookRepository bookRepository;
@@ -44,7 +44,6 @@ public class BookManagementService {
     private final TagRepository tagRepository;
     private final ContributorRepositroy contributorRepositroy;
     private final BookContributorRepository bookContributorRepository;
-    private final BookImageRepoisotry bookImageRepoisotry;
 
 
     /**
@@ -66,8 +65,8 @@ public class BookManagementService {
         Book saveBook = bookRepository.save(book);
 
         //도서 카테고리 연관관계 매핑(가장 하위 카테고리만 가져옴)
-        List<Long> lowestCategoryId = bookRepository.getLowestCategoryId(bookRequestDto.getCategoryIdList());
-        this.saveBookCategory(lowestCategoryId, book);
+        //List<Long> lowestCategoryId = bookRepository.getLowestCategoryId(bookRequestDto.getCategoryIdList());
+        this.saveBookCategory(bookRequestDto.getCategoryIdList(), book);
 
         //도서 태그 연관관계 매핑
         this.saveBookTag(book, bookRequestDto.getTagIdList());
@@ -75,10 +74,10 @@ public class BookManagementService {
         //도서기여자 연관관계 매핑
         this.saveBookContributor(book, bookRequestDto.getContributoridList());
 
-        //this.saveBookImages(book, thumbnail, details);
 
         return BookMapper.toResponseDto(saveBook);
     }
+
 
     /**
      * 도서수정(도서의 상태는 변경x)
@@ -115,8 +114,8 @@ public class BookManagementService {
             if (!requestDto.getCategoryIdList().isEmpty()) {
                 Optional.of(requestDto.getCategoryIdList()).ifPresent(categoryIdList -> {
                     bookCategoryRepository.deleteByBookId(bookId);
-                    List<Long> lowestCategoryId = bookRepository.getLowestCategoryId(categoryIdList);
-                    this.saveBookCategory(lowestCategoryId, book);
+                    //List<Long> lowestCategoryId = bookRepository.getLowestCategoryId(categoryIdList);
+                    this.saveBookCategory(categoryIdList, book);
                 });
             }
 
@@ -133,7 +132,6 @@ public class BookManagementService {
         } else {
             throw new NotFoundException("도서 정보가 없습니다");
         }
-
     }
 
     /**
@@ -215,6 +213,7 @@ public class BookManagementService {
         }
     }
 
+
     /**
      * 도서의 상태만  변경하는 메서드
      *
@@ -288,7 +287,6 @@ public class BookManagementService {
             throw new NotFoundException("책 정보가 없습니다");
         }
     }
-
 
 
 }
