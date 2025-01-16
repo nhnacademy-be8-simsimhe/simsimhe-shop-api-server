@@ -43,8 +43,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import(QuerydslConfig.class)
 class ReviewRepositoryTest {
 
-
-
     @Autowired
     ReviewRepository reviewRepository;
 
@@ -112,7 +110,6 @@ class ReviewRepositoryTest {
     @DisplayName("데이터 저장 확인")
     void saveData(){
 
-
         Review review = Review.builder()
                 .score(5)
                 .title("소년이 온다")
@@ -130,16 +127,31 @@ class ReviewRepositoryTest {
 
 
     @Test
-    @DisplayName("")
-    void updateData(){
+    @DisplayName("리뷰 수정 테스트")
+    void updateData() {
 
     }
 
     @Test
-    @DisplayName("")
-    void deleteData(){
+    @DisplayName("리뷰 삭제 테스트")
+    void deleteData() {
+        Review review = Review.builder()
+                .score(5)
+                .title("삭제할 리뷰")
+                .content("삭제할 내용")
+                .createdAt(LocalDateTime.now())
+                .book(testBook)
+                .user(testUser)
+                .build();
 
+        Review savedReview = reviewRepository.save(review);
+
+
+        reviewRepository.delete(savedReview);
+
+        assertThat(reviewRepository.findById(savedReview.getReviewId())).isEmpty();
     }
+
 
     @Test
     @DisplayName("책별 리뷰를 생성일자 순으로 가져오기 테스트")

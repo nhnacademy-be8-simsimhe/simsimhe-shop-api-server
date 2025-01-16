@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 class ReviewImagePathServiceImplTest {
+
     @InjectMocks
     private ReviewImagePathServiceImpl reviewImagePathService;
 

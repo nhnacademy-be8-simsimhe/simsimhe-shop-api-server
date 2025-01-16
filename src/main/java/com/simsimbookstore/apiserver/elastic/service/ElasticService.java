@@ -8,6 +8,10 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.elastic.entity.SearchBook;
+import com.simsimbookstore.apiserver.elastic.exception.FileParsingException;
+import com.simsimbookstore.apiserver.elastic.exception.SearchBookDeleteFailedException;
+import com.simsimbookstore.apiserver.elastic.exception.SearchBookExistenceCheckFailedException;
+import com.simsimbookstore.apiserver.elastic.exception.SearchBookSaveFailedException;
 import com.simsimbookstore.apiserver.elastic.repository.CustomRepository;
 import com.simsimbookstore.apiserver.exception.AlreadyExistException;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
@@ -28,19 +32,17 @@ public class ElasticService {
     private final CustomRepository repository;
 
     private final ResourceLoader resourceLoader;
-    private final LogbackMetrics logbackMetrics;
-
 
     public void createBook(SearchBook book){
 
         if (isExist(String.valueOf(book.getId()))){
-            throw new AlreadyExistException("해당 도서가 이미 존재합니다");
+            throw new AlreadyExistException("해당 도서가 인덱스에 이미 존재합니다");
         }
 
         try {
             repository.save(book);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new SearchBookSaveFailedException("해당 도서를 인덱싱하는데 실패했습니다.", e);
         }
     }
 
@@ -53,7 +55,7 @@ public class ElasticService {
         try {
             repository.delete(id);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new SearchBookDeleteFailedException("인덱스에서 도서를 삭제하는 중 오류가 발생했습니다.",e);
         }
     }
 
@@ -61,7 +63,7 @@ public class ElasticService {
         try {
             return repository.isExist(id);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new SearchBookExistenceCheckFailedException("도서 존재 여부 확인에 실패했습니다",e);
         }
     }
 
@@ -85,15 +87,11 @@ public class ElasticService {
         try {
             books = parseJsonFile(filePath);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FileParsingException("Json 파일을 파싱하는 중 오류가 발생했습니다. 파일 경로: " + filePath);
         }
 
         for (SearchBook book : books){
-            try {
-                repository.save(book);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+           createBook(book);
         }
 
     }
@@ -101,8 +99,6 @@ public class ElasticService {
 
     private PageResponse<SearchBook> getPageResponse(int page,
                                                            Page<SearchBook> bookPage) {
-
-        //최대 버튼개수 8개
         int maxPageButtons = 10;
         int startPage = (int) Math.max(1, bookPage.getNumber() - Math.floor((double) maxPageButtons / 2));
         int endPage = Math.min(startPage + maxPageButtons - 1, bookPage.getTotalPages());
@@ -110,8 +106,6 @@ public class ElasticService {
         if (endPage - startPage + 1 < maxPageButtons) {
             startPage = Math.max(1, endPage - maxPageButtons + 1);
         }
-
-
 
         return PageResponse.<SearchBook>builder()
                 .data(bookPage.getContent())

@@ -16,6 +16,7 @@ import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -68,6 +69,8 @@ public class ReviewServiceImpl implements ReviewService {
         return convertToUserAvailableReviewsDTO(results);
     }
 
+
+
     @Transactional
     @Override
     public Review createReview(ReviewRequestDTO dto, Long bookId, Long userId) {
@@ -90,6 +93,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .createdAt(LocalDateTime.now())
+                .updateAt(LocalDateTime.now())
                 .user(user)
                 .book(book)
                 .build();
@@ -97,6 +101,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         Review createReview = reviewRepository.save(review);
 
+        //TODO: 테스트 후 다시 사용할 코드입니다.
         //리뷰 포인트 적립
 //        ReviewPointCalculateRequestDto pointDto = new ReviewPointCalculateRequestDto (createReview.getReviewId(), userId);
 //        pointHistoryService.reviewPoint(pointDto);
@@ -132,33 +137,6 @@ public class ReviewServiceImpl implements ReviewService {
         return reviewRepository.findAllByBook(book, pageable);
     }
 
-
-
-//    @Override
-//    public Page<ReviewLikeCountDTO> getReviewsByBookOrderByScore(Long bookId, Long userId, int page, int size) {
-//
-//        Book existingBook = bookRepository.findById(bookId)
-//                .orElseThrow(()-> new NotFoundException("존재하지 않는 도서입니다."));
-//
-//        Pageable pageable = PageRequest.of(page, size);
-//
-//        Page<Object[]> results = reviewRepository.findAllByBookOrderByScoreDesc(bookId, pageable);
-//
-//        return convertToReviewLikeCountDTO(results, userId);
-//
-//    }
-
-//    @Override
-//    public Page<ReviewLikeCountDTO> getReviewsByBookOrderByLike(Long bookId, int page, int size) {
-//        Book existingBook = bookRepository.findById(bookId)
-//                .orElseThrow(()-> new NotFoundException("존재하지 않는 도서입니다."));
-//
-//        Pageable pageable = PageRequest.of(page, size);
-//
-//        Page<Object[]> results = reviewRepository.findAllByBookOrderByLikeDesc(bookId, pageable);
-//
-//        return convertToReviewLikeCountDTO(results, pageable);
-//    }
 
     @Override
     public Page<ReviewLikeCountDTO> getReviewsByBookOrderByRecent(Long bookId, Long userId, int page, int size) {

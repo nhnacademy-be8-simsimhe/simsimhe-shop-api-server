@@ -8,6 +8,7 @@ import com.simsimbookstore.apiserver.reviews.reviewlike.repository.ReviewLikeRep
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -18,7 +19,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ReviewLikeServiceImplTest {
@@ -55,36 +55,33 @@ class ReviewLikeServiceImplTest {
     }
 
     @Test
+    @DisplayName("좋아요 생성 성공")
     void createReviewLike_success() {
-        // given
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
         when(reviewLikeRepository.findByUserAndReview(user, review)).thenReturn(Optional.empty());
 
-        // when
         reviewLikeService.createReviewLike(1L, 1L);
 
-        // then
         verify(reviewLikeRepository, times(1)).save(any(ReviewLike.class));
     }
 
     @Test
+    @DisplayName("이미 좋아요를 누른 경우 예외 발생")
     void createReviewLike_alreadyLiked() {
-        // given
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
         when(reviewLikeRepository.findByUserAndReview(user, review))
                 .thenReturn(Optional.of(ReviewLike.builder().build()));
 
-        // when & then
         assertThatThrownBy(() -> reviewLikeService.createReviewLike(1L, 1L))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("이미 좋아요를 누른 리뷰입니다.");
     }
 
     @Test
+    @DisplayName("좋아요 삭제 성공")
     void deleteReviewLike_success() {
-        // given
         ReviewLike reviewLike = ReviewLike.builder()
                 .user(user)
                 .review(review)
@@ -95,45 +92,39 @@ class ReviewLikeServiceImplTest {
         when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
         when(reviewLikeRepository.findByUserAndReview(user, review)).thenReturn(Optional.of(reviewLike));
 
-        // when
         reviewLikeService.deleteReviewLike(1L, 1L);
 
-        // then
         verify(reviewLikeRepository, times(1)).delete(reviewLike);
     }
 
     @Test
+    @DisplayName("좋아요 삭제 실패 - 좋아요가 존재하지 않는 경우 예외 발생")
     void deleteReviewLike_notFound() {
-        // given
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
         when(reviewLikeRepository.findByUserAndReview(user, review)).thenReturn(Optional.empty());
 
-        // when & then
         assertThatThrownBy(() -> reviewLikeService.deleteReviewLike(1L, 1L))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("좋아요가 존재하지 않습니다.");
     }
 
     @Test
+    @DisplayName("좋아요 개수 조회 성공")
     void getReviewLikeCount_success() {
-        // given
         when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
         when(reviewLikeRepository.countByReview(review)).thenReturn(5L);
 
-        // when
         long count = reviewLikeService.getReviewLikeCount(1L);
 
-        // then
         assertThat(count).isEqualTo(5L);
     }
 
     @Test
+    @DisplayName("좋아요 개수 조회 실패 - 리뷰가 존재하지 않는 경우 예외 발생")
     void getReviewLikeCount_notFound() {
-        // given
         when(reviewRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // when & then
         assertThatThrownBy(() -> reviewLikeService.getReviewLikeCount(1L))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("존재하지 않는 리뷰입니다.");
