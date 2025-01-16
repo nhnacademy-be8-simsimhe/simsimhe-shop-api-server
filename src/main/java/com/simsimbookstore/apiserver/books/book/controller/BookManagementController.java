@@ -9,10 +9,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/admin/shop/books")
@@ -33,16 +31,7 @@ public class BookManagementController {
         BookResponseDto bookResponseDto = bookManagementService.registerBook(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(bookResponseDto);
     }
-//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public ResponseEntity<BookResponseDto> createBook(
-//            @RequestPart("requestDto") @Valid BookRequestDto requestDto,
-//            @RequestPart("thumbnail") MultipartFile thumbnail
-//    ) {
-//        System.out.println("📌 Received BookRequestDto: " + requestDto);
-//        System.out.println("📌 Received File: " + thumbnail.getOriginalFilename());
-//        BookResponseDto bookResponseDto = bookManagementService.registerBook(requestDto, thumbnail);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(bookResponseDto);
-//    }
+
 
 
     /**
