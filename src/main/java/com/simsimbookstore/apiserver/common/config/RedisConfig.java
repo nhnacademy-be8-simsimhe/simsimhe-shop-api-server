@@ -38,7 +38,6 @@ public class RedisConfig {
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        String decryptedPassword = getDecryptedRedisPassword().trim(); // 비밀번호 공백 제거
         config.setHostName(getDecryptedRedisHost());
         config.setPassword(RedisPassword.of(getDecryptedRedisPassword().trim()));
         config.setPort(redisProperty.getPort());
