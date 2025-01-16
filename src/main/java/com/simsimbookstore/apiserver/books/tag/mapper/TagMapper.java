@@ -6,6 +6,10 @@ import com.simsimbookstore.apiserver.books.tag.dto.TagResponseDto;
 
 public class TagMapper {
 
+    private TagMapper(){
+        throw new UnsupportedOperationException("TagMapper는 인스턴스화 할수없음");
+    }
+
     public static TagResponseDto toTagResponseDto(Tag tag){
         return TagResponseDto.builder()
                 .tagId(tag.getTagId())

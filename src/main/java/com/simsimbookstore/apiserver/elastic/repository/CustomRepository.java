@@ -6,7 +6,6 @@ import com.simsimbookstore.apiserver.elastic.entity.SearchBook;
 import org.springframework.data.domain.Page;
 
 import java.io.IOException;
-import java.util.List;
 
 public interface CustomRepository {
 

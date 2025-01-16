@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
 
 public class BookContributorMapper {
 
+    private BookContributorMapper() {
+        throw new UnsupportedOperationException("BookContributorMapper 인스턴스화 할 수 없음");
+    }
+
     public static BookContributorResponsDto toResponse(BookContributor bookContributor) {
         return BookContributorResponsDto.builder()
                 .contributorId(bookContributor.getBookContributorId())

@@ -34,9 +34,9 @@ public class CartController {
      * @return
      */
     @PutMapping("/migrate/user/{userId}")
-    public ResponseEntity CartToDB(@PathVariable(name = "userId") Long userId,
+    public ResponseEntity<Void> cartToDb(@PathVariable(name = "userId") Long userId,
                                    @RequestBody List<CartRequestDto> requestDtoList) {
-        cartService.CartToDb(userId, requestDtoList);
+        cartService.cartToDb(userId, requestDtoList);
 
         return ResponseEntity.status(HttpStatus.OK).build();
 

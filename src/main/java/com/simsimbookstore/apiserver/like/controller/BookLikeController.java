@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,27 +22,19 @@ public class BookLikeController {
      * 좋아요를 설정,취소하는 컨트롤러
      *
      * @param requestDto
-     * @param bindingResult
      * @return
      */
     @PutMapping
-    public ResponseEntity<?> setBookLike(@RequestBody @Valid BookLikeRequestDto requestDto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bindingResult.getAllErrors());
-        }
+    public ResponseEntity<BookLikeResponseDto> setBookLike(@RequestBody @Valid BookLikeRequestDto requestDto) {
 
-        try {
-            BookLikeResponseDto responseDto = bookLikeService.setBookLike(requestDto);
-            return ResponseEntity.status(HttpStatus.OK).body(responseDto);
-        } catch (Exception exception) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("좋아요 등록이 안됩니다");
-        }
+        BookLikeResponseDto responseDto = bookLikeService.setBookLike(requestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+
     }
 
 
     /**
      * 회원이 좋아요를 누른 총 개수를 반환
-     *
      *
      * @param userId
      * @return

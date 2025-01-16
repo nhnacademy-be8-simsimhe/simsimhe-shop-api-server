@@ -5,11 +5,12 @@ import com.simsimbookstore.apiserver.orders.order.dto.OrderHistoryResponseDto;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -18,12 +19,21 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
 
     @Override
     public PageResponse<OrderHistoryResponseDto> getOrderHistory(Long userId, Pageable pageable) {
-        Page<Order> orderPage = orderRepository.findByUserUserIdOrderByOrderDateDesc(userId, pageable);
 
-        Page<OrderHistoryResponseDto> dtoOrder = orderPage.map(this::convertToDto);
+        log.info("Start fetching order history for userId: {}, with pageable: {}", userId, pageable);
+        Page<Order> orderPage = orderRepository.findByUserUserIdOrderByOrderDateDesc(userId, pageable);
+        log.info("Fetched {} orders for userId: {}", orderPage.getTotalElements(), userId);
+
+        Page<OrderHistoryResponseDto> response = orderPage.map(this::convertToDto);
+
+
+        log.info("Converted orders to DTOs. Total DTOs: {}", response.getTotalElements());
+
 
         return new PageResponse<OrderHistoryResponseDto>().getPageResponse(
-                pageable.getPageNumber() + 1, 10, dtoOrder
+                pageable.getPageNumber() + 1,
+                10,
+                response
         );
     }
 
