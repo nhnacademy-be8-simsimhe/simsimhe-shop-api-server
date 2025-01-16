@@ -80,4 +80,14 @@ public class Delivery {
     public void updateDeliveryState(DeliveryState newDeliveryState) {
         this.deliveryState = newDeliveryState;
     }
+
+
+    public boolean validateRefundable() {
+        return this.deliveryState == DeliveryState.READY
+                || this.deliveryState == DeliveryState.COMPLETED;
+    }
+
+    public void cancel() {
+        this.deliveryState = DeliveryState.CANCEL;
+    }
 }

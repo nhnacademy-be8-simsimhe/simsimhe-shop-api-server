@@ -5,6 +5,7 @@ import com.simsimbookstore.apiserver.orders.facade.OrderFacadeRequestDto;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
 import com.simsimbookstore.apiserver.orders.order.dto.BookListRequestDto;
 import com.simsimbookstore.apiserver.orders.order.dto.BookListResponseDto;
+import com.simsimbookstore.apiserver.orders.order.dto.OrderResponseDto;
 import com.simsimbookstore.apiserver.orders.order.dto.TotalRequestDto;
 import com.simsimbookstore.apiserver.orders.order.dto.TotalResponseDto;
 import com.simsimbookstore.apiserver.orders.order.service.OrderListService;
@@ -59,7 +60,7 @@ public class OrderController {
 
 
     @PostMapping("/prepare")
-    public ResponseEntity<?> createPrepareOrder(
+    public ResponseEntity<OrderFacadeResponseDto> createPrepareOrder(
             @RequestBody OrderFacadeRequestDto facadeRequestDto
     ) {
         log.info("log del = {}", facadeRequestDto.getDeliveryRequestDto().toString());
@@ -76,6 +77,7 @@ public class OrderController {
         OrderFacadeResponseDto response = orderFacade.createPrepareOrder(facadeRequestDto);
         return ResponseEntity.ok(response);
     }
+
 }
 
 
