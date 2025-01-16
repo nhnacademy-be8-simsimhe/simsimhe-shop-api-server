@@ -179,7 +179,7 @@ class BookManagementServiceTest {
         titleField.set(existingBook, "Old Title");
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(existingBook));
-        when(bookRepository.getLowestCategoryId(anyList())).thenReturn(List.of(2L));
+       // when(bookRepository.getLowestCategoryId(anyList())).thenReturn(List.of(2L));
 
         // Category 생성
         Constructor<Category> categoryConstructor = Category.class.getDeclaredConstructor();
