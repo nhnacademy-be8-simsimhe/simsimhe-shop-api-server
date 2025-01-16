@@ -70,13 +70,12 @@ public class AladinApiService {
                 AladinApiXmlResponse apiResponse = xmlMapper.readValue(response, AladinApiXmlResponse.class);
 
                 if (apiResponse.getItems().isEmpty()) {
-                    System.out.println("No data returned for SearchTarget=" + searchTarget + ", start=" + start);
                     continue;
                 }
 
                 for (AladinBookXmlResponse item : apiResponse.getItems()) {
                     if (item.getIsbn13() == null || bookRepository.existsByIsbn(item.getIsbn13())) {
-                        System.out.println("Skipping duplicate or missing ISBN: " + item.getIsbn13());
+                        log.error("중복된 isbn값 = {}", item.getIsbn13());
                         continue;
                     }
 
@@ -109,7 +108,6 @@ public class AladinApiService {
         } catch (Exception e) {
             log.error("Failed to upload and save image");
         }
-
     }
 
 

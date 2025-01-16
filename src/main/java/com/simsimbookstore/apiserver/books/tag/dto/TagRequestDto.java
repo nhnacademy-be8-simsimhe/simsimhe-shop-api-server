@@ -1,7 +1,6 @@
 package com.simsimbookstore.apiserver.books.tag.dto;
 
 
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

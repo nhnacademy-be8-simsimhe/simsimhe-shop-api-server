@@ -36,19 +36,18 @@ class ReviewControllerTest {
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
     private ReviewService reviewService;
-    private ReviewImagePathService reviewImagePathService;
 
     @BeforeEach
     void setup() {
 
         reviewService = mock(ReviewService.class);
-        reviewImagePathService = mock(ReviewImagePathService.class);
-        ReviewController reviewController = new ReviewController(reviewService, reviewImagePathService);
+        ReviewController reviewController = new ReviewController(reviewService);
         mockMvc = MockMvcBuilders.standaloneSetup(reviewController).build();
         objectMapper = new ObjectMapper();
     }
 
     @Test
+    @DisplayName("리뷰 생성 테스트")
     void saveReviewTest() throws Exception {
 
         Long bookId = 1L;

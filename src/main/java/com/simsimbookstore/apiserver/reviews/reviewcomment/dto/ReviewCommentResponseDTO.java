@@ -2,24 +2,26 @@ package com.simsimbookstore.apiserver.reviews.reviewcomment.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class ReviewCommentResponseDTO {
 
 
-    Long reviewCommentId;
+    private Long reviewCommentId;
 
-    String content;
+    private String content;
 
-    LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
-    LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
-    String userName;
+    private String userName;
 
-    Long userId;
+    private Long userId;
 
 }

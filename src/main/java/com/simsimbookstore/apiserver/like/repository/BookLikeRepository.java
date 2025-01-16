@@ -1,6 +1,5 @@
 package com.simsimbookstore.apiserver.like.repository;
 
-import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.like.entity.BookLike;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
