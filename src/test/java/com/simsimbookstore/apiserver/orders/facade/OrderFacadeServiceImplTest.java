@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,11 +19,23 @@ import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.orders.order.service.MemberOrderService;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookResponseDto;
+import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
 import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
+import com.simsimbookstore.apiserver.point.service.PointHistoryService;
+import com.simsimbookstore.apiserver.users.grade.entity.Grade;
+import com.simsimbookstore.apiserver.users.grade.entity.Tier;
+import com.simsimbookstore.apiserver.users.role.entity.Role;
+import com.simsimbookstore.apiserver.users.role.entity.RoleName;
+import com.simsimbookstore.apiserver.users.user.entity.User;
+import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
+import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 import java.math.BigDecimal;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,8 +57,44 @@ class OrderFacadeServiceImplTest {
     @Mock
     private OrderRepository orderRepository;
 
+    @Mock
+    private PointHistoryService pointHistoryService;
+
+
     @InjectMocks
     private OrderFacadeImpl orderFacadeService;
+
+    User mockUser;
+    Grade testGrade;
+
+    @BeforeEach
+    void setUp() {
+        testGrade = Grade.builder()
+                .tier(Tier.STANDARD)
+                .minAmount(BigDecimal.valueOf(0))
+                .maxAmount(BigDecimal.valueOf(100000))
+                .build();
+
+        mockUser = User.builder()
+                .userId(1L)
+                .userName("John Doe")
+                .email("johndoe@example.com")
+                .createdAt(LocalDateTime.now())
+                .userStatus(UserStatus.ACTIVE)
+                .grade(testGrade)
+                .userRoleList(new HashSet<>())
+                .build();
+
+        UserRole userRole = UserRole.builder()
+                .userRoleId(1L)
+                .user(mockUser)
+                .role(new Role(1L, RoleName.USER))
+                .build();
+
+        mockUser.addUserRole(userRole);
+
+
+    }
 
     @Test
     void testCreatePrepareOrder_Success() {
@@ -115,6 +164,69 @@ class OrderFacadeServiceImplTest {
         assertEquals(mockOrderResponse.getTotalPrice(), result.getTotalPrice());
 
         assertEquals(mockOrderName, mockOrder.getOrderName());
+    }
+
+
+    @Test
+    void testOrderRefund_Success() {
+        // Arrange
+        Long orderId = 1L;
+        Order mockOrder = Order.builder()
+                .orderId(orderId)
+                .orderState(Order.OrderState.DELIVERY_READY)
+                .user(mockUser)
+                .delivery(Delivery.builder()
+                        .deliveryId(101L)
+                        .deliveryState(Delivery.DeliveryState.READY)
+                        .build())
+                .build();
+
+        List<OrderBook> mockOrderBooks = List.of(
+                OrderBook.builder()
+                        .orderBookId(201L)
+                        .orderBookState(OrderBook.OrderBookState.DELIVERY_READY)
+                        .build(),
+                OrderBook.builder()
+                        .orderBookId(202L)
+                        .orderBookState(OrderBook.OrderBookState.DELIVERY_READY)
+                        .build()
+        );
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(mockOrder));
+        when(orderBookService.getOrderBooks(orderId)).thenReturn(mockOrderBooks);
+
+        // Act
+        Order result = orderFacadeService.orderRefund(orderId);
+
+        // Assert
+        verify(orderRepository, times(1)).findById(orderId);
+        verify(orderBookService, times(1)).getOrderBooks(orderId);
+        verify(pointHistoryService, times(1)).refundPoint(orderId);
+
+        assertEquals(Order.OrderState.PAYMENT_CANCELED, result.getOrderState());
+        assertEquals(Delivery.DeliveryState.CANCEL, result.getDelivery().getDeliveryState());
+        assertTrue(mockOrderBooks.stream().allMatch(ob -> ob.getOrderBookState() == OrderBook.OrderBookState.CANCELED));
+    }
+
+    @Test
+    void testOrderRefund_GuestOrder_ThrowsException() {
+        // Arrange
+        Long orderId = 2L;
+        Order mockOrder = mock(Order.class); // Mock 객체로 생성
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(mockOrder));
+        when(mockOrder.isGuestOrder()).thenReturn(true); // Stub 처리
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            orderFacadeService.orderRefund(orderId);
+        });
+
+        // Verify
+        assertEquals("Guest order cannot be refunded to point", exception.getMessage());
+        verify(orderRepository, times(1)).findById(orderId);
+        verify(orderBookService, never()).getOrderBooks(orderId);
+        verify(pointHistoryService, never()).refundPoint(orderId);
     }
 }
 
