@@ -163,7 +163,7 @@ public class CouponServiceImpl implements CouponService {
      */
     @Transactional
     @Override
-    public List<CouponResponseDto> getEligibleCoupons(Long userId, Long bookId) {
+    public List<CouponResponseDto> getEligibleCoupons(Long userId, Long bookId, int quantity) {
         //userId null 체크
         validateId(userId);
         //bookId null 체크
@@ -171,7 +171,8 @@ public class CouponServiceImpl implements CouponService {
 
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")이 존재하지 않습니다."));
         Book book = bookRepository.findByBookId(bookId).orElseThrow(() -> new NotFoundException("도서(id:" + bookId + ")이 존재하지 않습니다."));
-        List<Coupon> coupons = couponRepository.findEligibleCouponToBook(userId, book.getBookId()); //유저의 모든 전체쿠폰, 모든 카테고리 쿠폰, 책에 적용가능한 책 쿠폰을 가져온다.
+        BigDecimal orderAmount = book.getSaleprice().multiply(BigDecimal.valueOf(quantity));
+        List<Coupon> coupons = couponRepository.findEligibleCouponToBook(userId, book.getBookId(),orderAmount); //유저의 모든 전체쿠폰, 모든 카테고리 쿠폰, 책에 적용가능한 책 쿠폰을 가져온다.
 
         //책의 정보를 가지고 와서 책이 속한 카테고리 Id를 모두 가지고 온다.
         BookResponseDto bookDetail = bookGetService.getBookDetail(null, book.getBookId());

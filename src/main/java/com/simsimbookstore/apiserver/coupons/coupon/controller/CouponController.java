@@ -95,10 +95,11 @@ public class CouponController {
      * @param bookId
      * @return 적용가능한 쿠폰 Page
      */
-    @GetMapping(value = "/shop/users/{userId}/coupons/unused",params = "bookId")
+    @GetMapping(value = "/shop/users/{userId}/coupons/unused",params = {"bookId","quantity"})
     public ResponseEntity<List<CouponResponseDto>> getEligibleCouponsToBook(@PathVariable Long userId,
-                                                                            @RequestParam Long bookId) {
-        List<CouponResponseDto> eligibleCoupons = couponService.getEligibleCoupons(userId, bookId);
+                                                                            @RequestParam Long bookId,
+                                                                            @RequestParam int quantity) {
+        List<CouponResponseDto> eligibleCoupons = couponService.getEligibleCoupons(userId, bookId, quantity);
         return ResponseEntity.status(HttpStatus.OK).body(eligibleCoupons);
 
     }

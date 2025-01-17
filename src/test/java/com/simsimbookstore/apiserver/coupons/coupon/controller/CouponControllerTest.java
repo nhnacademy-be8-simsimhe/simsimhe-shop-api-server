@@ -249,6 +249,7 @@ class CouponControllerTest {
     void getEligibleCouponsToBook_FixCoupon_Success() throws Exception {
         Long userId = 1L;
         Long bookId = 200L;
+        int quantity = 1;
         String sortField = "issueDate";
 
         List<CouponResponseDto> couponList = Arrays.asList(
@@ -278,10 +279,11 @@ class CouponControllerTest {
                         .build()
         );
 
-        when(couponService.getEligibleCoupons(eq(userId), eq(bookId))).thenReturn(couponList);
+        when(couponService.getEligibleCoupons(eq(userId), eq(bookId),eq(quantity))).thenReturn(couponList);
 
         mockMvc.perform(get("/api/shop/users/{userId}/coupons/unused", userId)
                         .param("bookId", String.valueOf(bookId))
+                        .param("quantity",String.valueOf(quantity))
                         .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
