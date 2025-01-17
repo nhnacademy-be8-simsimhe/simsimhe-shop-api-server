@@ -65,6 +65,8 @@ public class BookRequestDto {
     @NotNull
     private boolean giftPackaging; //true면 포장 가능
 
+    private String thumbnailImage;
+
 
     private List<Long> contributoridList;
 

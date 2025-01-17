@@ -2,6 +2,7 @@ package com.simsimbookstore.apiserver.point.service.impl;
 
 
 import com.simsimbookstore.apiserver.books.book.entity.Book;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.point.dto.OrderPointCalculateRequestDto;
@@ -19,7 +20,6 @@ import com.simsimbookstore.apiserver.point.service.PointPolicyService;
 import com.simsimbookstore.apiserver.reviews.review.dto.ReviewRequestDTO;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.reviews.review.repository.ReviewRepository;
-import com.simsimbookstore.apiserver.reviews.review.service.ReviewService;
 import com.simsimbookstore.apiserver.reviews.reviewimage.repository.ReviewImagePathRepository;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.user.entity.User;
@@ -27,16 +27,19 @@ import com.simsimbookstore.apiserver.users.user.service.UserService;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+
+@ExtendWith(MockitoExtension.class)
 class PointHistoryServiceImplTest {
 
     @Mock
@@ -50,9 +53,6 @@ class PointHistoryServiceImplTest {
 
     @Mock
     private UserService userService;
-
-    @Mock
-    private ReviewService reviewService;
 
     @Mock
     private PointPolicyService pointPolicyService;
@@ -80,7 +80,6 @@ class PointHistoryServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         userId = 1L;
         orderId = 1L;
         bookId = 1L;
@@ -106,7 +105,6 @@ class PointHistoryServiceImplTest {
                 .orderNumber(generatedOrderNumber)
                 .totalPrice(BigDecimal.valueOf(100000))
                 .pointUse(BigDecimal.valueOf(5000))
-                .pointUse(BigDecimal.valueOf(100))
                 .originalPrice(BigDecimal.valueOf(100000))
                 .build();
     }
@@ -191,8 +189,6 @@ class PointHistoryServiceImplTest {
 
         BigDecimal earnPoints = BigDecimal.valueOf(500);
 
-        User user = User.builder().userId(userId).build();
-        Review review = Review.builder().reviewId(reviewId).content("Great review").build();
         PointHistory pointHistory = PointHistory.builder()
                 .pointType(PointHistory.PointType.EARN)
                 .amount(earnPoints.intValue())
@@ -271,35 +267,16 @@ class PointHistoryServiceImplTest {
     @Test
     void testOrderPoint_WhenPointHistoryIsNotNull() {
         // given
-        Long userId = 1L;
-        Long orderId = 1L;
-        BigDecimal orderTotalPrice = BigDecimal.valueOf(100000);
-        BigDecimal originalPrice = BigDecimal.valueOf(100000);
-        BigDecimal pointUse = BigDecimal.valueOf(5000);
         BigDecimal earnPoints = BigDecimal.valueOf(1000);
 
         Tier tier = Tier.STANDARD;
 
         when(userService.getUserTier(userId)).thenReturn(tier);
 
-        User user = User.builder().userId(userId).build();
-        Order order = Order.builder()
-                .orderId(orderId)
-                .originalPrice(originalPrice)
-                .totalPrice(orderTotalPrice)
-                .pointUse(pointUse)
-                .build();
 
         PointHistory expectedEarnPointHistory = PointHistory.builder()
                 .pointType(PointHistory.PointType.EARN)
                 .amount(earnPoints.intValue())
-                .created_at(LocalDateTime.now())
-                .user(user)
-                .build();
-
-        PointHistory expectedDeductPointHistory = PointHistory.builder()
-                .pointType(PointHistory.PointType.DEDUCT)
-                .amount(-pointUse.intValue())
                 .created_at(LocalDateTime.now())
                 .user(user)
                 .build();
@@ -343,5 +320,129 @@ class PointHistoryServiceImplTest {
         verify(orderPointManageRepository, times(2)).save(any(OrderPointManage.class));
     }
 
+    @Test
+    void testGetUserPoints_Success() {
+        // Arrange
+        int mockSum = 5000;
+
+        when(pointHistoryRepository.sumAmountByUserId(userId)).thenReturn(Optional.of(mockSum));
+
+        // Act
+        BigDecimal result = pointHistoryService.getUserPoints(userId);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(BigDecimal.valueOf(mockSum), result);
+        verify(pointHistoryRepository).sumAmountByUserId(userId);
+    }
+
+    @Test
+    void testGetUserPoints_EmptySum() {
+        // Arrange
+        when(pointHistoryRepository.sumAmountByUserId(userId)).thenReturn(Optional.empty());
+
+        // Act
+        BigDecimal result = pointHistoryService.getUserPoints(userId);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(BigDecimal.ZERO, result);
+        verify(pointHistoryRepository).sumAmountByUserId(userId);
+    }
+
+    @Test
+    void testRefundPoint_Success() {
+        // Arrange
+        BigDecimal expectedRefund = BigDecimal.valueOf(105000);
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(pointHistoryRepository.save(any(PointHistory.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        BigDecimal result = pointHistoryService.refundPoint(orderId);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(expectedRefund, result);
+        verify(orderRepository).findById(orderId);
+        verify(pointHistoryRepository).save(any(PointHistory.class));
+    }
+
+    @Test
+    void testRefundPoint_OrderNotFound() {
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> pointHistoryService.refundPoint(orderId));
+        assertEquals("order Not Found", exception.getMessage());
+        verify(orderRepository).findById(orderId);
+        verify(pointHistoryRepository, never()).save(any(PointHistory.class));
+    }
+
+    @Test
+    void testValidateUsePoints_Success() {
+        // Arrange
+        BigDecimal requestedPoints = BigDecimal.valueOf(3000);
+        when(pointHistoryRepository.sumAmountByUserId(userId)).thenReturn(Optional.of(5000));
+
+        // Act
+        pointHistoryService.validateUsePoints(userId, requestedPoints);
+
+        // Assert
+        verify(pointHistoryRepository).sumAmountByUserId(userId);
+    }
+
+    @Test
+    void testValidateUsePoints_InsufficientPoints() {
+        // Arrange
+        BigDecimal requestedPoints = BigDecimal.valueOf(6000);
+        when(pointHistoryRepository.sumAmountByUserId(userId)).thenReturn(Optional.of(5000));
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> pointHistoryService.validateUsePoints(userId, requestedPoints));
+        assertEquals("Insufficient points. Available points: 5000", exception.getMessage());
+        verify(pointHistoryRepository).sumAmountByUserId(userId);
+    }
+
+    @Test
+    void testUpdatePoint_Success() {
+        // Arrange
+        Integer newAmount = 3000;
+        Long pointHistoryId = 1L;
+        PointHistory mockPointHistory = PointHistory.builder()
+                .pointHistoryId(pointHistoryId)
+                .amount(1000)
+                .build();
+
+        when(pointHistoryRepository.findById(pointHistoryId)).thenReturn(Optional.of(mockPointHistory));
+        when(pointHistoryRepository.save(any(PointHistory.class))).thenReturn(mockPointHistory);
+
+        // Act
+        PointHistory result = pointHistoryService.updatePoint(pointHistoryId, newAmount);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(newAmount, result.getAmount());
+        verify(pointHistoryRepository).findById(pointHistoryId);
+        verify(pointHistoryRepository).save(any(PointHistory.class));
+    }
+
+    @Test
+    void testUpdatePoint_NotFound() {
+        // Arrange
+        Long pointHistoryId = 1L;
+        Integer newAmount = 3000;
+
+        when(pointHistoryRepository.findById(pointHistoryId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> pointHistoryService.updatePoint(pointHistoryId, newAmount));
+        assertEquals("포인트 기록이 존재하지 않습니다.", exception.getMessage());
+        verify(pointHistoryRepository).findById(pointHistoryId);
+        verify(pointHistoryRepository, never()).save(any(PointHistory.class));
+    }
 
 }

@@ -6,11 +6,8 @@ import com.simsimbookstore.apiserver.point.dto.OrderPointRequestDto;
 import com.simsimbookstore.apiserver.point.dto.PointHistoryResponseDto;
 import com.simsimbookstore.apiserver.point.dto.ReviewPointCalculateRequestDto;
 import com.simsimbookstore.apiserver.point.entity.PointHistory;
-import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import java.math.BigDecimal;
-import java.util.List;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface PointHistoryService {
@@ -32,4 +29,6 @@ public interface PointHistoryService {
     PointHistory updatePoint(Long pointHistoryId, Integer newAmount);
 
     BigDecimal calculateEarnOrderPoints(OrderPointCalculateRequestDto dto);
+
+    BigDecimal refundPoint(Long orderId);
 }

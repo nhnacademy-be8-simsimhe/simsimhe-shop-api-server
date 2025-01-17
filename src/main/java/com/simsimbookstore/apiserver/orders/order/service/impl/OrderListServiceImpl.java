@@ -1,4 +1,4 @@
-package com.simsimbookstore.apiserver.orders.order.service.Impl;
+package com.simsimbookstore.apiserver.orders.order.service.impl;
 
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
@@ -10,11 +10,8 @@ import com.simsimbookstore.apiserver.orders.order.dto.OrderCouponResponseDto;
 import com.simsimbookstore.apiserver.orders.order.service.OrderListService;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 @Slf4j
 @Service
@@ -44,22 +41,23 @@ public class OrderListServiceImpl implements OrderListService {
 
     @Override
     public List<BookListResponseDto> createBookOrderWithCoupons(List<BookListResponseDto> bookOrderList, Long userId) {
-        return bookOrderList.stream()
-                .peek(book -> {
-                    // 페이지 요청 없이 쿠폰 조회
-                    List<CouponResponseDto> eligibleCoupons = couponService.getEligibleCoupons(userId, book.getBookId());
+        bookOrderList.forEach(book -> {
+            // 페이지 요청 없이 쿠폰 조회
+            List<CouponResponseDto> eligibleCoupons = couponService.getEligibleCoupons(userId, book.getBookId());
 
-                    // 쿠폰 데이터를 변환하여 OrderCouponResponseDto 리스트 생성
-                    List<OrderCouponResponseDto> coupons = eligibleCoupons.stream()
-                            .map(coupon -> new OrderCouponResponseDto(
-                                    coupon.getCouponId(),
-                                    coupon.getCouponTypeName(),
-                                    coupon.getDisCountType()))
-                            .collect(Collectors.toList());
+            // 쿠폰 데이터를 변환하여 OrderCouponResponseDto 리스트 생성
+            List<OrderCouponResponseDto> coupons = eligibleCoupons.stream()
+                    .map(coupon -> new OrderCouponResponseDto(
+                            coupon.getCouponId(),
+                            coupon.getCouponTypeName(),
+                            coupon.getDisCountType()))
+                    .toList(); // Java 16+에서 사용 가능
 
-                    book.setCoupons(coupons);  // 쿠폰 설정
-                })
-                .collect(Collectors.toList());
+            book.setCoupons(coupons); // 쿠폰 설정
+        });
+
+        // 불변 리스트 반환
+        return List.copyOf(bookOrderList);
     }
 
 }

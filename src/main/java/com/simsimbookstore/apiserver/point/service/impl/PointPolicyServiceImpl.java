@@ -1,5 +1,6 @@
 package com.simsimbookstore.apiserver.point.service.impl;
 
+
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.point.dto.PointPolicyRequestDto;
 import com.simsimbookstore.apiserver.point.dto.PointPolicyResponseDto;
@@ -9,7 +10,6 @@ import com.simsimbookstore.apiserver.point.service.PointPolicyService;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.user.service.UserService;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,10 +42,9 @@ public class PointPolicyServiceImpl implements PointPolicyService {
     @Override
     public List<PointPolicyResponseDto> getAllPolicies() {
         List<PointPolicy> policyList = pointPolicyRepository.findAll();
-
         return policyList.stream()
                 .map(PointPolicyResponseDto::fromEntity)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
