@@ -7,15 +7,18 @@ import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.coupondiscount.entity.CouponDiscount;
 import com.simsimbookstore.apiserver.orders.delivery.dto.DeliveryRequestDto;
 import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
+import com.simsimbookstore.apiserver.orders.delivery.repository.DeliveryRepository;
 import com.simsimbookstore.apiserver.orders.delivery.service.DeliveryService;
 import com.simsimbookstore.apiserver.orders.order.dto.MemberOrderRequestDto;
 import com.simsimbookstore.apiserver.orders.order.dto.OrderResponseDto;
+import com.simsimbookstore.apiserver.orders.order.dto.RetryOrderRequestDto;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.orders.order.service.GuestOrderService;
 import com.simsimbookstore.apiserver.orders.order.service.MemberOrderService;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
+import com.simsimbookstore.apiserver.orders.orderbook.repository.OrderBookRepository;
 import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
 import com.simsimbookstore.apiserver.point.dto.OrderPointRequestDto;
 import com.simsimbookstore.apiserver.point.service.PointHistoryService;
@@ -40,6 +43,8 @@ public class OrderFacadeImpl implements OrderFacade {
     private final BookManagementService bookManagementService;
     private final CouponService couponService;
     private final GuestOrderService guestOrderService;
+    private final OrderBookRepository orderBookRepository;
+    private final DeliveryRepository deliveryRepository;
 
     @Override
     @Transactional
@@ -114,6 +119,40 @@ public class OrderFacadeImpl implements OrderFacade {
         return response;
     }
 
+
+    @Override
+    public OrderFacadeResponseDto retryOrder(RetryOrderRequestDto dto) {
+        // 1. 주문 조회
+        Order order = orderRepository.findById(dto.getOrderId())
+                .orElseThrow(() -> new NotFoundException("Order Not Found"));
+
+        // 2. 배송 및 주문책 조회
+        Delivery delivery = order.getDelivery();
+        List<OrderBook> orderBooks = orderBookRepository.findByOrderOrderId(dto.getOrderId());
+
+        // 3. 모든 관련 엔티티가 pending 상태인지 확인
+        boolean isOrderPending = order.isPending();
+        boolean isDeliveryPending = delivery.isPending();
+        boolean areAllOrderBooksPending = orderBooks.stream().allMatch(OrderBook::isPending);
+
+        if ( !(isOrderPending && isDeliveryPending && areAllOrderBooksPending) ) {
+            throw new IllegalStateException("모든 주문 관련 항목이 pending 상태가 아닙니다.");
+        }
+
+        // 4. OrderFacadeResponseDto 생성 및 반환
+        return OrderFacadeResponseDto.builder()
+                .orderNumber(order.getOrderNumber())
+                .totalPrice(order.getTotalPrice())
+                .orderName(order.getOrderName())
+                .email(order.getOrderEmail())
+                .phoneNumber(order.getPhoneNumber())
+                .userName(order.getUser().getUserName())
+                .method(dto.getMethod())
+                .build();
+    }
+
+
+    @Override
     @Transactional
     public void completeOrder(String orderNumber) {
         // 1. 주문 번호로 Order 조회
@@ -125,18 +164,23 @@ public class OrderFacadeImpl implements OrderFacade {
         for (OrderBook orderBook : orderBookList) {
             // 3. 재고 수정
             bookManagementService.modifyQuantity(orderBook.getOrderBookId(), -orderBook.getQuantity());
+
+            //주문상태 수정
             orderBook.setOrderBookState(OrderBook.OrderBookState.DELIVERY_READY);
             // 4. 쿠폰 사용 처리
-            CouponDiscount couponDiscount = orderBook.getCouponDiscount(); // 연관된 CouponDiscount 가져오기
+            CouponDiscount couponDiscount = orderBook.getCouponDiscount();// 연관된 CouponDiscount 가져오기
+            // 5. 쿠폰 사용한것 저장
             if (couponDiscount != null) { // CouponDiscount가 있는 경우에만 처리
-                Coupon coupon = couponDiscount.getCoupon(); // CouponDiscount에서 Coupon 가져오기
+                Coupon coupon = couponDiscount.getCoupon();
+                couponDiscount.setUsage(true);
+                // CouponDiscount에서 Coupon 가져오기
                 if (coupon != null) {
                     couponService.useCoupon(order.getUser().getUserId(), coupon.getCouponId());
                 }
             }
         }
 
-        // 5. 포인트 적립 처리 회원 주문일 때만
+        // 5. 포인트 적립 처리 회원 주문일 때만 비회원은 적립하지 않음
         if (!order.isGuestOrder()) {
             pointHistoryService.orderPoint(OrderPointRequestDto.builder()
                     .orderId(order.getOrderId())

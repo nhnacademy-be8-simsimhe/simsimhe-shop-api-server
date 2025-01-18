@@ -103,6 +103,10 @@ public class Order {
         return false;
     }
 
+    public boolean isPending() {
+        return this.orderState == OrderState.PENDING;
+    }
+
 
     public void refund() {
         this.orderState = OrderState.PAYMENT_CANCELED;

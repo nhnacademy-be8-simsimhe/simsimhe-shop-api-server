@@ -102,6 +102,10 @@ public class OrderBook {
                 || this.orderBookState == OrderBookState.COMPLETED;
     }
 
+    public boolean isPending() {
+        return this.orderBookState == OrderBookState.PENDING;
+    }
+
     public void cancel() {
         this.orderBookState = OrderBookState.CANCELED;
     }

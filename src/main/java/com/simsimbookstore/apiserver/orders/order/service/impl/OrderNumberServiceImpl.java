@@ -71,4 +71,6 @@ public class OrderNumberServiceImpl implements OrderNumberService {
 
         redisTemplate.expireAt(key, Date.from(midnightInstant));
     }
+
+
 }
