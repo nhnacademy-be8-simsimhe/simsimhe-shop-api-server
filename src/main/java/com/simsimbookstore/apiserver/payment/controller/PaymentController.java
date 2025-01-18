@@ -60,8 +60,8 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(confirmResponseDto);
     }
 
-    @PostMapping("/payment-retry")
-    public ResponseEntity<String> paymentRetry(RetryOrderRequestDto dto) {
+    @PostMapping("/payment/retry")
+    public ResponseEntity<String> paymentRetry(@RequestBody RetryOrderRequestDto dto) {
         OrderFacadeResponseDto responseDto = orderFacade.retryOrder(dto);
         String result = paymentService.createPaymentRequest(responseDto);
         return ResponseEntity.ok(result);

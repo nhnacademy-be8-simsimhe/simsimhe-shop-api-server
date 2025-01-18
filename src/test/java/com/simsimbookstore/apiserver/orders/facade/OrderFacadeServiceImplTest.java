@@ -3,6 +3,7 @@ package com.simsimbookstore.apiserver.orders.facade;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -252,21 +253,19 @@ class OrderFacadeServiceImplTest {
     @DisplayName("retryOrder() - 모든 관련 항목이 pending 상태일 때 성공")
     void testRetryOrder_Success() {
         // Given
-        Long orderId = 1L;
+        String orderNumber = "20241226-000001";
         RetryOrderRequestDto requestDto = new RetryOrderRequestDto();
-        requestDto.setOrderId(orderId);
+        requestDto.setOrderNumber(orderNumber);
         requestDto.setMethod("CARD");
 
         Order mockOrder = Order.builder()
-                .orderId(orderId)
-                .orderNumber("ORD-123")
+                .orderNumber(orderNumber)
                 .totalPrice(BigDecimal.valueOf(10000))
                 .orderName("Test Order")
                 .orderEmail("test@example.com")
                 .phoneNumber("010-1234-5678")
                 .user(User.builder().userName("John Doe").build())
                 .build();
-        // 모든 상태를 pending으로 설정
         mockOrder.setOrderState(Order.OrderState.PENDING);
 
         Delivery mockDelivery = Delivery.builder()
@@ -274,22 +273,15 @@ class OrderFacadeServiceImplTest {
                 .deliveryState(Delivery.DeliveryState.PENDING)
                 .build();
 
-        List<OrderBook> mockOrderBooks = Arrays.asList(
-                OrderBook.builder().orderBookId(101L).orderBookState(OrderBook.OrderBookState.PENDING).build(),
-                OrderBook.builder().orderBookId(102L).orderBookState(OrderBook.OrderBookState.PENDING).build()
-        );
-
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(mockOrder));
-        // 주문에 배송 정보 설정
+        when(orderRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.of(mockOrder));
         mockOrder.setDelivery(mockDelivery);
-        when(orderBookRepository.findByOrderOrderId(orderId)).thenReturn(mockOrderBooks);
 
         // When
         OrderFacadeResponseDto response = orderFacadeService.retryOrder(requestDto);
 
         // Then
         assertNotNull(response);
-        assertEquals("ORD-123", response.getOrderNumber());
+        assertEquals(orderNumber, response.getOrderNumber());
         assertEquals(BigDecimal.valueOf(10000), response.getTotalPrice());
         assertEquals("Test Order", response.getOrderName());
         assertEquals("test@example.com", response.getEmail());
@@ -302,9 +294,9 @@ class OrderFacadeServiceImplTest {
     @DisplayName("retryOrder() - pending 상태가 아닐 때 예외 발생")
     void testRetryOrder_Failure_NotAllPending() {
         // Given
-        Long orderId = 1L;
+        String orderNumber = "20241226-000001";
         RetryOrderRequestDto requestDto = new RetryOrderRequestDto();
-        requestDto.setOrderId(orderId);
+        requestDto.setOrderNumber(orderNumber);
         requestDto.setMethod("CARD");
 
         Delivery mockDelivery1 = Delivery.builder()
@@ -312,13 +304,13 @@ class OrderFacadeServiceImplTest {
                 .deliveryState(Delivery.DeliveryState.READY)
                 .build();
 
-        Order mockOrder = Order.builder().orderId(orderId).build();
-        // 하나라도 pending이 아님
+        Order mockOrder = Order.builder()
+                .orderNumber(orderNumber)
+                .build();
         mockOrder.setOrderState(Order.OrderState.COMPLETED);
         mockOrder.setDelivery(mockDelivery1);
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(mockOrder));
 
-
+        when(orderRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.of(mockOrder));
 
         // When & Then
         IllegalStateException exception = assertThrows(
@@ -326,7 +318,10 @@ class OrderFacadeServiceImplTest {
                 () -> orderFacadeService.retryOrder(requestDto)
         );
         assertEquals("모든 주문 관련 항목이 pending 상태가 아닙니다.", exception.getMessage());
+        verify(orderRepository, times(1)).findByOrderNumber(orderNumber);
+        verify(orderBookRepository, never()).findByOrderOrderId(anyLong());
     }
+
 
 
     @Test

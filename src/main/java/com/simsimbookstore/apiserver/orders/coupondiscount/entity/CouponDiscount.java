@@ -51,7 +51,7 @@ public class CouponDiscount {
     @Column(name = "discount_price", nullable = false)
     private BigDecimal discountPrice;
 
-    @Column(name = "usage")
+    @Column(name = "coupon_usage")
     private boolean usage;
 
 }

@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class RetryOrderRequestDto {
     Long userId;
-    Long orderId;
+    String orderNumber;
     String method;
 }

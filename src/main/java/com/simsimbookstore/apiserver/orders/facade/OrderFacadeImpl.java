@@ -123,12 +123,13 @@ public class OrderFacadeImpl implements OrderFacade {
     @Override
     public OrderFacadeResponseDto retryOrder(RetryOrderRequestDto dto) {
         // 1. 주문 조회
-        Order order = orderRepository.findById(dto.getOrderId())
+        log.info("dto : {}", dto.toString());
+        Order order = orderRepository.findByOrderNumber(dto.getOrderNumber())
                 .orElseThrow(() -> new NotFoundException("Order Not Found"));
 
         // 2. 배송 및 주문책 조회
         Delivery delivery = order.getDelivery();
-        List<OrderBook> orderBooks = orderBookRepository.findByOrderOrderId(dto.getOrderId());
+        List<OrderBook> orderBooks = orderBookRepository.findByOrderOrderId(order.getOrderId());
 
         // 3. 모든 관련 엔티티가 pending 상태인지 확인
         boolean isOrderPending = order.isPending();
