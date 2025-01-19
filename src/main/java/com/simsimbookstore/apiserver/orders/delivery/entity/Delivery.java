@@ -87,6 +87,10 @@ public class Delivery {
                 || this.deliveryState == DeliveryState.COMPLETED;
     }
 
+    public boolean isPending() {
+        return this.deliveryState == DeliveryState.PENDING;
+    }
+
     public void cancel() {
         this.deliveryState = DeliveryState.CANCEL;
     }

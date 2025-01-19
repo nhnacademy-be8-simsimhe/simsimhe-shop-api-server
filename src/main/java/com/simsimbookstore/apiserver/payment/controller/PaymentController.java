@@ -3,6 +3,7 @@ package com.simsimbookstore.apiserver.payment.controller;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeImpl;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeRequestDto;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
+import com.simsimbookstore.apiserver.orders.order.dto.RetryOrderRequestDto;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.PaymentMethodResponse;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
@@ -59,6 +60,12 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(confirmResponseDto);
     }
 
+    @PostMapping("/payment/retry")
+    public ResponseEntity<String> paymentRetry(@RequestBody RetryOrderRequestDto dto) {
+        OrderFacadeResponseDto responseDto = orderFacade.retryOrder(dto);
+        String result = paymentService.createPaymentRequest(responseDto);
+        return ResponseEntity.ok(result);
+    } 
 
 //    // 사용자/관리자의 환불 요청 (결제 취소)
 //    @PostMapping("/payment/cancel")

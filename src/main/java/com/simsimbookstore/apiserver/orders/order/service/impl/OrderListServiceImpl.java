@@ -51,7 +51,7 @@ public class OrderListServiceImpl implements OrderListService {
                             coupon.getCouponId(),
                             coupon.getCouponTypeName(),
                             coupon.getDisCountType()))
-                    .toList(); // Java 16+에서 사용 가능
+                    .toList();
 
             book.setCoupons(coupons); // 쿠폰 설정
         });

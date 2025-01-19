@@ -3,39 +3,48 @@ package com.simsimbookstore.apiserver.orders.facade;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.simsimbookstore.apiserver.books.book.service.BookManagementService;
 import com.simsimbookstore.apiserver.orders.delivery.dto.DeliveryRequestDto;
 import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
 import com.simsimbookstore.apiserver.orders.delivery.service.DeliveryService;
 import com.simsimbookstore.apiserver.orders.order.dto.MemberOrderRequestDto;
 import com.simsimbookstore.apiserver.orders.order.dto.OrderResponseDto;
+import com.simsimbookstore.apiserver.orders.order.dto.RetryOrderRequestDto;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.orders.order.service.MemberOrderService;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookResponseDto;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
+import com.simsimbookstore.apiserver.orders.orderbook.repository.OrderBookRepository;
 import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
 import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.role.entity.Role;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
+import com.simsimbookstore.apiserver.users.role.service.RoleService;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 import java.math.BigDecimal;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -60,6 +69,15 @@ class OrderFacadeServiceImplTest {
     @Mock
     private PointHistoryService pointHistoryService;
 
+    @Mock
+    private BookManagementService bookManagementService;
+
+    @Mock
+    private OrderBookRepository orderBookRepository;
+
+    @Mock
+    private RoleService roleService;
+
 
     @InjectMocks
     private OrderFacadeImpl orderFacadeService;
@@ -69,6 +87,8 @@ class OrderFacadeServiceImplTest {
 
     @BeforeEach
     void setUp() {
+
+
         testGrade = Grade.builder()
                 .tier(Tier.STANDARD)
                 .minAmount(BigDecimal.valueOf(0))
@@ -228,6 +248,156 @@ class OrderFacadeServiceImplTest {
         verify(orderBookService, never()).getOrderBooks(orderId);
         verify(pointHistoryService, never()).refundPoint(orderId);
     }
+
+    @Test
+    @DisplayName("retryOrder() - 모든 관련 항목이 pending 상태일 때 성공")
+    void testRetryOrder_Success() {
+        // Given
+        String orderNumber = "20241226-000001";
+        RetryOrderRequestDto requestDto = new RetryOrderRequestDto();
+        requestDto.setOrderNumber(orderNumber);
+        requestDto.setMethod("CARD");
+
+        Order mockOrder = Order.builder()
+                .orderNumber(orderNumber)
+                .totalPrice(BigDecimal.valueOf(10000))
+                .orderName("Test Order")
+                .orderEmail("test@example.com")
+                .phoneNumber("010-1234-5678")
+                .user(User.builder().userName("John Doe").build())
+                .build();
+        mockOrder.setOrderState(Order.OrderState.PENDING);
+
+        Delivery mockDelivery = Delivery.builder()
+                .deliveryId(1L)
+                .deliveryState(Delivery.DeliveryState.PENDING)
+                .build();
+
+        when(orderRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.of(mockOrder));
+        mockOrder.setDelivery(mockDelivery);
+
+        // When
+        OrderFacadeResponseDto response = orderFacadeService.retryOrder(requestDto);
+
+        // Then
+        assertNotNull(response);
+        assertEquals(orderNumber, response.getOrderNumber());
+        assertEquals(BigDecimal.valueOf(10000), response.getTotalPrice());
+        assertEquals("Test Order", response.getOrderName());
+        assertEquals("test@example.com", response.getEmail());
+        assertEquals("010-1234-5678", response.getPhoneNumber());
+        assertEquals("CARD", response.getMethod());
+        assertEquals("John Doe", response.getUserName());
+    }
+
+    @Test
+    @DisplayName("retryOrder() - pending 상태가 아닐 때 예외 발생")
+    void testRetryOrder_Failure_NotAllPending() {
+        // Given
+        String orderNumber = "20241226-000001";
+        RetryOrderRequestDto requestDto = new RetryOrderRequestDto();
+        requestDto.setOrderNumber(orderNumber);
+        requestDto.setMethod("CARD");
+
+        Delivery mockDelivery1 = Delivery.builder()
+                .deliveryId(999L)
+                .deliveryState(Delivery.DeliveryState.READY)
+                .build();
+
+        Order mockOrder = Order.builder()
+                .orderNumber(orderNumber)
+                .build();
+        mockOrder.setOrderState(Order.OrderState.COMPLETED);
+        mockOrder.setDelivery(mockDelivery1);
+
+        when(orderRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.of(mockOrder));
+
+        // When & Then
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> orderFacadeService.retryOrder(requestDto)
+        );
+        assertEquals("모든 주문 관련 항목이 pending 상태가 아닙니다.", exception.getMessage());
+        verify(orderRepository, times(1)).findByOrderNumber(orderNumber);
+        verify(orderBookRepository, never()).findByOrderOrderId(anyLong());
+    }
+
+
+
+    @Test
+    @DisplayName("completeOrder() - 정상적으로 주문 완료 처리")
+    void testCompleteOrder_Success() {
+        // Given
+        String orderNumber = "ORD-123";
+        Long orderId = 1L;
+
+        Role guestRole = Role.builder()
+                .roleName(RoleName.USER)
+                .build();
+
+        UserRole userRole = UserRole.builder()
+                .userRoleId(1L)
+                .user(mockUser)
+                .role(guestRole)
+                .build();
+
+        mockUser.addUserRole(userRole);
+
+        // 주문, 배송, 주문책, 쿠폰 할인 등의 모의 데이터 설정
+        Delivery delivery = Delivery.builder()
+                .deliveryId(101L)
+                .deliveryState(Delivery.DeliveryState.READY)
+                .build();
+
+        // 기존의 mockOrder 대신 spyOrder 생성
+        Order realOrder = Order.builder()
+                .orderId(orderId)
+                .orderNumber(orderNumber)
+                .orderState(Order.OrderState.PENDING)
+                .user(mockUser)
+                .delivery(delivery)
+                .build();
+        Order spyOrder = spy(realOrder);
+
+        OrderBook orderBook1 = OrderBook.builder()
+                .orderBookId(201L)
+                .quantity(2)
+                .orderBookState(OrderBook.OrderBookState.PENDING)
+                .build();
+
+        OrderBook orderBook2 = OrderBook.builder()
+                .orderBookId(202L)
+                .quantity(1)
+                .orderBookState(OrderBook.OrderBookState.PENDING)
+                .build();
+
+        List<OrderBook> orderBooks = Arrays.asList(orderBook1, orderBook2);
+
+        lenient().when(roleService.findByRoleName(RoleName.GUEST)).thenReturn(guestRole);
+        // 비회원 주문이 아닌 상황을 가정하여 false 반환
+        lenient().when(spyOrder.isGuestOrder()).thenReturn(false);
+        when(orderRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.of(spyOrder));
+        when(orderBookService.getOrderBooks(orderId)).thenReturn(orderBooks);
+
+        // Act
+        orderFacadeService.completeOrder(orderNumber);
+
+        // Assert
+        assertEquals(Order.OrderState.DELIVERY_READY, spyOrder.getOrderState());
+        assertEquals(Delivery.DeliveryState.READY, spyOrder.getDelivery().getDeliveryState());
+
+        for (OrderBook ob : orderBooks) {
+            assertEquals(OrderBook.OrderBookState.DELIVERY_READY, ob.getOrderBookState());
+        }
+
+        for (OrderBook ob : orderBooks) {
+            verify(bookManagementService).modifyQuantity(ob.getOrderBookId(), -ob.getQuantity());
+        }
+
+        verify(pointHistoryService).orderPoint(any());
+    }
+
+
 }
 
 

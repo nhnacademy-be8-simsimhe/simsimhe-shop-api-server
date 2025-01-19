@@ -10,13 +10,5 @@ public class OrderCouponResponseDto {
     private Long couponId;
     private String couponTypeName;
     private DisCountType discountType;
-
-//    @Override
-//    public String toString() {
-//        return "OrderCouponResponseDto{" +
-//                "couponId=" + couponId +
-//                ", couponTypeName='" + couponTypeName + '\'' +
-//                '}';
-//    }
 }
 
