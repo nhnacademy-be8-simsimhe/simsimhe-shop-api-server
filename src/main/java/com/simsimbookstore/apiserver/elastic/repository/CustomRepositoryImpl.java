@@ -6,7 +6,6 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.simsimbookstore.apiserver.elastic.entity.SearchBook;
 import com.simsimbookstore.apiserver.elastic.exception.SearchBookElasticsearchException;
-import io.micrometer.core.instrument.binder.logging.LogbackMetrics;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,32 +13,21 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+
 import java.io.IOException;
 import java.util.List;
 
 
 @Slf4j
 @Repository
-public class CustomRepositoryImpl implements CustomRepository{
+public class CustomRepositoryImpl implements CustomRepository {
 
     public static final String INDEX = "simsimhe-books";
     ElasticsearchClient client;
 
     @Autowired
-    public CustomRepositoryImpl(ElasticsearchClient client, LogbackMetrics logbackMetrics) {
+    public CustomRepositoryImpl(ElasticsearchClient client) {
         this.client = client;
-    }
-
-
-    @Override
-    public void save(SearchBook book) throws IOException {
-
-        client.index(i -> i.index(INDEX).id(String.valueOf(book.getId())).document(book));
-    }
-
-    @Override
-    public void delete(String id) throws IOException {
-        client.delete(d -> d.index(INDEX).id(String.valueOf(id)));
     }
 
 
@@ -50,7 +38,7 @@ public class CustomRepositoryImpl implements CustomRepository{
         try {
             SearchResponse<SearchBook> response = client.search(s -> s
                             .index(INDEX)
-                            .from((page -1) * 12)
+                            .from((page - 1) * 12)
                             .size(12)
                             .query(q -> q
                                     .multiMatch(m -> m
@@ -68,18 +56,16 @@ public class CustomRepositoryImpl implements CustomRepository{
                     ,
                     SearchBook.class);
 
-            log.info("total data : {}", response.hits().total().value());
-
             List<SearchBook> results = response.hits().hits().stream().map(Hit::source).toList();
 
             long totalCount = response.hits().total().value();
 
-            Pageable pageable = PageRequest.of((page -1), 12);
+            Pageable pageable = PageRequest.of((page - 1), 12);
 
 
             return new PageImpl<>(results, pageable, totalCount);
         } catch (IOException e) {
-            throw new SearchBookElasticsearchException("엘라스틱서치 쿼리를 실행하는 중 실패했습니다. 검색어: "+word, e);
+            throw new SearchBookElasticsearchException("엘라스틱서치 쿼리를 실행하는 중 실패했습니다. 검색어: " + word, e);
         }
     }
 
@@ -91,7 +77,7 @@ public class CustomRepositoryImpl implements CustomRepository{
         ).value();
     }
 
-    public String convertSortWord(String sort){
+    public String convertSortWord(String sort) {
         return switch (sort) {
             case "popular" -> "bookSellCount";
             case "latest" -> "publishedAt";

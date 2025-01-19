@@ -51,7 +51,7 @@ public class ReviewServiceImpl implements ReviewService {
 
 
         String canReviewBeCreated = canReviewBeCreated(userId, bookId);
-        if (!canReviewBeCreated.equals("REVIEW_CAN_CREATE")){
+        if (!canReviewBeCreated.equals("REVIEW_CAN_CREATE")) {
             String message = canReviewBeCreated.equals("REVIEW_ALREADY_EXIST") ? "해당 도서에 대한 리뷰는 한번만 쓸 수 있습니다." : "주문한 도서에 포함되어 있지 않습니다.";
             throw new NotCreateReviewException(message);
         }
@@ -81,19 +81,19 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public Page<ReviewLikeCountDTO> getReviewsByBookOrderBySort(Long bookId, Long userId, int page, int size, String sort) {
         Book existingBook = bookRepository.findById(bookId)
-                .orElseThrow(()-> new NotFoundException("존재하지 않는 도서입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 도서입니다."));
 
 
         Pageable pageable = PageRequest.of(page, size);
 
         Page<Object[]> results = null;
 
-        if (sort.equals("score")){
-            results= reviewRepository.findAllByBookOrderByScoreDesc(userId,bookId,pageable);
-        }else if (sort.equals("recommend")){
-            results= reviewRepository.findAllByBookOrderByLikeDesc(userId,bookId,pageable);
-        }else {
-            results= reviewRepository.findAllByBookOrderByCreatedAtDesc(userId,bookId,pageable);
+        if (sort.equals("score")) {
+            results = reviewRepository.findAllByBookOrderByScoreDesc(userId, bookId, pageable);
+        } else if (sort.equals("recommend")) {
+            results = reviewRepository.findAllByBookOrderByLikeDesc(userId, bookId, pageable);
+        } else {
+            results = reviewRepository.findAllByBookOrderByCreatedAtDesc(userId, bookId, pageable);
         }
 
 
@@ -102,7 +102,7 @@ public class ReviewServiceImpl implements ReviewService {
 
 
     @Override
-    public Page<Review> getReviewsByBook(Long bookId, int page, int size){
+    public Page<Review> getReviewsByBook(Long bookId, int page, int size) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 책입니다."));
 
@@ -125,9 +125,8 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
 
-
     @Override
-    public Page<UserReviewsDTO> getUserReviews(Long userId, int page, int size){
+    public Page<UserReviewsDTO> getUserReviews(Long userId, int page, int size) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
 
@@ -146,12 +145,6 @@ public class ReviewServiceImpl implements ReviewService {
 
         return convertToUserAvailableReviewsDTO(results);
     }
-
-
-
-
-
-
 
 
     @Transactional
@@ -180,23 +173,23 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
 
-    public Page<ReviewLikeCountDTO> convertToReviewLikeCountDTO(Page<Object[]> results,Long userId) {
+    public Page<ReviewLikeCountDTO> convertToReviewLikeCountDTO(Page<Object[]> results, Long userId) {
         return results.map(obj -> ReviewLikeCountDTO.builder()
-                                .reviewId((Long) obj[0])
-                        .title((String) obj[1])
-                        .content((String) obj[2])
-                        .createdAt(obj[3] != null ? ((Timestamp) obj[3]).toLocalDateTime() : null)
-                        .userName((String) obj[4])
-                        .userId((Long) obj[5])
-                        .score((Integer) obj[6])
-                        .likeCount(((Long) obj[7]))
-                        .commentCount(((Long) obj[8]))
-                        .imagePaths(obj[9] != null ? Arrays.asList(((String) obj[9]).split(",")) : null)
-                        .editable(((Long) obj[5]).equals(userId))
-                        .deletable(((Long) obj[5]).equals(userId))
-                        .userLiked(isLikedByUser((Integer)obj[10]))
-                        .build()
-                );
+                .reviewId((Long) obj[0])
+                .title((String) obj[1])
+                .content((String) obj[2])
+                .createdAt(obj[3] != null ? ((Timestamp) obj[3]).toLocalDateTime() : null)
+                .userName((String) obj[4])
+                .userId((Long) obj[5])
+                .score((Integer) obj[6])
+                .likeCount(((Long) obj[7]))
+                .commentCount(((Long) obj[8]))
+                .imagePaths(obj[9] != null ? Arrays.asList(((String) obj[9]).split(",")) : null)
+                .editable(((Long) obj[5]).equals(userId))
+                .deletable(((Long) obj[5]).equals(userId))
+                .userLiked(isLikedByUser((Integer) obj[10]))
+                .build()
+        );
     }
 
 
@@ -232,7 +225,7 @@ public class ReviewServiceImpl implements ReviewService {
         );
     }
 
-    public String canReviewBeCreated(Long userId, Long bookId){
+    public String canReviewBeCreated(Long userId, Long bookId) {
 
         long orderCheck = reviewRepository.bookOrderCheck(userId, bookId);
 

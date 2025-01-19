@@ -42,10 +42,10 @@ public class ReviewLikeServiceImpl implements ReviewLikeService {
 
 
         ReviewLike reviewLike = ReviewLike.builder()
-                                .user(user)
-                                .review(review)
-                                .created_at(LocalDateTime.now())
-                                .build();
+                .user(user)
+                .review(review)
+                .created_at(LocalDateTime.now())
+                .build();
 
         reviewLikeRepository.save(reviewLike);
     }

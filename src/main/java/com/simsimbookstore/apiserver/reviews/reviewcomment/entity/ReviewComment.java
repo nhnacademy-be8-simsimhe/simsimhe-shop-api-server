@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 @Builder
 public class ReviewComment {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "review_comment_id")
     private Long reviewCommentId;
 
@@ -39,7 +40,6 @@ public class ReviewComment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
 
 
 }

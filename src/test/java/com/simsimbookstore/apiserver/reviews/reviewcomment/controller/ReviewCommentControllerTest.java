@@ -1,4 +1,5 @@
 package com.simsimbookstore.apiserver.reviews.reviewcomment.controller;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.reviews.reviewcomment.dto.ReviewCommentRequestDTO;
 import com.simsimbookstore.apiserver.reviews.reviewcomment.dto.ReviewCommentResponseDTO;
@@ -14,14 +15,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ReviewCommentControllerTest {
 
@@ -43,7 +45,7 @@ class ReviewCommentControllerTest {
         Long reviewId = 1L;
         Long userId = 2L;
         ReviewCommentRequestDTO requestDTO = new ReviewCommentRequestDTO("This is a comment");
-        ReviewCommentResponseDTO responseDTO = new ReviewCommentResponseDTO(1L, "This is a comment", LocalDateTime.now(), LocalDateTime.now(), "user1",1L);
+        ReviewCommentResponseDTO responseDTO = new ReviewCommentResponseDTO(1L, "This is a comment", LocalDateTime.now(), LocalDateTime.now(), "user1", 1L);
 
         when(reviewCommentService.createReviewComment(any(ReviewCommentRequestDTO.class), eq(reviewId), eq(userId)))
                 .thenReturn(responseDTO);
@@ -74,7 +76,7 @@ class ReviewCommentControllerTest {
                 .update_at(LocalDateTime.now())
                 .build();
 
-        when(reviewCommentService.updateReviewComment(eq(reviewId),eq(commentId),any(ReviewCommentRequestDTO.class)))
+        when(reviewCommentService.updateReviewComment(eq(reviewId), eq(commentId), any(ReviewCommentRequestDTO.class)))
                 .thenReturn(updatedComment);
 
         mockMvc.perform(put("/api/shop/reviews/{reviewId}/comments/{commentId}", reviewId, commentId)
@@ -85,7 +87,7 @@ class ReviewCommentControllerTest {
                 .andExpect(jsonPath("$.reviewCommentId").value(commentId))
                 .andExpect(jsonPath("$.content").value("Updated comment"));
 
-        verify(reviewCommentService).updateReviewComment(eq(reviewId),eq(commentId),any(ReviewCommentRequestDTO.class));
+        verify(reviewCommentService).updateReviewComment(eq(reviewId), eq(commentId), any(ReviewCommentRequestDTO.class));
     }
 
     @Test

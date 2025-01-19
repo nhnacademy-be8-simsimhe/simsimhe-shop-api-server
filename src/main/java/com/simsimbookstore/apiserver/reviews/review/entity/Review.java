@@ -29,7 +29,7 @@ public class Review {
     @Setter
     private String title;
 
-//    @Lob
+    //    @Lob
     @Setter
     @Column(nullable = false)
     private String content;

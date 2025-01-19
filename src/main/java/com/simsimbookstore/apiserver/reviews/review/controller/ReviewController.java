@@ -1,4 +1,5 @@
 package com.simsimbookstore.apiserver.reviews.review.controller;
+
 import com.simsimbookstore.apiserver.reviews.review.dto.ReviewLikeCountDTO;
 import com.simsimbookstore.apiserver.reviews.review.dto.ReviewRequestDTO;
 import com.simsimbookstore.apiserver.reviews.review.dto.ReviewResponseDTO;
@@ -26,7 +27,7 @@ public class ReviewController {
 
 
     @PostMapping
-    public ResponseEntity<ReviewResponseDTO> createReview(@PathVariable Long bookId, @RequestParam Long userId, @RequestParam(value = "images", required = false) List<MultipartFile> files,  @Valid @RequestBody ReviewRequestDTO reviewRequestDTO){
+    public ResponseEntity<ReviewResponseDTO> createReview(@PathVariable Long bookId, @RequestParam Long userId, @RequestParam(value = "images", required = false) List<MultipartFile> files, @Valid @RequestBody ReviewRequestDTO reviewRequestDTO) {
 
         Review review = reviewService.createReview(reviewRequestDTO, bookId, userId);
         ReviewResponseDTO response = new ReviewResponseDTO(
@@ -43,51 +44,43 @@ public class ReviewController {
 
     @GetMapping("/{reviewId}")
     public ResponseEntity<ReviewResponseDTO> getReviewById(@PathVariable Long bookId,
-            @PathVariable Long reviewId) {
+                                                           @PathVariable Long reviewId) {
         ReviewResponseDTO review = reviewService.getReviewById(reviewId);
         return ResponseEntity.ok(review);
     }
 
 
-
-
     @GetMapping
     public ResponseEntity<Page<ReviewLikeCountDTO>> getAllReviewsOrderBySort(@PathVariable Long bookId,
-                                                                               @RequestParam Long userId,
-                                                                               @RequestParam(defaultValue = "0") int page,
-                                                                               @RequestParam(defaultValue = "10") int size,
-                                                                               @RequestParam(defaultValue = "recommend") String sort) {
+                                                                             @RequestParam Long userId,
+                                                                             @RequestParam(defaultValue = "0") int page,
+                                                                             @RequestParam(defaultValue = "10") int size,
+                                                                             @RequestParam(defaultValue = "recommend") String sort) {
 
-        var reviews = reviewService.getReviewsByBookOrderBySort(bookId,userId, page, size, sort);
+        var reviews = reviewService.getReviewsByBookOrderBySort(bookId, userId, page, size, sort);
 
         return ResponseEntity.ok(reviews);
     }
 
 
-
     @PostMapping("/{reviewId}")
     public ResponseEntity<ReviewResponseDTO> updateReview(@PathVariable Long bookId,
-                                          @PathVariable Long reviewId,
-                                          @Valid @RequestBody ReviewRequestDTO reviewRequestDTO){
-        Review updatedReview = reviewService.updateReview(reviewRequestDTO,reviewId);
+                                                          @PathVariable Long reviewId,
+                                                          @Valid @RequestBody ReviewRequestDTO reviewRequestDTO) {
+        Review updatedReview = reviewService.updateReview(reviewRequestDTO, reviewId);
 
         return ResponseEntity.ok(new ReviewResponseDTO(updatedReview));
     }
 
 
-
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<String> deleteReview(
             @PathVariable Long bookId,
-            @PathVariable Long reviewId){
+            @PathVariable Long reviewId) {
 
         reviewService.deleteReview(reviewId);
         return ResponseEntity.noContent().build();
     }
-
-
-
-
 
 
 }
