@@ -1,15 +1,11 @@
 package com.simsimbookstore.apiserver.reviews.review.controller;
-
-
 import com.simsimbookstore.apiserver.reviews.review.dto.ReviewLikeCountDTO;
 import com.simsimbookstore.apiserver.reviews.review.dto.ReviewRequestDTO;
 import com.simsimbookstore.apiserver.reviews.review.dto.ReviewResponseDTO;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.reviews.review.service.ReviewService;
-import com.simsimbookstore.apiserver.reviews.reviewimage.service.ReviewImagePathService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -53,22 +49,16 @@ public class ReviewController {
     }
 
 
+
+
     @GetMapping
-    public ResponseEntity<Page<Review>> getAllReviews(@PathVariable Long bookId,
-                                                      @RequestParam(defaultValue = "0") int page,
-                                                      @RequestParam(defaultValue = "10") int size) {
-        var reviews = reviewService.getAllReviews(bookId, page, size);
-        return ResponseEntity.ok(reviews);
-    }
-
-
-    @GetMapping("/recent")
-    public ResponseEntity<Page<ReviewLikeCountDTO>> getAllReviewsOrderByRecent(@PathVariable Long bookId,
+    public ResponseEntity<Page<ReviewLikeCountDTO>> getAllReviewsOrderBySort(@PathVariable Long bookId,
                                                                                @RequestParam Long userId,
                                                                                @RequestParam(defaultValue = "0") int page,
-                                                                               @RequestParam(defaultValue = "10") int size) {
-        log.info("bookId : {}", bookId);
-        var reviews = reviewService.getReviewsByBookOrderByRecent(bookId,userId, page, size);
+                                                                               @RequestParam(defaultValue = "10") int size,
+                                                                               @RequestParam(defaultValue = "recommend") String sort) {
+
+        var reviews = reviewService.getReviewsByBookOrderBySort(bookId,userId, page, size, sort);
 
         return ResponseEntity.ok(reviews);
     }
@@ -79,7 +69,6 @@ public class ReviewController {
     public ResponseEntity<ReviewResponseDTO> updateReview(@PathVariable Long bookId,
                                           @PathVariable Long reviewId,
                                           @Valid @RequestBody ReviewRequestDTO reviewRequestDTO){
-
         Review updatedReview = reviewService.updateReview(reviewRequestDTO,reviewId);
 
         return ResponseEntity.ok(new ReviewResponseDTO(updatedReview));
