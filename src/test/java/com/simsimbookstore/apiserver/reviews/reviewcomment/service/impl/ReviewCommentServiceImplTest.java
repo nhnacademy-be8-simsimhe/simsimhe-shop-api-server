@@ -20,14 +20,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import javax.xml.stream.events.Comment;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ReviewCommentServiceImplTest {
@@ -164,7 +162,7 @@ class ReviewCommentServiceImplTest {
         when(reviewCommentRepository.findById(commentId)).thenReturn(Optional.empty());
 
         // When / Then
-        assertThatThrownBy(() -> reviewCommentService.updateReviewComment(reviewId, commentId,requestDTO))
+        assertThatThrownBy(() -> reviewCommentService.updateReviewComment(reviewId, commentId, requestDTO))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("존재하지 않는 리뷰 댓글입니다.");
 
@@ -215,20 +213,20 @@ class ReviewCommentServiceImplTest {
 
     @Test
     @DisplayName("리뷰 댓글 단일 조회 실패 - 해당 댓글이 존재하지 않음")
-    void getReviewCommentById_Fail_CommentNotExist(){
+    void getReviewCommentById_Fail_CommentNotExist() {
 
         Long commentId = 1L;
 
         when(reviewCommentRepository.findById(commentId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(()-> reviewCommentService.getReviewCommentById(commentId))
+        assertThatThrownBy(() -> reviewCommentService.getReviewCommentById(commentId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("존재하지 않는 리뷰 댓글입니다.");
     }
 
     @Test
     @DisplayName("리뷰 댓글 단일 조회 성공 테스트")
-    void getReviewCommentById_Success(){
+    void getReviewCommentById_Success() {
 
         Long commentId = 1L;
 
@@ -247,20 +245,20 @@ class ReviewCommentServiceImplTest {
 
         assertThat(callReviewComment).isNotNull();
         assertThat(callReviewComment.getContent()).isEqualTo("리뷰 댓글입니다");
-        assertThat(callReviewComment.getUser().getUserName() ).isEqualTo("Test User");
+        assertThat(callReviewComment.getUser().getUserName()).isEqualTo("Test User");
 
         verify(reviewCommentRepository).findById(commentId);
     }
 
     @Test
     @DisplayName("리뷰 댓글 전체 조회 실패 - 리뷰 없음")
-    void getReviewComments_Fail_NoReview(){
+    void getReviewComments_Fail_NoReview() {
 
         Long reviewId = 1L;
 
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(()-> reviewCommentService.getReviewComments(reviewId, 0, 10))
+        assertThatThrownBy(() -> reviewCommentService.getReviewComments(reviewId, 0, 10))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("존재하지 않는 리뷰입니다.");
     }
@@ -268,7 +266,7 @@ class ReviewCommentServiceImplTest {
 
     @Test
     @DisplayName("리뷰 댓글 전체 조회 성공")
-    void getReviewComments_Success(){
+    void getReviewComments_Success() {
         Long reviewId = 1L;
 
         List<ReviewComment> comments = List.of(

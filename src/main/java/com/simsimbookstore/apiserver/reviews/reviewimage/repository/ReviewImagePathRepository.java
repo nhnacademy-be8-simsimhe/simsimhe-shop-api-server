@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface ReviewImagePathRepository extends JpaRepository<ReviewImagePath,Long> {
+public interface ReviewImagePathRepository extends JpaRepository<ReviewImagePath, Long> {
     List<ReviewImagePath> findByReview(Review review);
 }

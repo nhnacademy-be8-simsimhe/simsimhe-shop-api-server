@@ -11,8 +11,6 @@ import com.simsimbookstore.apiserver.reviews.reviewimage.entity.ReviewImagePath;
 import com.simsimbookstore.apiserver.reviews.reviewimage.repository.ReviewImagePathRepository;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
-import org.hibernate.annotations.NotFound;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -94,7 +92,7 @@ class ReviewServiceImplTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-        when(reviewRepository.bookOrderCheck(userId,bookId)).thenReturn(0L);
+        when(reviewRepository.bookOrderCheck(userId, bookId)).thenReturn(0L);
 
 
         NotCreateReviewException exception = assertThrows(NotCreateReviewException.class, () -> {
@@ -102,7 +100,7 @@ class ReviewServiceImplTest {
         });
 
 
-        assertEquals("주문한 도서에 포함되어 있지 않습니다.",exception.getMessage());
+        assertEquals("주문한 도서에 포함되어 있지 않습니다.", exception.getMessage());
         verify(userRepository, never()).save(any());
     }
 
@@ -119,8 +117,8 @@ class ReviewServiceImplTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-        when(reviewRepository.bookOrderCheck(userId,bookId)).thenReturn(1L);
-        when(reviewRepository.alreadyExistCheck(userId,bookId)).thenReturn(1L);
+        when(reviewRepository.bookOrderCheck(userId, bookId)).thenReturn(1L);
+        when(reviewRepository.alreadyExistCheck(userId, bookId)).thenReturn(1L);
 //        when(reviewService.canReviewBeCreated(userId, bookId)).thenReturn("REVIEW_ALREADY_EXIST");
 
 
@@ -129,10 +127,9 @@ class ReviewServiceImplTest {
         });
 
 
-        assertEquals("해당 도서에 대한 리뷰는 한번만 쓸 수 있습니다.",exception.getMessage());
+        assertEquals("해당 도서에 대한 리뷰는 한번만 쓸 수 있습니다.", exception.getMessage());
         verify(userRepository, never()).save(any());
     }
-
 
 
     @Test
@@ -181,10 +178,9 @@ class ReviewServiceImplTest {
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
 
 
-        assertThrows(NotFoundException.class , ()-> reviewService.updateReview(dto, reviewId));
+        assertThrows(NotFoundException.class, () -> reviewService.updateReview(dto, reviewId));
         verify(reviewRepository, never()).save(any());
     }
-
 
 
     @Test
@@ -305,8 +301,6 @@ class ReviewServiceImplTest {
     }
 
 
-
-
     @Test
     @DisplayName("해당 도서에 대한 전체 리뷰 조회 성공")
     void getReviewsByBook_success() {
@@ -334,8 +328,6 @@ class ReviewServiceImplTest {
     }
 
 
-
-
     @Test
     @DisplayName("해당 도서에 대한 전체 리뷰 조회 실패 - (도서 없음)")
     void getReviewsByBook_fail_bookNotFound() {
@@ -350,8 +342,6 @@ class ReviewServiceImplTest {
     }
 
 
-
-
     @Test
     @DisplayName("해당 리뷰 조회 실패 - 리뷰 존재하지 않음")
     void getReviewById_fail_NotExistReview() {
@@ -360,9 +350,9 @@ class ReviewServiceImplTest {
 
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
 
-       assertThatThrownBy(()->reviewService.getReviewById(reviewId))
-               .isInstanceOf(NotFoundException.class)
-               .hasMessage("존재하지 않는 책입니다.");
+        assertThatThrownBy(() -> reviewService.getReviewById(reviewId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 책입니다.");
     }
 
     @Test
@@ -395,13 +385,12 @@ class ReviewServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                ()->reviewService.getUserReviews(userId, page, size));
+                () -> reviewService.getUserReviews(userId, page, size));
 
 
         assertEquals(exception.getMessage(), "존재하지 않는 유저입니다.");
         verify(reviewRepository, never()).getUserReviews(eq(userId), any(Pageable.class));
     }
-
 
 
     @Test
@@ -476,7 +465,7 @@ class ReviewServiceImplTest {
                 .content("Old Content")
                 .createdAt(LocalDateTime.now()).build();
 
-        ReviewImagePath reviewImagePath = new ReviewImagePath(1L,"/review/reviewImage.png", existingReview);
+        ReviewImagePath reviewImagePath = new ReviewImagePath(1L, "/review/reviewImage.png", existingReview);
 
         when(reviewImagePathRepository.findById(reviewId)).thenReturn(Optional.of(reviewImagePath));
 
@@ -498,8 +487,6 @@ class ReviewServiceImplTest {
         assertFalse(result);
         verify(reviewImagePathRepository, times(1)).findById(reviewId);
     }
-
-
 
 
     @Test

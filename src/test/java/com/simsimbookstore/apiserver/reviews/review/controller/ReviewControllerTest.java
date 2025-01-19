@@ -6,25 +6,20 @@ import com.simsimbookstore.apiserver.reviews.review.dto.ReviewRequestDTO;
 import com.simsimbookstore.apiserver.reviews.review.dto.ReviewResponseDTO;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.reviews.review.service.ReviewService;
-
-import com.simsimbookstore.apiserver.reviews.reviewimage.service.ReviewImagePathService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
-
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.*;
-
-
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -81,7 +76,7 @@ class ReviewControllerTest {
 
     @Test
     @DisplayName("도서 리뷰 목록 조회 테스트 (최근순)")
-    void getAllReviewsTest() throws Exception{
+    void getAllReviewsTest() throws Exception {
 
         Long bookId = 1L;
         Long userId = 1L;
@@ -90,8 +85,8 @@ class ReviewControllerTest {
         String sort = "latest";
 
         var reviews = List.of(
-                new ReviewLikeCountDTO(1L, "good book", "I loved this book!", LocalDateTime.now(),"mingyeong", 4,12L, 12L),
-                new ReviewLikeCountDTO(2L, "great book", "Interesting", LocalDateTime.now(),"hello", 3,20L, 9L)
+                new ReviewLikeCountDTO(1L, "good book", "I loved this book!", LocalDateTime.now(), "mingyeong", 4, 12L, 12L),
+                new ReviewLikeCountDTO(2L, "great book", "Interesting", LocalDateTime.now(), "hello", 3, 20L, 9L)
         );
 
         var pageable = PageRequest.of(page, size);
@@ -100,7 +95,6 @@ class ReviewControllerTest {
 
         when(reviewService.getReviewsByBookOrderBySort(eq(bookId), eq(userId), eq(page), eq(size), eq(sort)))
                 .thenReturn(response);
-
 
 
         mockMvc.perform(get("/api/shop/books/{bookId}/reviews", bookId)
@@ -127,8 +121,8 @@ class ReviewControllerTest {
     @DisplayName("단일 리뷰 조회하기")
     void getReviewById() throws Exception {
         Long bookId = 1L;
-        Long reviewId =1L;
-        Long userId =1L;
+        Long reviewId = 1L;
+        Long userId = 1L;
 
         ReviewResponseDTO reviewResponseDTO = new ReviewResponseDTO(
                 reviewId,
@@ -143,7 +137,7 @@ class ReviewControllerTest {
 
         when(reviewService.getReviewById(reviewId)).thenReturn(reviewResponseDTO);
 
-        mockMvc.perform(get("/api/shop/books/{bookId}/reviews/{reviewId}",bookId, reviewId)
+        mockMvc.perform(get("/api/shop/books/{bookId}/reviews/{reviewId}", bookId, reviewId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -155,7 +149,7 @@ class ReviewControllerTest {
 
     @Test
     @DisplayName("리뷰 수정 테스트")
-    void updateReviewTest() throws Exception{
+    void updateReviewTest() throws Exception {
         Long bookId = 1L;
         Long reviewId = 2L;
         ReviewRequestDTO request = new ReviewRequestDTO(4, "Updated Title", "Updated Content");
@@ -187,7 +181,7 @@ class ReviewControllerTest {
 
     @Test
     @DisplayName("리뷰 삭제 테스트")
-    void deleteReviewTest() throws Exception{
+    void deleteReviewTest() throws Exception {
         Long bookId = 1L;
         Long reviewId = 2L;
 

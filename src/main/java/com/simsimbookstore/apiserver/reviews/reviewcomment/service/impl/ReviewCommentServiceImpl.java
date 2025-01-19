@@ -36,7 +36,7 @@ public class ReviewCommentServiceImpl implements ReviewCommentService {
     @Override
     public ReviewCommentResponseDTO createReviewComment(ReviewCommentRequestDTO requestDTO, Long reviewId, Long userId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(()-> new NotFoundException("존재하지 않는 리뷰입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰입니다."));
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
@@ -63,7 +63,7 @@ public class ReviewCommentServiceImpl implements ReviewCommentService {
     @Override
     public ReviewComment updateReviewComment(Long reviewId, Long commentId, ReviewCommentRequestDTO dto) {
         ReviewComment existingReviewComment = reviewCommentRepository.findById(commentId)
-                .orElseThrow(()-> new NotFoundException("존재하지 않는 리뷰 댓글입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰 댓글입니다."));
 
         existingReviewComment.setContent(dto.getContent());
         existingReviewComment.setUpdate_at(LocalDateTime.now());
@@ -85,7 +85,7 @@ public class ReviewCommentServiceImpl implements ReviewCommentService {
     @Override
     public Page<ReviewCommentResponseDTO> getReviewComments(Long reviewId, int page, int size) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(()-> new NotFoundException("존재하지 않는 리뷰입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰입니다."));
 
         Pageable pageable = PageRequest.of(page, size);
 
@@ -98,7 +98,7 @@ public class ReviewCommentServiceImpl implements ReviewCommentService {
     @Transactional
     @Override
     public void deleteReviewComment(Long commentId) {
-        ReviewComment existingReviewComment= reviewCommentRepository.findById(commentId)
+        ReviewComment existingReviewComment = reviewCommentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰 댓글입니다."));
         reviewCommentRepository.delete(existingReviewComment);
     }

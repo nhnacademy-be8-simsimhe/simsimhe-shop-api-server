@@ -1,14 +1,11 @@
 package com.simsimbookstore.apiserver.reviews.review.controller;
 
-import co.elastic.clients.elasticsearch.license.LicenseStatus;
 import com.simsimbookstore.apiserver.reviews.review.dto.UserAvailableReviewsDTO;
 import com.simsimbookstore.apiserver.reviews.review.dto.UserReviewsDTO;
 import com.simsimbookstore.apiserver.reviews.review.service.ReviewService;
-import com.simsimbookstore.apiserver.users.user.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.Extensions;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -25,7 +22,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,9 +37,9 @@ class UserReviewControllerTest {
     ReviewService reviewService;
 
     @TestConfiguration
-    static class TestConfig{
+    static class TestConfig {
         @Bean
-        public ReviewService reviewService(){
+        public ReviewService reviewService() {
             return mock(ReviewService.class);
         }
     }
@@ -57,7 +54,7 @@ class UserReviewControllerTest {
         int size = 10;
 
         List<UserReviewsDTO> reviewList = List.of(
-                new UserReviewsDTO(   1L,
+                new UserReviewsDTO(1L,
                         101L,
                         "Effective Java",
                         "Joshua Bloch",
@@ -72,7 +69,7 @@ class UserReviewControllerTest {
                         5,
                         List.of("/images/review1.jpg", "/images/review2.jpg")),
 
-                new UserReviewsDTO(   2L,
+                new UserReviewsDTO(2L,
                         90L,
                         "위대한 개츠비",
                         "프랜시스 스콧 피츠제럴드",
@@ -95,8 +92,8 @@ class UserReviewControllerTest {
         when(reviewService.getUserReviews(userId, page, size)).thenReturn(userReviews);
 
         mockMvc.perform(get("/api/shop/users/{userId}/reviews", userId)
-                .param("page", "0")
-                .param("size", "1"))
+                        .param("page", "0")
+                        .param("size", "1"))
                 .andDo(print())
                 .andExpect(status().isOk());
 
@@ -112,18 +109,18 @@ class UserReviewControllerTest {
         int size = 10;
 
         List<UserAvailableReviewsDTO> reviewList = List.of(
-                new UserAvailableReviewsDTO(   1L,
+                new UserAvailableReviewsDTO(1L,
                         "title1",
                         "author1",
                         "/images/title1.jpg",
                         LocalDateTime.now()),
-                new UserAvailableReviewsDTO(   101L,
+                new UserAvailableReviewsDTO(101L,
                         "title2",
                         "author2",
                         "/images/title2.jpg",
                         LocalDateTime.now()),
 
-                new UserAvailableReviewsDTO(   70L,
+                new UserAvailableReviewsDTO(70L,
                         "title3",
                         "author3",
                         "/images/title3.jpg",
@@ -143,9 +140,6 @@ class UserReviewControllerTest {
                 .andExpect(status().isOk());
 
     }
-
-
-
 
 
 }

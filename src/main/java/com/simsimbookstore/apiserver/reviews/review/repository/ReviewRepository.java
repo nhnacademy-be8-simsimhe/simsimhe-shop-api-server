@@ -5,11 +5,10 @@ import com.simsimbookstore.apiserver.reviews.review.dto.ReviewLikeCountDTO;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
-import org.springframework.data.domain.Pageable;
 
 
 @Repository
@@ -19,9 +18,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Review> findAllByBook(Book book, Pageable pageable);
 
 
-
     Page<ReviewLikeCountDTO> findAllByUser(User user, Pageable pageable);
-
 
 
     @Query(value = "SELECT " +
@@ -78,8 +75,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Object[]> findAllByBookOrderByLikeDesc(Long userId, Long bookId, Pageable pageable);
 
 
-
-
     @Query(value = "SELECT " +
             "r.review_id AS reviewId, " +
             "r.title AS title, " +
@@ -106,13 +101,12 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Object[]> findAllByBookOrderByScoreDesc(Long userId, Long bookId, Pageable pageable);
 
 
-
     @Query(value = "select count(o.order_id) " +
             "from orders as o " +
             "LEFT JOIN order_books as ob ON o.order_id = ob.order_id\n" +
             "LEFT JOIN reviews AS r ON ob.book_id = r.book_id AND o.user_id = r.user_id\n" +
             "WHERE o.user_id=:userId AND ob.book_id =:bookId",
-    nativeQuery = true)
+            nativeQuery = true)
     long bookOrderCheck(Long userId, Long bookId);
 
     @Query(value = "select count(review_id) > 0 from reviews where user_id = :userId AND book_id = :bookId",
@@ -178,7 +172,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             nativeQuery = true
     )
     Page<Object[]> getEligibleBooksForReview(Long userId, Pageable pageable);
-
 
 
 }

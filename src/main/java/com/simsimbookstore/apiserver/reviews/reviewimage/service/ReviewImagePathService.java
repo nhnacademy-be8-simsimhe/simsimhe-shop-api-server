@@ -8,6 +8,8 @@ import java.util.List;
 public interface ReviewImagePathService {
 
     List<ReviewImgPathResponseDTO> createReviewImage(Long reviewId, List<String> imageName);
+
     void deleteReviewImage(Long imageId);
+
     List<ReviewImagePath> getImagesByReviewId(Long reviewId);
 }

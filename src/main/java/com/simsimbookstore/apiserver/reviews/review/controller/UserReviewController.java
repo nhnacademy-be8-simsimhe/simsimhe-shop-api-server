@@ -17,15 +17,15 @@ public class UserReviewController {
     private final ReviewService reviewService;
 
     @GetMapping
-    public ResponseEntity<Page<UserReviewsDTO>> getUserReviews(@PathVariable Long userId, @RequestParam int page, @RequestParam int size){
-        Page<UserReviewsDTO> userReviews = reviewService.getUserReviews(userId,page,size);
+    public ResponseEntity<Page<UserReviewsDTO>> getUserReviews(@PathVariable Long userId, @RequestParam int page, @RequestParam int size) {
+        Page<UserReviewsDTO> userReviews = reviewService.getUserReviews(userId, page, size);
         return ResponseEntity.ok(userReviews);
     }
 
 
     @GetMapping("/available")
-    public ResponseEntity<Page<UserAvailableReviewsDTO>> getEligibleBooksForReview(@PathVariable Long userId, @RequestParam int page, @RequestParam int size){
-        Page<UserAvailableReviewsDTO> userReviews = reviewService.getAvailableReviews(userId,page,size);
+    public ResponseEntity<Page<UserAvailableReviewsDTO>> getEligibleBooksForReview(@PathVariable Long userId, @RequestParam int page, @RequestParam int size) {
+        Page<UserAvailableReviewsDTO> userReviews = reviewService.getAvailableReviews(userId, page, size);
         return ResponseEntity.ok(userReviews);
     }
 
