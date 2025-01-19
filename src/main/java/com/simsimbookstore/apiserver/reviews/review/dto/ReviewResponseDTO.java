@@ -32,9 +32,6 @@ public class ReviewResponseDTO {
     }
 
 
-
-
-
     public ReviewResponseDTO(Review review) {
         this.reviewId = review.getReviewId();
         this.title = review.getTitle();

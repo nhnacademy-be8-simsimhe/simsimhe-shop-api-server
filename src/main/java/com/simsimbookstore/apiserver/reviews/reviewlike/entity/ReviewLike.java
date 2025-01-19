@@ -13,16 +13,17 @@ import java.time.LocalDateTime;
 @Entity
 //사용자는 리뷰에대한 공감을 한번만 누를수있음 유니크 제약조건을 설정해도 로직에서 중복 삽입 방지하는 코드추가
 @Table(name = "review_likes",
-       uniqueConstraints = {
-           @UniqueConstraint(columnNames = {"user_id", "review_id"})
-       })
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user_id", "review_id"})
+        })
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Setter
 public class ReviewLike {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "review_like_id")
     private Long reviewLikeId;
 

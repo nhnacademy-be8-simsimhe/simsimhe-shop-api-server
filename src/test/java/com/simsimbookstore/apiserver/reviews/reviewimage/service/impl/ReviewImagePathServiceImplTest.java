@@ -6,7 +6,6 @@ import com.simsimbookstore.apiserver.reviews.review.repository.ReviewRepository;
 import com.simsimbookstore.apiserver.reviews.reviewimage.dto.ReviewImgPathResponseDTO;
 import com.simsimbookstore.apiserver.reviews.reviewimage.entity.ReviewImagePath;
 import com.simsimbookstore.apiserver.reviews.reviewimage.repository.ReviewImagePathRepository;
-import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,7 +18,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 

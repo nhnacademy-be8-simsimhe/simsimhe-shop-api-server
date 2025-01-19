@@ -33,8 +33,6 @@ public class ReviewUpdateResponseDTO {
     }
 
 
-
-
     public ReviewUpdateResponseDTO(Review review) {
         this.reviewId = review.getReviewId();
         this.title = review.getTitle();

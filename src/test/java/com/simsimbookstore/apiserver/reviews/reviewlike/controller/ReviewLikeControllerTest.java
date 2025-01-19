@@ -5,23 +5,19 @@ import com.simsimbookstore.apiserver.reviews.reviewlike.service.ReviewLikeServic
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 class ReviewLikeControllerTest {
-
 
 
     private MockMvc mockMvc;
@@ -35,9 +31,9 @@ class ReviewLikeControllerTest {
     }
 
 
-
     @Test
-    void createLike() throws Exception{
+    @DisplayName("리뷰 좋아요 생성 테스트 성공")
+    void createLike() throws Exception {
 
         Long userId = 1L;
         Long reviewId = 2L;
@@ -45,13 +41,14 @@ class ReviewLikeControllerTest {
         doNothing().when(reviewLikeService).createReviewLike(eq(userId), eq(reviewId));
 
         mockMvc.perform(post("/api/shop/reviews/{reviewId}/likes", reviewId)
-                .param("userId", String.valueOf(userId)))
+                        .param("userId", String.valueOf(userId)))
                 .andExpect(status().isOk());
 
     }
 
     @Test
-    void removeLike() throws Exception{
+    @DisplayName("리뷰 좋아요 삭제 테스트 성공")
+    void removeLike() throws Exception {
 
         Long userId = 1L;
         Long reviewId = 2L;
@@ -82,7 +79,6 @@ class ReviewLikeControllerTest {
 
         verify(reviewLikeService, times(1)).getReviewLikeCount(eq(reviewId));
     }
-
 
 
 }
