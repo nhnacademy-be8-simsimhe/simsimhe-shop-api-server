@@ -102,7 +102,6 @@ public class OrderBookServiceImpl implements OrderBookService {
 
         if (dto.getCouponDiscountRequestDto() != null) {
             couponDiscountService.createCouponDiscount(dto.getCouponDiscountRequestDto(), savedOrderBook);
-            //couponService.useCoupon(order.getUser().getUserId(), dto.getCouponId());
         }
 
         if (dto.getPackagesRequestDtos() != null && !dto.getPackagesRequestDtos().isEmpty()) {
