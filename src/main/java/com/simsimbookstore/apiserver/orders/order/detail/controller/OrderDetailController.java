@@ -21,7 +21,7 @@ public class OrderDetailController {
         return ResponseEntity.ok(detailResponseDto);
     }
 
-    @GetMapping("/api/shop/guest-orders")
+    @GetMapping("/api/shop/users/guest-orders")
     public ResponseEntity<OrderDetailResponseDto> guestOrderDetail(@RequestParam String orderNumber,
                                                                    @RequestParam String email) {
         return ResponseEntity.ok(orderDetailService.getGuestOrderDetail(orderNumber, email));
