@@ -51,3 +51,6 @@ GET http://localhost:8010/api/shop/coupons/13/calculate?bookId=3&quantity=2
 
 ### GET getUnusedCoupons
 GET http://localhost:8010/api/shop/users/91/coupons/unused
+
+### GET getUserCouponDiscount
+GET http://localhost:8010/api/shop/users/91/coupon-discounts

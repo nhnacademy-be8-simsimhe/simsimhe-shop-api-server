@@ -4,6 +4,8 @@ import com.simsimbookstore.apiserver.coupons.coupon.dto.CouponResponseDto;
 import com.simsimbookstore.apiserver.coupons.coupon.dto.DiscountAmountResponseDto;
 import com.simsimbookstore.apiserver.coupons.coupon.dto.IssueCouponsRequestDto;
 import com.simsimbookstore.apiserver.coupons.coupon.service.CouponService;
+import com.simsimbookstore.apiserver.orders.coupondiscount.dto.UserCouponDiscountResponseDto;
+import com.simsimbookstore.apiserver.orders.coupondiscount.service.CouponDiscountService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +29,7 @@ import java.util.Map;
 @RequestMapping("/api")
 public class CouponController {
     private final CouponService couponService;
-
+    private final CouponDiscountService couponDiscountService;
 
     @GetMapping("/admin/coupons")
     public ResponseEntity<Page<CouponResponseDto>> getTotalCoupons(Pageable pageable) {
@@ -56,6 +58,19 @@ public class CouponController {
                                                                        @RequestParam Long couponTypeId) {
         CouponResponseDto unusedCoupon = couponService.getUnusedCouponByCouponType(userId, couponTypeId);
         return ResponseEntity.status(HttpStatus.OK).body(unusedCoupon);
+    }
+
+    /**
+     * 유저가 사용한 쿠폰 할인 내역을 Page로 가져온다.
+     * @param userId
+     * @param pageable
+     * @return
+     */
+    @GetMapping("/shop/users/{user-id}/coupon-discounts")
+    public ResponseEntity<Page<UserCouponDiscountResponseDto>> getUserCouponDiscount(@PathVariable(name = "user-id") Long userId,
+                                                                                     Pageable pageable) {
+        Page<UserCouponDiscountResponseDto> userCouponDiscountPage = couponDiscountService.getUserCouponDiscount(userId, pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(userCouponDiscountPage);
     }
 
     /**
@@ -170,17 +185,27 @@ public class CouponController {
         return ResponseEntity.status(HttpStatus.OK).body(discountAmountResponseDto);
     }
 
+    /**
+     * 만료된 쿠폰을 모두 가져온다.
+     * @return
+     */
     @GetMapping("/admin/coupons/expired")
     public ResponseEntity<List<CouponResponseDto>> getExpiredCoupons() {
         List<CouponResponseDto> coupons = couponService.getExpiredCoupons();
         return ResponseEntity.status(HttpStatus.OK).body(coupons);
     }
 
+    /**
+     * 쿠폰의 상태는 UNUSED상태이지만 deadline이 끝난 쿠폰들을 모두 가져온다.
+     * @return
+     */
     @GetMapping("/admin/coupons/unused/deadline-pass")
     public ResponseEntity<List<CouponResponseDto>> getUnusedButDeadlinePassedCoupon() {
         List<CouponResponseDto> coupons = couponService.getUnusedButDeadlinePassedCoupon();
         return ResponseEntity.status(HttpStatus.OK).body(coupons);
     }
+
+
 
 
     private Pageable setPageable(Pageable pageable, String sortField) {
