@@ -17,7 +17,6 @@ import com.simsimbookstore.apiserver.orders.packages.dto.PackageResponseDto;
 import com.simsimbookstore.apiserver.orders.packages.entity.Packages;
 import com.simsimbookstore.apiserver.orders.packages.service.PackageService;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
@@ -34,11 +33,15 @@ public class OrderBookServiceImpl implements OrderBookService {
     private final CouponDiscountService couponDiscountService;
     private final PackageService packageService;
 
+    private static final String ORDER_BOOK = "OrderBook";
+
+
     @Override
     @Transactional
     public OrderBookResponseDto createOrderBook(OrderBookRequestDto orderBookRequestDto) {
         OrderBook savedOrderBook = processSingleOrderBook(orderBookRequestDto);
-        return toOrderBookResponseDto(findEntityById(savedOrderBook.getOrderBookId(), orderBookRepository, "OrderBook"));
+        return toOrderBookResponseDto(
+                findEntityById(savedOrderBook.getOrderBookId(), orderBookRepository, ORDER_BOOK));
     }
 
     @Override
@@ -46,19 +49,19 @@ public class OrderBookServiceImpl implements OrderBookService {
     public List<OrderBookResponseDto> createOrderBooks(List<OrderBookRequestDto> orderBookRequestDtos) {
         return orderBookRequestDtos.stream()
                 .map(this::processSingleOrderBook)
-                .map(orderBook -> toOrderBookResponseDto(findEntityById(orderBook.getOrderBookId(), orderBookRepository, "OrderBook")))
-                .collect(Collectors.toList());
+                .map(orderBook -> toOrderBookResponseDto(
+                        findEntityById(orderBook.getOrderBookId(), orderBookRepository, ORDER_BOOK))).toList();
     }
 
     @Override
     public OrderBookResponseDto getOrderBook(Long orderBookId) {
-        return toOrderBookResponseDto(findEntityById(orderBookId, orderBookRepository, "OrderBook"));
+        return toOrderBookResponseDto(findEntityById(orderBookId, orderBookRepository, ORDER_BOOK));
     }
 
     @Override
     @Transactional
     public OrderBookResponseDto updateOrderBook(Long orderBookId, OrderBook.OrderBookState newOrderBookState) {
-        OrderBook orderBook = findEntityById(orderBookId, orderBookRepository, "OrderBook");
+        OrderBook orderBook = findEntityById(orderBookId, orderBookRepository, ORDER_BOOK);
         orderBook.updateOrderBookState(newOrderBookState);
         return toOrderBookResponseDto(orderBookRepository.save(orderBook));
     }
@@ -66,21 +69,20 @@ public class OrderBookServiceImpl implements OrderBookService {
     @Override
     @Transactional
     public void deleteOrderBook(Long orderBookId) {
-        OrderBook orderBook = findEntityById(orderBookId, orderBookRepository, "OrderBook");
+        OrderBook orderBook = findEntityById(orderBookId, orderBookRepository, ORDER_BOOK);
         orderBookRepository.delete(orderBook);
     }
 
     @Override
     public List<PackageResponseDto> getPackages(Long orderBookId) {
-        OrderBook orderBook = findEntityById(orderBookId, orderBookRepository, "OrderBook");
+        OrderBook orderBook = findEntityById(orderBookId, orderBookRepository, ORDER_BOOK);
         return orderBook.getPackages().stream()
-                .map(this::toPackageResponseDto)
-                .collect(Collectors.toList());
+                .map(this::toPackageResponseDto).toList();
     }
 
     @Override
     public CouponDiscountResponseDto getCouponDiscount(Long orderBookId) {
-        OrderBook orderBook = findEntityById(orderBookId, orderBookRepository, "OrderBook");
+        OrderBook orderBook = findEntityById(orderBookId, orderBookRepository, ORDER_BOOK);
         return toCouponDiscountResponseDto(orderBook.getCouponDiscount());
     }
 
@@ -102,7 +104,6 @@ public class OrderBookServiceImpl implements OrderBookService {
 
         if (dto.getCouponDiscountRequestDto() != null) {
             couponDiscountService.createCouponDiscount(dto.getCouponDiscountRequestDto(), savedOrderBook);
-            //couponService.useCoupon(order.getUser().getUserId(), dto.getCouponId());
         }
 
         if (dto.getPackagesRequestDtos() != null && !dto.getPackagesRequestDtos().isEmpty()) {
@@ -120,7 +121,9 @@ public class OrderBookServiceImpl implements OrderBookService {
     }
 
     private CouponDiscountResponseDto toCouponDiscountResponseDto(CouponDiscount couponDiscount) {
-        if (couponDiscount == null) return null;
+        if (couponDiscount == null) {
+            return null;
+        }
         return CouponDiscountResponseDto.builder()
                 .couponDiscountId(couponDiscount.getCouponDiscountId())
                 .couponName(couponDiscount.getCouponName())
@@ -133,8 +136,7 @@ public class OrderBookServiceImpl implements OrderBookService {
     public OrderBookResponseDto toOrderBookResponseDto(OrderBook orderBook) {
         CouponDiscountResponseDto couponRes = toCouponDiscountResponseDto(orderBook.getCouponDiscount());
         List<PackageResponseDto> packageResList = orderBook.getPackages().stream()
-                .map(this::toPackageResponseDto)
-                .collect(Collectors.toList());
+                .map(this::toPackageResponseDto).toList();
 
         return OrderBookResponseDto.builder()
                 .orderBookId(orderBook.getOrderBookId())

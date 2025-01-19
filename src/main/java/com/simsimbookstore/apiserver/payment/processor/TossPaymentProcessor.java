@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeRequestDto;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
+import com.simsimbookstore.apiserver.orders.order.dto.RetryOrderRequestDto;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.payment.client.PaymentRestTemplate;
@@ -74,11 +75,13 @@ public class TossPaymentProcessor implements PaymentProcessor {
 
     public boolean validation(SuccessRequestDto successDto) {  // SuccessRequestDto successRequestDto
         // redis에 임시 저장해둔 값과 같은지 검증
+        log.info("dto Id = {}", successDto.getOrderId());
+        BigDecimal amount = successDto.getAmount();
+        log.info("dto Amount = {}", amount);
         String redisOrderId = (String) redisTemplate.opsForHash().get(HASH_NAME, "orderId");
         BigDecimal redisAmount = (BigDecimal) redisTemplate.opsForHash().get(HASH_NAME, "totalAmount");
-
         if ((Objects.equals(successDto.getOrderId(), redisOrderId))
-                && (Objects.equals(successDto.getAmount(), redisAmount))) {
+                && (successDto.getAmount().compareTo(redisAmount) == 0)) {
             // 같으면 임시 저장 데이터 삭제 > 달라도 삭제가 되야할듯??
             redisTemplate.opsForHash().delete(HASH_NAME, "orderId");
             redisTemplate.opsForHash().delete(HASH_NAME, "totalAmount");

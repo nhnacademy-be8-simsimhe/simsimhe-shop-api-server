@@ -8,7 +8,6 @@ import com.simsimbookstore.apiserver.orders.coupondiscount.entity.CouponDiscount
 import com.simsimbookstore.apiserver.orders.coupondiscount.repository.CouponDiscountRepository;
 import com.simsimbookstore.apiserver.orders.coupondiscount.service.CouponDiscountService;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
-import com.simsimbookstore.apiserver.orders.orderbook.repository.OrderBookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +39,7 @@ public class CouponDiscountServiceImpl implements CouponDiscountService {
                 .couponName(requestDto.getCouponName())
                 .couponType(requestDto.getCouponType())
                 .discountPrice(requestDto.getDiscountPrice())
+                .usage(false)
                 .build();
 
         // (3) 양방향 연결
