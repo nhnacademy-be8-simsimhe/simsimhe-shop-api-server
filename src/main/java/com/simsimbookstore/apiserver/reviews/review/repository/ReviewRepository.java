@@ -73,7 +73,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "WHERE r.book_id = :bookId " +
             "GROUP BY " +
             "r.review_id, r.title, r.content, r.created_at, u.user_name, u.user_id, r.score " +
-            "ORDER BY COUNT(rl.review_like_id) DESC",
+            "ORDER BY COUNT(rl.review_like_id) DESC, r.created_at DESC ",
             nativeQuery = true)
     Page<Object[]> findAllByBookOrderByLikeDesc(Long userId, Long bookId, Pageable pageable);
 

@@ -3,6 +3,7 @@ package com.simsimbookstore.apiserver.reviews.reviewlike.controller;
 
 import com.simsimbookstore.apiserver.reviews.reviewlike.service.ReviewLikeService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
@@ -62,25 +63,26 @@ class ReviewLikeControllerTest {
                 .andExpect(status().isOk());
     }
 
+
     @Test
-    void getLikeCount() throws Exception{
-
+    @DisplayName("리뷰 좋아요 수 조회 성공 테스트")
+    void getLikeCount_Success() throws Exception {
+        Long userId = 1L;
         Long reviewId = 2L;
-        long likeCount = 10L;
+        Long expectedCount = 10L;
 
-
-        when(reviewLikeService.getReviewLikeCount(eq(reviewId))).thenReturn(likeCount);
-
+        when(reviewLikeService.getReviewLikeCount(eq(reviewId))).thenReturn(expectedCount);
 
         mockMvc.perform(get("/api/shop/reviews/{reviewId}/likes/count", reviewId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(xpath("/Long").string("10")); // JSON 응답 검증
-
+                .andExpect(content().string(String.valueOf(expectedCount)));
 
         verify(reviewLikeService, times(1)).getReviewLikeCount(eq(reviewId));
-
-
     }
+
+
+
 }
