@@ -2,9 +2,9 @@ package com.simsimbookstore.apiserver.users.socialuser.mapper;
 
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.socialuser.dto.Provider;
+import com.simsimbookstore.apiserver.users.socialuser.dto.SocialUserRequestDto;
 import com.simsimbookstore.apiserver.users.socialuser.dto.SocialUserResponse;
 import com.simsimbookstore.apiserver.users.socialuser.entity.SocialUser;
-import com.simsimbookstore.apiserver.users.socialuser.dto.SocialUserRequestDto;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 
@@ -33,7 +33,7 @@ public class SocialUserMapper {
 
     public static SocialUserResponse toSocialUserResponse(SocialUser socialUser) {
         List<RoleName> roleNames = new ArrayList<>();
-        for (UserRole userRole : socialUser.getUserRoleList()){
+        for (UserRole userRole : socialUser.getUserRoleList()) {
             roleNames.add(userRole.getRole().getRoleName());
         }
 

@@ -1,14 +1,11 @@
 package com.simsimbookstore.apiserver.users.user.service;
 
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
-
 import com.simsimbookstore.apiserver.users.user.dto.GuestUserRequestDto;
-
 import com.simsimbookstore.apiserver.users.user.dto.UserResponse;
-
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
-import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,4 +32,6 @@ public interface UserService {
 
     List<UserResponse> getUserByBirthMonth(String monthStr);
 
+    @Transactional
+    int updateDormantUserState(int period);
 }

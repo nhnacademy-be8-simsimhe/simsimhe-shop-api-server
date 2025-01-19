@@ -73,5 +73,4 @@ public class UserController {
         List<UserResponse> userByBirthMonth = userService.getUserByBirthMonth(birthMonth);
         return ResponseEntity.status(HttpStatus.OK).body(userByBirthMonth);
     }
-
 }

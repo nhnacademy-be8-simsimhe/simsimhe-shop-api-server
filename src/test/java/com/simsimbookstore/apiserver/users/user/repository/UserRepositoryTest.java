@@ -37,9 +37,11 @@ class UserRepositoryTest {
     private GradeRepository gradeRepository;
 
     LocalUser testUser;
+
+    Grade standardGrade;
     @BeforeEach
     void setUp() {
-        Grade standardGrade = Grade.builder()
+        standardGrade = Grade.builder()
                 .tier(Tier.STANDARD)
                 .minAmount(BigDecimal.valueOf(0))
                 .maxAmount(BigDecimal.valueOf(100000))
@@ -63,6 +65,7 @@ class UserRepositoryTest {
                 .grade(standardGrade)
                 .loginId("test")
                 .password("test")
+                .latestLoginDate(LocalDateTime.now().minusDays(100))
                 .build();
         testUser = localUserRepository.save(testUser);
     }
@@ -105,5 +108,53 @@ class UserRepositoryTest {
         assertTrue(user.isPresent());
 
         assertEquals(user.get().getGrade().getTier(), Tier.STANDARD);
+    }
+
+    @Test
+        void updateUserStateInactive() {
+        // 휴면 유저임
+        User testUser1 = LocalUser.builder()
+                .userName("test2")
+                .email("test2@example.com")
+                .createdAt(LocalDateTime.now())
+                .userStatus(UserStatus.ACTIVE)
+                .grade(standardGrade)
+                .loginId("test2")
+                .password("test2")
+                .latestLoginDate(LocalDateTime.now().minusDays(31))
+                .build();
+
+        // 휴면 유저가 아님
+        User testUser2 = LocalUser.builder()
+                .userName("test1")
+                .email("test1@example.com")
+                .createdAt(LocalDateTime.now())
+                .userStatus(UserStatus.ACTIVE)
+                .grade(standardGrade)
+                .loginId("test1")
+                .password("test1")
+                .latestLoginDate(LocalDateTime.now())
+                .build();
+
+        userRepository.save(testUser1);
+        userRepository.save(testUser2);
+
+        int count = userRepository.updateUserStateInactive(LocalDateTime.now().minusDays(30));
+        assertEquals(count, 2);
+
+        Optional<User> optionalUser = userRepository.findById(testUser.getUserId());
+        assertTrue(optionalUser.isPresent());
+        User user = optionalUser.get();
+        assertEquals(UserStatus.INACTIVE, user.getUserStatus());
+
+        Optional<User> optionalUser1 = userRepository.findById(testUser1.getUserId());
+        assertTrue(optionalUser1.isPresent());
+        User user1 = optionalUser1.get();
+        assertEquals(UserStatus.INACTIVE, user1.getUserStatus());
+
+        Optional<User> optionalUser2 = userRepository.findById(testUser2.getUserId());
+        assertTrue(optionalUser2.isPresent());
+        User user2 = optionalUser2.get();
+        assertEquals(UserStatus.ACTIVE, user2.getUserStatus());
     }
 }

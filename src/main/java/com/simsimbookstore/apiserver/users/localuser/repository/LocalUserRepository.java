@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
-
 public interface LocalUserRepository extends JpaRepository<LocalUser, Long> {
 
     @EntityGraph(attributePaths = {"grade", "userRoleList", "userRoleList.role"})

@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface GradeRepository extends JpaRepository<Grade, Long> {
     boolean existsByTier(Tier tier);
+
     Grade findByTier(Tier tier);
+
     Grade findByGradeId(Long gradeId);
 }
