@@ -123,28 +123,29 @@ class OrderControllerTest {
                 BookListResponseDto.builder().bookId(2L).price(BigDecimal.valueOf(20000)).quantity(1).build()
         );
 
-        // Mock 설정
-        when(orderListService.toBookOrderList(bookListRequestDto)).thenReturn(bookListResponseDto);
+        // Mock 설정: 특정 객체 대신 anyList() 사용
+        when(orderListService.toBookOrderList(anyList())).thenReturn(bookListResponseDto);
 
         // JSON 본문
         String requestBody = objectMapper.writeValueAsString(bookListRequestDto);
 
         // when & then
         mockMvc.perform(
-                        post(API_ORDER_URL)  // "/api/order"
+                        post(API_ORDER_URL)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(requestBody)
                 )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].bookId").value(1L))
+                .andExpect(jsonPath("$[0].bookId").value(1))
                 .andExpect(jsonPath("$[0].price").value(10000))
                 .andExpect(jsonPath("$[0].quantity").value(2))
-                .andExpect(jsonPath("$[1].bookId").value(2L))
+                .andExpect(jsonPath("$[1].bookId").value(2))
                 .andExpect(jsonPath("$[1].price").value(20000))
                 .andExpect(jsonPath("$[1].quantity").value(1));
 
         verify(orderListService, times(1)).toBookOrderList(anyList());
     }
+
 
 
     @Test
