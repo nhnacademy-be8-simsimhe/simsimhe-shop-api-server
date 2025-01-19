@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.storage.config.ObjectStorageConfig;
 import com.simsimbookstore.apiserver.storage.exception.ObjectStorageException;
 import com.simsimbookstore.apiserver.storage.exception.ObjectStorageTokenException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -110,14 +108,12 @@ public class ObjectServiceImpl {
 
         String requestToken = authService.requestToken();
         List<String> uploadedFileNames = new ArrayList<>();
-        String name = "";
 
         try (InputStream inputStream = createInputStreamFromUrl(fileUrl)) {
             // URL에서 파일 이름 추출 또는 고유 이름 생성
             String fileName = createUniqueFileName(getFileNameFromUrl(fileUrl));
             String tokenId = extractTokenId(requestToken);
             String url = getUrl(fileName);
-            name = fileName;
             // 파일 업로드
             uploadFileToStorage(url, inputStream, tokenId);
             uploadedFileNames.add(url);
@@ -134,7 +130,9 @@ public class ObjectServiceImpl {
      */
     private void validateImageFile(MultipartFile file) {
         String fileName = file.getOriginalFilename();
-        if (fileName.isEmpty()) {
+
+        // fileName이 null인지 먼저 확인
+        if (fileName == null || fileName.isEmpty()) {
             throw new ObjectStorageException("File name is invalid");
         }
 
@@ -143,6 +141,7 @@ public class ObjectServiceImpl {
             throw new ObjectStorageException("Unsupported file type: " + extension);
         }
     }
+
 
     /*
         - 파일 이름에서 확장자를 추출
@@ -197,16 +196,12 @@ public class ObjectServiceImpl {
 
     // URL로부터 InputStream 생성
     private InputStream createInputStreamFromUrl(String fileUrl) {
-        try {
-            HttpClient httpClient = HttpClient.newHttpClient();
-
-            // HTTP GET 요청 생성
+        try (HttpClient httpClient = HttpClient.newHttpClient()) { // try-with-resources 사용
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(fileUrl))
                     .GET()
                     .build();
 
-            // HTTP 응답에서 InputStream 가져오기
             HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
 
             if (response.statusCode() != 200) {
@@ -214,22 +209,27 @@ public class ObjectServiceImpl {
             }
 
             return response.body();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ObjectStorageException("Thread was interrupted while creating InputStream from URL: " + fileUrl);
         } catch (Exception e) {
             throw new ObjectStorageException("Failed to create InputStream from URL: " + fileUrl);
         }
     }
+
+
+
 
     /*
         주어진 URL에 파일을 업로드
         - HTTP PUT 요청 사용
         - 인증 토큰 헤더 추가
      */
-    private void uploadFileToStorage(String url, InputStream inputStream, String tokenId) throws IOException {
+    private void uploadFileToStorage(String url, InputStream inputStream, String tokenId) {
         RequestCallback requestCallback = request -> {
             request.getHeaders().add("X-Auth-Token", tokenId);
             IOUtils.copy(inputStream, request.getBody());
         };
-
         restTemplate.execute(url, HttpMethod.PUT, requestCallback, null);
     }
 }
