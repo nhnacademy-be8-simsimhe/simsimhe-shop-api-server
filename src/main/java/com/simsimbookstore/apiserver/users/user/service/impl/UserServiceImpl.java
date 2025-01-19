@@ -38,12 +38,15 @@ public class UserServiceImpl implements UserService {
     private final RoleService roleService;
     private final GradeService gradeService;
 
+    private static final String USER_NOT_FOUND_MESSAGE = "Not found user with ID: ";
+
+
     @Transactional
     @Override
     public User updateUserStatus(Long userId, UserStatus userStatus) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
-            throw new NotFoundException("not found user with ID : " + userId);
+            throw new NotFoundException(USER_NOT_FOUND_MESSAGE + userId);
         }
 
         User user = optionalUser.get();
@@ -56,7 +59,7 @@ public class UserServiceImpl implements UserService {
     public User updateUserGrade(Long userId, Tier tier) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
-            throw new NotFoundException("not found user with ID : " + userId);
+            throw new NotFoundException(USER_NOT_FOUND_MESSAGE + userId);
         }
 
         User user = optionalUser.get();
@@ -71,29 +74,31 @@ public class UserServiceImpl implements UserService {
     public User updateUserLatestLoginDate(Long userId, LocalDateTime latestLoginDate) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
-            throw new NotFoundException("not found user with ID : " + userId);
+            throw new NotFoundException(USER_NOT_FOUND_MESSAGE + userId);
         }
 
         User user = optionalUser.get();
         user.updateLatestLoginDate(latestLoginDate);
         userRepository.save(user);
         Optional<User> savedUser = userRepository.findUserWithGradeAndUserRoleListByUserId(user.getUserId());
+
+        if (savedUser.isEmpty()) {
+            throw new NotFoundException(USER_NOT_FOUND_MESSAGE + userId);
+        }
         return savedUser.get();
     }
 
 
     @Override
     public User getUser(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("not found user with ID : " + userId));
-        return user;
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_MESSAGE + userId));
     }
 
     @Override
     public User getUserWithGradeAndRoles(Long userId) {
-        User user = userRepository.findUserWithGradeAndUserRoleListByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("not found user with ID : " + userId));
-        return user;
+        return userRepository.findUserWithGradeAndUserRoleListByUserId(userId)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_MESSAGE + userId));
     }
 
 

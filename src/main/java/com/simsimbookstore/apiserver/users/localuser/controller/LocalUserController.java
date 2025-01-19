@@ -20,7 +20,7 @@ public class LocalUserController {
     private final LocalUserService localUserService;
 
     @PostMapping
-    public ResponseEntity<?> addLocalUser(
+    public ResponseEntity<LocalUser> addLocalUser(
             @RequestBody @Valid LocalUserRegisterRequestDto localUserRequestDto
     ) {
         LocalUser response = localUserService.saveLocalUser(localUserRequestDto);
@@ -28,13 +28,13 @@ public class LocalUserController {
     }
 
     @GetMapping("/{loginId}/exists")
-    public ResponseEntity<?> existsByLoginId(@PathVariable String loginId) {
+    public ResponseEntity<Boolean> existsByLoginId(@PathVariable String loginId) {
         boolean response = localUserService.existsByLoginId(loginId);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{loginId}")
-    public ResponseEntity<?> getLocalUser(@PathVariable String loginId) {
+    public ResponseEntity<LocalUserResponseDto> getLocalUser(@PathVariable String loginId) {
         LocalUser localUser = localUserService.findByLoginId(loginId);
         if (Objects.isNull(localUser)) {
             return ResponseEntity.ok(null);

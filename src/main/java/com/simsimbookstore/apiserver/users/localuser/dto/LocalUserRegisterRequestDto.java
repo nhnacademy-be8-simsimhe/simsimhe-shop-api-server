@@ -30,7 +30,7 @@ public class LocalUserRegisterRequestDto {
 
     @NotBlank
     @Length(min = 8, max = 15)
-    @Pattern(regexp = "^[0-9]+$", message = "핸드폰 번호는 숫자만 입력 가능합니다")
+    @Pattern(regexp = "^\\d+$", message = "핸드폰 번호는 숫자만 입력 가능합니다")
     private String mobileNumber;
 
     @NotBlank

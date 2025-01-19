@@ -67,8 +67,7 @@ public class LocalUserServiceImpl implements LocalUserService {
 
     @Override
     public LocalUser findByLoginId(String loginId) {
-        LocalUser localUser = localUserRepository.findByLoginId(loginId);
-        return localUser;
+        return localUserRepository.findByLoginId(loginId);
     }
 
     //중복 loginId 체크

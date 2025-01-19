@@ -21,7 +21,7 @@ public class AddressController {
 
     // 단건 조회
     @GetMapping("/addresses/{addressId}")
-    public ResponseEntity<?> getAddress(
+    public ResponseEntity<Address> getAddress(
             @PathVariable Long addressId
     ) {
         Address address = addressService.getAddress(addressId);
@@ -30,7 +30,7 @@ public class AddressController {
 
     // 리스트 조회
     @GetMapping("/{userId}/addresses")
-    public ResponseEntity<?> getAddresses(
+    public ResponseEntity<List<AddressResponseDto>> getAddresses(
             @PathVariable Long userId
     ) {
         List<AddressResponseDto> addresses = addressService.getAddresses(userId);
@@ -39,7 +39,7 @@ public class AddressController {
 
     // 주소 등록
     @PostMapping("{userId}/addresses")
-    public ResponseEntity<?> addAddress(
+    public ResponseEntity<Object> addAddress(
             @PathVariable Long userId,
             @RequestBody @Valid AddressRequestDto requestDto
     ) {
@@ -55,7 +55,7 @@ public class AddressController {
 
     // 주소 삭제
     @DeleteMapping("/addresses/{addressId}")
-    public ResponseEntity<?> deleteAddress(
+    public ResponseEntity<Void> deleteAddress(
             @PathVariable Long addressId
     ) {
         addressService.deleteAddress(addressId);

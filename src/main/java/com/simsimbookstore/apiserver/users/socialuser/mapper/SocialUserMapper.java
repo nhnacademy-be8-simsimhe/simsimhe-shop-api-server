@@ -14,9 +14,11 @@ import java.util.HashSet;
 import java.util.List;
 
 public class SocialUserMapper {
+    private SocialUserMapper() {
+    }
 
     public static SocialUser toSocialUser(SocialUserRequestDto socialUserRequestDto) {
-        SocialUser socialUser = SocialUser.builder()
+        return SocialUser.builder()
                 .userName(socialUserRequestDto.getName())
                 .mobileNumber(socialUserRequestDto.getMobile())
                 .email(socialUserRequestDto.getEmail())
@@ -28,7 +30,6 @@ public class SocialUserMapper {
                 .oauthId(socialUserRequestDto.getOauthId())
                 .provider(Provider.PAYCO)
                 .build();
-        return socialUser;
     }
 
     public static SocialUserResponse toSocialUserResponse(SocialUser socialUser) {
@@ -37,7 +38,7 @@ public class SocialUserMapper {
             roleNames.add(userRole.getRole().getRoleName());
         }
 
-        SocialUserResponse socialUserResponse = SocialUserResponse.builder()
+        return SocialUserResponse.builder()
                 .userId(socialUser.getUserId())
                 .roles(roleNames)
                 .userStatus(socialUser.getUserStatus())
@@ -45,6 +46,5 @@ public class SocialUserMapper {
                 .oauthId(socialUser.getOauthId())
                 .provider(socialUser.getProvider())
                 .build();
-        return socialUserResponse;
     }
 }

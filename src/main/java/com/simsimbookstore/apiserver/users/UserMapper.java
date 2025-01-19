@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserMapper {
+    private UserMapper() {
+    }
 
     public static UserResponse toResponse(User user) {
         List<RoleName> roles = new ArrayList<>();
@@ -16,7 +18,7 @@ public class UserMapper {
             roles.add(userRole.getRole().getRoleName());
         }
 
-        UserResponse userResponse = UserResponse.builder()
+        return UserResponse.builder()
                 .userId(user.getUserId())
                 .userName(user.getUserName())
                 .mobileNumber(user.getMobileNumber())
@@ -30,6 +32,5 @@ public class UserMapper {
                 .tier(user.getGrade().getTier())
                 .roles(roles)
                 .build();
-        return userResponse;
     }
 }

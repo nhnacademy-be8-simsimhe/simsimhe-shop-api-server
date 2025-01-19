@@ -12,9 +12,12 @@ import java.util.HashSet;
 import java.util.List;
 
 public class LocalUserMapper {
+    private LocalUserMapper() {
+    }
 
     public static LocalUser registerRequestDtoTo(LocalUserRegisterRequestDto requestDto) {
-        LocalUser localUser = LocalUser.builder()
+        // 기본값 active
+        return LocalUser.builder()
                 .userName(requestDto.getUserName())
                 .mobileNumber(requestDto.getMobileNumber())
                 .email(requestDto.getEmail())
@@ -28,7 +31,6 @@ public class LocalUserMapper {
                 .userRoleList(new HashSet<>())
                 .latestLoginDate(LocalDateTime.now())
                 .build();
-        return localUser;
     }
 
     public static LocalUserResponseDto localUserResponseDtoTo(LocalUser localUser) {
@@ -38,7 +40,7 @@ public class LocalUserMapper {
             roles.add(userRole.getRole().getRoleName());
         }
 
-        LocalUserResponseDto localUserResponseDto = LocalUserResponseDto.builder()
+        return LocalUserResponseDto.builder()
                 .userId(localUser.getUserId())
                 .loginId(localUser.getLoginId())
                 .roles(roles)
@@ -46,7 +48,5 @@ public class LocalUserMapper {
                 .userStatus(localUser.getUserStatus())
                 .latestLoginDate(localUser.getLatestLoginDate())
                 .build();
-
-        return localUserResponseDto;
     }
 }

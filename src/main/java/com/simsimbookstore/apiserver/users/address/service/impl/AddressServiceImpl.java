@@ -26,20 +26,18 @@ public class AddressServiceImpl implements AddressService {
     // 주소 단건 조회
     @Override
     public Address getAddress(Long addressId) {
-        Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new NotFoundException("Not founded address with ID: " + addressId));
 
-        return address;
+        return addressRepository.findById(addressId)
+                .orElseThrow(() -> new NotFoundException("Not founded address with ID: " + addressId));
     }
 
     // 유저 아이디 기준 리스트 조회
     @Override
     public List<AddressResponseDto> getAddresses(Long userId) {
         List<Address> addresses = addressRepository.findAllByUserUserId(userId);
-        List<AddressResponseDto> list = addresses.stream()
+        return addresses.stream()
                 .map(AddressMapper::responseDtoFrom)
                 .toList();
-        return list;
     }
 
     // 유저 저장
@@ -52,8 +50,7 @@ public class AddressServiceImpl implements AddressService {
 
         address.assignUser(user);
         Address savedAddress = addressRepository.save(address);
-        AddressResponseDto addressResponseDto = AddressMapper.responseDtoFrom(savedAddress);
-        return addressResponseDto;
+        return AddressMapper.responseDtoFrom(savedAddress);
     }
 
     // 주소 삭제
