@@ -29,9 +29,9 @@ public class Review {
     @Setter
     private String title;
 
-    @Lob
-    @Column(nullable = false)
+//    @Lob
     @Setter
+    @Column(nullable = false)
     private String content;
 
     @Column(nullable = false)

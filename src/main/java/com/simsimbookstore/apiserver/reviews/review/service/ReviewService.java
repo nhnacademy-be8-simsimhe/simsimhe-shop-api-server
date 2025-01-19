@@ -14,13 +14,11 @@ public interface ReviewService {
 
     Review updateReview(ReviewRequestDTO dto, Long reviewId);
 
-    Page<Review> getAllReviews(Long bookId, int page, int size);
-    
 
-    Page<ReviewLikeCountDTO> getReviewsByBookOrderByRecent(Long bookId, Long userId, int page, int size);
 
-    Page<ReviewLikeCountDTO> getReviewsByUser(Long userId, Long bookId, int page, int size);
+    Page<ReviewLikeCountDTO> getReviewsByBookOrderBySort(Long bookId, Long userId, int page, int size, String sort);
 
+    Page<Review> getReviewsByBook(Long bookId, int page, int size);
     ReviewResponseDTO getReviewById(Long reviewId);
 
     void deleteReview(Long reviewId);
@@ -29,5 +27,4 @@ public interface ReviewService {
     boolean isPhotoReview(Long reviewId);
     Page<UserReviewsDTO> getUserReviews(Long userId, int page, int size);
     Page<UserAvailableReviewsDTO> getAvailableReviews(Long userId, int page, int size);
-
 }

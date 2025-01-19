@@ -1,4 +1,4 @@
-package com.simsimbookstore.apiserver.orders.order.service.Impl;
+package com.simsimbookstore.apiserver.orders.order.service.impl;
 
 import com.simsimbookstore.apiserver.orders.order.service.OrderNumberService;
 import java.time.Instant;
@@ -28,21 +28,33 @@ public class OrderNumberServiceImpl implements OrderNumberService {
      */
     @Override
     public String generateOrderNo() {
+        // NullPointerException 방지: redisTemplate이 null인지 확인
+        if (redisTemplate == null) {
+            throw new IllegalStateException("RedisTemplate is not initialized");
+        }
+
         String today = LocalDate.now().format(DATE_FORMAT);
         String redisKey = "ORDER_NO:" + today;
 
-        // 1) INCR 연산 원자적
-        Long seq = redisTemplate.opsForValue().increment(redisKey, 1);
+        Long seq;
+        try {
+            // 1) INCR 연산 원자적
+            seq = redisTemplate.opsForValue().increment(redisKey, 1);
+        } catch (NullPointerException e) {
+            throw new IllegalStateException("Unable to access Redis operations. Ensure RedisTemplate is configured correctly.", e);
+        }
+
+        // seq가 null인 경우 예외 처리
+        if (seq == null) {
+            throw new IllegalStateException("Failed to increment order number in Redis");
+        }
 
         // 2) seq == 1 이면 "처음 생성된 키"이므로, 자정까지 TTL 설정
-        //    이미 key가 존재해 값이 2 이상이라면 TTL이 설정되어 있을 것이므로 재설정 필요 없음
-
         if (seq == 1L) {
             setExpireAtMidnight(redisKey);
         }
 
         // 3) 주문번호 포맷
-        //    예) "20241226-00000001"
         return today + "-" + String.format("%08d", seq);
     }
 
@@ -59,4 +71,6 @@ public class OrderNumberServiceImpl implements OrderNumberService {
 
         redisTemplate.expireAt(key, Date.from(midnightInstant));
     }
+
+
 }

@@ -157,16 +157,6 @@ class OrderBookServiceImplTest {
 
         List<OrderBookRequestDto> requestDtos = Collections.singletonList(dto);
 
-        Book book = Book.builder()
-                .bookId(1L)
-                .title("Test Book")
-                .build();
-
-        Order order = Order.builder()
-                .orderId(1L)
-                .user(testUser)
-                .build();
-
         OrderBook savedOrderBook = OrderBook.builder()
                 .orderBookId(200L)
                 .book(book)
@@ -221,38 +211,52 @@ class OrderBookServiceImplTest {
         when(orderBookRepository.findById(200L)).thenReturn(Optional.of(savedOrderBook));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
+        // When
         List<OrderBookResponseDto> resultList = orderBookService.createOrderBooks(requestDtos);
 
         // Then
-        assertNotNull(resultList);
-        assertEquals(1, resultList.size());
-
         OrderBookResponseDto responseDto = resultList.getFirst();
-        assertEquals(200L, responseDto.getOrderBookId());
-        assertEquals("Test Book", responseDto.getBookTitle());
-        assertEquals(2, responseDto.getQuantity());
-        assertEquals(new BigDecimal("10000"), responseDto.getSalePrice());
-        assertEquals(new BigDecimal("500"), responseDto.getDiscountPrice());
-        assertEquals("PENDING", responseDto.getOrderBookState());
 
-        // 쿠폰 검증
-        assertNotNull(responseDto.getCouponDiscount());
-        assertEquals(1L, responseDto.getCouponDiscount().getCouponDiscountId());
-        assertEquals("WELCOME", responseDto.getCouponDiscount().getCouponName());
-        assertEquals("FIXED", responseDto.getCouponDiscount().getCouponType());
-        assertEquals(new BigDecimal("1000"), responseDto.getCouponDiscount().getDiscountPrice());
+        assertAll("OrderBookResponseDto assertions",
+                () -> assertNotNull(resultList),
+                () -> assertEquals(1, resultList.size()),
+                () -> assertEquals(200L, responseDto.getOrderBookId()),
+                () -> assertEquals("Test Book", responseDto.getBookTitle()),
+                () -> assertEquals(2, responseDto.getQuantity()),
+                () -> assertEquals(new BigDecimal("10000"), responseDto.getSalePrice()),
+                () -> assertEquals(new BigDecimal("500"), responseDto.getDiscountPrice()),
+                () -> assertEquals("PENDING", responseDto.getOrderBookState()),
 
-        // 패키지 검증
-        assertNotNull(responseDto.getPackages());
-        assertEquals(2, responseDto.getPackages().size());
+                () -> {
+                    // 쿠폰 검증
+                    assertNotNull(responseDto.getCouponDiscount());
+                    assertAll("CouponDiscount assertions",
+                            () -> assertEquals(1L, responseDto.getCouponDiscount().getCouponDiscountId()),
+                            () -> assertEquals("WELCOME", responseDto.getCouponDiscount().getCouponName()),
+                            () -> assertEquals("FIXED", responseDto.getCouponDiscount().getCouponType()),
+                            () -> assertEquals(new BigDecimal("1000"), responseDto.getCouponDiscount().getDiscountPrice())
+                    );
+                },
 
-        PackageResponseDto pkg1 = responseDto.getPackages().getFirst();
-        assertEquals(1L, pkg1.getPackageId());
-        assertEquals("GiftBox", pkg1.getPackageType());
+                () -> {
+                    // 패키지 검증
+                    assertNotNull(responseDto.getPackages());
+                    assertEquals(2, responseDto.getPackages().size());
 
-        PackageResponseDto pkg2 = responseDto.getPackages().get(1);
-        assertEquals(2L, pkg2.getPackageId());
-        assertEquals("Ribbon", pkg2.getPackageType());
+                    PackageResponseDto pkg1 = responseDto.getPackages().getFirst();
+                    PackageResponseDto pkg2 = responseDto.getPackages().get(1);
+
+                    assertAll("First Package assertions",
+                            () -> assertEquals(1L, pkg1.getPackageId()),
+                            () -> assertEquals("GiftBox", pkg1.getPackageType())
+                    );
+
+                    assertAll("Second Package assertions",
+                            () -> assertEquals(2L, pkg2.getPackageId()),
+                            () -> assertEquals("Ribbon", pkg2.getPackageType())
+                    );
+                }
+        );
 
         // Verify
         verify(bookRepository, times(1)).findById(1L);
@@ -528,4 +532,116 @@ class OrderBookServiceImplTest {
 
         verify(orderBookRepository, times(1)).findById(nonExistentOrderBookId);
     }
+
+    @Test
+    @DisplayName("getOrderName() - 단일 도서 주문 시 올바른 주문명 반환")
+    void testGetOrderName_SingleBook() {
+        // given
+        OrderBookRequestDto dto = OrderBookRequestDto.builder()
+                .bookId(1L)
+                .quantity(3)
+                .build();
+        List<OrderBookRequestDto> dtos = Collections.singletonList(dto);
+
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+
+        // when
+        String orderName = orderBookService.getOrderName(dtos);
+
+        // then
+        assertEquals("Test Book 3권", orderName);
+        verify(bookRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    @DisplayName("getOrderName() - 여러 도서 주문 시 올바른 주문명 반환")
+    void testGetOrderName_MultipleBooks() {
+        // given
+        OrderBookRequestDto dto1 = OrderBookRequestDto.builder()
+                .bookId(1L)
+                .quantity(1)
+                .build();
+        OrderBookRequestDto dto2 = OrderBookRequestDto.builder()
+                .bookId(1L)
+                .quantity(2)
+                .build();
+        List<OrderBookRequestDto> dtos = Arrays.asList(dto1, dto2);
+
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+
+        // when
+        String orderName = orderBookService.getOrderName(dtos);
+
+        // then
+        assertEquals("Test Book 외 1권", orderName);
+        verify(bookRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    @DisplayName("getOrderBooks() - 주어진 주문 ID에 해당하는 OrderBooks 반환")
+    void testGetOrderBooks() {
+        // given
+        Long orderId = 100L;
+        OrderBook ob1 = OrderBook.builder().orderBookId(1L).build();
+        OrderBook ob2 = OrderBook.builder().orderBookId(2L).build();
+        List<OrderBook> orderBooks = Arrays.asList(ob1, ob2);
+
+        when(orderBookRepository.findByOrderOrderId(orderId)).thenReturn(orderBooks);
+
+        // when
+        List<OrderBook> result = orderBookService.getOrderBooks(orderId);
+
+        // then
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertTrue(result.contains(ob1));
+        assertTrue(result.contains(ob2));
+        verify(orderBookRepository, times(1)).findByOrderOrderId(orderId);
+    }
+
+    @Test
+    @DisplayName("createOrderBook() - 성공적으로 OrderBookResponseDto 반환")
+    void testCreateOrderBook_Success() {
+        // given
+        OrderBookRequestDto requestDto = OrderBookRequestDto.builder()
+                .orderId(1L)
+                .bookId(1L)
+                .quantity(2)
+                .salePrice(new BigDecimal("10000"))
+                .discountPrice(new BigDecimal("500"))
+                .orderBookState("PENDING")
+                .build();
+
+        OrderBook savedOrderBook = OrderBook.builder()
+                .orderBookId(200L)
+                .book(book)
+                .order(order)
+                .quantity(2)
+                .salePrice(new BigDecimal("10000"))
+                .discountPrice(new BigDecimal("500"))
+                .orderBookState(OrderBook.OrderBookState.PENDING)
+                .packages(new ArrayList<>())
+                .couponDiscount(null)
+                .build();
+
+        // 내부 메서드 호출을 모킹하기 위해 repository와 관련 서비스들의 동작을 설정
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderBookRepository.save(any(OrderBook.class))).thenReturn(savedOrderBook);
+        when(orderBookRepository.findById(200L)).thenReturn(Optional.of(savedOrderBook));
+        // toOrderBookResponseDto 변환 과정을 단순화하기 위해 savedOrderBook를 기반으로 응답 DTO 직접 생성
+        // 실제 서비스 구현에 따라 toOrderBookResponseDto 내부 동작을 모킹할 수 있음
+
+        // when
+        OrderBookResponseDto responseDto = orderBookService.createOrderBook(requestDto);
+
+        // then
+        assertNotNull(responseDto);
+        assertEquals(200L, responseDto.getOrderBookId());
+        assertEquals("PENDING", responseDto.getOrderBookState());
+        // 필요한 추가 검증...
+    }
+
+
+
 }

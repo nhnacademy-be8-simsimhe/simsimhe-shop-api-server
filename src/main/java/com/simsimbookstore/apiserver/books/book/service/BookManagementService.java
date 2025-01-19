@@ -14,6 +14,8 @@ import com.simsimbookstore.apiserver.books.bookcategory.entity.BookCategory;
 import com.simsimbookstore.apiserver.books.bookcategory.repository.BookCategoryRepository;
 import com.simsimbookstore.apiserver.books.bookcontributor.entity.BookContributor;
 import com.simsimbookstore.apiserver.books.bookcontributor.repository.BookContributorRepository;
+import com.simsimbookstore.apiserver.books.bookimage.entity.BookImagePath;
+import com.simsimbookstore.apiserver.books.bookimage.repoitory.BookImageRepoisotry;
 import com.simsimbookstore.apiserver.books.booktag.entity.BookTag;
 import com.simsimbookstore.apiserver.books.booktag.repositry.BookTagRepository;
 import com.simsimbookstore.apiserver.books.category.entity.Category;
@@ -28,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -44,6 +47,8 @@ public class BookManagementService {
     private final TagRepository tagRepository;
     private final ContributorRepositroy contributorRepositroy;
     private final BookContributorRepository bookContributorRepository;
+    private final BookImageRepoisotry bookImageRepoisotry;
+
 
 
     /**
@@ -73,6 +78,14 @@ public class BookManagementService {
 
         //도서기여자 연관관계 매핑
         this.saveBookContributor(book, bookRequestDto.getContributoridList());
+
+        //이미지등록
+        BookImagePath bookImagePath = BookImagePath.builder().imageType(BookImagePath.ImageType.THUMBNAIL)
+                .book(book)
+                .imagePath(bookRequestDto.getThumbnailImage()) //여기서스트링은 오브젝트스토리지에서 가져온거
+                .build();
+
+        bookImageRepoisotry.save(bookImagePath);
 
 
         return BookMapper.toResponseDto(saveBook);

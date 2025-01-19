@@ -15,6 +15,8 @@ import com.simsimbookstore.apiserver.books.bookcategory.entity.BookCategory;
 import com.simsimbookstore.apiserver.books.bookcategory.repository.BookCategoryRepository;
 import com.simsimbookstore.apiserver.books.bookcontributor.entity.BookContributor;
 import com.simsimbookstore.apiserver.books.bookcontributor.repository.BookContributorRepository;
+import com.simsimbookstore.apiserver.books.bookimage.entity.BookImagePath;
+import com.simsimbookstore.apiserver.books.bookimage.repoitory.BookImageRepoisotry;
 import com.simsimbookstore.apiserver.books.booktag.entity.BookTag;
 import com.simsimbookstore.apiserver.books.booktag.repositry.BookTagRepository;
 import com.simsimbookstore.apiserver.books.category.entity.Category;
@@ -24,12 +26,12 @@ import com.simsimbookstore.apiserver.books.contributor.repository.ContributorRep
 import com.simsimbookstore.apiserver.books.tag.domain.Tag;
 import com.simsimbookstore.apiserver.books.tag.repository.TagRepository;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -65,8 +67,12 @@ class BookManagementServiceTest {
     @Mock
     private BookContributorRepository bookContributorRepository;
 
+    @Mock
+    private BookImageRepoisotry bookImageRepoisotry;
+
 
     @Test
+    @DisplayName("도서 등록 테스트")
     void testRegisterBook() {
         // Arrange
         BookRequestDto requestDto = BookRequestDto.builder()
@@ -84,11 +90,27 @@ class BookManagementServiceTest {
                 .categoryIdList(List.of(1L))
                 .tagIdList(List.of(2L))
                 .contributoridList(List.of(3L))
+                .thumbnailImage("https://object-storage-url.com/image.jpg") // 썸네일 URL 추가
                 .build();
 
-        Book mockBook = mock(Book.class);
+        // Mocking: bookRepository가 Book 객체를 저장하고 반환
+        Book mockBook = Book.builder()
+                .title(requestDto.getTitle())
+                .description(requestDto.getDescription())
+                .bookIndex(requestDto.getBookIndex())
+                .publisher(requestDto.getPublisher())
+                .isbn(requestDto.getIsbn())
+                .quantity(requestDto.getQuantity())
+                .price(requestDto.getPrice())
+                .saleprice(requestDto.getSaleprice())
+                .publicationDate(requestDto.getPublicationDate())
+                .pages(requestDto.getPages())
+                .bookStatus(requestDto.getBookStatus())
+                .build();
+
         when(bookRepository.save(any(Book.class))).thenReturn(mockBook);
-        //when(bookRepository.getLowestCategoryId(anyList())).thenReturn(List.of(1L));
+
+        // Mocking: 카테고리, 태그, 기여자
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(mock(Category.class)));
         when(tagRepository.findById(2L)).thenReturn(Optional.of(mock(Tag.class)));
         when(contributorRepositroy.findById(3L)).thenReturn(Optional.of(mock(Contributor.class)));
@@ -98,10 +120,19 @@ class BookManagementServiceTest {
 
         // Assert
         assertNotNull(responseDto);
-        verify(bookRepository).save(any(Book.class));
-        verify(bookCategoryRepository).save(any(BookCategory.class));
-        verify(bookTagRepository).save(any(BookTag.class));
-        verify(bookContributorRepository).save(any(BookContributor.class));
+        assertEquals("Test Book", responseDto.getTitle());
+        assertEquals("Test Description", responseDto.getDescription());
+
+        // 검증: 도서 저장
+        verify(bookRepository, times(1)).save(any(Book.class));
+
+        // 검증: 카테고리, 태그, 기여자 연관관계 저장
+        verify(bookCategoryRepository, times(1)).save(any(BookCategory.class));
+        verify(bookTagRepository, times(1)).save(any(BookTag.class));
+        verify(bookContributorRepository, times(1)).save(any(BookContributor.class));
+
+        // 검증: BookImagePath 저장
+        verify(bookImageRepoisotry, times(1)).save(any(BookImagePath.class));
     }
 
     @Test
@@ -179,7 +210,7 @@ class BookManagementServiceTest {
         titleField.set(existingBook, "Old Title");
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(existingBook));
-       // when(bookRepository.getLowestCategoryId(anyList())).thenReturn(List.of(2L));
+        // when(bookRepository.getLowestCategoryId(anyList())).thenReturn(List.of(2L));
 
         // Category 생성
         Constructor<Category> categoryConstructor = Category.class.getDeclaredConstructor();
