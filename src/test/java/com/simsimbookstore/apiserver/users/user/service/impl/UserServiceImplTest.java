@@ -4,8 +4,13 @@ import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
+import com.simsimbookstore.apiserver.users.grade.service.GradeService;
 import com.simsimbookstore.apiserver.users.role.entity.Role;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
+import com.simsimbookstore.apiserver.users.role.repository.RoleRepository;
+import com.simsimbookstore.apiserver.users.role.service.RoleService;
+import com.simsimbookstore.apiserver.users.user.dto.GuestUserRequestDto;
+import com.simsimbookstore.apiserver.users.user.dto.UserResponse;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
@@ -19,11 +24,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +44,15 @@ class UserServiceImplTest {
 
     @Mock
     private GradeRepository gradeRepository;
+
+    @Mock
+    private RoleRepository roleRepository;
+
+    @Mock
+    private GradeService gradeService;
+
+    @Mock
+    private RoleService roleService;
 
     User testUser;
 
@@ -115,6 +131,17 @@ class UserServiceImplTest {
     }
 
     @Test
+    void getUserByBirthMonth() {
+        when(userRepository.findAllByBirthMonth(3, RoleName.USER)).thenReturn(List.of(testUser));
+
+        List<UserResponse> userByBirthMonth = userService.getUserByBirthMonth("1995-03-09");
+
+        verify(userRepository, times(1)).findAllByBirthMonth(3, RoleName.USER);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> userService.getUserByBirthMonth("invalid value"));
+    }
+
+    @Test
     void existsUser(){
         userService.existsUser(1L);
         verify(userRepository, times(1)).existsById(anyLong());
@@ -159,5 +186,30 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).save(testUser);
 
         Assertions.assertThrows(NotFoundException.class, () -> userService.updateUserLatestLoginDate(99L, LocalDateTime.now()));
+    }
+
+    @Test
+    void createGuest() {
+        GuestUserRequestDto guestUserRequestDto = GuestUserRequestDto.builder()
+                .userName("testName")
+                .mobileNumber("01051278121")
+                .build();
+
+        when(gradeService.findByTier(Tier.STANDARD)).thenReturn(standardGrade);
+        when(roleService.findByRoleName(RoleName.GUEST)).thenReturn(Role.builder().roleId(1L).build());
+
+        User guest = userService.createGuest(guestUserRequestDto);
+
+        assertEquals(guestUserRequestDto.getUserName(), guest.getUserName());
+
+        verify(gradeService, times(1)).findByTier(Tier.STANDARD);
+        verify(roleService, times(1)).findByRoleName(RoleName.GUEST);
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void updateDormantUserState() {
+        userService.updateDormantUserState(30);
+        verify(userRepository, times(1)).updateUserStateInactive(any(LocalDateTime.class));
     }
 }

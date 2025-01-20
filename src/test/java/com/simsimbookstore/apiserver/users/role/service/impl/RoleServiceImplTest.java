@@ -1,6 +1,7 @@
 package com.simsimbookstore.apiserver.users.role.service.impl;
 
 import com.simsimbookstore.apiserver.exception.AlreadyExistException;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.users.role.entity.Role;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.role.repository.RoleRepository;
@@ -56,5 +57,15 @@ class RoleServiceImplTest {
         Role role = roleService.findByRoleName(RoleName.USER);
         assertNotNull(role);
         assertEquals(testRole.getRoleName(), role.getRoleName());
+
+        when(roleRepository.findByRoleName(any())).thenReturn(null);
+        assertThrows(NotFoundException.class, () -> roleService.findByRoleName(RoleName.ADMIN));
+    }
+
+    @Test
+    @DisplayName("역할 존재 여부 조회 테스트")
+    void existsByRoleName(){
+        roleService.existsByRoleName(RoleName.USER);
+        verify(roleRepository, times(1)).existsByRoleName(RoleName.USER);
     }
 }

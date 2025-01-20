@@ -22,7 +22,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.text.ParsePosition;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 import static java.time.LocalDate.now;
@@ -78,12 +83,9 @@ public class UserServiceImpl implements UserService {
         User user = optionalUser.get();
         user.updateLatestLoginDate(latestLoginDate);
         userRepository.save(user);
-        Optional<User> savedUser = userRepository.findUserWithGradeAndUserRoleListByUserId(user.getUserId());
+        Optional<User> optionalSavedUser = userRepository.findUserWithGradeAndUserRoleListByUserId(user.getUserId());
 
-        if (savedUser.isEmpty()) {
-            throw new NotFoundException(USER_NOT_FOUND_MESSAGE + userId);
-        }
-        return savedUser.get();
+        return optionalSavedUser.orElseThrow(()->new NotFoundException(USER_NOT_FOUND_MESSAGE + userId));
     }
 
 
@@ -113,30 +115,40 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponse> getUserByBirthMonth(String monthStr) {
-        boolean isNumeric = monthStr.chars().allMatch(Character::isDigit);
-        // 문자열이 숫자인지 확인
-        if (!isNumeric) {
-            throw new IllegalArgumentException("month는 숫자여야 합니다.");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDate = null;
+
+        try{
+            localDate = LocalDate.parse(monthStr, formatter);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("옳바른 날짜 형식이 아닙니다: " + monthStr);
         }
-        // 1과 12사이 숫자인지 확인
-        int month = Integer.parseInt(monthStr);
-        if (month > 12 || month < 1) {
-            throw new IllegalArgumentException("month는 1과 12 사이 숫자여야합니다.");
-        }
+
+        int month = localDate.getMonth().getValue();
         List<User> users = userRepository.findAllByBirthMonth(month, RoleName.USER);
         return users.stream().map(UserMapper::toResponse).toList();
+
+//        boolean isNumeric = monthStr.chars().allMatch(Character::isDigit);
+//        // 문자열이 숫자인지 확인
+//        if (!isNumeric) {
+//            throw new IllegalArgumentException("month는 숫자여야 합니다.");
+//        }
+//        // 1과 12사이 숫자인지 확인
+//        int month = Integer.parseInt(monthStr);
+//        if (month > 12 || month < 1) {
+//            throw new IllegalArgumentException("month는 1과 12 사이 숫자여야합니다.");
+//        }
+
     }
 
     public Tier getUserTier(Long userId) {
         return (getUser(userId).getGrade().getTier());
     }
 
-
     @Transactional
     @Override
     public User createGuest(GuestUserRequestDto dto) {
         String uuid = UUID.randomUUID().toString().substring(0, 15);
-
 
         Grade grade = gradeService.findByTier(Tier.STANDARD);
 
@@ -170,6 +182,4 @@ public class UserServiceImpl implements UserService {
     public int updateDormantUserState(int period) {
         return userRepository.updateUserStateInactive(LocalDateTime.now().minusDays(period));
     }
-
-
 }

@@ -176,11 +176,21 @@ class UserControllerTest {
                 .content(objectMapper.writeValueAsString(List.of(response))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", Matchers.is(1)));
+    }
 
-//        @GetMapping("/active")
-//    public ResponseEntity<List<UserResponse>> getActiveUser() {
-//        List<UserResponse> allActiveUser = userService.getAllActiveUser();
-//        return ResponseEntity.status(HttpStatus.OK).body(allActiveUser);
-//    }
+    @Test
+    void getAllUserByBirth() throws Exception {
+
+        UserResponse response = UserMapper.toResponse(testUser);
+        when(userService.getUserByBirthMonth(any())).thenReturn(List.of(response));
+
+        mockMvc.perform(get("/api/users").param("birthMonth", "1995-03-09")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(List.of(List.of(response)))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", Matchers.is(1)));
+
+        verify(userService, times(1)).getUserByBirthMonth("1995-03-09");
+
     }
 }
