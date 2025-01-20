@@ -10,8 +10,9 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Entity (name = "payments")
+@Entity
 @Builder
+@Table (name = "payments")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Payment {
@@ -46,13 +47,4 @@ public class Payment {
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
-
-//    public Payment(Object o, String paymentKey, OffsetDateTime approvedAt, String paymentMethod, PaymentStatus paymentStatus, Order order) {
-//        this.paymentId = (Long) o;
-//        this.paymentKey = paymentKey;
-//        this.paymentDate = approvedAt;
-//        this.paymentMethodToss = paymentMethod;
-//        this.paymentStatus = paymentStatus;
-//        this.order = order;
-//    }
 }
