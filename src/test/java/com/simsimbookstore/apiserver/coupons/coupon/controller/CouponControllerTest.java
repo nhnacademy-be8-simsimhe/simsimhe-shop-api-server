@@ -136,22 +136,6 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.couponTargetId", is(200)));
     }
 
-    /**
-     * 테스트 메서드: GET /api/coupons/{couponId} - 쿠폰 없음
-     */
-    @Test
-    @DisplayName("GET /api/shop/coupons/{couponId} - 쿠폰 없음")
-    @Disabled
-    void getCoupon_NotFound() throws Exception {
-        Long couponId = 9999L;
-
-        when(couponService.getCouponById(couponId))
-                .thenThrow(new NotFoundException("쿠폰(id:" + couponId + ")이 존재하지 않습니다."));
-
-        mockMvc.perform(get("/api/shop/coupons/{couponId}", couponId)
-                        .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
-                .andExpect(status().isNotFound());
-    }
 
     /**
      * 테스트 메서드: GET /api/users/{userId}/coupons/unused?couponTypeId=xxx - FixCouponResponseDto 반환 시 성공
@@ -504,26 +488,7 @@ class CouponControllerTest {
     /**
      * 테스트 메서드: POST /api/coupons/issue - 사용자 중 하나가 존재하지 않아 NotFoundException 발생
      */
-    @Test
-    @DisplayName("POST /api/admin/coupons/issue - 사용자 없음")
-    @Disabled
-    void issueCoupons_UserNotFound() throws Exception {
-        IssueCouponsRequestDto requestDto = IssueCouponsRequestDto.builder()
-                .userIds(Arrays.asList(1L, 5L))
-                .couponTypeId(100L)
-                .build();
 
-
-        doThrow(new NotFoundException("회원(id:5)이 존재하지 않습니다."))
-                .when(couponService)
-                .issueCoupons(anyList(), eq(100L));
-
-        mockMvc.perform(post("/api/admin/coupons/issue")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto))
-                        .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
-                .andExpect(status().isNotFound());
-    }
 
     /**
      * 테스트 메서드: POST /api/users/{userId}/coupons/{couponId}/expired - FixCouponResponseDto 반환 시 성공
@@ -610,23 +575,6 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.couponTargetId", is(700)));
     }
 
-    /**
-     * 테스트 메서드: POST /api/users/{userId}/coupons/{couponId}/expired - 쿠폰 없음
-     */
-    @Test
-    @DisplayName("POST /api/admin/users/{userId}/coupons/{couponId}/expired - 쿠폰 없음")
-    @Disabled
-    void expiredCoupon_NotFound() throws Exception {
-        Long userId = 1L;
-        Long couponId = 9999L;
-
-        when(couponService.expireCoupon(userId, couponId))
-                .thenThrow(new NotFoundException("쿠폰(id:" + couponId + ")이 존재하지 않습니다."));
-
-        mockMvc.perform(post("/api/admin/users/{userId}/coupons/{couponId}/expired", userId, couponId)
-                        .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
-                .andExpect(status().isNotFound());
-    }
 
     /**
      * 테스트 메서드: POST /api/users/{userId}/coupons/{couponId}/use - FixCouponResponseDto 반환 시 성공
@@ -713,23 +661,7 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.couponTargetId", is(800)));
     }
 
-    /**
-     * 테스트 메서드: POST /api/users/{userId}/coupons/{couponId}/use - 쿠폰 없음
-     */
-    @Test
-    @DisplayName("POST /api/shop/users/{userId}/coupons/{couponId}/use - 쿠폰 없음")
-    @Disabled
-    void useCoupon_NotFound() throws Exception {
-        Long userId = 1L;
-        Long couponId = 9999L;
 
-        when(couponService.expireCoupon(userId, couponId))
-                .thenThrow(new NotFoundException("쿠폰(id:" + couponId + ")이 존재하지 않습니다."));
-
-        mockMvc.perform(post("/api/users/{userId}/coupons/{couponId}/use", userId, couponId)
-                        .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
-                .andExpect(status().isNotFound());
-    }
 
     /**
      * 테스트 메서드: DELETE /api/users/{userId}/coupons/{couponId} - FixCouponResponseDto 반환 시 성공
@@ -763,23 +695,7 @@ class CouponControllerTest {
                 .andExpect(status().isOk());
     }
 
-    /**
-     * 테스트 메서드: DELETE /api/users/{userId}/coupons/{couponId} - 쿠폰 없음
-     */
-    @Test
-    @DisplayName("DELETE /api/admin/users/{userId}/coupons/{couponId} - 쿠폰 없음")
-    @Disabled
-    void deleteCoupon_NotFound() throws Exception {
-        Long userId = 1L;
-        Long couponId = 9999L;
 
-        doThrow(new NotFoundException("쿠폰(id:" + couponId + ")이 존재하지 않습니다."))
-                .when(couponService).deleteCoupon(userId, couponId);
-
-        mockMvc.perform(delete("/api/admin/users/{userId}/coupons/{couponId}", userId, couponId)
-                        .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
-                .andExpect(status().isNotFound());
-    }
 
     /**
      * 테스트 메서드: GET /api/coupons/{couponId}/calculate - 성공
@@ -806,24 +722,5 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.discountAmount", is(150.00)));
     }
 
-    /**
-     * 테스트 메서드: GET /api/coupons/{couponId}/calculate - 쿠폰 없음
-     */
-    @Test
-    @DisplayName("GET /api/shop/coupons/{couponId}/calculate - 쿠폰 없음")
-    @Disabled
-    void calDiscountAmount_NotFound() throws Exception {
-        Long couponId = 9999L;
-        Long bookId = 300L;
-        Integer quantity = 3;
 
-        when(couponService.calDiscountAmount(bookId, quantity, couponId))
-                .thenThrow(new NotFoundException("쿠폰(id:" + couponId + ")이 존재하지 않습니다."));
-
-        mockMvc.perform(get("/api/shop/coupons/{couponId}/calculate", couponId)
-                        .param("bookId", String.valueOf(bookId))
-                        .param("quantity", String.valueOf(quantity))
-                        .accept(MediaType.APPLICATION_JSON)) // Accept 헤더 설정
-                .andExpect(status().isNotFound());
-    }
 }
