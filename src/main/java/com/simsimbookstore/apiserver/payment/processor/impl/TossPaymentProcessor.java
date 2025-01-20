@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -37,7 +37,7 @@ import java.time.ZonedDateTime;
 import java.util.Objects;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
 public class TossPaymentProcessor implements PaymentProcessor {
     private final PaymentRestTemplate paymentRestTemplate;
