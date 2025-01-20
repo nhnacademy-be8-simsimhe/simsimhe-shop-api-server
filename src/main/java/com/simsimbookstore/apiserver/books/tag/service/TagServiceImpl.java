@@ -7,8 +7,6 @@ import com.simsimbookstore.apiserver.books.tag.mapper.TagMapper;
 import com.simsimbookstore.apiserver.books.tag.repository.TagRepository;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,19 +75,7 @@ public class TagServiceImpl implements TagService {
     }
 
 
-    /**
-     * 페이지별로 모든 태그가져오기
-     *
-     * @param pageable
-     * @return
-     */
-    @Override
-    public Page<TagResponseDto> getAllTags(Pageable pageable) {
-        //1. 페이징된 Tag 엔티티 조회
-        Page<Tag> tagPage = tagRepository.findAllActivated(pageable);
-        // 2. Tag 엔티티를 TagResponseDto로 변환
-        return tagPage.map(TagMapper::toTagResponseDto); // Page<TagResponseDto> 반환
-    }
+
 
     /**
      * 태그삭제
