@@ -26,9 +26,6 @@ public class OrderHistoryController {
                                                                               int size) {
 
         Pageable pageable = PageRequest.of(page - 1, size);
-
-        PageResponse<OrderHistoryResponseDto> response = orderHistoryService.getOrderHistory(userId, pageable);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok().body(orderHistoryService.getOrderHistory(userId, pageable));
     }
 }

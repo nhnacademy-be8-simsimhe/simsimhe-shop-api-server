@@ -25,3 +25,8 @@ payment:
 #    front url
     success_url : "http://localhost:3000/payments/success"
     fail_url : "http://localhost:3000/payments/fail"
+
+rabbitmq:
+  secret-key: 7bcf9993624c4ccf9140a44e40608808
+  port: 5672
+  virtual-host: vh1_dev

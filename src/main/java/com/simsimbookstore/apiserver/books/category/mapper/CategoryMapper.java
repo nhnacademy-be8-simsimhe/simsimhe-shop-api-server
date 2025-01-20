@@ -10,6 +10,10 @@ import java.util.stream.Collectors;
 
 public class CategoryMapper {
 
+    private CategoryMapper(){
+        throw new UnsupportedOperationException("CategoryMapper는 인스턴스화할수없음");
+    }
+
     /**
      * CategoryRequestDto를 Category 엔티티로 변환
      *

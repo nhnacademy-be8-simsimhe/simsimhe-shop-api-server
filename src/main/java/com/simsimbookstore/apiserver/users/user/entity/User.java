@@ -53,7 +53,7 @@ public class User {
     @Column(name = "mobile_number", length = 15)
     private String mobileNumber;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 255)
     private String email;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
