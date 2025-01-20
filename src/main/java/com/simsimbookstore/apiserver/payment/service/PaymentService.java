@@ -21,6 +21,7 @@ import java.util.List;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class PaymentService {
     private final List<PaymentProcessor> paymentProcessorList;
