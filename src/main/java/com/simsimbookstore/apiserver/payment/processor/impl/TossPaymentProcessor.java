@@ -1,21 +1,25 @@
-package com.simsimbookstore.apiserver.payment.processor;
+package com.simsimbookstore.apiserver.payment.processor.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
-import com.simsimbookstore.apiserver.orders.facade.OrderFacadeRequestDto;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
-import com.simsimbookstore.apiserver.orders.order.dto.RetryOrderRequestDto;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.payment.client.PaymentRestTemplate;
+import com.simsimbookstore.apiserver.payment.dto.Cancel;
+import com.simsimbookstore.apiserver.payment.dto.CanceledResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmResponseDto;
-import com.simsimbookstore.apiserver.payment.dto.PaymentMethodResponse;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
 import com.simsimbookstore.apiserver.payment.entity.Payment;
+import com.simsimbookstore.apiserver.payment.entity.PaymentCanceled;
 import com.simsimbookstore.apiserver.payment.entity.PaymentMethod;
 import com.simsimbookstore.apiserver.payment.entity.PaymentStatus;
+import com.simsimbookstore.apiserver.payment.exception.PaymentAlreadyCanceled;
+import com.simsimbookstore.apiserver.payment.exception.PaymentNotExistException;
 import com.simsimbookstore.apiserver.payment.exception.PaymentValidationFailException;
+import com.simsimbookstore.apiserver.payment.processor.PaymentProcessor;
+import com.simsimbookstore.apiserver.payment.repository.PaymentCanceledRepository;
 import com.simsimbookstore.apiserver.payment.repository.PaymentMethodRepository;
 import com.simsimbookstore.apiserver.payment.repository.PaymentRepository;
 import com.simsimbookstore.apiserver.payment.repository.PaymentStatusRepository;
@@ -24,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -41,6 +45,7 @@ public class TossPaymentProcessor implements PaymentProcessor {
     private final PaymentStatusRepository paymentStatusRepository;
     private final OrderRepository orderRepository;
     private final PaymentMethodRepository paymentMethodRepository;
+    private final PaymentCanceledRepository paymentCanceledRepository;
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -75,13 +80,11 @@ public class TossPaymentProcessor implements PaymentProcessor {
 
     public boolean validation(SuccessRequestDto successDto) {  // SuccessRequestDto successRequestDto
         // redis에 임시 저장해둔 값과 같은지 검증
-        log.info("dto Id = {}", successDto.getOrderId());
-        BigDecimal amount = successDto.getAmount();
-        log.info("dto Amount = {}", amount);
         String redisOrderId = (String) redisTemplate.opsForHash().get(HASH_NAME, "orderId");
         BigDecimal redisAmount = (BigDecimal) redisTemplate.opsForHash().get(HASH_NAME, "totalAmount");
+
         if ((Objects.equals(successDto.getOrderId(), redisOrderId))
-                && (successDto.getAmount().compareTo(redisAmount) == 0)) {
+                && (Objects.equals(successDto.getAmount(), redisAmount))) {
             // 같으면 임시 저장 데이터 삭제 > 달라도 삭제가 되야할듯??
             redisTemplate.opsForHash().delete(HASH_NAME, "orderId");
             redisTemplate.opsForHash().delete(HASH_NAME, "totalAmount");
@@ -152,16 +155,51 @@ public class TossPaymentProcessor implements PaymentProcessor {
         // Payment 저장
         paymentRepository.save(payment);
     }
-}
 
     // 환불을 위한 주문 번호로 paymentKey 조회
-//    public String getPaymentKey(String orderId) {
-//        String paymentKey = paymentRepository.findPaymentKeyByOrderId(orderId);
-//        return paymentKey;
-//    }
-//
-//
-//    // 관리자 - toss에게 환불 요청
-//    public void adminCanceled(String paymentKey, String cancelReason) {
-//        String response = paymentRestTemplate.adminCanceled(paymentKey, cancelReason);
-//    }
+    @Transactional(readOnly = true)
+    public String getPaymentKey(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber).orElseThrow(() -> new NotFoundException("주문이 존재하지 않습니다."));
+        Payment payment = paymentRepository.findByOrder(order).orElseThrow(() -> new PaymentNotExistException("결제가 존재하지 않습니다."));
+        return payment.getPaymentKey();
+    }
+
+    // 결제 취소
+    @Transactional
+    @Override
+    public void canceledPayment(Cancel cancel) {
+        String orderNumber = cancel.getOrderNumber();
+        String paymentKey = getPaymentKey(orderNumber);
+        ResponseEntity<CanceledResponseDto> canceledResponse = paymentRestTemplate.canceled(paymentKey, cancel.getCanceledReason());  //CanceledResponseDto 화면에 보여줄거면 필요
+        canceledSaveAndPaymentUpdateState(canceledResponse.getBody(), paymentKey);
+
+        // 이미 취소된 건에 대한 처리 필요
+        if (canceledResponse.getStatusCode().is4xxClientError()) {
+            throw new PaymentAlreadyCanceled("이미 취소가 처리된 결제입니다.");
+        }
+    }
+
+    public void canceledSaveAndPaymentUpdateState(CanceledResponseDto canceledResponseDto, String paymentKey) {
+        Payment payment = paymentRepository.findPaymentByPaymentKey(paymentKey)
+                .orElseThrow(() -> new PaymentNotExistException("결제 내역이 존재하지 않습니다."));
+        PaymentStatus status = paymentStatusRepository.findByPaymentStatusName("CANCEL")
+                .orElseThrow(() -> new NotFoundException("CANCEL 상태가 존재하지 않습니다."));
+
+        ZoneId seoulZone = ZoneId.of("Asia/Seoul");
+        ZonedDateTime zonedDateTime = ZonedDateTime.parse(canceledResponseDto.getCanceledAt());
+        LocalDateTime dateTime = zonedDateTime.withZoneSameInstant(seoulZone).toLocalDateTime();
+
+        // 결제 취소 저장
+        PaymentCanceled canceled = PaymentCanceled.builder()
+                .paymentCanceledReason(canceledResponseDto.getPaymentCanceledReason())
+                .paymentCanceledTransactionKey(canceledResponseDto.getPaymentCanceledTransactionKey())
+                .canceledAt(dateTime)
+                .payment(payment)
+                .build();
+
+        paymentCanceledRepository.save(canceled);
+
+        // 취소에 따른 payment status 상태 변경
+        payment.setPaymentStatus(status);
+    }
+}
