@@ -1,14 +1,12 @@
 package com.simsimbookstore.apiserver.books.contributor.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Setter
 public class ContributorResponseDto {
 
     private Long contributorId;

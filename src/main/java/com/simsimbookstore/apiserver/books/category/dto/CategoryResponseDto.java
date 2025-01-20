@@ -1,17 +1,15 @@
 package com.simsimbookstore.apiserver.books.category.dto;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Builder
-@Data
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Setter
 public class CategoryResponseDto {
 
     private Long categoryId;

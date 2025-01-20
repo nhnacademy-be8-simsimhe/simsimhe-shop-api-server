@@ -3,10 +3,7 @@ package com.simsimbookstore.apiserver.books.book.dto;
 
 import com.simsimbookstore.apiserver.books.book.entity.BookStatus;
 import com.simsimbookstore.apiserver.books.bookcontributor.dto.BookContributorResponsDto;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,8 +11,9 @@ import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
 @Builder
+@Getter
+@Setter
 public class BookListResponse {
 
     private Long bookId;
