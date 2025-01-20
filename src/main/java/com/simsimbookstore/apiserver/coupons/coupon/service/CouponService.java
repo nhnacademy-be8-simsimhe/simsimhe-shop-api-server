@@ -21,8 +21,12 @@ public interface CouponService {
     //user의 쿠폰 중 미사용된 쿠폰을 가져온다.
     Page<CouponResponseDto> getUnusedCoupons(Pageable pageable, Long userId);
 
+    List<CouponResponseDto> getExpiredCoupons();
+
+    List<CouponResponseDto> getUnusedButDeadlinePassedCoupon();
+
     //user의 적용 가능한 쿠폰울 가져온다.
-    List<CouponResponseDto> getEligibleCoupons(Long userId, Long bookId);
+    List<CouponResponseDto> getEligibleCoupons(Long userId, Long bookId, int quantity);
 
     // user들에게 쿠폰을 발급한다.
     void issueCoupons(List<Long> userIds, Long couponTypeId);

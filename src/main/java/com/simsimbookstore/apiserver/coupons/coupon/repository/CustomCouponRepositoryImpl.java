@@ -16,12 +16,14 @@ import com.simsimbookstore.apiserver.coupons.categorycoupon.entity.QCategoryCoup
 import com.simsimbookstore.apiserver.coupons.coupon.entity.Coupon;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.CouponStatus;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.QCoupon;
+import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.QCouponPolicy;
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.QCouponType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,37 +38,42 @@ public class CustomCouponRepositoryImpl implements CustomCouponRepository {
      * @return 특정 책에 적용 가능한 쿠폰 페이지
      */
     @Override
-    public List<Coupon> findEligibleCouponToBook(Long userId, Long bookId) {
+    public List<Coupon> findEligibleCouponToBook(Long userId, Long bookId, BigDecimal orderAmount) {
         QCoupon coupon = QCoupon.coupon;
         QCouponType couponType = QCouponType.couponType;
         QCategoryCoupon categoryCoupon = QCategoryCoupon.categoryCoupon;
         QBookCoupon bookCoupon = QBookCoupon.bookCoupon;
         QAllCoupon allCoupon = QAllCoupon.allCoupon;
         QBookCategory bookCategory = QBookCategory.bookCategory;
+        QCouponPolicy couponPolicy = QCouponPolicy.couponPolicy; // CouponPolicy Q타입
 
         JPAQuery<Coupon> query = jpaQueryFactory.selectFrom(coupon)
                 .join(coupon.couponType, couponType)
                 .leftJoin(categoryCoupon).on(couponType.couponTypeId.eq(categoryCoupon.couponTypeId))
                 .leftJoin(bookCoupon).on(couponType.couponTypeId.eq(bookCoupon.couponTypeId))
                 .leftJoin(allCoupon).on(couponType.couponTypeId.eq(allCoupon.couponTypeId))
-                .where(coupon.user.userId.eq(userId)
-                        .and(coupon.couponStatus.eq(CouponStatus.UNUSED))
-                        .and(
-                                couponType.instanceOf(CategoryCoupon.class)
-                                        .or(
-                                                couponType.instanceOf(BookCoupon.class)
-                                                        .and(bookCoupon.book.bookId.eq(bookId))
-                                        )
-                                        .or(
-                                                couponType.instanceOf(AllCoupon.class)
-                                        )
-                        )
+                .join(couponType.couponPolicy, couponPolicy) // CouponPolicy 조인 추가
+                .where(
+                        coupon.user.userId.eq(userId)
+                                .and(coupon.couponStatus.eq(CouponStatus.UNUSED))
+                                .and(couponPolicy.minOrderAmount.loe(orderAmount)) // orderAmount >= minOrderAmount 조건 추가
+                                .and(
+                                        couponType.instanceOf(CategoryCoupon.class)
+                                                .or(
+                                                        couponType.instanceOf(BookCoupon.class)
+                                                                .and(bookCoupon.book.bookId.eq(bookId))
+                                                )
+                                                .or(
+                                                        couponType.instanceOf(AllCoupon.class)
+                                                )
+                                )
                 )
                 .orderBy(coupon.issueDate.asc());
 
-
         return query.fetch();
     }
+
+
 
     /**
      * 유저가 가지고 있는 쿠폰 중에서 특정 쿠폰 타입이고 아직 사용되지 않은(UNUSED)쿠폰을 반환한다
