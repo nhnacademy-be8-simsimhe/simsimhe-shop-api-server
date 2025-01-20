@@ -9,12 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
@@ -25,21 +20,21 @@ public class LocalUserController {
     private final LocalUserService localUserService;
 
     @PostMapping
-    public ResponseEntity<?> addLocalUser(
+    public ResponseEntity<LocalUser> addLocalUser(
             @RequestBody @Valid LocalUserRegisterRequestDto localUserRequestDto
-            ) {
+    ) {
         LocalUser response = localUserService.saveLocalUser(localUserRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{loginId}/exists")
-    public ResponseEntity<?> existsByLoginId(@PathVariable String loginId) {
+    public ResponseEntity<Boolean> existsByLoginId(@PathVariable String loginId) {
         boolean response = localUserService.existsByLoginId(loginId);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{loginId}")
-    public ResponseEntity<?> getLocalUser(@PathVariable String loginId) {
+    public ResponseEntity<LocalUserResponseDto> getLocalUser(@PathVariable String loginId) {
         LocalUser localUser = localUserService.findByLoginId(loginId);
         if (Objects.isNull(localUser)) {
             return ResponseEntity.ok(null);

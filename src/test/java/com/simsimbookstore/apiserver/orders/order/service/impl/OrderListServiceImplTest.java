@@ -121,8 +121,8 @@ class OrderListServiceImplTest {
         coupon2.setDisCountType(DisCountType.FIX);
 
         // couponService 모킹 설정
-        when(couponService.getEligibleCoupons(eq(userId), eq(1L))).thenReturn(List.of(coupon1));
-        when(couponService.getEligibleCoupons(eq(userId), eq(2L))).thenReturn(List.of(coupon2));
+        when(couponService.getEligibleCoupons(eq(userId), eq(1L),anyInt())).thenReturn(List.of(coupon1));
+        when(couponService.getEligibleCoupons(eq(userId), eq(2L),anyInt())).thenReturn(List.of(coupon2));
 
         // when: 메서드 실행
         List<BookListResponseDto> result = orderListService.createBookOrderWithCoupons(bookOrderList, userId);

@@ -15,6 +15,7 @@ import com.simsimbookstore.apiserver.coupons.coupon.dto.DiscountAmountResponseDt
 import com.simsimbookstore.apiserver.coupons.coupon.dto.EmptyCouponResponseDto;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.Coupon;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.CouponStatus;
+import com.simsimbookstore.apiserver.coupons.exception.AlreadyCouponDeadlinePassed;
 import com.simsimbookstore.apiserver.coupons.exception.AlreadyCouponUsed;
 import com.simsimbookstore.apiserver.coupons.exception.InapplicableCoupon;
 import com.simsimbookstore.apiserver.coupons.exception.InsufficientOrderAmountException;
@@ -137,8 +138,19 @@ public class CouponServiceImpl implements CouponService {
         validateId(userId);
         //유저 확인
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("회원(id:"+userId+")이 존재하지 않습니다."));
-        Page<Coupon> couponPage = couponRepository.findByUserUserIdAndCouponStatus(pageable, userId, CouponStatus.UNUSED);
+        Page<Coupon> couponPage = couponRepository.findByUserUserIdAndCouponStatusAndDeadlineBeforeNow(userId, CouponStatus.UNUSED, pageable);
         return couponPage.map(CouponMapper::toResponse);
+    }
+    @Override
+    public List<CouponResponseDto> getExpiredCoupons() {
+        List<Coupon> coupons = couponRepository.findByCouponStatus(CouponStatus.EXPIRED);
+        return coupons.stream().map(CouponMapper::toResponse).toList();
+    }
+
+    @Override
+    public List<CouponResponseDto> getUnusedButDeadlinePassedCoupon() {
+        List<Coupon> coupons = couponRepository.findUnusedAndExpiredCoupons();
+        return coupons.stream().map(CouponMapper::toResponse).toList();
     }
 
     /**
@@ -151,7 +163,7 @@ public class CouponServiceImpl implements CouponService {
      */
     @Transactional
     @Override
-    public List<CouponResponseDto> getEligibleCoupons(Long userId, Long bookId) {
+    public List<CouponResponseDto> getEligibleCoupons(Long userId, Long bookId, int quantity) {
         //userId null 체크
         validateId(userId);
         //bookId null 체크
@@ -159,7 +171,8 @@ public class CouponServiceImpl implements CouponService {
 
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")이 존재하지 않습니다."));
         Book book = bookRepository.findByBookId(bookId).orElseThrow(() -> new NotFoundException("도서(id:" + bookId + ")이 존재하지 않습니다."));
-        List<Coupon> coupons = couponRepository.findEligibleCouponToBook(userId, book.getBookId()); //유저의 모든 전체쿠폰, 모든 카테고리 쿠폰, 책에 적용가능한 책 쿠폰을 가져온다.
+        BigDecimal orderAmount = book.getSaleprice().multiply(BigDecimal.valueOf(quantity));
+        List<Coupon> coupons = couponRepository.findEligibleCouponToBook(userId, book.getBookId(),orderAmount); //유저의 모든 전체쿠폰, 모든 카테고리 쿠폰, 책에 적용가능한 책 쿠폰을 가져온다.
 
         //책의 정보를 가지고 와서 책이 속한 카테고리 Id를 모두 가지고 온다.
         BookResponseDto bookDetail = bookGetService.getBookDetail(null, book.getBookId());
@@ -172,6 +185,11 @@ public class CouponServiceImpl implements CouponService {
 
         // 유저의 카테고리 쿠폰이 책에 적용 가능한지 확인한다.
         for (Coupon coupon : coupons) {
+            //유효기간이 지났는지 확인하고 지났으면 만료처리
+            if (coupon.getDeadline().isBefore(LocalDateTime.now())) {
+                coupon.expire();
+                continue;
+            }
             if (coupon.getCouponType() instanceof CategoryCoupon categoryCoupon) {
                 Long targetId = categoryCoupon.getCategory().getCategoryId();
                 for (Long categoryId : categoryIdList) {
@@ -274,6 +292,10 @@ public class CouponServiceImpl implements CouponService {
         Coupon coupon = couponRepository.findByUserUserIdAndCouponId(userId, couponId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")은 쿠폰(id:" + couponId + ")을 가지고 있지 않습니다."));
         if (coupon.getCouponStatus() != CouponStatus.UNUSED) {
             throw new AlreadyCouponUsed("회원(id:" + userId + ")의 쿠폰(id:" + couponId + ")은 이미 사용된 쿠폰입니다.");
+        }
+        if (coupon.getDeadline().isBefore(LocalDateTime.now())) {
+            coupon.expire();
+            throw new AlreadyCouponDeadlinePassed("쿠폰(id:" + couponId + ")은 이미 사용기간이 지났습니다. 쿠폰을 만료 처리합니다.");
         }
         coupon.use();
 

@@ -33,6 +33,7 @@ public class OrderDetailInfoDto {
     private String roadAddress;
     private String detailedAddress;
     private String reference;
+    private Delivery.DeliveryState deliveryState;
 
     // payment_method
     private String paymentMethod;
@@ -57,6 +58,7 @@ public class OrderDetailInfoDto {
         this.roadAddress = delivery.getRoadAddress();
         this.detailedAddress = delivery.getDetailedAddress();
         this.reference = delivery.getReference();
+        this.deliveryState = delivery.getDeliveryState();
 
         this.paymentMethod = payment.getTossReturnMethod();
     }

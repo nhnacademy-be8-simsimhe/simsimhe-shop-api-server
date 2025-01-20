@@ -44,6 +44,7 @@ public class CouponMapper {
     private static FixCouponResponseDto toFixCouponResponse(Coupon coupon, CouponType couponType, CouponPolicy couponPolicy,CouponDetails couponDetails) {
 
         return FixCouponResponseDto.builder()
+                .userId(coupon.getUser().getUserId())
                 .couponId(coupon.getCouponId())
                 .issueDate(coupon.getIssueDate())
                 .deadline(coupon.getDeadline())
@@ -60,6 +61,7 @@ public class CouponMapper {
     private static RateCouponResponseDto toRateCouponResponse(Coupon coupon, CouponType couponType, CouponPolicy couponPolicy, CouponDetails couponDetails) {
 
         return RateCouponResponseDto.builder()
+                .userId(coupon.getUser().getUserId())
                 .couponId(coupon.getCouponId())
                 .issueDate(coupon.getIssueDate())
                 .deadline(coupon.getDeadline())

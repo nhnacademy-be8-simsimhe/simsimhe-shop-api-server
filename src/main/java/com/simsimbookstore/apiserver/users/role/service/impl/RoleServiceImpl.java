@@ -6,8 +6,9 @@ import com.simsimbookstore.apiserver.users.role.entity.Role;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.role.repository.RoleRepository;
 import com.simsimbookstore.apiserver.users.role.service.RoleService;
-import java.util.Objects;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 public class RoleServiceImpl implements RoleService {
@@ -18,8 +19,8 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Role save(Role role){
-        if (roleRepository.existsByRoleName(role.getRoleName())){
+    public Role save(Role role) {
+        if (roleRepository.existsByRoleName(role.getRoleName())) {
             throw new AlreadyExistException("already exists " + role.getRoleName());
         }
 
@@ -27,7 +28,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Role findByRoleName(RoleName roleName){
+    public Role findByRoleName(RoleName roleName) {
         Role role = roleRepository.findByRoleName(RoleName.USER);
         if (Objects.isNull(role)) {
             throw new NotFoundException("Role with name " + RoleName.USER + " does not exist");
@@ -36,7 +37,7 @@ public class RoleServiceImpl implements RoleService {
         return roleRepository.findByRoleName(roleName);
     }
 
-    public boolean existsByRoleName(RoleName roleName){
+    public boolean existsByRoleName(RoleName roleName) {
         return roleRepository.existsByRoleName(roleName);
     }
 }

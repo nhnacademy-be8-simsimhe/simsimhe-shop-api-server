@@ -25,6 +25,8 @@ import java.util.Map;
 public class RabbitMqConfig {
     public static final String EXCHANGE_NAME = "simsimbooks.exchange";
     public static final String COUPON_ISSUE_QUEUE_ROUTING_KEY = "routing_key_issue_coupon";
+    public static final String COUPON_DELETE_QUEUE_ROUTING_KEY = "routing_key_delete_coupon";
+    public static final String COUPON_EXPIRE_QUEUE_ROUTING_KEY = "routing_key_expire_coupon";
 
     private final RabbitmqProperty rabbitMqProperty;
     private final Map<String, String> secretMap = new HashMap<>();
@@ -80,8 +82,16 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    public Queue couponQueue() { //쿠폰 큐
-        return new Queue(CouponMqConsumer.COUPON_QUEUE_NAME, true);
+    public Queue couponIssueQueue() {
+        return new Queue(CouponMqConsumer.COUPON_ISSUE_QUEUE_NAME, true);
+    }
+    @Bean
+    public Queue couponExpireQueue() {
+        return new Queue(CouponMqConsumer.COUPON_EXPIRE_QUEUE_NAME, true);
+    }
+    @Bean
+    public Queue couponDeleteQueue() {
+        return new Queue("simsimbooks.coupon.delete.queue", true);
     }
 
     @Bean
@@ -92,8 +102,17 @@ public class RabbitMqConfig {
     //아래부터는 Exchange와 queue 바인딩
 
     @Bean
-    public Binding bindingCouponQueue(Queue couponQueue, DirectExchange directExchange) {
-        return BindingBuilder.bind(couponQueue).to(directExchange).with(COUPON_ISSUE_QUEUE_ROUTING_KEY);
+    public Binding bindingCouponIssueQueue(Queue couponIssueQueue, DirectExchange directExchange) {
+        return BindingBuilder.bind(couponIssueQueue).to(directExchange).with(COUPON_ISSUE_QUEUE_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding bindingCouponExpireQueue(Queue couponExpireQueue, DirectExchange directExchange) {
+        return BindingBuilder.bind(couponExpireQueue).to(directExchange).with(COUPON_EXPIRE_QUEUE_ROUTING_KEY);
+    }
+    @Bean
+    public Binding bindingCouponDeleteQueue(Queue couponDeleteQueue, DirectExchange directExchange) {
+        return BindingBuilder.bind(couponDeleteQueue).to(directExchange).with(COUPON_DELETE_QUEUE_ROUTING_KEY);
     }
 }
 

@@ -388,7 +388,7 @@ class ReviewServiceImplTest {
                 () -> reviewService.getUserReviews(userId, page, size));
 
 
-        assertEquals(exception.getMessage(), "존재하지 않는 유저입니다.");
+        assertEquals("존재하지 않는 유저입니다.", exception.getMessage());
         verify(reviewRepository, never()).getUserReviews(eq(userId), any(Pageable.class));
     }
 

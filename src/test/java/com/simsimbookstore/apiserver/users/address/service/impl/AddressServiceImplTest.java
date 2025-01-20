@@ -1,12 +1,5 @@
 package com.simsimbookstore.apiserver.users.address.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.users.address.dto.AddressRequestDto;
 import com.simsimbookstore.apiserver.users.address.entity.Address;
@@ -16,9 +9,6 @@ import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.service.impl.UserServiceImpl;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +16,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AddressServiceImplTest {
@@ -86,7 +83,7 @@ class AddressServiceImplTest {
 
     @Test
     @DisplayName("주소 단건 조회 실패 - NotFoundException")
-    void getAddressNotFound(){
+    void getAddressNotFound() {
         when(addressRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> addressService.getAddress(1L));
     }
@@ -127,14 +124,14 @@ class AddressServiceImplTest {
 
     @Test
     @DisplayName("주소 삭제 실패 - NotFoundException")
-    void deleteAddressNotFound(){
+    void deleteAddressNotFound() {
         when(addressRepository.existsById(anyLong())).thenReturn(false);
         assertThrows(NotFoundException.class, () -> addressService.deleteAddress(1L));
     }
 
     @Test
     @DisplayName("유저 주소 개수 조회")
-    void getCountAddresses(){
+    void getCountAddresses() {
         when(addressRepository.countAllByUserUserId(testUser.getUserId())).thenReturn(1);
         addressService.getCountAddresses(testUser.getUserId());
         verify(addressRepository, times(1)).countAllByUserUserId(testUser.getUserId());

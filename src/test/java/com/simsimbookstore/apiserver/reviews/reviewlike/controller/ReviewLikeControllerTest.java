@@ -38,7 +38,7 @@ class ReviewLikeControllerTest {
         Long userId = 1L;
         Long reviewId = 2L;
 
-        doNothing().when(reviewLikeService).createReviewLike(eq(userId), eq(reviewId));
+        doNothing().when(reviewLikeService).createReviewLike(userId, reviewId);
 
         mockMvc.perform(post("/api/shop/reviews/{reviewId}/likes", reviewId)
                         .param("userId", String.valueOf(userId)))
@@ -53,7 +53,7 @@ class ReviewLikeControllerTest {
         Long userId = 1L;
         Long reviewId = 2L;
 
-        doNothing().when(reviewLikeService).createReviewLike(eq(userId), eq(reviewId));
+        doNothing().when(reviewLikeService).createReviewLike(userId, reviewId);
 
         mockMvc.perform(delete("/api/shop/reviews/{reviewId}/likes", reviewId)
                         .param("userId", String.valueOf(userId)))
@@ -77,7 +77,7 @@ class ReviewLikeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(String.valueOf(expectedCount)));
 
-        verify(reviewLikeService, times(1)).getReviewLikeCount(eq(reviewId));
+        verify(reviewLikeService, times(1)).getReviewLikeCount(reviewId);
     }
 
 

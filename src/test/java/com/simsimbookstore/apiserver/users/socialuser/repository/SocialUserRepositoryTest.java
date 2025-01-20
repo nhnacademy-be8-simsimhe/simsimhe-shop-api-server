@@ -4,8 +4,8 @@ import com.simsimbookstore.apiserver.common.config.QuerydslConfig;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
-import com.simsimbookstore.apiserver.users.socialuser.entity.SocialUser;
 import com.simsimbookstore.apiserver.users.socialuser.dto.Provider;
+import com.simsimbookstore.apiserver.users.socialuser.entity.SocialUser;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,7 +63,7 @@ class SocialUserRepositoryTest {
     }
 
     @Test
-    void existsById(){
+    void existsById() {
         boolean isExist = socialUserRepository.existsByOauthId(testSocialUser.getOauthId());
         assertTrue(isExist);
 

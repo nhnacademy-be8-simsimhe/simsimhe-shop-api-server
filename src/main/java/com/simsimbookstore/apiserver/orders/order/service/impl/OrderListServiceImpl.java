@@ -43,7 +43,7 @@ public class OrderListServiceImpl implements OrderListService {
     public List<BookListResponseDto> createBookOrderWithCoupons(List<BookListResponseDto> bookOrderList, Long userId) {
         bookOrderList.forEach(book -> {
             // 페이지 요청 없이 쿠폰 조회
-            List<CouponResponseDto> eligibleCoupons = couponService.getEligibleCoupons(userId, book.getBookId());
+            List<CouponResponseDto> eligibleCoupons = couponService.getEligibleCoupons(userId, book.getBookId(),book.getQuantity());
 
             // 쿠폰 데이터를 변환하여 OrderCouponResponseDto 리스트 생성
             List<OrderCouponResponseDto> coupons = eligibleCoupons.stream()
