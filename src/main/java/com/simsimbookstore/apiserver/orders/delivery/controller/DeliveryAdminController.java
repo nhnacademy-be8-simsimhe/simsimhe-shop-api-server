@@ -47,7 +47,7 @@ public class DeliveryAdminController {
 
 
     @GetMapping("/tracking-numbers/{id}")
-    public ResponseEntity<?> findByTrackingNumber(@PathVariable("id") Integer id) {
+    public ResponseEntity<DeliveryResponseDto> findByTrackingNumber(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(deliveryService.findByTrackingNumber(id));
     }
 
