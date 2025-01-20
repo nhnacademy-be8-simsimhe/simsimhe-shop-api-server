@@ -86,7 +86,7 @@ public class RabbitMqConfig {
     }
     @Bean
     public Queue couponExpireQueue() {
-        return new Queue(COUPON_EXPIRE_QUEUE_ROUTING_KEY, true);
+        return new Queue(CouponMqConsumer.COUPON_EXPIRE_QUEUE_NAME, true);
     }
     @Bean
     public Queue couponDeleteQueue() {
