@@ -39,6 +39,7 @@ public class CustomCouponDiscountRepositoryImpl implements CustomCouponDiscountR
                 .join(order.user, user)
                 .where(user.userId.eq(userId))
                 .where(coupon.couponStatus.eq(CouponStatus.USED))
+                .where(couponDiscount.usage.eq(true))
                 .orderBy(coupon.useDate.desc())
                 .offset(pageable.getOffset()) // 시작 위치 지정
                 .limit(pageable.getPageSize())
@@ -51,6 +52,7 @@ public class CustomCouponDiscountRepositoryImpl implements CustomCouponDiscountR
                 .join(orderBook.order, order)
                 .join(order.user, user)
                 .where(user.userId.eq(userId))
+                .where(couponDiscount.usage.eq(true))
                 .where(coupon.couponStatus.eq(CouponStatus.USED))
                 .fetchOne(), 0L);
 
