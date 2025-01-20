@@ -64,7 +64,8 @@ public class Delivery {
         IN_PROGRESS,    // 배송중
         COMPLETED,      // 배송완료
         RETURNED,       // 반품
-        ERROR           // 배송오류
+        ERROR,      // 배송오류
+        CANCEL
     }
 
     @JsonCreator
@@ -78,5 +79,19 @@ public class Delivery {
 
     public void updateDeliveryState(DeliveryState newDeliveryState) {
         this.deliveryState = newDeliveryState;
+    }
+
+
+    public boolean validateRefundable() {
+        return this.deliveryState == DeliveryState.READY
+                || this.deliveryState == DeliveryState.COMPLETED;
+    }
+
+    public boolean isPending() {
+        return this.deliveryState == DeliveryState.PENDING;
+    }
+
+    public void cancel() {
+        this.deliveryState = DeliveryState.CANCEL;
     }
 }

@@ -96,4 +96,17 @@ public class OrderBook {
             couponDiscount.setOrderBook(this); // 쿠폰의 OrderBook 설정
         }
     }
+
+    public boolean validateRefundable() {
+        return this.orderBookState == OrderBookState.DELIVERY_READY
+                || this.orderBookState == OrderBookState.COMPLETED;
+    }
+
+    public boolean isPending() {
+        return this.orderBookState == OrderBookState.PENDING;
+    }
+
+    public void cancel() {
+        this.orderBookState = OrderBookState.CANCELED;
+    }
 }

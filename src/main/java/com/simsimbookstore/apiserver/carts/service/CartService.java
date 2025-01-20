@@ -44,35 +44,7 @@ public class CartService {
      * @param userId
      * @param cartRequestDtoList
      */
-//    public void CartToDb(Long userId, List<CartRequestDto> cartRequestDtoList) {
-//        //장바구니 비우기
-//        cartRepository.deleteByUserId(userId);
-//
-//        Optional<User> optionalUser = userRepository.findById(userId);
-//
-//        if (optionalUser.isPresent()) {
-//            User user = optionalUser.get();
-//
-//            List<Cart> cartList = cartRequestDtoList.stream()
-//                    .map(c -> {
-//                        Optional<Book> optionalBook = bookRepository.findById(Long.valueOf(c.getBookId()));
-//                        if (optionalBook.isPresent()) {
-//                            Book book = optionalBook.get();
-//                            return Cart.builder()
-//                                    .user(user)
-//                                    .book(book)
-//                                    .quantity(c.getQuantity())
-//                                    .build();
-//                        } else {
-//                            throw new NotFoundException("도서 정보가 없습니다");
-//                        }
-//                    }).collect(Collectors.toList());
-//            cartRepository.saveAll(cartList);
-//        }else {
-//            throw new NotFoundException("회원 정보가 없습니다");
-//        }
-//    }
-    public void CartToDb(Long userId, List<CartRequestDto> cartRequestDtoList) {
+    public void cartToDb(Long userId, List<CartRequestDto> cartRequestDtoList) {
         // 장바구니 비우기
         cartRepository.deleteByUserId(userId);
 

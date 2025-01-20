@@ -12,6 +12,10 @@ import java.util.Optional;
 
 public class BookMapper {
 
+    // private 생성자를 추가하여 인스턴스화를 방지(소나큐브 경고처리)
+    private BookMapper() {
+        throw new UnsupportedOperationException("BookMapper클래스 인스턴스화 할 수 없음");
+    }
 
     public static BookResponseDto toResponseDto(Book book) {
         return BookResponseDto.builder()
@@ -41,9 +45,9 @@ public class BookMapper {
                 .quantity(bookRequestDto.getQuantity())
                 .price(bookRequestDto.getPrice())
                 .saleprice(bookRequestDto.getSaleprice())
-               .publicationDate(Optional.ofNullable(bookRequestDto.getPublicationDate())
-                                     .map(LocalDate::from)
-                                     .orElse(LocalDate.now())) // null인 경우 현재 날짜
+                .publicationDate(Optional.ofNullable(bookRequestDto.getPublicationDate())
+                        .map(LocalDate::from)
+                        .orElse(LocalDate.now())) // null인 경우 현재 날짜
                 .giftPackaging(bookRequestDto.isGiftPackaging())
                 .pages(bookRequestDto.getPages())
                 .bookStatus(bookRequestDto.getBookStatus())

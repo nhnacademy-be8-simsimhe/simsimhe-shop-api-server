@@ -13,7 +13,6 @@ import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.logging.Log;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,17 +20,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 
 @Slf4j
@@ -60,15 +55,14 @@ class ReviewLikeRepositoryTest {
         Grade grade2 = createGrade(Tier.ROYAL, 0.01);
 
 
-        // 2. User 데이터 생성 및 저장
         user1 = createUser("User1", "user1@example.com", "01011111111", grade1);
         user2 = createUser("User2", "user2@example.com", "01057238902", grade2);
 
-        // 3. Review 데이터 생성 및 저장
+
         review1 = createReview("Review 1", "Review 1 !!!!!!");
         review2 = createReview("Review 2", "Review 2 !!!!!!");
 
-        // 4. ReviewLike 데이터 생성 및 저장
+
         createReviewLike(review1, user1);
         createReviewLike(review1, user2);
         createReviewLike(review2, user1);
@@ -77,14 +71,13 @@ class ReviewLikeRepositoryTest {
     @Test
     @DisplayName("특정 사용자가 남긴 모든 좋아요 조회")
     void findAllByUser() {
-        // Given
         User savedUser = userRepository.findById(user1.getUserId())
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        // When
+
         List<ReviewLike> likes = reviewLikeRepository.findAllByUser(savedUser);
 
-        // Then
+
         assertThat(likes).hasSize(2);
     }
 

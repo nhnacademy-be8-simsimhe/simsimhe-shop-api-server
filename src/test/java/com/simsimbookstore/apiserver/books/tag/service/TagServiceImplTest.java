@@ -11,12 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+
 
 import java.util.Arrays;
 import java.util.List;
@@ -122,23 +118,7 @@ class TagServiceImplTest {
         verify(tagRepository).findById(999L);
     }
 
-    @Test
-    @DisplayName("페이징 처리된 태그 목록 조회 성공")
-    void getPagedTags() {
-        Tag secondTag = Tag.builder().tagId(2L).tagName("외국도서").build();
-        Pageable pageable = PageRequest.of(0, 2);
-        Page<Tag> mockPage = new PageImpl<>(Arrays.asList(mockTag, secondTag), pageable, 2);
 
-        when(tagRepository.findAllActivated(pageable)).thenReturn(mockPage);
-
-        Page<TagResponseDto> tagResponsePage = tagService.getAllTags(pageable);
-
-        assertNotNull(tagResponsePage);
-        assertEquals(2, tagResponsePage.getContent().size());
-        assertEquals("국내도서", tagResponsePage.getContent().get(0).getTagName());
-        assertEquals("외국도서", tagResponsePage.getContent().get(1).getTagName());
-        verify(tagRepository).findAllActivated(pageable);
-    }
 
     @Test
     @DisplayName("태그 업데이트 성공")

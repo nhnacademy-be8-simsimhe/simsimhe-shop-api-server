@@ -22,7 +22,6 @@ import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import com.simsimbookstore.apiserver.point.service.PointPolicyService;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.reviews.review.repository.ReviewRepository;
-import com.simsimbookstore.apiserver.reviews.review.service.ReviewService;
 import com.simsimbookstore.apiserver.reviews.reviewimage.entity.ReviewImagePath;
 import com.simsimbookstore.apiserver.reviews.reviewimage.repository.ReviewImagePathRepository;
 import com.simsimbookstore.apiserver.users.user.entity.User;
@@ -30,9 +29,10 @@ import com.simsimbookstore.apiserver.users.user.service.UserService;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,64 +52,21 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     private final ReviewImagePathRepository reviewImagePathRepository;
     private final ReviewRepository reviewRepository;
 
-    /**
-     * 사용자 포인트 히스토리를 페이지네이션하여 반환합니다.
-     *
-     * @param userId   사용자 ID
-     * @param pageable 페이지네이션 정보
-     * @return 사용자 포인트 히스토리의 PageResponse 객체
-     */
     @Override
     public PageResponse<PointHistoryResponseDto> getUserPointHistory(Long userId, Pageable pageable) {
-        List<PointHistoryResponseDto> content = pointHistoryRepository.getPointHistoriesByUserId(userId, pageable);
-        for (PointHistoryResponseDto dto : content) {
-            log.info(dto.toString());
-        }
-        long totalElements = pointHistoryRepository.findByUserUserId(userId).size();
+        List<PointHistoryResponseDto> pointHistories = pointHistoryRepository.getPointHistoriesByUserId(userId, pageable);
 
-        return getPageResponse(content, pageable, totalElements);
+        long totalElements = pointHistoryRepository.countByUserId(userId);
+
+        Page<PointHistoryResponseDto> page = new PageImpl<>(pointHistories, pageable, totalElements);
+
+        return new PageResponse<PointHistoryResponseDto>().getPageResponse(
+                pageable.getPageNumber() + 1,  // 현재 페이지 (1부터 시작하도록 설정)
+                10,  // 최대 페이지 버튼 수
+                page // Page 객체
+        );
     }
 
-    /**
-     * PageResponse 생성 로직
-     *
-     * @param content       현재 페이지의 데이터
-     * @param pageable      페이지네이션 정보
-     * @param totalElements 전체 데이터 수
-     * @return PageResponse 객체
-     */
-    private PageResponse<PointHistoryResponseDto> getPageResponse(List<PointHistoryResponseDto> content,
-                                                                  Pageable pageable,
-                                                                  long totalElements) {
-        int maxPageButtons = 8;
-
-        // 총 페이지 수 계산
-        int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
-
-        // 현재 페이지 (1-based index로 변환)
-        int currentPage = pageable.getPageNumber() + 1;
-
-        // 시작 페이지 계산
-        int startPage = (int) Math.max(1, currentPage - Math.floor((double) maxPageButtons / 2));
-
-        // 종료 페이지 계산
-        int endPage = Math.min(startPage + maxPageButtons - 1, totalPages);
-
-        // 버튼 개수가 부족한 경우 보정
-        if (endPage - startPage + 1 < maxPageButtons) {
-            startPage = Math.max(1, endPage - maxPageButtons + 1);
-        }
-
-        // PageResponse 반환
-        return PageResponse.<PointHistoryResponseDto>builder()
-                .data(content)
-                .currentPage(currentPage)
-                .startPage(startPage)
-                .endPage(endPage)
-                .totalPage(totalPages)
-                .totalElements(totalElements)
-                .build();
-    }
 
     @Override
     @Transactional
@@ -133,7 +90,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
                     .user(user)
                     .build());
 
-            OrderPointManage orderPointManageUse1 = orderPointManageRepository.save(OrderPointManage.builder()
+            orderPointManageRepository.save(OrderPointManage.builder()
                     .pointHistory(use)
                     .order(order)
                     .build());
@@ -147,9 +104,9 @@ public class PointHistoryServiceImpl implements PointHistoryService {
                 .created_at(now())
                 .user(user)
                 .build());
-        // 2. OrderPointManage 엔티티 생성 및
+        // 2. OrderPointManage 엔티티 생성
 
-        OrderPointManage orderPointManage2 = orderPointManageRepository.save(OrderPointManage.builder()
+        orderPointManageRepository.save(OrderPointManage.builder()
                 .pointHistory(save)
                 .order(order)
                 .build());
@@ -169,19 +126,19 @@ public class PointHistoryServiceImpl implements PointHistoryService {
         Review review = reviewRepository.findById(dto.getReviewId())
                 .orElseThrow(() -> new NotFoundException("Review not found"));
 
-        // 1. PointHistory 엔티티 저장
+        // 1. PointHistory
         PointHistory save = pointHistoryRepository.save(PointHistory.builder()
                 .pointType(PointHistory.PointType.EARN)
                 .amount(earnPoints.intValue())
                 .created_at(now())
                 .user(user)
                 .build());
-        // 2. ReviewPointManage 엔티티 생성 및
-        ReviewPointManage reviewPointManage =
-                reviewPointManageRepository.save(ReviewPointManage.builder()
-                        .pointHistory(save)
-                        .review(review)
-                        .build());
+
+        // 2. ReviewPointManage
+        reviewPointManageRepository.save(ReviewPointManage.builder()
+                .pointHistory(save)
+                .review(review)
+                .build());
 
         return save;
     }
@@ -241,14 +198,30 @@ public class PointHistoryServiceImpl implements PointHistoryService {
                 .getOriginalPrice();
 
         // 티어를 Map으로  매핑
-        PointPolicy.EarningMethod EarningMethod = tierToEarningMethodMap.get(tier);
-        if (EarningMethod == null) {
+        PointPolicy.EarningMethod earningMethod = tierToEarningMethodMap.get(tier);
+        if (earningMethod == null) {
             throw new IllegalArgumentException("Invalid Tier: " + tier);
         }
 
         // 정책 조회 및 포인트 계산
-        BigDecimal rate = pointHistoryService.getPolicy(EarningMethod).getEarningValue();
+        BigDecimal rate = pointHistoryService.getPolicy(earningMethod).getEarningValue();
         return originalPrice.multiply(rate);
+    }
+
+    @Override
+    public BigDecimal refundPoint(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new NotFoundException("order Not Found"));
+        //total+point use
+        BigDecimal pointUse = order.getPointUse();
+        BigDecimal totalPrice = order.getTotalPrice();
+        BigDecimal save = pointUse.add(totalPrice);
+        pointHistoryRepository.save( PointHistory.builder()
+                .user(order.getUser())
+                .amount(save.intValue())
+                .created_at(now())
+                .pointType(PointHistory.PointType.EARN)
+                .build());
+        return save;
     }
 
 

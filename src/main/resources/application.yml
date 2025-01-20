@@ -22,11 +22,6 @@ spring:
       max-file-size: 100MB
       max-request-size: 100MB
 
-  elasticsearch:
-    uris: http://115.94.72.197:9200
-    username: elastic
-    password: nhnacademy123!
-
   profiles:
     active: dev  # 배포시 prod로 변경
     # 마지막에 실행되는 파일이 앞의 설정을 덮어쓰기 때문에 사용에 주의가 필요
@@ -73,3 +68,9 @@ redis:
   host: 7098f39a110b4eb88c68ffd65f18774f
   port: 6379
   password: d183598bca794d998bada10b352f57ad
+
+elasticsearch:
+  data: 1bf3dfed48184557a8eec43f70d82de7
+
+rabbitmq:
+  data: 7bcf9993624c4ccf9140a44e40608808

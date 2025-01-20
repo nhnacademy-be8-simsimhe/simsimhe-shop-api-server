@@ -1,16 +1,14 @@
 package com.simsimbookstore.apiserver.carts.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
 @Builder
+@Getter
+@Setter
 public class CartResponseDto {
     private Long bookId;
     private String userId;

@@ -36,7 +36,7 @@ public class ReviewImagePathServiceImpl implements ReviewImagePathService {
 
         List<ReviewImgPathResponseDTO> imagePaths = new ArrayList<>();
 
-        for (String path : imageName){
+        for (String path : imageName) {
             ReviewImagePath reviewImagePath = ReviewImagePath.builder()
                     .imageName(path)
                     .review(review)

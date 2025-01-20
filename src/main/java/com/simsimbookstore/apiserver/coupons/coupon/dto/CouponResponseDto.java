@@ -5,11 +5,13 @@ import com.simsimbookstore.apiserver.coupons.coupon.entity.CouponStatus;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.DisCountType;
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponTargetType;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+@NoArgsConstructor
 @SuperBuilder
 @Getter
 @Setter
@@ -39,5 +41,5 @@ public abstract class CouponResponseDto {
 
 
 
-    
+
 }

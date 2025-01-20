@@ -1,15 +1,13 @@
 package com.simsimbookstore.apiserver.books.book.dto;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Getter
 public class BookGiftResponse {
 
     private boolean giftPackaging;

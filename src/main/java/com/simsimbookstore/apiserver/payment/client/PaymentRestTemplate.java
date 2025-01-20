@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
 import com.simsimbookstore.apiserver.payment.config.TossPaymentProperties;
+import com.simsimbookstore.apiserver.payment.dto.CanceledResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
 import org.springframework.context.annotation.Configuration;
@@ -105,26 +106,29 @@ public class PaymentRestTemplate {
     }
 
     // 나중에 멱등키를 사용한다면 키 redis에 15일 저장
-    public String adminCanceled(String paymentKey, String cancelReason) {
+    public ResponseEntity<CanceledResponseDto> canceled(String paymentKey, String cancelReason) {
         URI uri = URI.create("https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel");
 
         headers.setBasicAuth(encodedAuth);
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
+        Map<String, String> cancelReasonMap = new HashMap<>();
+        cancelReasonMap.put("cancelReason", cancelReason);
+
         HttpEntity<String> request = null;
         try {
-            request = new HttpEntity<>(objectMapper.writeValueAsString(cancelReason), headers);
+            request = new HttpEntity<>(objectMapper.writeValueAsString(cancelReasonMap), headers);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
 
-        ResponseEntity<String> responseEntity = restTemplate.exchange(
+        ResponseEntity<CanceledResponseDto> responseEntity = restTemplate.exchange(
                 uri,
                 HttpMethod.POST,
                 request,
-                String.class
+                CanceledResponseDto.class
         );
-        return responseEntity.getBody();
+        return responseEntity;
     }
 }

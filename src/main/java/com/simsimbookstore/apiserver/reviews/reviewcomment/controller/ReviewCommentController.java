@@ -51,7 +51,7 @@ public class ReviewCommentController {
      */
     @GetMapping("/{commentId}")
     public ResponseEntity<ReviewComment> getReviewCommentById(
-            @PathVariable Long reviewId,@PathVariable Long commentId) {
+            @PathVariable Long reviewId, @PathVariable Long commentId) {
         ReviewComment reviewComment = reviewCommentService.getReviewCommentById(commentId);
         return ResponseEntity.ok(reviewComment);
     }
@@ -61,10 +61,10 @@ public class ReviewCommentController {
      * 전체 댓글 조회 (해당 리뷰에 대한)
      */
     @GetMapping
-    public ResponseEntity<?> getReviewComments(
+    public ResponseEntity<Page<ReviewCommentResponseDTO>> getReviewComments(
             @PathVariable Long reviewId,
-      @RequestParam(defaultValue = "0") int page,
-    @RequestParam(defaultValue = "10") int size){
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         Page<ReviewCommentResponseDTO> reviewComments = reviewCommentService.getReviewComments(reviewId, page, size);
         return ResponseEntity.ok(reviewComments);
     }
@@ -73,7 +73,7 @@ public class ReviewCommentController {
      * 댓글 삭제
      */
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<Void> deleteReviewComment(@PathVariable Long reviewId,@PathVariable Long commentId) {
+    public ResponseEntity<Void> deleteReviewComment(@PathVariable Long reviewId, @PathVariable Long commentId) {
         reviewCommentService.deleteReviewComment(commentId);
         return ResponseEntity.noContent().build();
     }

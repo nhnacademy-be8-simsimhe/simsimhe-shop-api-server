@@ -8,12 +8,10 @@ import com.simsimbookstore.apiserver.books.contributor.mapper.ContributorMapper;
 import com.simsimbookstore.apiserver.books.contributor.service.ContributorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,14 +27,10 @@ public class ContributorController {
      * 기여자 등록
      *
      * @param requestDto
-     * @param bindingResult
      * @return
      */
     @PostMapping("/contributors")
-    public ResponseEntity<?> saveContributor(@RequestBody @Valid ContributorRequestDto requestDto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bindingResult.getAllErrors());
-        }
+    public ResponseEntity<ContributorResponseDto> saveContributor(@RequestBody @Valid ContributorRequestDto requestDto) {
 
         ContributorResponseDto responseDto = contributorService.createContributor(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
@@ -64,11 +58,10 @@ public class ContributorController {
      */
     @GetMapping("/contributors")
     public ResponseEntity<PageResponse<ContributorResponseDto>> getAllContributorPage(@RequestParam(defaultValue = "1") int page,
-                                                              @RequestParam(defaultValue = "2") int size) {
-        Pageable pageable = PageRequest.of(page-1, size);
+                                                                                      @RequestParam(defaultValue = "2") int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
         PageResponse<ContributorResponseDto> response = contributorService.getAllContributors(pageable);
         return ResponseEntity.status(HttpStatus.OK).body(response);
-
     }
 
     /**
@@ -78,7 +71,7 @@ public class ContributorController {
      * @return
      */
     @DeleteMapping("/contributors/{contributorId}")
-    public ResponseEntity<?> delete(@PathVariable("contributorId") Long contributorId) {
+    public ResponseEntity<Void> delete(@PathVariable("contributorId") Long contributorId) {
         contributorService.deleteContributor(contributorId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -90,7 +83,7 @@ public class ContributorController {
      * @return
      */
     @GetMapping("/contributors/{contributorId}")
-    public ResponseEntity<?> getContributor(@PathVariable("contributorId") Long contributorId) {
+    public ResponseEntity<ContributorResponseDto> getContributor(@PathVariable("contributorId") Long contributorId) {
         Contributor contributor = contributorService.getContributer(contributorId);
         ContributorResponseDto response = ContributorMapper.toResponse(contributor);
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -99,18 +92,15 @@ public class ContributorController {
 
     /**
      * 기여자 수정
+     *
      * @param contributorId
      * @param contributorRequestDto
-     * @param bindingResult
      * @return
      */
     @PutMapping("/contributors/{contributorId}")
-    public ResponseEntity<?> update(@PathVariable("contributorId") Long contributorId,
-                                    @RequestBody @Valid ContributorRequestDto contributorRequestDto,
-                                    BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bindingResult.getAllErrors());
-        }
+    public ResponseEntity<ContributorResponseDto> update(@PathVariable("contributorId") Long contributorId,
+                                                         @RequestBody @Valid ContributorRequestDto contributorRequestDto
+    ) {
         ContributorResponseDto responseDto = contributorService.updateContributor(contributorId, contributorRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }

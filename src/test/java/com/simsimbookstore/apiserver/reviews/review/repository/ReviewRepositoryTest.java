@@ -4,18 +4,15 @@ import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.book.entity.BookStatus;
 import com.simsimbookstore.apiserver.books.book.repository.BookRepository;
 import com.simsimbookstore.apiserver.common.config.QuerydslConfig;
-import com.simsimbookstore.apiserver.reviews.review.dto.ReviewLikeCountDTO;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
-import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.user.entity.Gender;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,17 +21,14 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @Slf4j
@@ -42,8 +36,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @Import(QuerydslConfig.class)
 class ReviewRepositoryTest {
-
-
 
     @Autowired
     ReviewRepository reviewRepository;
@@ -61,7 +53,7 @@ class ReviewRepositoryTest {
     Book testBook;
 
     @BeforeEach
-    void setup(){
+    void setup() {
 
         Grade grade = Grade.builder()
                 .tier(Tier.STANDARD)
@@ -99,7 +91,7 @@ class ReviewRepositoryTest {
                 .build();
 
 
-        testBook= bookRepository.save(testBook);
+        testBook = bookRepository.save(testBook);
 
         testUser = userRepository.save(testUser);
 
@@ -110,8 +102,7 @@ class ReviewRepositoryTest {
 
     @Test
     @DisplayName("데이터 저장 확인")
-    void saveData(){
-
+    void saveData() {
 
         Review review = Review.builder()
                 .score(5)
@@ -130,16 +121,31 @@ class ReviewRepositoryTest {
 
 
     @Test
-    @DisplayName("")
-    void updateData(){
+    @DisplayName("리뷰 수정 테스트")
+    void updateData() {
 
     }
 
     @Test
-    @DisplayName("")
-    void deleteData(){
+    @DisplayName("리뷰 삭제 테스트")
+    void deleteData() {
+        Review review = Review.builder()
+                .score(5)
+                .title("삭제할 리뷰")
+                .content("삭제할 내용")
+                .createdAt(LocalDateTime.now())
+                .book(testBook)
+                .user(testUser)
+                .build();
 
+        Review savedReview = reviewRepository.save(review);
+
+
+        reviewRepository.delete(savedReview);
+
+        assertThat(reviewRepository.findById(savedReview.getReviewId())).isEmpty();
     }
+
 
     @Test
     @DisplayName("책별 리뷰를 생성일자 순으로 가져오기 테스트")
@@ -159,7 +165,6 @@ class ReviewRepositoryTest {
     }
 
 
-
     @Test
     @DisplayName("책별 리뷰를 좋아요 개수 순으로 가져오기 테스트")
     void testFindAllByBookOrderByLikeDesc() {
@@ -167,7 +172,7 @@ class ReviewRepositoryTest {
         Long bookId = testBook.getBookId();
         PageRequest pageable = PageRequest.of(0, 10);
 
-        Page<Object[]> result = reviewRepository.findAllByBookOrderByLikeDesc(userId,bookId, pageable);
+        Page<Object[]> result = reviewRepository.findAllByBookOrderByLikeDesc(userId, bookId, pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getTotalElements()).isGreaterThan(0);
@@ -180,7 +185,7 @@ class ReviewRepositoryTest {
         Long bookId = testBook.getBookId();
         PageRequest pageable = PageRequest.of(0, 10);
 
-        Page<Object[]> result = reviewRepository.findAllByBookOrderByScoreDesc(userId,bookId, pageable);
+        Page<Object[]> result = reviewRepository.findAllByBookOrderByScoreDesc(userId, bookId, pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getTotalElements()).isGreaterThan(0);
@@ -198,9 +203,7 @@ class ReviewRepositoryTest {
 //    }
 
 
-
-
-    void saveReview(){
+    void saveReview() {
         Review testReview1 = Review.builder()
                 .score(5)
                 .title("테스트 제목")

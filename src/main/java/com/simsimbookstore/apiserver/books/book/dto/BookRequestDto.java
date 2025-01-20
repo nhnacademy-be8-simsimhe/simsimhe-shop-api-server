@@ -5,10 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
@@ -19,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Data
+@Getter
 public class BookRequestDto {
 
     @NotBlank(message = "책 이름을 공백 없이 입력해주세요")
@@ -64,6 +61,8 @@ public class BookRequestDto {
 
     @NotNull
     private boolean giftPackaging; //true면 포장 가능
+
+    private String thumbnailImage;
 
 
     private List<Long> contributoridList;

@@ -7,21 +7,22 @@ import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.coupondiscount.entity.CouponDiscount;
 import com.simsimbookstore.apiserver.orders.delivery.dto.DeliveryRequestDto;
 import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
+import com.simsimbookstore.apiserver.orders.delivery.repository.DeliveryRepository;
 import com.simsimbookstore.apiserver.orders.delivery.service.DeliveryService;
 import com.simsimbookstore.apiserver.orders.order.dto.MemberOrderRequestDto;
 import com.simsimbookstore.apiserver.orders.order.dto.OrderResponseDto;
+import com.simsimbookstore.apiserver.orders.order.dto.RetryOrderRequestDto;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
+import com.simsimbookstore.apiserver.orders.order.service.GuestOrderService;
 import com.simsimbookstore.apiserver.orders.order.service.MemberOrderService;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
+import com.simsimbookstore.apiserver.orders.orderbook.repository.OrderBookRepository;
 import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
 import com.simsimbookstore.apiserver.point.dto.OrderPointRequestDto;
 import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 
-import com.simsimbookstore.apiserver.users.user.dto.GuestUserRequestDto;
-import com.simsimbookstore.apiserver.users.user.entity.User;
-import com.simsimbookstore.apiserver.users.user.service.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +40,11 @@ public class OrderFacadeImpl implements OrderFacade {
     private final DeliveryService deliveryService;
     private final PointHistoryService pointHistoryService;
     private final OrderRepository orderRepository;
-    private final UserService userService;
     private final BookManagementService bookManagementService;
     private final CouponService couponService;
+    private final GuestOrderService guestOrderService;
+    private final OrderBookRepository orderBookRepository;
+    private final DeliveryRepository deliveryRepository;
 
     @Override
     @Transactional
@@ -59,7 +62,7 @@ public class OrderFacadeImpl implements OrderFacade {
 
         //비회원 일때
         if (facadeRequestDto.memberOrderRequestDto.getUserId() == null) {
-            guestId = prepareUser(facadeRequestDto);
+            guestId = guestOrderService.prepareUser(facadeRequestDto);
             orderReq = facadeRequestDto.getMemberOrderRequestDto();
             orderReq.setUserId(guestId);
             orderReq.setDeliveryId(delivery.getDeliveryId());
@@ -109,13 +112,48 @@ public class OrderFacadeImpl implements OrderFacade {
                 .email(orderReq.getOrderEmail())
                 .phoneNumber(orderReq.getPhoneNumber())
                 .method(facadeRequestDto.getMethod())
-                .userName("이름")
+                .userName(facadeRequestDto.getMemberOrderRequestDto().getSenderName())
                 .build();
 
         log.info("OrderFacadeResponseDto created: {}", response);
         return response;
     }
 
+
+    @Override
+    public OrderFacadeResponseDto retryOrder(RetryOrderRequestDto dto) {
+        // 1. 주문 조회
+        log.info("dto : {}", dto.toString());
+        Order order = orderRepository.findByOrderNumber(dto.getOrderNumber())
+                .orElseThrow(() -> new NotFoundException("Order Not Found"));
+
+        // 2. 배송 및 주문책 조회
+        Delivery delivery = order.getDelivery();
+        List<OrderBook> orderBooks = orderBookRepository.findByOrderOrderId(order.getOrderId());
+
+        // 3. 모든 관련 엔티티가 pending 상태인지 확인
+        boolean isOrderPending = order.isPending();
+        boolean isDeliveryPending = delivery.isPending();
+        boolean areAllOrderBooksPending = orderBooks.stream().allMatch(OrderBook::isPending);
+
+        if ( !(isOrderPending && isDeliveryPending && areAllOrderBooksPending) ) {
+            throw new IllegalStateException("모든 주문 관련 항목이 pending 상태가 아닙니다.");
+        }
+
+        // 4. OrderFacadeResponseDto 생성 및 반환
+        return OrderFacadeResponseDto.builder()
+                .orderNumber(order.getOrderNumber())
+                .totalPrice(order.getTotalPrice())
+                .orderName(order.getOrderName())
+                .email(order.getOrderEmail())
+                .phoneNumber(order.getPhoneNumber())
+                .userName(order.getUser().getUserName())
+                .method(dto.getMethod())
+                .build();
+    }
+
+
+    @Override
     @Transactional
     public void completeOrder(String orderNumber) {
         // 1. 주문 번호로 Order 조회
@@ -127,45 +165,76 @@ public class OrderFacadeImpl implements OrderFacade {
         for (OrderBook orderBook : orderBookList) {
             // 3. 재고 수정
             bookManagementService.modifyQuantity(orderBook.getOrderBookId(), -orderBook.getQuantity());
+
+            //주문상태 수정
             orderBook.setOrderBookState(OrderBook.OrderBookState.DELIVERY_READY);
             // 4. 쿠폰 사용 처리
-            CouponDiscount couponDiscount = orderBook.getCouponDiscount(); // 연관된 CouponDiscount 가져오기
+            CouponDiscount couponDiscount = orderBook.getCouponDiscount();// 연관된 CouponDiscount 가져오기
+            // 5. 쿠폰 사용한것 저장
             if (couponDiscount != null) { // CouponDiscount가 있는 경우에만 처리
-                Coupon coupon = couponDiscount.getCoupon(); // CouponDiscount에서 Coupon 가져오기
+                Coupon coupon = couponDiscount.getCoupon();
+                couponDiscount.setUsage(true);
+                // CouponDiscount에서 Coupon 가져오기
                 if (coupon != null) {
                     couponService.useCoupon(order.getUser().getUserId(), coupon.getCouponId());
                 }
             }
         }
 
-        // 5. 포인트 적립 처리
-        pointHistoryService.orderPoint(OrderPointRequestDto.builder()
-                .orderId(order.getOrderId())
-                .userId(order.getUser().getUserId()) // 사용자 ID로 포인트 적립
-                .build());
+        // 5. 포인트 적립 처리 회원 주문일 때만 비회원은 적립하지 않음
+        if (!order.isGuestOrder()) {
+            pointHistoryService.orderPoint(OrderPointRequestDto.builder()
+                    .orderId(order.getOrderId())
+                    .userId(order.getUser().getUserId()) // 사용자 ID로 포인트 적립
+                    .build());
+        }
 
+        //6. 주문상태 수정
         order.setOrderState(Order.OrderState.DELIVERY_READY);
         order.getDelivery().setDeliveryState(Delivery.DeliveryState.READY);
 
     }
-    /**
-     * 비회원 주문을 위한 비회원 생성
-     *
-     * @param //OrderFacadeRequsetDto
-     * @return Guest userId
-     */
 
     @Transactional
-    public Long prepareUser(OrderFacadeRequestDto dto) {
-        if (dto.getMemberOrderRequestDto().getUserId() == null) {
-            GuestUserRequestDto guestDto = GuestUserRequestDto.builder()
-                    .userName(dto.memberOrderRequestDto.getSenderName()).build();
+    @Override
+    public Order orderRefund(Long orderId) {
 
-            User guest = userService.createGuest(guestDto);
-            return guest.getUserId();
-        } else {
-            return dto.getMemberOrderRequestDto().getUserId();
+        // 1. 주문 엔티티 조회
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+
+        if (order.isGuestOrder()) {
+            throw new IllegalArgumentException("Guest order cannot be refunded to point");
         }
+
+        // 2. 해당 주문에 속한 OrderBook들 조회
+        List<OrderBook> orderBooks = orderBookService.getOrderBooks(orderId);
+
+        // 3. 환불 가능 여부 모두 체크
+        if (!order.validateRefundable()) {
+            throw new IllegalStateException("주문이 환불 불가능한 상태입니다.");
+        }
+
+        if (!order.getDelivery().validateRefundable()) {
+            throw new IllegalStateException("배송이 환불 불가능한 상태입니다.");
+        }
+
+        boolean allOrderBooksRefundable = orderBooks.stream()
+                .allMatch(OrderBook::validateRefundable);
+        if (!allOrderBooksRefundable) {
+            throw new IllegalStateException("일부 상품이 환불 불가능한 상태입니다.");
+        }
+
+        // 4. 환불/취소 처리
+        order.refund();
+        order.getDelivery().cancel();
+        orderBooks.forEach(OrderBook::cancel);
+
+        // 5. 포인트로 환불
+        pointHistoryService.refundPoint(orderId);
+
+        return order;
     }
+
 }
 

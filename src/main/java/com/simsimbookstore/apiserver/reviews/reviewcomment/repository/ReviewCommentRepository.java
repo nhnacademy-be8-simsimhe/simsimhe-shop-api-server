@@ -11,5 +11,6 @@ import java.util.List;
 public interface ReviewCommentRepository extends JpaRepository<ReviewComment, Long> {
 
     List<ReviewComment> findAllByReview(Review review);
+
     Page<ReviewComment> findAllByReview(Review review, Pageable pageable);
 }

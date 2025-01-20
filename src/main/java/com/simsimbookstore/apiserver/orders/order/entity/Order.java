@@ -1,9 +1,21 @@
 package com.simsimbookstore.apiserver.orders.order.entity;
 
 import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
+import com.simsimbookstore.apiserver.users.role.entity.Role;
+import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.user.entity.User;
-import jakarta.persistence.*;
-
+import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,7 +39,7 @@ public class Order {
     @Column(name = "order_id", nullable = false)
     private Long orderId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -73,6 +85,31 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @Column(name = "order_state", nullable = false)
     private OrderState orderState;
+
+
+    public boolean validateRefundable() {
+        return this.orderState == OrderState.DELIVERY_READY
+                || this.orderState == OrderState.COMPLETED;
+    }
+
+    public boolean isGuestOrder() {
+        for (UserRole userRole : user.getUserRoleList()) {
+            Role role = userRole.getRole();
+            if (role != null && role.getRoleName() == RoleName.GUEST) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isPending() {
+        return this.orderState == OrderState.PENDING;
+    }
+
+
+    public void refund() {
+        this.orderState = OrderState.PAYMENT_CANCELED;
+    }
 
     public enum OrderState {
         PENDING,           // 주문대기
