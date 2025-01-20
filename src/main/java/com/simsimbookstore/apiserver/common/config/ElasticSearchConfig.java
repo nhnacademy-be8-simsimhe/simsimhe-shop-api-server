@@ -25,10 +25,8 @@ public class ElasticSearchConfig {
     private final ElasticProperty elasticProperty;
     private final KeyConfig keyConfig;
 
-
     @Bean
-    public ElasticsearchClient elasticsearchClient() {
-
+    public ElasticsearchTransport restClientTransport(){
         String[] data = keyConfig.keyStore(elasticProperty.getData()).split("\n");
 
         String url = data[0];
@@ -47,7 +45,13 @@ public class ElasticSearchConfig {
                 });
 
         ElasticsearchTransport transport = new RestClientTransport(builder.build(), new JacksonJsonpMapper());
-        return new ElasticsearchClient(transport);
+        return transport;
+    }
+
+
+    @Bean
+    public ElasticsearchClient elasticsearchClient(ElasticsearchTransport restClientTransport) {
+        return new ElasticsearchClient(restClientTransport);
     }
 
 }
