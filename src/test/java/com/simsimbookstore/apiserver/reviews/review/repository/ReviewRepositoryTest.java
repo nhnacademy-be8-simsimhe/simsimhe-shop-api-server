@@ -160,7 +160,7 @@ class ReviewRepositoryTest {
         log.info("Total Elements: {}", result.getTotalElements());
 
         assertThat(result).isNotNull();
-        assertThat(result.getTotalElements()).isGreaterThan(0); // 기대한 결과 검증
+        assertThat(result.getTotalElements()).isPositive(); // 기대한 결과 검증
         assertThat(result.getContent().get(0)).isNotNull(); // 첫 번째 데이터 검증
     }
 
@@ -175,7 +175,7 @@ class ReviewRepositoryTest {
         Page<Object[]> result = reviewRepository.findAllByBookOrderByLikeDesc(userId, bookId, pageable);
 
         assertThat(result).isNotNull();
-        assertThat(result.getTotalElements()).isGreaterThan(0);
+        assertThat(result.getTotalElements()).isPositive();
     }
 
     @Test
@@ -188,7 +188,7 @@ class ReviewRepositoryTest {
         Page<Object[]> result = reviewRepository.findAllByBookOrderByScoreDesc(userId, bookId, pageable);
 
         assertThat(result).isNotNull();
-        assertThat(result.getTotalElements()).isGreaterThan(0);
+        assertThat(result.getTotalElements()).isPositive();
     }
 
 //    @Test

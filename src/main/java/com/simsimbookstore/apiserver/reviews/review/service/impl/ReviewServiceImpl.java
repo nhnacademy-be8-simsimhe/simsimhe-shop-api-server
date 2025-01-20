@@ -80,7 +80,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Page<ReviewLikeCountDTO> getReviewsByBookOrderBySort(Long bookId, Long userId, int page, int size, String sort) {
-        Book existingBook = bookRepository.findById(bookId)
+        bookRepository.findById(bookId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 도서입니다."));
 
 
@@ -127,7 +127,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Page<UserReviewsDTO> getUserReviews(Long userId, int page, int size) {
-        User user = userRepository.findById(userId)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
 
         Pageable pageable = PageRequest.of(page, size);
@@ -137,7 +137,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Page<UserAvailableReviewsDTO> getAvailableReviews(Long userId, int page, int size) {
-        User user = userRepository.findById(userId)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
 
         Pageable pageable = PageRequest.of(page, size);

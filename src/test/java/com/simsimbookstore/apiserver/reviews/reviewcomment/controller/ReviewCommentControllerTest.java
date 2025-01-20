@@ -101,7 +101,7 @@ class ReviewCommentControllerTest {
                 .created_at(LocalDateTime.now())
                 .build();
 
-        when(reviewCommentService.getReviewCommentById(eq(commentId))).thenReturn(reviewComment);
+        when(reviewCommentService.getReviewCommentById(commentId)).thenReturn(reviewComment);
 
         mockMvc.perform(get("/api/shop/reviews/{reviewId}/comments/{commentId}", reviewId, commentId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -111,7 +111,7 @@ class ReviewCommentControllerTest {
                 .andExpect(jsonPath("$.reviewCommentId").value(commentId))
                 .andExpect(jsonPath("$.content").value("This is a comment"));
 
-        verify(reviewCommentService).getReviewCommentById(eq(commentId));
+        verify(reviewCommentService).getReviewCommentById(commentId);
     }
 
     @Test
@@ -128,7 +128,7 @@ class ReviewCommentControllerTest {
 
         Page<ReviewCommentResponseDTO> page = new PageImpl<>(comments, pageable, comments.size());
 
-        when(reviewCommentService.getReviewComments(eq(reviewId), eq(0), eq(10))).thenReturn(page);
+        when(reviewCommentService.getReviewComments(reviewId, 0, 10)).thenReturn(page);
 
         mockMvc.perform(get("/api/shop/reviews/{reviewId}/comments", reviewId)
                         .param("page", "0")
@@ -142,7 +142,7 @@ class ReviewCommentControllerTest {
                 .andExpect(jsonPath("$.content[1].content").value("Comment 2"))
                 .andDo(print());
 
-        verify(reviewCommentService).getReviewComments(eq(reviewId), eq(0), eq(10));
+        verify(reviewCommentService).getReviewComments(reviewId, 0, 10);
     }
 
 
@@ -152,13 +152,13 @@ class ReviewCommentControllerTest {
         Long reviewId = 1L;
         Long commentId = 1L;
 
-        doNothing().when(reviewCommentService).deleteReviewComment(eq(commentId));
+        doNothing().when(reviewCommentService).deleteReviewComment(commentId);
 
         mockMvc.perform(delete("/api/shop/reviews/{reviewId}/comments/{commentId}", reviewId, commentId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
-        verify(reviewCommentService).deleteReviewComment(eq(commentId));
+        verify(reviewCommentService).deleteReviewComment(commentId);
     }
 }
