@@ -165,8 +165,8 @@ public class TossPaymentProcessor implements PaymentProcessor {
     }
 
     // 결제 취소
-    @Override
     @Transactional
+    @Override
     public void canceledPayment(Cancel cancel) {
         String orderNumber = cancel.getOrderNumber();
         String paymentKey = getPaymentKey(orderNumber);
