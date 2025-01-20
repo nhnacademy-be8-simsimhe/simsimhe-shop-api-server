@@ -13,6 +13,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Query("SELECT c FROM Category c WHERE c.categoryName = :categoryName AND c.parent = :parent")
     Optional<Category> findByCategoryNameAndParent(@Param("categoryName") String categoryName, @Param("parent") Category parent);
 
+    //부모 카테고리가 없는 카테고리 조회
     @Query("SELECT c FROM Category c WHERE c.categoryName = :categoryName AND c.parent IS NULL")
     Optional<Category> findByCategoryNameAndParentIsNull(@Param("categoryName") String categoryName);
 

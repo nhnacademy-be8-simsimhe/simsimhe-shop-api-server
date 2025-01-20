@@ -36,6 +36,5 @@ public class CartCustomRepositoryImpl implements CartCustomRepository {
                 .innerJoin(bookImagePath).on(book.bookId.eq(bookImagePath.book.bookId))
                 .where(book.bookId.eq(bookId).and(bookImagePath.imageType.eq(BookImagePath.ImageType.THUMBNAIL)))
                 .fetchOne();
-
     }
 }

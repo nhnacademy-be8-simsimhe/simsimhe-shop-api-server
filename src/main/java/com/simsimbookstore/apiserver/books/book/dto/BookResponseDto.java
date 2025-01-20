@@ -5,19 +5,17 @@ import com.simsimbookstore.apiserver.books.book.entity.BookStatus;
 import com.simsimbookstore.apiserver.books.bookcontributor.dto.BookContributorResponsDto;
 import com.simsimbookstore.apiserver.books.category.dto.CategoryResponseDto;
 import com.simsimbookstore.apiserver.books.tag.dto.TagResponseDto;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Setter
+@Getter
 public class BookResponseDto {
 
     private Long bookId;

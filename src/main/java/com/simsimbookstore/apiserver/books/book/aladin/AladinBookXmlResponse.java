@@ -3,11 +3,14 @@ package com.simsimbookstore.apiserver.books.book.aladin;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @JsonIgnoreProperties(ignoreUnknown = true) // 매핑되지 않은 필드를 무시
-@Data
+@Getter
+@Setter
 public class AladinBookXmlResponse {
 
     @JacksonXmlProperty(localName = "itemId", isAttribute = true) // itemId는 속성

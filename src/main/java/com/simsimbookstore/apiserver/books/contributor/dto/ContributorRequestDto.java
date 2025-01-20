@@ -2,15 +2,14 @@ package com.simsimbookstore.apiserver.books.contributor.dto;
 
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Setter
+@EqualsAndHashCode
 public class ContributorRequestDto {
 
     @NotBlank(message = "이름을 공백없이 입력해주세요")
