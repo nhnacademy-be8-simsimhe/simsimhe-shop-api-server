@@ -4,14 +4,16 @@ import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.delivery.repository.DeliveryRepository;
 import com.simsimbookstore.apiserver.orders.order.dto.MemberOrderRequestDto;
+import com.simsimbookstore.apiserver.orders.order.dto.OrderAdminResponseDto;
 import com.simsimbookstore.apiserver.orders.order.dto.OrderOrderBookResponseDto;
 import com.simsimbookstore.apiserver.orders.order.dto.OrderResponseDto;
+import com.simsimbookstore.apiserver.orders.order.dto.OrderStateUpdateDto;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.orders.order.service.MemberOrderService;
 import com.simsimbookstore.apiserver.orders.order.service.OrderNumberService;
 import com.simsimbookstore.apiserver.orders.order.service.OrderTotalService;
-import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookResponseDto;
+import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookAdminResponseDto;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
 import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
 import com.simsimbookstore.apiserver.users.user.entity.User;
@@ -84,17 +86,30 @@ public class MemberOrderServiceImpl implements MemberOrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
 
-        OrderResponseDto orderResponseDto = OrderResponseDto.fromEntity(order);
+        OrderAdminResponseDto orderResponseDto = OrderAdminResponseDto.builder()
+                .orderId(orderId)
+                .orderNumber(order.getOrderNumber())
+                .orderState(order.getOrderState())
+                .totalPrice(order.getTotalPrice()).build();
 
         List<OrderBook> orderBooks = orderBookService.getOrderBooks(orderId);
 
-        List<OrderBookResponseDto> orderBookResponseDtos = orderBooks.stream()
-                .map(orderBookService::toOrderBookResponseDto).toList();
+        List<OrderBookAdminResponseDto> orderBookAdminResponseDtos = orderBooks.stream()
+                .map(ob -> OrderBookAdminResponseDto.builder()
+                        .orderBookId(ob.getOrderBookId())
+                        .bookTitle(ob.getBook().getTitle())
+                        .quantity(ob.getQuantity())
+                        .salePrice(ob.getSalePrice())
+                        .discountPrice(ob.getDiscountPrice())
+                        .orderBookState(ob.getOrderBookState())
+                        .build()).toList();
+
         return OrderOrderBookResponseDto.builder()
                 .orderResponseDto(orderResponseDto)
-                .orderBookResponseDtos(orderBookResponseDtos)
+                .orderBookAdminResponseDtos(orderBookAdminResponseDtos)
                 .build();
     }
+
     @Override
     public PageResponse<OrderResponseDto> getAllOrders(Pageable pageable) {
         Page<Order> orderPage = orderRepository.findAll(pageable);
@@ -107,6 +122,16 @@ public class MemberOrderServiceImpl implements MemberOrderService {
                 dtoPage
         );
     }
+
+    @Override
+    public OrderAdminResponseDto updateOrder(OrderStateUpdateDto dto) {
+        Order order = orderRepository.findById(dto.getOrderId())
+                .orElseThrow(() -> new NotFoundException("order not found. ID=" + dto.getOrderId()));
+        order.setOrderState(dto.getOrderState());
+        orderRepository.save(order);
+        return OrderAdminResponseDto.fromEntity(order);
+    }
+
 
 
 }

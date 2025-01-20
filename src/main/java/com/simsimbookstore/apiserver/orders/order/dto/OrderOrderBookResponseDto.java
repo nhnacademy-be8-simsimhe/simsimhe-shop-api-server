@@ -1,6 +1,6 @@
 package com.simsimbookstore.apiserver.orders.order.dto;
 
-import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookResponseDto;
+import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookAdminResponseDto;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +14,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OrderOrderBookResponseDto {
 
-    OrderResponseDto orderResponseDto;
-    List<OrderBookResponseDto> orderBookResponseDtos;
+    OrderAdminResponseDto orderResponseDto;
+    List<OrderBookAdminResponseDto> orderBookAdminResponseDtos;
 }
