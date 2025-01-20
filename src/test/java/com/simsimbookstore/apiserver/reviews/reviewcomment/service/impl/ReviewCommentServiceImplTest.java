@@ -278,7 +278,7 @@ class ReviewCommentServiceImplTest {
         Page<ReviewComment> commentPage = new PageImpl<>(comments, pageable, comments.size());
 
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
-        when(reviewCommentRepository.findAllByReview(eq(review), eq(pageable))).thenReturn(commentPage);
+        when(reviewCommentRepository.findAllByReview(review, pageable)).thenReturn(commentPage);
 
         // When
         Page<ReviewCommentResponseDTO> result = reviewCommentService.getReviewComments(reviewId, 0, 10);

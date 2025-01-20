@@ -40,9 +40,8 @@ public class ElasticSearchConfig {
         );
 
         RestClientBuilder builder = RestClient.builder(new HttpHost(url, 9200))
-                .setHttpClientConfigCallback(httpClientBuilder -> {
-                    return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-                });
+                .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+
 
         ElasticsearchTransport transport = new RestClientTransport(builder.build(), new JacksonJsonpMapper());
         return transport;

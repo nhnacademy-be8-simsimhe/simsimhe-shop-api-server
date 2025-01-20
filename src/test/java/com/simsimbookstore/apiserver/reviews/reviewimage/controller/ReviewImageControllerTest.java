@@ -52,7 +52,7 @@ class ReviewImageControllerTest {
 
         );
 
-        when(reviewImagePathService.createReviewImage(eq(reviewId), eq(imagePaths)))
+        when(reviewImagePathService.createReviewImage(reviewId, imagePaths))
                 .thenReturn(imgPathResponseDTOList);
 
         mockMvc.perform(post("/api/shop/reviews/{reviewId}/images", reviewId)
@@ -64,7 +64,7 @@ class ReviewImageControllerTest {
                 .andExpect(jsonPath("$[0].reviewImagePathId").value(imgPathResponseDTOList.get(0).getReviewImagePathId()))
                 .andExpect(jsonPath("$[0].imageName").value(imgPathResponseDTOList.get(0).getImageName()));
 
-        verify(reviewImagePathService, times(1)).createReviewImage(eq(reviewId), eq(imagePaths));
+        verify(reviewImagePathService, times(1)).createReviewImage(reviewId, imagePaths);
     }
 
     @Test
@@ -72,13 +72,13 @@ class ReviewImageControllerTest {
     void deleteImage() throws Exception {
         Long imageId = 1L;
 
-        doNothing().when(reviewImagePathService).deleteReviewImage(eq(imageId));
+        doNothing().when(reviewImagePathService).deleteReviewImage(imageId);
 
         mockMvc.perform(delete("/api/shop/reviews/{reviewId}/images/{imageId}", 1L, imageId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        verify(reviewImagePathService, times(1)).deleteReviewImage(eq(imageId));
+        verify(reviewImagePathService, times(1)).deleteReviewImage(imageId);
     }
 
     @Test
@@ -91,7 +91,7 @@ class ReviewImageControllerTest {
                 ReviewImagePath.builder().reviewImagePathId(2L).imageName("/images/review1/image2.jpg").build()
         );
 
-        when(reviewImagePathService.getImagesByReviewId(eq(reviewId))).thenReturn(mockImages);
+        when(reviewImagePathService.getImagesByReviewId(reviewId)).thenReturn(mockImages);
 
         mockMvc.perform(get("/api/shop/reviews/{reviewId}/images", reviewId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -104,7 +104,7 @@ class ReviewImageControllerTest {
                 .andExpect(jsonPath("$[1].reviewImagePathId").value(mockImages.get(1).getReviewImagePathId()))
                 .andExpect(jsonPath("$[1].imageName").value(mockImages.get(1).getImageName()));
 
-        verify(reviewImagePathService, times(1)).getImagesByReviewId(eq(reviewId));
+        verify(reviewImagePathService, times(1)).getImagesByReviewId(reviewId);
     }
 
 }

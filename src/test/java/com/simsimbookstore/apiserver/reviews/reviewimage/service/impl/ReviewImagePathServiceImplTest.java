@@ -72,7 +72,7 @@ class ReviewImagePathServiceImplTest {
         when(reviewRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reviewImagePathService.createReviewImage(1L, List.of("/images/review1/image1.jpg")))
-                .isInstanceOf(NotFoundException.class)
+                .isInstanceOf(RuntimeException.class)
                 .hasMessage("존재하지 않는 리뷰입니다.");
         verify(reviewRepository, times(1)).findById(1L);
         verify(reviewImagePathRepository, never()).save(any(ReviewImagePath.class));

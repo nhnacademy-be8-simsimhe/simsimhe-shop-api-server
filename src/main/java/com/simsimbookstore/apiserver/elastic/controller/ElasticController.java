@@ -17,7 +17,7 @@ public class ElasticController {
 
 
     @PostMapping("/document")
-    public ResponseEntity<?> saveData(@RequestBody SearchBookDto searchBookDto) {
+    public ResponseEntity<Void> saveData(@RequestBody SearchBookDto searchBookDto) {
 
         SearchBook searchBook = new SearchBook(
                 searchBookDto.getId(),
@@ -38,7 +38,7 @@ public class ElasticController {
     }
 
     @PostMapping("/document/save")
-    public ResponseEntity<?> saveAll() {
+    public ResponseEntity<String> saveAll() {
         elasticService.saveAll("simsim.json");
         return ResponseEntity.ok("all data is saved");
     }
@@ -53,7 +53,7 @@ public class ElasticController {
 
 
     @DeleteMapping("/document/{id}")
-    public ResponseEntity<?> deleteData(@PathVariable String id) {
+    public ResponseEntity<String> deleteData(@PathVariable String id) {
 
         elasticService.deleteBook(id);
 
