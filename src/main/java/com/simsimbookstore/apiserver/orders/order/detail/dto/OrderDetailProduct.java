@@ -19,9 +19,10 @@ public class OrderDetailProduct {
     private BigDecimal discountPrice;
     private String packageName;
     private BigDecimal packagePrice;
+    private OrderBook.OrderBookState orderBookState;
 
     //String packageName, BigDecimal packagePrice
-    public OrderDetailProduct(OrderBook orderBooks, String bookTitle, String couponName, BigDecimal couponPrice, String packageName, BigDecimal packagePrice) {
+    public OrderDetailProduct(OrderBook orderBooks, String bookTitle, String couponName, BigDecimal couponPrice, String packageName, BigDecimal packagePrice, OrderBook.OrderBookState orderBookState) {
         this.bookTitle = bookTitle;
         this.couponName = couponName;
         this.couponPrice = couponPrice;
@@ -30,5 +31,6 @@ public class OrderDetailProduct {
         this.discountPrice = orderBooks.getDiscountPrice();
         this.packageName = packageName;
         this.packagePrice = packagePrice;
+        this.orderBookState = orderBookState;
     }
 }

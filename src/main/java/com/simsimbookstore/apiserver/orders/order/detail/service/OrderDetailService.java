@@ -58,6 +58,7 @@ public class OrderDetailService {
             // 책 제목
             book = bookRepository.findByBookId(orderBook.getOrderBookId()).orElseThrow(() -> new NotFoundException("주문된 책이 없습니다."));
             String bookTitle = book.getTitle();
+            OrderBook.OrderBookState orderBookState = orderBook.getOrderBookState();
 
             // coupon
             CouponDiscount couponDiscount = couponDiscountRepository.findByOrderBook(orderBook);
@@ -86,7 +87,7 @@ public class OrderDetailService {
                 }
             }
 
-            OrderDetailProduct orderDetailProduct = new OrderDetailProduct(orderBook, bookTitle, couponName, couponPrice, packageName, packagePrice);
+            OrderDetailProduct orderDetailProduct = new OrderDetailProduct(orderBook, bookTitle, couponName, couponPrice, packageName, packagePrice, orderBookState);
             orderDetailProducts.add(orderDetailProduct);
         }
 
