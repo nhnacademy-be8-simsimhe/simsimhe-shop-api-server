@@ -1,13 +1,5 @@
 package com.simsimbookstore.apiserver.users.address.controller;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.users.address.dto.AddressRequestDto;
 import com.simsimbookstore.apiserver.users.address.dto.AddressResponseDto;
@@ -18,9 +10,6 @@ import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +21,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest(controllers = AddressController.class)
@@ -51,6 +48,7 @@ class AddressControllerTest {
     Address testAddress2;
 
     AddressRequestDto testAddressRequestDto1;
+
     @BeforeEach
     void setUp() {
         Grade testGrade = Grade.builder()
@@ -105,9 +103,9 @@ class AddressControllerTest {
                 .build();
 
         when(addressService.getAddress(1L)).thenReturn(testAddress1);
-        mockMvc.perform(get("/api/users/addresses/{addressID}",1L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(addressRequestDto)))
+        mockMvc.perform(get("/api/users/addresses/{addressID}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(addressRequestDto)))
 
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.addressId").value(testAddress1.getAddressId()));
@@ -120,14 +118,14 @@ class AddressControllerTest {
         AddressResponseDto addressResponseDto2 = AddressMapper.responseDtoFrom(testAddress2);
 
 
-        when(addressService.getAddresses(1L)).thenReturn(List.of(addressResponseDto1,addressResponseDto2));
-        mockMvc.perform(get("/api/users/{userId}/addresses",1L)
-                .contentType(MediaType.APPLICATION_JSON))
+        when(addressService.getAddresses(1L)).thenReturn(List.of(addressResponseDto1, addressResponseDto2));
+        mockMvc.perform(get("/api/users/{userId}/addresses", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
 
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[*].addressId").value(Matchers.hasItems(1,2)))
-                .andExpect(jsonPath("$[*].alias").value(Matchers.hasItems("본집","자취방")));
+                .andExpect(jsonPath("$[*].addressId").value(Matchers.hasItems(1, 2)))
+                .andExpect(jsonPath("$[*].alias").value(Matchers.hasItems("본집", "자취방")));
     }
 
     @Test
@@ -135,9 +133,9 @@ class AddressControllerTest {
         AddressResponseDto addressResponseDto = AddressMapper.responseDtoFrom(testAddress1);
 
         when(addressService.createAddress(anyLong(), any(AddressRequestDto.class))).thenReturn(addressResponseDto);
-        mockMvc.perform(post("/api/users/{userId}/addresses",1L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(testAddressRequestDto1)))
+        mockMvc.perform(post("/api/users/{userId}/addresses", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(testAddressRequestDto1)))
 
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.addressId").value(testAddress1.getAddressId()));
@@ -159,7 +157,7 @@ class AddressControllerTest {
         when(addressService.createAddress(anyLong(), any(AddressRequestDto.class))).thenReturn(responseDto);
 
 
-        mockMvc.perform(post("/api/users/{usersId}/addresses",1L)
+        mockMvc.perform(post("/api/users/{usersId}/addresses", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testAddressRequestDto1)))
                 .andExpect(status().isCreated())
@@ -171,10 +169,10 @@ class AddressControllerTest {
 
     @Test
     @DisplayName("10개 이상의 주소 등록 시 BadRequest")
-    void addAddressMoreThan10() throws Exception{
+    void addAddressMoreThan10() throws Exception {
         when(addressService.getCountAddresses(anyLong())).thenReturn(10);
 
-        mockMvc.perform(post("/api/users/{usersId}/addresses",1L)
+        mockMvc.perform(post("/api/users/{usersId}/addresses", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testAddressRequestDto1)))
                 .andExpect(status().isBadRequest())

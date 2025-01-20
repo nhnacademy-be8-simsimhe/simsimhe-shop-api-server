@@ -40,9 +40,8 @@ public class SocialUserServiceImpl implements SocialUserService {
         if (isExist) {
             Optional<SocialUser> optionalSocialUser = socialUserRepository.findByOauthId(oauthId);
             return optionalSocialUser
-                    .orElseThrow(()-> new NotFoundException("not found socialUser with oauthId: " + oauthId));
-        }
-        else { // 소셜 유저 최초 등록
+                    .orElseThrow(() -> new NotFoundException("not found socialUser with oauthId: " + oauthId));
+        } else { // 소셜 유저 최초 등록
             SocialUser socialUser = SocialUserMapper.toSocialUser(socialUserRequestDto);
             Grade tier = gradeService.findByTier(Tier.STANDARD);
             socialUser.assignGrade(tier);

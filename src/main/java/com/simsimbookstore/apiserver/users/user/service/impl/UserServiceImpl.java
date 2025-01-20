@@ -1,42 +1,36 @@
 package com.simsimbookstore.apiserver.users.user.service.impl;
 
-import static java.time.LocalDate.now;
-
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.users.UserMapper;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
-
 import com.simsimbookstore.apiserver.users.grade.service.GradeService;
 import com.simsimbookstore.apiserver.users.role.entity.Role;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.role.service.RoleService;
 import com.simsimbookstore.apiserver.users.user.dto.GuestUserRequestDto;
-import com.simsimbookstore.apiserver.users.user.entity.Gender;
-
-import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.user.dto.UserResponse;
-
+import com.simsimbookstore.apiserver.users.user.entity.Gender;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import com.simsimbookstore.apiserver.users.user.service.UserService;
-
 import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
-import java.time.LocalDateTime;
-
-import java.util.HashSet;
-
-import java.util.List;
-
-import java.util.Optional;
-
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.text.ParsePosition;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.*;
+
+import static java.time.LocalDate.now;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -47,12 +41,15 @@ public class UserServiceImpl implements UserService {
     private final RoleService roleService;
     private final GradeService gradeService;
 
+    private static final String USER_NOT_FOUND_MESSAGE = "Not found user with ID: ";
+
+
     @Transactional
     @Override
     public User updateUserStatus(Long userId, UserStatus userStatus) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
-            throw new NotFoundException("not found user with ID : " + userId);
+            throw new NotFoundException(USER_NOT_FOUND_MESSAGE + userId);
         }
 
         User user = optionalUser.get();
@@ -65,14 +62,14 @@ public class UserServiceImpl implements UserService {
     public User updateUserGrade(Long userId, Tier tier) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
-            throw new NotFoundException("not found user with ID : " + userId);
+            throw new NotFoundException(USER_NOT_FOUND_MESSAGE + userId);
         }
 
         User user = optionalUser.get();
         Grade newGrade = gradeRepository.findByTier(tier);
         user.updateGrade(newGrade);
 
-            return userRepository.save(user);
+        return userRepository.save(user);
     }
 
     @Transactional
@@ -80,29 +77,28 @@ public class UserServiceImpl implements UserService {
     public User updateUserLatestLoginDate(Long userId, LocalDateTime latestLoginDate) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
-            throw new NotFoundException("not found user with ID : " + userId);
+            throw new NotFoundException(USER_NOT_FOUND_MESSAGE + userId);
         }
 
         User user = optionalUser.get();
         user.updateLatestLoginDate(latestLoginDate);
         userRepository.save(user);
-        Optional<User> savedUser = userRepository.findUserWithGradeAndUserRoleListByUserId(user.getUserId());
-        return savedUser.get();
+        Optional<User> optionalSavedUser = userRepository.findUserWithGradeAndUserRoleListByUserId(user.getUserId());
+
+        return optionalSavedUser.orElseThrow(()->new NotFoundException(USER_NOT_FOUND_MESSAGE + userId));
     }
 
 
     @Override
     public User getUser(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("not found user with ID : " + userId));
-        return user;
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_MESSAGE + userId));
     }
 
     @Override
-    public User getUserWithGradeAndRoles(Long userId){
-        User user = userRepository.findUserWithGradeAndUserRoleListByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("not found user with ID : " + userId));
-        return user;
+    public User getUserWithGradeAndRoles(Long userId) {
+        return userRepository.findUserWithGradeAndUserRoleListByUserId(userId)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_MESSAGE + userId));
     }
 
 
@@ -119,37 +115,47 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponse> getUserByBirthMonth(String monthStr) {
-        boolean isNumeric = monthStr.chars().allMatch(Character::isDigit);
-        // 문자열이 숫자인지 확인
-        if (!isNumeric) {
-            throw new IllegalArgumentException("month는 숫자여야 합니다.");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDate = null;
+
+        try{
+            localDate = LocalDate.parse(monthStr, formatter);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("옳바른 날짜 형식이 아닙니다: " + monthStr);
         }
-        // 1과 12사이 숫자인지 확인
-        int month = Integer.parseInt(monthStr);
-        if (month > 12 || month < 1) {
-            throw new IllegalArgumentException("month는 1과 12 사이 숫자여야합니다.");
-        }
+
+        int month = localDate.getMonth().getValue();
         List<User> users = userRepository.findAllByBirthMonth(month, RoleName.USER);
         return users.stream().map(UserMapper::toResponse).toList();
+
+//        boolean isNumeric = monthStr.chars().allMatch(Character::isDigit);
+//        // 문자열이 숫자인지 확인
+//        if (!isNumeric) {
+//            throw new IllegalArgumentException("month는 숫자여야 합니다.");
+//        }
+//        // 1과 12사이 숫자인지 확인
+//        int month = Integer.parseInt(monthStr);
+//        if (month > 12 || month < 1) {
+//            throw new IllegalArgumentException("month는 1과 12 사이 숫자여야합니다.");
+//        }
+
     }
 
     public Tier getUserTier(Long userId) {
-        return  (getUser(userId).getGrade().getTier());
+        return (getUser(userId).getGrade().getTier());
     }
-
 
     @Transactional
     @Override
     public User createGuest(GuestUserRequestDto dto) {
-        String uuid = UUID.randomUUID().toString().substring(0,15);
-
+        String uuid = UUID.randomUUID().toString().substring(0, 15);
 
         Grade grade = gradeService.findByTier(Tier.STANDARD);
 
         User guest = User.builder()
                 .userName(dto.getUserName())
                 .mobileNumber(uuid)
-                .email(uuid.substring(0,5)+"@"+uuid.substring(6,15)+"com")
+                .email(uuid.substring(0, 5) + "@" + uuid.substring(6, 15) + "com")
                 .birth(now())
                 .gender(Gender.MALE)
                 .userStatus(UserStatus.ACTIVE)
@@ -169,5 +175,11 @@ public class UserServiceImpl implements UserService {
         userRepository.save(guest);
 
         return guest;
+    }
+
+    @Transactional
+    @Override
+    public int updateDormantUserState(int period) {
+        return userRepository.updateUserStateInactive(LocalDateTime.now().minusDays(period));
     }
 }

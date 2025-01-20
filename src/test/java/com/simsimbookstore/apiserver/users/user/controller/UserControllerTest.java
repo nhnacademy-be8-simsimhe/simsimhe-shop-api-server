@@ -1,29 +1,22 @@
 package com.simsimbookstore.apiserver.users.user.controller;
 
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.simsimbookstore.apiserver.users.UserMapper;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.role.entity.Role;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.user.dto.UserGradeUpdateRequestDto;
 import com.simsimbookstore.apiserver.users.user.dto.UserLatestLoginDateUpdateRequestDto;
+import com.simsimbookstore.apiserver.users.user.dto.UserResponse;
 import com.simsimbookstore.apiserver.users.user.dto.UserStatusUpdateRequestDto;
+import com.simsimbookstore.apiserver.users.user.entity.Gender;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.service.impl.UserServiceImpl;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-
 import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +27,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
 @ExtendWith(MockitoExtension.class)
@@ -67,6 +70,7 @@ class UserControllerTest {
                 .createdAt(LocalDateTime.now())
                 .userStatus(UserStatus.ACTIVE)
                 .grade(testGrade)
+                .gender(Gender.FEMALE)
                 .userRoleList(new HashSet<>())
                 .build();
 
@@ -115,8 +119,8 @@ class UserControllerTest {
         when(userService.updateUserGrade(userId, Tier.ROYAL)).thenReturn(testUser);
 
         mockMvc.perform(put("/api/users/1/grade")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userGradeUpdateRequestDto)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userGradeUpdateRequestDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(userId))
                 .andExpect(jsonPath("$.grade.tier").value(Tier.ROYAL.toString()));
@@ -136,10 +140,57 @@ class UserControllerTest {
         when(userService.updateUserLatestLoginDate(userId, requestDto.getLatestLoginDate())).thenReturn(testUser);
 
         mockMvc.perform(put("/api/users/1/latestLoginDate")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestDto)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(userId));
 //                .andExpect(jsonPath("$.latestLoginDate").value(latestLoginDate.toString()));
+    }
+
+    @Test
+    void getUser() throws Exception {
+        Long userId = 1L;
+        when(userService.getUserWithGradeAndRoles(userId)).thenReturn(testUser);
+
+        UserResponse response = UserMapper.toResponse(testUser);
+        mockMvc.perform(get("/api/users/{userId}",1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(response)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId").value(userId))
+                .andExpect(jsonPath("$.userName").value(testUser.getUserName()))
+                .andExpect(jsonPath("$.email").value(testUser.getEmail()))
+                .andExpect(jsonPath("$.userStatus").value(testUser.getUserStatus().toString()))
+                .andExpect(jsonPath("$.tier").value(testUser.getGrade().getTier().toString()))
+                .andExpect(jsonPath("$.gender").value(testUser.getGender().toString()))
+                .andExpect(jsonPath("$.roles", Matchers.hasItem(RoleName.USER.toString())));
+    }
+
+    @Test
+    void getActiveUser() throws Exception {
+        UserResponse response = UserMapper.toResponse(testUser);
+        when(userService.getAllActiveUser()).thenReturn(List.of(response));
+
+        mockMvc.perform(get("/api/users/active")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(List.of(response))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", Matchers.is(1)));
+    }
+
+    @Test
+    void getAllUserByBirth() throws Exception {
+
+        UserResponse response = UserMapper.toResponse(testUser);
+        when(userService.getUserByBirthMonth(any())).thenReturn(List.of(response));
+
+        mockMvc.perform(get("/api/users").param("birthMonth", "1995-03-09")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(List.of(List.of(response)))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", Matchers.is(1)));
+
+        verify(userService, times(1)).getUserByBirthMonth("1995-03-09");
+
     }
 }

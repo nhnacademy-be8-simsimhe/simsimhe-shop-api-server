@@ -20,7 +20,7 @@ public class SocialUserController {
     private final SocialUserService socialUserService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginSocialUser(
+    public ResponseEntity<SocialUserResponse> loginSocialUser(
             @RequestBody SocialUserRequestDto socialUserRequestDto
     ) {
         SocialUser socialUser = socialUserService.loginSocialUser(socialUserRequestDto);
