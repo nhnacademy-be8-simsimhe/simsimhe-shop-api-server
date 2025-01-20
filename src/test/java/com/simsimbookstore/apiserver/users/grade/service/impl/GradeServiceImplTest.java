@@ -1,5 +1,6 @@
 package com.simsimbookstore.apiserver.users.grade.service.impl;
 
+import com.simsimbookstore.apiserver.exception.AlreadyExistException;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
@@ -73,9 +74,18 @@ class GradeServiceImplTest {
     @DisplayName("새로운 등급 저장 테스트")
     void save() {
         when(gradeRepository.save(standardGrade)).thenReturn(standardGrade);
+        when(gradeRepository.existsByTier(any())).thenReturn(false);
         gradeService.save(standardGrade);
 
         verify(gradeRepository, times(1)).save(standardGrade);
+    }
+
+    @Test
+    @DisplayName("새로운 등급 저장 시 이미 등록된 티어")
+    void save_AlreadyExistException() {
+        when(gradeRepository.existsByTier(any())).thenReturn(true);
+
+        assertThrows(AlreadyExistException.class, () -> gradeService.save(standardGrade));
     }
 
     @Test

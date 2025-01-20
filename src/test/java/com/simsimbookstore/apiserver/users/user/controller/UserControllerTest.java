@@ -2,17 +2,21 @@ package com.simsimbookstore.apiserver.users.user.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.simsimbookstore.apiserver.users.UserMapper;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.role.entity.Role;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.user.dto.UserGradeUpdateRequestDto;
 import com.simsimbookstore.apiserver.users.user.dto.UserLatestLoginDateUpdateRequestDto;
+import com.simsimbookstore.apiserver.users.user.dto.UserResponse;
 import com.simsimbookstore.apiserver.users.user.dto.UserStatusUpdateRequestDto;
+import com.simsimbookstore.apiserver.users.user.entity.Gender;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.service.impl.UserServiceImpl;
 import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,9 +31,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -65,6 +70,7 @@ class UserControllerTest {
                 .createdAt(LocalDateTime.now())
                 .userStatus(UserStatus.ACTIVE)
                 .grade(testGrade)
+                .gender(Gender.FEMALE)
                 .userRoleList(new HashSet<>())
                 .build();
 
@@ -139,5 +145,42 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(userId));
 //                .andExpect(jsonPath("$.latestLoginDate").value(latestLoginDate.toString()));
+    }
+
+    @Test
+    void getUser() throws Exception {
+        Long userId = 1L;
+        when(userService.getUserWithGradeAndRoles(userId)).thenReturn(testUser);
+
+        UserResponse response = UserMapper.toResponse(testUser);
+        mockMvc.perform(get("/api/users/{userId}",1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(response)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId").value(userId))
+                .andExpect(jsonPath("$.userName").value(testUser.getUserName()))
+                .andExpect(jsonPath("$.email").value(testUser.getEmail()))
+                .andExpect(jsonPath("$.userStatus").value(testUser.getUserStatus().toString()))
+                .andExpect(jsonPath("$.tier").value(testUser.getGrade().getTier().toString()))
+                .andExpect(jsonPath("$.gender").value(testUser.getGender().toString()))
+                .andExpect(jsonPath("$.roles", Matchers.hasItem(RoleName.USER.toString())));
+    }
+
+    @Test
+    void getActiveUser() throws Exception {
+        UserResponse response = UserMapper.toResponse(testUser);
+        when(userService.getAllActiveUser()).thenReturn(List.of(response));
+
+        mockMvc.perform(get("/api/users/active")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(List.of(response))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", Matchers.is(1)));
+
+//        @GetMapping("/active")
+//    public ResponseEntity<List<UserResponse>> getActiveUser() {
+//        List<UserResponse> allActiveUser = userService.getAllActiveUser();
+//        return ResponseEntity.status(HttpStatus.OK).body(allActiveUser);
+//    }
     }
 }
