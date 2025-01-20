@@ -18,6 +18,4 @@ public class SearchBookDto {
     List<String> tags;
     String publishedAt;
     long salePrice;
-    long bookSellCount;
-    long reviewCount;
 }

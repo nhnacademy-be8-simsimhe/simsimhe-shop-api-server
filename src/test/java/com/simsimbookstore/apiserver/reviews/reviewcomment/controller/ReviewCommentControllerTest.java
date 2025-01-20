@@ -10,6 +10,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -20,8 +22,8 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ReviewCommentControllerTest {
 
@@ -43,7 +45,7 @@ class ReviewCommentControllerTest {
         Long reviewId = 1L;
         Long userId = 2L;
         ReviewCommentRequestDTO requestDTO = new ReviewCommentRequestDTO("This is a comment");
-        ReviewCommentResponseDTO responseDTO = new ReviewCommentResponseDTO(1L, "This is a comment", LocalDateTime.now(), LocalDateTime.now(), "user1",1L);
+        ReviewCommentResponseDTO responseDTO = new ReviewCommentResponseDTO(1L, "This is a comment", LocalDateTime.now(), LocalDateTime.now(), "user1", 1L);
 
         when(reviewCommentService.createReviewComment(any(ReviewCommentRequestDTO.class), eq(reviewId), eq(userId)))
                 .thenReturn(responseDTO);
@@ -74,7 +76,7 @@ class ReviewCommentControllerTest {
                 .update_at(LocalDateTime.now())
                 .build();
 
-        when(reviewCommentService.updateReviewComment(eq(reviewId),eq(commentId),any(ReviewCommentRequestDTO.class)))
+        when(reviewCommentService.updateReviewComment(eq(reviewId), eq(commentId), any(ReviewCommentRequestDTO.class)))
                 .thenReturn(updatedComment);
 
         mockMvc.perform(put("/api/shop/reviews/{reviewId}/comments/{commentId}", reviewId, commentId)
@@ -85,7 +87,7 @@ class ReviewCommentControllerTest {
                 .andExpect(jsonPath("$.reviewCommentId").value(commentId))
                 .andExpect(jsonPath("$.content").value("Updated comment"));
 
-        verify(reviewCommentService).updateReviewComment(eq(reviewId),eq(commentId),any(ReviewCommentRequestDTO.class));
+        verify(reviewCommentService).updateReviewComment(eq(reviewId), eq(commentId), any(ReviewCommentRequestDTO.class));
     }
 
     @Test
@@ -112,34 +114,36 @@ class ReviewCommentControllerTest {
         verify(reviewCommentService).getReviewCommentById(eq(commentId));
     }
 
-//    @Test
-//    @DisplayName("댓글 전체 조회 테스트")
-//    void getReviewCommentsTest() throws Exception {
-//        Long reviewId = 1L;
-//
-//        List<ReviewCommentResponseDTO> comments = List.of(
-//                new ReviewCommentResponseDTO(1L, "Comment 1", LocalDateTime.now(), LocalDateTime.now(), "user1", 1L),
-//                new ReviewCommentResponseDTO(2L, "Comment 2", LocalDateTime.now(), LocalDateTime.now(), "user2", 2L)
-//        );
-//
-//        Page<ReviewCommentResponseDTO> page = new PageImpl<>(comments);
-//
-//        when(reviewCommentService.getReviewComments(eq(reviewId), eq(0), eq(10))).thenReturn(page);
-//
-//        mockMvc.perform(get("/api/shop/reviews/{reviewId}/comments", reviewId)
-//                        .param("page", "0")
-//                        .param("size", "10")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.content[0].reviewCommentId").value(1L))
-//                .andExpect(jsonPath("$.content[0].content").value("Comment 1"))
-//                .andExpect(jsonPath("$.content[1].reviewCommentId").value(2L))
-//                .andExpect(jsonPath("$.content[1].content").value("Comment 2"))
-//                .andDo(print());
-//
-//        verify(reviewCommentService).getReviewComments(eq(reviewId), eq(0), eq(10));
-//    }
+    @Test
+    @DisplayName("댓글 전체 조회 테스트")
+    void getReviewCommentsTest() throws Exception {
+        Long reviewId = 1L;
+
+        List<ReviewCommentResponseDTO> comments = List.of(
+                new ReviewCommentResponseDTO(1L, "Comment 1", LocalDateTime.now(), LocalDateTime.now(), "user1", 1L),
+                new ReviewCommentResponseDTO(2L, "Comment 2", LocalDateTime.now(), LocalDateTime.now(), "user2", 2L)
+        );
+
+        Pageable pageable = PageRequest.of(0, 2);
+
+        Page<ReviewCommentResponseDTO> page = new PageImpl<>(comments, pageable, comments.size());
+
+        when(reviewCommentService.getReviewComments(eq(reviewId), eq(0), eq(10))).thenReturn(page);
+
+        mockMvc.perform(get("/api/shop/reviews/{reviewId}/comments", reviewId)
+                        .param("page", "0")
+                        .param("size", "10")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].reviewCommentId").value(1L))
+                .andExpect(jsonPath("$.content[0].content").value("Comment 1"))
+                .andExpect(jsonPath("$.content[1].reviewCommentId").value(2L))
+                .andExpect(jsonPath("$.content[1].content").value("Comment 2"))
+                .andDo(print());
+
+        verify(reviewCommentService).getReviewComments(eq(reviewId), eq(0), eq(10));
+    }
 
 
     @Test

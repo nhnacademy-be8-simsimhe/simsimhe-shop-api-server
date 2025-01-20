@@ -7,7 +7,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +32,7 @@ public class WrapTypeController {
      */
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getWrapTypeById(@PathVariable Long id) {
+    public ResponseEntity<WrapTypeResponseDto> getWrapTypeById(@PathVariable Long id) {
         WrapTypeResponseDto wrapType = wrapTypeService.getWrapTypeById(id);
         return ResponseEntity.ok(wrapType);
     }
@@ -41,15 +40,11 @@ public class WrapTypeController {
     /**
      *
      * @param wrapTypeRequestDto 포장지를 저장 요청 dto
-     * @param bindingResult 에러처리
      * @return
      */
 
     @PostMapping
-    public ResponseEntity<?> createWrapType(@RequestBody @Valid WrapTypeRequestDto wrapTypeRequestDto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bindingResult.getAllErrors());
-        }
+    public ResponseEntity<WrapTypeResponseDto> createWrapType(@RequestBody @Valid WrapTypeRequestDto wrapTypeRequestDto) {
         WrapTypeResponseDto createdWrapType = wrapTypeService.createWrapType(wrapTypeRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdWrapType);
     }
@@ -74,7 +69,7 @@ public class WrapTypeController {
      */
 
     @PostMapping("/{id}/availability")
-    public ResponseEntity<?> updateAvailability(
+    public ResponseEntity<WrapTypeResponseDto> updateAvailability(
             @PathVariable Long id,
             @RequestParam Boolean isAvailable) {
 
