@@ -1,13 +1,6 @@
 package com.simsimbookstore.apiserver.users.user.controller;
 
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
@@ -19,10 +12,6 @@ import com.simsimbookstore.apiserver.users.user.dto.UserStatusUpdateRequestDto;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.service.impl.UserServiceImpl;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-
 import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,6 +23,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
 @ExtendWith(MockitoExtension.class)
@@ -115,8 +113,8 @@ class UserControllerTest {
         when(userService.updateUserGrade(userId, Tier.ROYAL)).thenReturn(testUser);
 
         mockMvc.perform(put("/api/users/1/grade")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userGradeUpdateRequestDto)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userGradeUpdateRequestDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(userId))
                 .andExpect(jsonPath("$.grade.tier").value(Tier.ROYAL.toString()));
@@ -136,8 +134,8 @@ class UserControllerTest {
         when(userService.updateUserLatestLoginDate(userId, requestDto.getLatestLoginDate())).thenReturn(testUser);
 
         mockMvc.perform(put("/api/users/1/latestLoginDate")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestDto)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(userId));
 //                .andExpect(jsonPath("$.latestLoginDate").value(latestLoginDate.toString()));

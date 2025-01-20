@@ -1,8 +1,5 @@
 package com.simsimbookstore.apiserver.users.address.repository;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.simsimbookstore.apiserver.common.config.QuerydslConfig;
 import com.simsimbookstore.apiserver.users.address.entity.Address;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
@@ -11,10 +8,6 @@ import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Import({QuerydslConfig.class})
 @DataJpaTest
@@ -105,7 +106,7 @@ class AddressRepositoryTest {
 
     @Test
     @DisplayName("주소 삭제")
-    void deleteAddress(){
+    void deleteAddress() {
         addressRepository.deleteById(testAddress1.getAddressId());
         Optional<Address> optionalAddress = addressRepository.findById(testAddress1.getAddressId());
         assertTrue(optionalAddress.isEmpty());
@@ -113,7 +114,7 @@ class AddressRepositoryTest {
 
     @Test
     @DisplayName("유저의 등록된 주소 개수 조회")
-    void countAllByUserUserId(){
+    void countAllByUserUserId() {
         int addressCount = addressRepository.countAllByUserUserId(testUser.getUserId());
         assertEquals(2, addressCount);
     }

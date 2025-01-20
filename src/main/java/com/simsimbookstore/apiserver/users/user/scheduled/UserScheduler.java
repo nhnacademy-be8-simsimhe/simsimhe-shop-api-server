@@ -16,7 +16,7 @@ public class UserScheduler {
 
     // 매분마다
 //    @Scheduled(cron = "0 * * * * ?")
-    public void checkDormantUser() {
-        userService.updateDormantUserState(30);
+    public int checkDormantUser() {
+        return userService.updateDormantUserState(30);
     }
 }

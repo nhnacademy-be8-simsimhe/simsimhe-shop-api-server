@@ -7,8 +7,6 @@ import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.role.repository.RoleRepository;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Import(QuerydslConfig.class)
 @DataJpaTest
@@ -34,7 +35,7 @@ class LocalUserRepositoryTest {
     private LocalUser testUser;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         Grade grade = Grade.builder()
                 .tier(Tier.STANDARD)
                 .minAmount(BigDecimal.valueOf(0))

@@ -1,7 +1,5 @@
 package com.simsimbookstore.apiserver.users.user.repository;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.simsimbookstore.apiserver.common.config.QuerydslConfig;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
@@ -10,17 +8,19 @@ import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.repository.LocalUserRepository;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import org.hibernate.LazyInitializationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Import(QuerydslConfig.class)
 @DataJpaTest
@@ -39,6 +39,8 @@ class UserRepositoryTest {
     LocalUser testUser;
 
     Grade standardGrade;
+    Grade royalGrade;
+
     @BeforeEach
     void setUp() {
         standardGrade = Grade.builder()
@@ -47,7 +49,7 @@ class UserRepositoryTest {
                 .maxAmount(BigDecimal.valueOf(100000))
                 .build();
 
-        Grade royalGrade = Grade.builder()
+        royalGrade = Grade.builder()
                 .tier(Tier.ROYAL)
                 .minAmount(BigDecimal.valueOf(0))
                 .maxAmount(BigDecimal.valueOf(100000))
@@ -71,7 +73,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    void findById(){
+    void findById() {
         Optional<User> optionalUser = userRepository.findById(testUser.getUserId());
         assertTrue(optionalUser.isPresent());
         assertEquals(testUser.getUserId(), optionalUser.get().getUserId());
@@ -86,7 +88,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    void updateGrade(){
+    void updateGrade() {
         Grade newGrade = gradeRepository.findByTier(Tier.ROYAL);
         testUser.updateGrade(newGrade);
 
@@ -111,7 +113,7 @@ class UserRepositoryTest {
     }
 
     @Test
-        void updateUserStateInactive() {
+    void updateUserStateInactive() {
         // 휴면 유저임
         User testUser1 = LocalUser.builder()
                 .userName("test2")
@@ -156,5 +158,16 @@ class UserRepositoryTest {
         assertTrue(optionalUser2.isPresent());
         User user2 = optionalUser2.get();
         assertEquals(UserStatus.ACTIVE, user2.getUserStatus());
+    }
+
+    @Test
+    void updateUserGrade() {
+        int i = userRepository.updateUserGrade(testUser.getUserId(), royalGrade);
+
+        assertEquals(1, i);
+        Optional<User> optionalUser = userRepository.findById(testUser.getUserId());
+        assertTrue(optionalUser.isPresent());
+
+        assertEquals(royalGrade.getGradeId(), optionalUser.get().getGrade().getGradeId());
     }
 }

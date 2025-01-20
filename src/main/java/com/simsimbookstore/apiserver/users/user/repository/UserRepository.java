@@ -1,6 +1,7 @@
 package com.simsimbookstore.apiserver.users.user.repository;
 
 
+import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
@@ -31,4 +32,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE User u SET u.userStatus = 'INACTIVE' WHERE u.userStatus = 'ACTIVE' AND u.latestLoginDate <= :targetDateTime")
     int updateUserStateInactive(@Param("targetDateTime") LocalDateTime targetDateTime);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE User u SET u.grade = :grade where u.userId = :userId")
+    int updateUserGrade(@Param("userId") Long userId,@Param("grade") Grade grade);
 }

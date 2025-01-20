@@ -30,6 +30,7 @@ import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
 import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
+import com.simsimbookstore.apiserver.users.grade.service.GradeService;
 import com.simsimbookstore.apiserver.users.role.entity.Role;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.role.service.RoleService;
@@ -78,6 +79,8 @@ class OrderFacadeServiceImplTest {
     @Mock
     private RoleService roleService;
 
+    @Mock
+    private GradeService gradeService;
 
     @InjectMocks
     private OrderFacadeImpl orderFacadeService;
@@ -396,6 +399,7 @@ class OrderFacadeServiceImplTest {
 
         verify(pointHistoryService).orderPoint(any());
     }
+
 
 
 }

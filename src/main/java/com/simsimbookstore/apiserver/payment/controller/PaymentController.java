@@ -49,7 +49,7 @@ public class PaymentController {
 
     // Toss에게 받은 결제 인증 성공시 검증 후 결제 승인 요청 -> 결제 완료 -> DB 저장
     @GetMapping("/payment/success")
-    public ResponseEntity<?> paymentSuccess(@RequestParam String paymentKey,
+    public ResponseEntity<ConfirmResponseDto> paymentSuccess(@RequestParam String paymentKey,
                                             @RequestParam String orderId,
                                             @RequestParam BigDecimal amount) {
         // 결제 승인 요청
@@ -57,6 +57,7 @@ public class PaymentController {
             
       //재고소모,쿠폰사용,포인트적립소모
         orderFacade.completeOrder(orderId);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(confirmResponseDto);
     }
 

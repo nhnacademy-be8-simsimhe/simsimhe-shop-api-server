@@ -21,11 +21,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static java.time.LocalDate.now;
 
@@ -172,4 +170,6 @@ public class UserServiceImpl implements UserService {
     public int updateDormantUserState(int period) {
         return userRepository.updateUserStateInactive(LocalDateTime.now().minusDays(period));
     }
+
+
 }
