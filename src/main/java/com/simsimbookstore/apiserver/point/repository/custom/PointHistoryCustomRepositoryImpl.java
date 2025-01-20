@@ -8,8 +8,6 @@ import com.simsimbookstore.apiserver.point.entity.QPointHistory;
 import com.simsimbookstore.apiserver.point.entity.QReviewPointManage;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 
@@ -61,6 +59,20 @@ public class PointHistoryCustomRepositoryImpl implements PointHistoryCustomRepos
         });
 
         return content;
+    }
+
+    @Override
+    public long countByUserId(Long userId) {
+        QPointHistory qPointHistory = QPointHistory.pointHistory;
+
+        Long count = queryFactory
+                .select(qPointHistory.count())
+                .from(qPointHistory)
+                .where(qPointHistory.user.userId.eq(userId))
+                .fetchOne();
+
+        // null 방지: count가 null인 경우 0 반환
+        return count != null ? count : 0L;
     }
 }
 

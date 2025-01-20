@@ -10,7 +10,6 @@ import lombok.Getter;
 public class ReviewRequestDTO {
 
 
-
     @NotNull(message = "평점을 입력해주세요.")
     @Min(value = 1, message = "점수는 최소 1점 이상이어야 합니다.")
     @Max(value = 5, message = "점수는 최대 5점 이하여야 합니다.")

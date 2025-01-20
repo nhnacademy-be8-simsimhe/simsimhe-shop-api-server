@@ -8,7 +8,6 @@ import com.simsimbookstore.apiserver.orders.packages.repository.WrapTypeReposito
 import com.simsimbookstore.apiserver.orders.packages.service.WrapTypeService;
 import jakarta.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -38,8 +37,7 @@ public class WrapTypeServiceImpl implements WrapTypeService {
     @Override
     public List<WrapTypeResponseDto> getAllWrapTypes() {
         return wrapTypeRepository.findAll().stream()
-                .map(WrapType::toResponseDto)
-                .collect(Collectors.toList());
+                .map(WrapType::toResponseDto).toList();
     }
 
     @Override
@@ -57,7 +55,6 @@ public class WrapTypeServiceImpl implements WrapTypeService {
     @Override
     public List<WrapTypeResponseDto> getAllWarpTypeIsAvailable() {
         return wrapTypeRepository.findAllByIsAvailableTrue()
-                .stream().map(WrapType::toResponseDto)
-                .collect(Collectors.toList());
+                .stream().map(WrapType::toResponseDto).toList();
     }
 }

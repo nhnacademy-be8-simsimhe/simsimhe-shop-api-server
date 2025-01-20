@@ -62,7 +62,7 @@ public class LocalUserServiceImpl implements LocalUserService {
         pointHistoryService.signupPoint(save);
 
         // 회원가입 시 welcome 쿠폰을 발급
-        couponService.issueCoupons(List.of(save.getUserId()), CouponType.WELCOME_COUPON_TYPE);
+        couponService.issueCoupons(List.of(save.getUserId()), CouponType.WELCOME_COUPON_TYPE_ID);
 
         return localUser;
     }

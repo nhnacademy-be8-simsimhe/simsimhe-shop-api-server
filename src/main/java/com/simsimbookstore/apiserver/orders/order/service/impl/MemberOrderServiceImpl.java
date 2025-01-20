@@ -1,4 +1,4 @@
-package com.simsimbookstore.apiserver.orders.order.service.Impl;
+package com.simsimbookstore.apiserver.orders.order.service.impl;
 
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.delivery.repository.DeliveryRepository;
@@ -9,7 +9,6 @@ import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.orders.order.service.MemberOrderService;
 import com.simsimbookstore.apiserver.orders.order.service.OrderNumberService;
 import com.simsimbookstore.apiserver.orders.order.service.OrderTotalService;
-import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import java.math.BigDecimal;
@@ -25,7 +24,6 @@ public class MemberOrderServiceImpl implements MemberOrderService {
     private final UserRepository userRepository;
     private final OrderNumberService orderNumberService;
     private final DeliveryRepository deliveryRepository;
-    private final OrderBookService orderBookService;
     private final OrderTotalService orderTotalService;
 
 

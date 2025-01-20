@@ -1,115 +1,25 @@
-### GET request to example server
-GET https://examples.http-client.intellij.net/get
-    ?generated-in=IntelliJ IDEA
-
-### 인덱스 삭제
-DELETE localhost:9200/books
-
-### 인덱스 생성 확인
-PUT localhost:9200/books
-Content-Type: application/json
-Authorization: Basic ZWxhc3RpYzpuaG5hY2FkZW15MTIzIQ
-
-{
-  "settings": {
-    "analysis": {
-      "tokenizer": {
-        "nori_tokenizer": {
-          "type": "nori_tokenizer",
-          "decompound_mode": "discard"
-        }
-      },
-      "filter": {
-        "nori_pos_filter": {
-          "type": "nori_part_of_speech",
-          "stoptags": [
-            "E",
-            "J",
-            "IC"
-          ]
-        }
-
-      },
-      "analyzer": {
-        "nori_analyzer": {
-          "type": "custom",
-          "tokenizer": "nori_tokenizer",
-          "filter": ["lowercase", "nori_pos_filter"]
-        }
-      }
-    }
-  },
-  "mappings": {
-    "properties": {
-      "book_title": { "type": "text",
-                      "analyzer" : "nori_analyzer" },
-      "book_price": { "type": "double" },
-      "authors": { "type": "text", "analyzer" : "nori_analyzer" },
-      "review_count": { "type": "integer" },
-      "average_score": { "type": "float" },
-      "thumbnail_image": { "type": "text" }
-    }
-  }
-}
-
-###
-
-
-### 인덱스 test 생성
-POST localhost:3000/elastic/index/test
-Content-Type: application/json
-
-{
-  "settings": {
-    "analysis": {
-      "tokenizer": {
-        "my_tokenizer": {
-          "type": "standard"
-        }
-      },
-      "analyzer": {
-        "my_analyzer": {
-          "type": "custom",
-          "tokenizer": "my_tokenizer",
-          "filter": ["lowercase"]
-        }
-      }
-    }
-  },
-  "mappings": {
-    "properties": {
-      "title": {
-        "type": "text",
-        "analyzer": "my_analyzer"
-      },
-      "content": {
-        "type": "text",
-        "analyzer": "my_analyzer"
-      }
-    }
-  }
-}
-
-
-
-### books 인덱스 생성
-POST localhost:3000/elastic/index/books
-
-
-### books index에 document 추가
-POST localhost:3000/elastic/document
-Content-Type: application/json
-
-{
-  "id" : 2,
-  "title" : "unlimited",
-  "tags" : ["뮤지컬", "영화"]
-}
-
-
-### simsimhe-books에서 json으로 뽑아낸 데이터 저장
+### simsimhe-books에서 json으로 뽑아낸 데이터 저장 (일괄 저장)
 POST localhost:8010/api/shop/elastic/document/save
 Content-Type: application/json
+
+
+### simsimhe-books에 데이터 저장
+POST localhost:8010/api/shop/elastic/document
+Content-Type: application/json
+
+{
+  "id": 10000,
+  "title": "테스트1000",
+  "description": "테스트1000 설명입니다",
+  "author": "테스트 작가",
+  "bookImage": "https",
+  "tags": [
+    "국내도서",
+    "소설"
+  ],
+  "publishedAt": "2025-01-19",
+  "salePrice": 19000
+}
 
 
 
@@ -119,24 +29,19 @@ POST localhost:8010/elastic/document/06Oh3pMBUDE5eABL4uCm
 Content-Type:application/json
 
 {
-  "title" : "한강"
+  "title": "한강"
 }
 
 
 
-### books 인덱스에서 title이 hello인 document 가져오기
+### simsimhe-books 인덱스에서 한강과 연관있는 데이터 검색
 GET localhost:8010/api/shop/elastic/document?keyword=한강
 
 
 
-### test 인덱스에 있는 데이터 전체 삭제
-DELETE localhost:3000/elastic/document
+### 인덱스에 있는 데이터 부분 삭제
+DELETE localhost:8010/api/shop/elastic/document/2
 
 
-### controller 테스트
-POST localhost:3000/elastic/document
-
-### 해당 id 도서 삭제
-DELETE localhost:3000/elastic/document/0qOg3pMBUDE5eABLruAw
 
 

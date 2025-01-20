@@ -2,13 +2,11 @@ package com.simsimbookstore.apiserver.elastic.repository;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.SortOrder;
-import co.elastic.clients.elasticsearch.core.GetRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.simsimbookstore.apiserver.elastic.entity.SearchBook;
-import io.micrometer.core.instrument.binder.logging.LogbackMetrics;
+import com.simsimbookstore.apiserver.elastic.exception.SearchBookElasticsearchException;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.client.RequestOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,47 +20,31 @@ import java.util.List;
 
 @Slf4j
 @Repository
-public class CustomRepositoryImpl implements CustomRepository{
+public class CustomRepositoryImpl implements CustomRepository {
 
     public static final String INDEX = "simsimhe-books";
-    private final LogbackMetrics logbackMetrics;
     ElasticsearchClient client;
 
     @Autowired
-    public CustomRepositoryImpl(ElasticsearchClient client, LogbackMetrics logbackMetrics) {
+    public CustomRepositoryImpl(ElasticsearchClient client) {
         this.client = client;
-        this.logbackMetrics = logbackMetrics;
     }
 
 
     @Override
-    public void save(SearchBook book) throws IOException {
-
-        client.index(i -> i.index("simsimhe-books").id(String.valueOf(book.getId())).document(book));
-    }
-
-    @Override
-    public void delete(String id) throws IOException {
-        client.delete(d -> d.index(INDEX).id(String.valueOf(id)));
-    }
-
-    @Override
-    public Page<SearchBook> findByMultipleFields(String word, String sort, int page) {
+    public Page<SearchBook> findByMultipleFields(String word, String sort, int page) {  //다중 검색
         String sortAt = convertSortWord(sort);
-
-//
 
         try {
             SearchResponse<SearchBook> response = client.search(s -> s
                             .index(INDEX)
-                            .from((page) * 12)
+                            .from((page - 1) * 12)
                             .size(12)
                             .query(q -> q
                                     .multiMatch(m -> m
                                             .query(word)
                                             .fields(List.of("title^5", "author^5", "description^1", "tags^2"))  // 가중치 지정 , 타이틀과 작가가 검색시 가장 높은 순위로 검색이 됨
                                             .operator(co.elastic.clients.elasticsearch._types.query_dsl.Operator.Or)
-
                                     )
                             )
                             .sort(so -> so
@@ -74,18 +56,16 @@ public class CustomRepositoryImpl implements CustomRepository{
                     ,
                     SearchBook.class);
 
-            log.info("total data : {}", response.hits().total().value());
-
             List<SearchBook> results = response.hits().hits().stream().map(Hit::source).toList();
 
             long totalCount = response.hits().total().value();
 
-            Pageable pageable = PageRequest.of(page, 12);
+            Pageable pageable = PageRequest.of((page - 1), 12);
 
 
             return new PageImpl<>(results, pageable, totalCount);
         } catch (IOException e) {
-            throw new RuntimeException("Elasticsearch query failed", e);
+            throw new SearchBookElasticsearchException("엘라스틱서치 쿼리를 실행하는 중 실패했습니다. 검색어: " + word, e);
         }
     }
 
@@ -97,12 +77,11 @@ public class CustomRepositoryImpl implements CustomRepository{
         ).value();
     }
 
-    public String convertSortWord(String sort){
+    public String convertSortWord(String sort) {
         return switch (sort) {
             case "popular" -> "bookSellCount";
             case "latest" -> "publishedAt";
-            case "price_high" -> "salePrice";
-            case "price_low" -> "salePrice";
+            case "price_high", "price_low" -> "salePrice";
             case "review" -> "reviewCount";
             default -> "";
         };

@@ -1,6 +1,5 @@
 package com.simsimbookstore.apiserver.orders.coupondiscount.service.impl;
 
-import static java.time.LocalDateTime.now;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.simsimbookstore.apiserver.coupons.allcoupon.entity.AllCoupon;
@@ -9,7 +8,6 @@ import com.simsimbookstore.apiserver.coupons.coupon.entity.CouponStatus;
 import com.simsimbookstore.apiserver.coupons.coupon.repository.CouponRepository;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.CouponPolicy;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.DisCountType;
-import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponType;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.coupondiscount.dto.CouponDiscountRequestDto;
 import com.simsimbookstore.apiserver.orders.coupondiscount.dto.CouponDiscountResponseDto;
@@ -44,6 +42,11 @@ class CouponDiscountServiceImplTest {
     @Mock
     private CouponRepository couponRepository;
 
+    private OrderBook orderBook;
+    private CouponDiscount existingDiscount;
+    private Coupon coupon;
+    private CouponDiscountRequestDto requestDto;
+
     @Mock
     private UserRepository userRepository;
 
@@ -51,14 +54,65 @@ class CouponDiscountServiceImplTest {
     @InjectMocks
     private CouponDiscountServiceImpl couponDiscountService;
 
-    private OrderBook orderBook;
 
     @BeforeEach
     void setUp() {
         orderBook = OrderBook.builder()
                 .orderBookId(200L)
                 .build();
+
+        orderBook = new OrderBook();
+        existingDiscount = new CouponDiscount();
+        coupon = mock(Coupon.class);
+        lenient().when(coupon.getCouponId()).thenReturn(1L);
+        requestDto = new CouponDiscountRequestDto();
+
+        // requestDto 필드 설정 (필요한 값 입력)
+        requestDto.setCouponId(1L);
+        requestDto.setCouponName("Test Coupon");
+        requestDto.setCouponType("Test Type");
+        requestDto.setDiscountPrice(BigDecimal.valueOf(5000));
+
+        // coupon 필드 설정
+        coupon.setCouponId(1L);
+
+        // orderBook에 기존 쿠폰 할인 설정 (테스트 시나리오에 따라 설정)
+        orderBook.setCouponDiscount(existingDiscount);
     }
+
+    @Test
+    void testCreateCouponDiscount_WithExistingDiscount() {
+        // given
+        when(couponRepository.findById(1L)).thenReturn(Optional.of(coupon));
+        when(couponDiscountRepository.save(any(CouponDiscount.class))).thenAnswer(invocation -> {
+            // 저장 시 전달된 CouponDiscount 반환
+            CouponDiscount savedDiscount = invocation.getArgument(0);
+            // 저장 시점에 orderBook에 새 쿠폰 할인 설정
+            orderBook.setCouponDiscount(savedDiscount);
+            return savedDiscount;
+        });
+
+        // when
+        CouponDiscountResponseDto response = couponDiscountService.createCouponDiscount(requestDto, orderBook);
+
+        // then
+        // 기존 쿠폰 할인 삭제 검증
+        verify(couponDiscountRepository).delete(existingDiscount);
+
+        // 새 쿠폰 할인 생성 및 저장 확인
+        verify(couponRepository).findById(1L);
+        verify(couponDiscountRepository).save(any(CouponDiscount.class));
+
+        // orderBook에 새 쿠폰 할인이 설정되었는지 확인
+        assertNotNull(orderBook.getCouponDiscount(), "새 쿠폰 할인이 설정되어야 함");
+
+        // responseDto 검증
+        assertNotNull(response);
+        assertEquals(orderBook.getCouponDiscount().getCouponDiscountId(), response.getCouponDiscountId());
+        assertEquals(orderBook.getCouponDiscount().getCouponName(), response.getCouponName());
+        // 필요한 다른 필드들도 비교 가능
+    }
+
 
     @Test
     void createCouponDiscount_Success() {

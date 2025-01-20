@@ -19,7 +19,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name = "coupon_types")
 public class CouponType {
-    public static final Long WELCOME_COUPON_TYPE = 1L;
+    public static final Long WELCOME_COUPON_TYPE_ID = 1L;
+    public static final Long BIRTHDAY_COUPON_TYPE_ID = 2L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "coupon_type_id")

@@ -7,7 +7,6 @@ import com.simsimbookstore.apiserver.books.category.service.CategoryService;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -29,24 +28,13 @@ public class CategoryController {
     /**
      * 카테고리 등록
      *
-     * @param requestDto    요청 DTO
-     * @param bindingResult 검증 결과
+     * @param requestDto 요청 DTO
      * @return 등록된 카테고리 정보
      */
     @PostMapping("/categories")
-    public ResponseEntity<?> saveCategory(@RequestBody @Valid CategoryRequestDto requestDto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bindingResult.getAllErrors());
-        }
-
-        try {
-            CategoryResponseDto responseDto = categoryService.createCategory(requestDto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
-        } catch (NotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("카테고리 등록 중 오류가 발생했습니다.");
-        }
+    public ResponseEntity<CategoryResponseDto> saveCategory(@RequestBody @Valid CategoryRequestDto requestDto) {
+        CategoryResponseDto responseDto = categoryService.createCategory(requestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
     /**
@@ -85,13 +73,11 @@ public class CategoryController {
      * @return 조회된 카테고리 정보
      */
     @GetMapping("/categories/{categoryId}")
-    public ResponseEntity<?> getCategoryById(@PathVariable Long categoryId) {
-        try {
-            CategoryResponseDto responseDto = categoryService.getCategoryById(categoryId);
-            return ResponseEntity.ok(responseDto);
-        } catch (NotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
+    public ResponseEntity<CategoryResponseDto> getCategoryById(@PathVariable Long categoryId) {
+
+        CategoryResponseDto responseDto = categoryService.getCategoryById(categoryId);
+        return ResponseEntity.ok(responseDto);
+
     }
 
     /**
@@ -101,15 +87,10 @@ public class CategoryController {
      * @return 상태 응답
      */
     @DeleteMapping("/categories/{categoryId}")
-    public ResponseEntity<?> deleteCategory(@PathVariable Long categoryId) {
-        try {
-            categoryService.deleteCategory(categoryId);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        } catch (NotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-        }
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long categoryId) {
+        categoryService.deleteCategory(categoryId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+
     }
 
 

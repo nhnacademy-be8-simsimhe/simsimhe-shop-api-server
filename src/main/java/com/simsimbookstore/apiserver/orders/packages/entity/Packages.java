@@ -2,7 +2,6 @@ package com.simsimbookstore.apiserver.orders.packages.entity;
 
 
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
-import com.simsimbookstore.apiserver.orders.packages.dto.PackageRequestDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -45,15 +44,4 @@ public class Packages {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wrap_type_id")
     private WrapType wrapType;
-
-
-    public Packages updatedPackage(OrderBook orderBook, PackageRequestDto packageRequestDto) {
-        return Packages.builder()
-                .packageId(this.packageId)
-                .orderBook(orderBook)
-                .wrapType(wrapType)
-                .packageType(packageType)
-                .build();
-    }
-
 }

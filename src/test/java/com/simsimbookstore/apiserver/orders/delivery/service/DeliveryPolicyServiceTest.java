@@ -12,6 +12,7 @@ import com.simsimbookstore.apiserver.orders.delivery.exception.DeliveryPolicyExc
 import com.simsimbookstore.apiserver.orders.delivery.repository.DeliveryPolicyRepository;
 import com.simsimbookstore.apiserver.orders.delivery.service.impl.DeliveryPolicyServiceImpl;
 import java.math.BigDecimal;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -105,5 +106,40 @@ class DeliveryPolicyServiceTest {
                 () -> deliveryPolicyService.deleteDeliveryPolicy(1L)
         );
         assertEquals("Delivery policy not found id: 1", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("기준 배송 정책 조회 테스트")
+    void testGetStandardPolicy() {
+        // given: 기준 정책을 반환하는 Repository 설정
+        LinkedList<DeliveryPolicy> standardPolicies = new LinkedList<>();
+        standardPolicies.add(deliveryPolicy2); // 기준 정책 세팅
+        when(deliveryPolicyRepository.findByStandardPolicyTrue()).thenReturn(standardPolicies);
+
+        // when
+        DeliveryPolicy result = deliveryPolicyService.getStandardPolicy();
+
+        // then
+        assertNotNull(result, "기준 배송 정책은 null이 아니어야 함");
+        assertEquals(deliveryPolicy2, result, "조회된 기준 배송 정책이 예상과 일치해야 함");
+        verify(deliveryPolicyRepository, times(1)).findByStandardPolicyTrue();
+    }
+
+    @Test
+    @DisplayName("모든 배송 정책 조회 테스트")
+    void testFindAll() {
+        // given: 모든 배송 정책을 반환하는 Repository 설정
+        List<DeliveryPolicy> policies = List.of(deliveryPolicy, deliveryPolicy2);
+        when(deliveryPolicyRepository.findAll()).thenReturn(policies);
+
+        // when
+        List<DeliveryPolicy> result = deliveryPolicyService.findAll();
+
+        // then
+        assertNotNull(result, "반환된 배송 정책 목록은 null이 아니어야 함");
+        assertEquals(2, result.size(), "배송 정책 목록의 크기가 예상과 일치해야 함");
+        assertTrue(result.contains(deliveryPolicy), "결과에 deliveryPolicy가 포함되어야 함");
+        assertTrue(result.contains(deliveryPolicy2), "결과에 deliveryPolicy2가 포함되어야 함");
+        verify(deliveryPolicyRepository, times(1)).findAll();
     }
 }
