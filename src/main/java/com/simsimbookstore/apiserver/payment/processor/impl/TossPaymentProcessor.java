@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
-import com.simsimbookstore.apiserver.orders.order.exception.OrderNotFoundException;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.payment.client.PaymentRestTemplate;
 import com.simsimbookstore.apiserver.payment.dto.Cancel;
@@ -160,7 +159,7 @@ public class TossPaymentProcessor implements PaymentProcessor {
     // 환불을 위한 주문 번호로 paymentKey 조회
     @Transactional(readOnly = true)
     public String getPaymentKey(String orderNumber) {
-        Order order = orderRepository.findByOrderNumber(orderNumber).orElseThrow(() -> new OrderNotFoundException("주문이 존재하지 않습니다."));
+        Order order = orderRepository.findByOrderNumber(orderNumber).orElseThrow(() -> new NotFoundException("주문이 존재하지 않습니다."));
         Payment payment = paymentRepository.findByOrder(order).orElseThrow(() -> new PaymentNotExistException("결제가 존재하지 않습니다."));
         return payment.getPaymentKey();
     }
