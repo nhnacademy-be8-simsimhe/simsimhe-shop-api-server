@@ -10,5 +10,6 @@ public interface SocialUserRepository extends JpaRepository<SocialUser, Long> {
 
     @EntityGraph(attributePaths = {"grade", "userRoleList", "userRoleList.role"})
     Optional<SocialUser> findByOauthId(String oauthId);
+
     boolean existsByOauthId(String oauthId);
 }

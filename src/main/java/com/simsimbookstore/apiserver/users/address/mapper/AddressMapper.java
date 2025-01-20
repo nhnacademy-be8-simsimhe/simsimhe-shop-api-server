@@ -5,19 +5,20 @@ import com.simsimbookstore.apiserver.users.address.dto.AddressResponseDto;
 import com.simsimbookstore.apiserver.users.address.entity.Address;
 
 public class AddressMapper {
+    private AddressMapper() {
+    }
 
     public static Address requestDtoTo(AddressRequestDto requestDto) {
-        Address address = Address.builder()
+        return Address.builder()
                 .alias(requestDto.getAlias())
                 .postalCode(requestDto.getPostalCode())
                 .roadAddress(requestDto.getRoadAddress())
                 .detailedAddress(requestDto.getDetailedAddress())
                 .build();
-        return address;
     }
 
     public static AddressResponseDto responseDtoFrom(Address address) {
-        AddressResponseDto addressResponseDto = AddressResponseDto.builder()
+        return AddressResponseDto.builder()
                 .userId(address.getUser().getUserId())
                 .addressId(address.getAddressId())
                 .alias(address.getAlias())
@@ -25,6 +26,5 @@ public class AddressMapper {
                 .roadAddress(address.getRoadAddress())
                 .detailedAddress(address.getDetailedAddress())
                 .build();
-        return addressResponseDto;
     }
 }

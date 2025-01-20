@@ -23,11 +23,21 @@ import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
 import com.simsimbookstore.apiserver.point.dto.OrderPointRequestDto;
 import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
+
+import com.simsimbookstore.apiserver.users.grade.entity.Grade;
+import com.simsimbookstore.apiserver.users.grade.entity.Tier;
+import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
+import com.simsimbookstore.apiserver.users.grade.service.GradeService;
+import com.simsimbookstore.apiserver.users.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.simsimbookstore.apiserver.users.grade.entity.QGrade.grade;
 
 @Slf4j
 @Service
@@ -45,6 +55,8 @@ public class OrderFacadeImpl implements OrderFacade {
     private final GuestOrderService guestOrderService;
     private final OrderBookRepository orderBookRepository;
     private final DeliveryRepository deliveryRepository;
+    private final GradeService gradeService;
+    private final UserService userService;
 
     @Override
     @Transactional
@@ -187,12 +199,17 @@ public class OrderFacadeImpl implements OrderFacade {
                     .orderId(order.getOrderId())
                     .userId(order.getUser().getUserId()) // 사용자 ID로 포인트 적립
                     .build());
+
+            // 순수 금액에 따른 유저의 등급 상태 변경
+            Grade grade = order.getUser().getGrade();
+            if (!grade.getTier().equals(Tier.PLATINUM)){
+                gradeService.calculateGrade(order.getUser().getUserId());
+            }
         }
 
         //6. 주문상태 수정
         order.setOrderState(Order.OrderState.DELIVERY_READY);
         order.getDelivery().setDeliveryState(Delivery.DeliveryState.READY);
-
     }
 
     @Transactional

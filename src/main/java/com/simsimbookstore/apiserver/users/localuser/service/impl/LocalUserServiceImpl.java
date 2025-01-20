@@ -7,21 +7,19 @@ import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.service.GradeService;
 import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
+import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.mapper.LocalUserMapper;
 import com.simsimbookstore.apiserver.users.localuser.repository.LocalUserRepository;
+import com.simsimbookstore.apiserver.users.localuser.service.LocalUserService;
 import com.simsimbookstore.apiserver.users.role.entity.Role;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.role.service.RoleService;
-import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
-import com.simsimbookstore.apiserver.users.localuser.service.LocalUserService;
 import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.util.List;
-import java.util.Objects;
 
 
 @Transactional(readOnly = true)
@@ -70,8 +68,7 @@ public class LocalUserServiceImpl implements LocalUserService {
 
     @Override
     public LocalUser findByLoginId(String loginId) {
-        LocalUser localUser = localUserRepository.findByLoginId(loginId);
-        return localUser;
+        return localUserRepository.findByLoginId(loginId);
     }
 
     //중복 loginId 체크

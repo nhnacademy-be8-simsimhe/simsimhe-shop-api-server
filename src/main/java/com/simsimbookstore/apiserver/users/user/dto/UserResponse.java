@@ -6,7 +6,6 @@ import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.user.entity.Gender;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
-import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +13,6 @@ import lombok.Getter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 @Builder
 @Getter

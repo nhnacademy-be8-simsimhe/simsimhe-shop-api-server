@@ -9,12 +9,11 @@ import com.simsimbookstore.apiserver.users.address.repository.AddressRepository;
 import com.simsimbookstore.apiserver.users.address.service.AddressService;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.service.UserService;
-import java.util.List;
-import java.util.Objects;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -26,21 +25,19 @@ public class AddressServiceImpl implements AddressService {
 
     // 주소 단건 조회
     @Override
-    public Address getAddress(Long addressId){
-        Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new NotFoundException("Not founded address with ID: " + addressId));
+    public Address getAddress(Long addressId) {
 
-        return address;
+        return addressRepository.findById(addressId)
+                .orElseThrow(() -> new NotFoundException("Not founded address with ID: " + addressId));
     }
 
     // 유저 아이디 기준 리스트 조회
     @Override
     public List<AddressResponseDto> getAddresses(Long userId) {
         List<Address> addresses = addressRepository.findAllByUserUserId(userId);
-        List<AddressResponseDto> list = addresses.stream()
+        return addresses.stream()
                 .map(AddressMapper::responseDtoFrom)
                 .toList();
-        return list;
     }
 
     // 유저 저장
@@ -48,12 +45,12 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public AddressResponseDto createAddress(Long userId, AddressRequestDto addressRequestDto) {
         Address address = AddressMapper.requestDtoTo(addressRequestDto);
-        User user = userService.getUser(userId);;
+        User user = userService.getUser(userId);
+        ;
 
         address.assignUser(user);
         Address savedAddress = addressRepository.save(address);
-        AddressResponseDto addressResponseDto = AddressMapper.responseDtoFrom(savedAddress);
-        return addressResponseDto;
+        return AddressMapper.responseDtoFrom(savedAddress);
     }
 
     // 주소 삭제

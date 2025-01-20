@@ -28,7 +28,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Set;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(LocalUserController.class)
@@ -47,6 +48,7 @@ class LocalUserControllerTest {
     LocalUserRegisterRequestDto testUserRequestDto;
 
     LocalUser testLocalUser;
+
     @BeforeEach
     void setUp() {
         testUserRequestDto = LocalUserRegisterRequestDto.builder()
@@ -107,7 +109,7 @@ class LocalUserControllerTest {
         when(localUserService.existsByLoginId(anyString())).thenReturn(true);
 
         mockMvc.perform(get("/api/users/localUsers/{loginId}/exists", "testLoginId")
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string("true"));
     }
@@ -128,7 +130,7 @@ class LocalUserControllerTest {
         when(localUserService.findByLoginId(anyString())).thenReturn(testLocalUser);
 
         mockMvc.perform(get("/api/users/localUsers/{loginId}", testLocalUser.getLoginId())
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(responseDto.getUserId()))
                 .andExpect(jsonPath("$.loginId").value(responseDto.getLoginId()))

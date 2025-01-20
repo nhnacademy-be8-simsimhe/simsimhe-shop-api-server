@@ -1,8 +1,7 @@
 package com.simsimbookstore.apiserver.users.localuser.service;
 
-import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
-import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
+import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 
 public interface LocalUserService {
     LocalUser saveLocalUser(LocalUserRegisterRequestDto localUserRequestDto);
