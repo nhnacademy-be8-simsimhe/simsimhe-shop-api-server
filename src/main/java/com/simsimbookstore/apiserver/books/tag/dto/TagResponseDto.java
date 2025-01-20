@@ -1,15 +1,12 @@
 package com.simsimbookstore.apiserver.books.tag.dto;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
 @Builder
+@Getter
 public class TagResponseDto {
 
     private Long tagId;
