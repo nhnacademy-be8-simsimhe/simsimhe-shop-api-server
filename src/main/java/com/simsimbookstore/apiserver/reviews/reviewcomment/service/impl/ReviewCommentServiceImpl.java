@@ -54,10 +54,8 @@ public class ReviewCommentServiceImpl implements ReviewCommentService {
         reviewCommentRepository.save(createComment);
 
 
-        ReviewCommentResponseDTO dto = new ReviewCommentResponseDTO(createComment.getReviewCommentId(), createComment.getContent(), createComment.getCreated_at(), createComment.getUpdate_at(), user.getUserName(), user.getUserId());
+        return new ReviewCommentResponseDTO(createComment.getReviewCommentId(), createComment.getContent(), createComment.getCreated_at(), createComment.getUpdate_at(), user.getUserName(), user.getUserId());
 
-
-        return dto;
     }
 
     @Override

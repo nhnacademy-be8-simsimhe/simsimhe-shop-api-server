@@ -20,7 +20,7 @@ public class ReviewImageController {
     private final ReviewImagePathService reviewImagePathService;
 
     @PostMapping
-    public ResponseEntity<?> addReviewImages(@PathVariable Long reviewId, @RequestBody List<String> imageName) {
+    public ResponseEntity<List<ReviewImgPathResponseDTO>> addReviewImages(@PathVariable Long reviewId, @RequestBody List<String> imageName) {
         log.info("imageName : {}", imageName);
         List<ReviewImgPathResponseDTO> savedImage = reviewImagePathService.createReviewImage(reviewId, imageName);
         return ResponseEntity.ok(savedImage);

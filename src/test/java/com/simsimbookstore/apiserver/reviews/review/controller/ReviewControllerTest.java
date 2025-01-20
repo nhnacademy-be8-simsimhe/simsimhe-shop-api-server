@@ -93,7 +93,7 @@ class ReviewControllerTest {
         var response = new PageImpl<>(reviews, pageable, reviews.size());
 
 
-        when(reviewService.getReviewsByBookOrderBySort(eq(bookId), eq(userId), eq(page), eq(size), eq(sort)))
+        when(reviewService.getReviewsByBookOrderBySort(bookId, userId, page, size, sort))
                 .thenReturn(response);
 
 
@@ -113,7 +113,7 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.content[1].content").value("Interesting"));
 
 
-        verify(reviewService).getReviewsByBookOrderBySort(eq(bookId), eq(userId), eq(page), eq(size), eq(sort));
+        verify(reviewService).getReviewsByBookOrderBySort(bookId, userId, page, size, sort);
 
     }
 
@@ -185,12 +185,12 @@ class ReviewControllerTest {
         Long bookId = 1L;
         Long reviewId = 2L;
 
-        doNothing().when(reviewService).deleteReview(eq(reviewId));
+        doNothing().when(reviewService).deleteReview(reviewId);
 
         mockMvc.perform(delete("/api/shop/books/{bookId}/reviews/{reviewId}", bookId, reviewId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
-        verify(reviewService).deleteReview(eq(reviewId));
+        verify(reviewService).deleteReview(reviewId);
     }
 }
