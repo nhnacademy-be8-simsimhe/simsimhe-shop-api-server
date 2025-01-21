@@ -24,8 +24,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 
 @Import(QuerydslConfig.class)
 @DataJpaTest
@@ -97,7 +95,7 @@ class CartCustomRepositoryImplTest {
         CartResponseDto responseDto = cartRepository.getBookForCart(book.getBookId());
         Assertions.assertNotNull(responseDto);
         Assertions.assertEquals(1L, responseDto.getBookId());
-        Assertions.assertEquals(100,responseDto.getBookQuantity());
+        Assertions.assertEquals(100, responseDto.getBookQuantity());
 
 
     }

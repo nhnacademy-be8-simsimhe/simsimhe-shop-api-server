@@ -3,7 +3,6 @@ package com.simsimbookstore.apiserver.orders.delivery.dto;
 import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,7 +39,7 @@ public class DeliveryDetailResponseDto {
                 .reference(delivery.getReference())
                 .availableStates(Arrays.stream(Delivery.DeliveryState.values())
                         .map(Enum::name)
-                        .collect(Collectors.toList()))
+                        .toList())
                 .build();
     }
 }

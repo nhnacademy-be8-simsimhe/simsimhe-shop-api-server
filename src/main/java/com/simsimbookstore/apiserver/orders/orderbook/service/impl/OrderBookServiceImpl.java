@@ -8,6 +8,7 @@ import com.simsimbookstore.apiserver.orders.coupondiscount.entity.CouponDiscount
 import com.simsimbookstore.apiserver.orders.coupondiscount.service.CouponDiscountService;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
+import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookAdminResponseDto;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookResponseDto;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
@@ -158,6 +159,18 @@ public class OrderBookServiceImpl implements OrderBookService {
     private <T> T findEntityById(Long id, JpaRepository<T, Long> repository, String entityName) {
         return repository.findById(id)
                 .orElseThrow(() -> new NotFoundException(entityName + " not found. ID=" + id));
+    }
+
+    @Override
+    public OrderBookAdminResponseDto toAdminResponseDto(OrderBook orderBook) {
+        return OrderBookAdminResponseDto.builder()
+                .orderBookId(orderBook.getOrderBookId())
+                .bookTitle(orderBook.getBook().getTitle())
+                .quantity(orderBook.getQuantity())
+                .salePrice(orderBook.getSalePrice())
+                .discountPrice(orderBook.getDiscountPrice())
+                .orderBookState(orderBook.getOrderBookState()) // Enum 그대로
+                .build();
     }
 }
 

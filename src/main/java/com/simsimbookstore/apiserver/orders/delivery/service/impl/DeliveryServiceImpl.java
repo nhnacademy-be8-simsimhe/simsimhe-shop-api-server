@@ -20,8 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeliveryServiceImpl implements DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
-    
 
+    private static final String DELIVERY_NOTFOUND = "Delivery not found with ID: ";
 
     public DeliveryServiceImpl(DeliveryRepository deliveryRepository) {
         this.deliveryRepository = deliveryRepository;
@@ -37,7 +37,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Transactional(readOnly = true)
     public DeliveryDetailResponseDto getDeliveryById(Long deliveryId) {
         Delivery delivery = deliveryRepository.findById(deliveryId)
-                .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found with ID: " + deliveryId));
+                .orElseThrow(() -> new DeliveryNotFoundException(DELIVERY_NOTFOUND + deliveryId));
 
         return DeliveryDetailResponseDto.fromEntity(delivery);
     }
@@ -46,7 +46,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     public DeliveryResponseDto updateDeliveryState(Long deliveryId, Delivery.DeliveryState newDeliveryState) {
         Delivery delivery = deliveryRepository.findById(deliveryId)
-                .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found with ID: " + deliveryId));
+                .orElseThrow(() -> new DeliveryNotFoundException(DELIVERY_NOTFOUND + deliveryId));
 
         validateDeliveryState(newDeliveryState);
 
@@ -67,7 +67,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     public void deleteDelivery(Long deliveryId) {
         if (!deliveryRepository.existsById(deliveryId)) {
-            throw new DeliveryNotFoundException("Delivery not found with ID: " + deliveryId);
+            throw new DeliveryNotFoundException(DELIVERY_NOTFOUND + deliveryId);
         }
         deliveryRepository.deleteById(deliveryId);
     }
@@ -101,7 +101,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     public DeliveryResponseDto updateTrackingNumber(Long deliveryId, Integer trackingNumber) {
         Delivery delivery = deliveryRepository.findById(deliveryId)
-                .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found with ID: " + deliveryId));
+                .orElseThrow(() -> new DeliveryNotFoundException(DELIVERY_NOTFOUND + deliveryId));
 
         delivery.setTrackingNumber(trackingNumber);  // 트래킹 번호 업데이트
         deliveryRepository.save(delivery);
