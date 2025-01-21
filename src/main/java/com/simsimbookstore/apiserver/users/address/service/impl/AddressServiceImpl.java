@@ -46,7 +46,6 @@ public class AddressServiceImpl implements AddressService {
     public AddressResponseDto createAddress(Long userId, AddressRequestDto addressRequestDto) {
         Address address = AddressMapper.requestDtoTo(addressRequestDto);
         User user = userService.getUser(userId);
-        ;
 
         address.assignUser(user);
         Address savedAddress = addressRepository.save(address);

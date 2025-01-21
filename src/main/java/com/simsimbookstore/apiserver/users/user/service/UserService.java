@@ -1,14 +1,11 @@
 package com.simsimbookstore.apiserver.users.user.service;
 
-import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.user.dto.GuestUserRequestDto;
 import com.simsimbookstore.apiserver.users.user.dto.UserResponse;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
