@@ -94,4 +94,8 @@ public class Delivery {
     public void cancel() {
         this.deliveryState = DeliveryState.CANCEL;
     }
+
+    public void complete() {
+        this.deliveryState = DeliveryState.COMPLETED;
+    }
 }

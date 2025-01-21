@@ -67,8 +67,10 @@ public class OrderBook {
     @Builder.Default
     private List<Packages> packages = new ArrayList<>();
 
-    @OneToOne(mappedBy = "orderBook", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "orderBook", cascade = CascadeType.ALL, orphanRemoval = true)
     private CouponDiscount couponDiscount;
+
+
 
 
     public enum OrderBookState {
@@ -109,4 +111,6 @@ public class OrderBook {
     public void cancel() {
         this.orderBookState = OrderBookState.CANCELED;
     }
+
+    public void complete() {this.orderBookState = OrderBookState.COMPLETED; }
 }
