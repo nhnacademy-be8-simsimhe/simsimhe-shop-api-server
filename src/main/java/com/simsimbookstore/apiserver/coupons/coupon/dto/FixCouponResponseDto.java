@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public class FixCouponResponseDto extends CouponResponseDto {
 
     // 할인 형태
-    private  final DisCountType disCountType = DisCountType.FIX;
+    private final DisCountType disCountType = DisCountType.FIX;
     // 할인액
     private BigDecimal discountPrice;
     // 최소 주문 금액
