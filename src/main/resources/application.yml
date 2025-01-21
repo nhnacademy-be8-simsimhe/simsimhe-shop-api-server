@@ -74,3 +74,7 @@ elasticsearch:
 
 rabbitmq:
   data: 7bcf9993624c4ccf9140a44e40608808
+
+file:
+  storage:
+    location: ${user.home}/uploads
