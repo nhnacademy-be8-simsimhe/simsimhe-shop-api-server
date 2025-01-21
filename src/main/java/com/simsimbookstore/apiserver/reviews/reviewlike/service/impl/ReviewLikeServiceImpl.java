@@ -19,6 +19,8 @@ import java.time.LocalDateTime;
 @Service
 public class ReviewLikeServiceImpl implements ReviewLikeService {
 
+    private static final String REVIEW_NOT_FOUND_MESSAGE = "존재하지 않는 리뷰입니다.";
+
 
     private final ReviewLikeRepository reviewLikeRepository;
     private final UserRepository userRepository;
@@ -32,7 +34,7 @@ public class ReviewLikeServiceImpl implements ReviewLikeService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰입니다."));
+                .orElseThrow(() -> new NotFoundException(REVIEW_NOT_FOUND_MESSAGE));
 
 
         boolean alreadyLiked = reviewLikeRepository.findByUserAndReview(user, review).isPresent();
@@ -44,7 +46,7 @@ public class ReviewLikeServiceImpl implements ReviewLikeService {
         ReviewLike reviewLike = ReviewLike.builder()
                 .user(user)
                 .review(review)
-                .created_at(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .build();
 
         reviewLikeRepository.save(reviewLike);
@@ -58,7 +60,7 @@ public class ReviewLikeServiceImpl implements ReviewLikeService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰입니다."));
+                .orElseThrow(() -> new NotFoundException(REVIEW_NOT_FOUND_MESSAGE));
 
 
         ReviewLike reviewLike = reviewLikeRepository.findByUserAndReview(user, review)
@@ -73,7 +75,7 @@ public class ReviewLikeServiceImpl implements ReviewLikeService {
      */
     public long getReviewLikeCount(Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰입니다."));
+                .orElseThrow(() -> new NotFoundException(REVIEW_NOT_FOUND_MESSAGE));
         return reviewLikeRepository.countByReview(review);
     }
 }
