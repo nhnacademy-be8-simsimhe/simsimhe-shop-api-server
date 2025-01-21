@@ -25,7 +25,6 @@ import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
 import com.simsimbookstore.apiserver.users.localuser.repository.LocalUserRepository;
 import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
-import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -35,7 +34,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -47,9 +45,6 @@ import org.springframework.test.context.ActiveProfiles;
 @DataJpaTest
 @ActiveProfiles("test2")
 class PointHistoryCustomRepositoryImplTest {
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private GradeRepository gradeRepository;
@@ -122,25 +117,25 @@ class PointHistoryCustomRepositoryImplTest {
                 .viewCount(0L)
                 .build();
 
-        Book savedBook = bookRepository.save(book);
+        bookRepository.save(book);
 
         PointHistory pointHistory1 = PointHistory.builder()
                 .user(testUser)
                 .pointType(PointHistory.PointType.EARN)
                 .amount(100)
-                .created_at(LocalDateTime.of(2025, 1, 2, 10, 0))
+                .createdAt(LocalDateTime.of(2025, 1, 2, 10, 0))
                 .build();
         PointHistory pointHistory2 = PointHistory.builder()
                 .user(testUser)
                 .pointType(PointHistory.PointType.DEDUCT)
                 .amount(-50)
-                .created_at(LocalDateTime.of(2025, 1, 3, 15, 0))
+                .createdAt(LocalDateTime.of(2025, 1, 3, 15, 0))
                 .build();
         PointHistory pointHistory3 = PointHistory.builder()
                 .user(testUser)
                 .pointType(PointHistory.PointType.EARN)
                 .amount(3000)
-                .created_at(LocalDateTime.of(2025, 1, 5, 15, 0))
+                .createdAt(LocalDateTime.of(2025, 1, 5, 15, 0))
                 .build();
 
         pointHistoryRepository.save(pointHistory1);
@@ -155,7 +150,8 @@ class PointHistoryCustomRepositoryImplTest {
                 .roadAddress("Seoul City Center")
                 .detailedAddress("Apartment 101")
                 .build();
-        delivery = deliveryRepository.save(delivery);
+
+        deliveryRepository.save(delivery);
 
         Order mockOrder = Order.builder()
                 .user(testUser)
@@ -210,7 +206,7 @@ class PointHistoryCustomRepositoryImplTest {
         assertNotNull(result);
         assertEquals(3, result.size());
 
-        PointHistoryResponseDto first = result.get(0);
+        PointHistoryResponseDto first = result.getFirst();
         assertNotNull(first);
         assertEquals("NONE", first.getSourceType());
         assertEquals(3000, first.getAmount()); // PointHistory3
@@ -224,5 +220,8 @@ class PointHistoryCustomRepositoryImplTest {
         assertNotNull(third);
         assertEquals("ORDER", third.getSourceType());
         assertEquals(100, third.getAmount()); // PointHistory1
+
+        long count = pointHistoryRepository.countByUserId(userId);
+        assertEquals(3, count, "사용자의 포인트 히스토리 개수가 일치해야 합니다.");
     }
 }
