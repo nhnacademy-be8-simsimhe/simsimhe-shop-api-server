@@ -25,8 +25,8 @@ public class PageResponse<T> {
     public PageResponse<T> getPageResponse(int page, int maxPageButtons,
                                            Page<T> objectPage) {
 
-        int startPage = (int) Math.max(1, objectPage.getNumber() - Math.floor((double) maxPageButtons / 2));
-        int endPage = Math.min(startPage + maxPageButtons - 1, objectPage.getTotalPages());
+        int startPage = (int) Math.max(1, objectPage.getNumber() - Math.floor((double) maxPageButtons / 2)); //NOSONAR
+        int endPage = Math.min(startPage + maxPageButtons - 1, objectPage.getTotalPages()); //NOSONAR
 
         if (endPage - startPage + 1 < maxPageButtons) {
             startPage = Math.max(1, endPage - maxPageButtons + 1);
