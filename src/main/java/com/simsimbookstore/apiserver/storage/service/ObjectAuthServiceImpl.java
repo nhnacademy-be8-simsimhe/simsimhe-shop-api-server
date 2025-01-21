@@ -71,11 +71,5 @@ public class ObjectAuthServiceImpl implements ObjectAuthService {
         if (response.getStatusCode() != HttpStatus.OK) {
             throw new ObjectStorageAuthException("Invalid response status: " + response.getStatusCode());
         }
-
-        String body = response.getBody();
-        if (body == null || body.isEmpty()) { // null 검사 추가
-            throw new ObjectStorageAuthException("Response body is null or empty");
-        }
     }
-
 }

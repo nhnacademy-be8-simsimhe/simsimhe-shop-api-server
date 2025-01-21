@@ -21,7 +21,11 @@ import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.orders.order.service.OrderNumberService;
 import com.simsimbookstore.apiserver.orders.order.service.OrderTotalService;
+
+import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
+
 import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
+
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import java.math.BigDecimal;
@@ -172,6 +176,75 @@ class MemberOrderServiceImplTest {
     }
 
     @Test
+    void testUpdateOrdersToCompleted() {
+        // given
+        LocalDate thirtyDaysAgo = LocalDate.now().minusDays(30);
+
+        // 오래된 주문(상태가 아직 COMPLETED가 아님)
+        Delivery oldDelivery = Delivery.builder()
+                .deliveryState(Delivery.DeliveryState.IN_PROGRESS)
+                .build();
+
+        OrderBook oldOrderBook = OrderBook.builder()
+                .orderBookState(OrderBook.OrderBookState.IN_DELIVERY)
+                .build();
+
+        Order oldOrder = Order.builder()
+                .orderState(Order.OrderState.IN_DELIVERY)
+                .deliveryDate(LocalDate.now().minusDays(31)) // 31일 전
+                .delivery(oldDelivery)
+                .build();
+        // 테스트에서는 가볍게만 세팅
+        List<OrderBook> oldOrderBooks = List.of(oldOrderBook);
+        oldOrder.setOrderBooks(oldOrderBooks);
+
+        // 최근 주문(30일 이내 → 업데이트 X)
+        Delivery recentDelivery = Delivery.builder()
+                .deliveryState(Delivery.DeliveryState.IN_PROGRESS)
+                .build();
+
+        OrderBook recentOrderBook = OrderBook.builder()
+                .orderBookState(OrderBook.OrderBookState.IN_DELIVERY)
+                .build();
+
+        Order recentOrder = Order.builder()
+                .orderState(Order.OrderState.IN_DELIVERY)
+                .deliveryDate(LocalDate.now().minusDays(10)) // 10일 전
+                .delivery(recentDelivery)
+                .build();
+        recentOrder.setOrderBooks(List.of(recentOrderBook));
+
+        // findAllOrdersNeedToComplete(...) 호출 시, 오래된 주문만 반환되도록 Mock 설정
+        when(orderRepository.findAllOrdersNeedToComplete(thirtyDaysAgo))
+                .thenReturn(List.of(oldOrder));
+
+        // when
+        int updatedCount = memberOrderService.updateOrdersToCompleted();
+
+        // then
+        // 오래된 주문 1건만 업데이트되었다고 가정
+        assertEquals(1, updatedCount);
+
+        // 오래된 주문, 딜리버리, 오더북 모두 COMPLETED 상태로 바뀌었는지 확인
+        assertEquals(Order.OrderState.COMPLETED, oldOrder.getOrderState());
+        assertEquals(Delivery.DeliveryState.COMPLETED, oldOrder.getDelivery().getDeliveryState());
+        oldOrder.getOrderBooks().forEach(
+                ob -> assertEquals(OrderBook.OrderBookState.COMPLETED, ob.getOrderBookState())
+        );
+
+        // 최근 주문은 상태 변화 X (여기선 recentOrder가 Mock 반환값에 포함되지 않음)
+        assertEquals(Order.OrderState.IN_DELIVERY, recentOrder.getOrderState());
+        assertEquals(Delivery.DeliveryState.IN_PROGRESS, recentOrder.getDelivery().getDeliveryState());
+        recentOrder.getOrderBooks().forEach(
+                ob -> assertEquals(OrderBook.OrderBookState.IN_DELIVERY, ob.getOrderBookState())
+        );
+
+        // verify
+        verify(orderRepository, times(1)).findAllOrdersNeedToComplete(thirtyDaysAgo);
+        // 상태가 변경된 Order를 저장하는 로직이 별도 있다면 save 호출도 검증 (예: orderRepository.saveAll(orders))
+        // 여기서는 예시로 생략 (또는 없는 로직일 수도 있음)
+    }
+    @Test
     @DisplayName("getOrder - 주문 조회 성공 테스트")
     void testGetOrder_Success() {
         Order order = Order.builder()
@@ -291,5 +364,6 @@ class MemberOrderServiceImplTest {
         assertTrue(exception.getMessage().contains("order not found. ID=999"));
         verify(orderRepository, times(1)).findById(999L);
         verify(orderRepository, never()).save(any(Order.class));
+
     }
 }

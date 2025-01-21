@@ -1,24 +1,30 @@
 package com.simsimbookstore.apiserver.orders.order.entity;
 
 import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
+import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
 import com.simsimbookstore.apiserver.users.role.entity.Role;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -43,7 +49,7 @@ public class Order {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Delivery delivery;
 
     @Column(name = "order_number")
@@ -86,6 +92,9 @@ public class Order {
     @Column(name = "order_state", nullable = false)
     private OrderState orderState;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<OrderBook> orderBooks = new ArrayList<>();
+
 
     public boolean validateRefundable() {
         return this.orderState == OrderState.DELIVERY_READY
@@ -110,6 +119,8 @@ public class Order {
     public void refund() {
         this.orderState = OrderState.PAYMENT_CANCELED;
     }
+
+    public void complete() { this.orderState = OrderState.COMPLETED; }
 
     public enum OrderState {
         PENDING,           // 주문대기
