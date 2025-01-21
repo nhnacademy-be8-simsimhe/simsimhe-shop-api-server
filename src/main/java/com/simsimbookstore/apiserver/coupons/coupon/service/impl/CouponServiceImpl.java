@@ -15,10 +15,6 @@ import com.simsimbookstore.apiserver.coupons.coupon.dto.DiscountAmountResponseDt
 import com.simsimbookstore.apiserver.coupons.coupon.dto.EmptyCouponResponseDto;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.Coupon;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.CouponStatus;
-import com.simsimbookstore.apiserver.coupons.exception.AlreadyCouponDeadlinePassed;
-import com.simsimbookstore.apiserver.coupons.exception.AlreadyCouponUsed;
-import com.simsimbookstore.apiserver.coupons.exception.InapplicableCoupon;
-import com.simsimbookstore.apiserver.coupons.exception.InsufficientOrderAmountException;
 import com.simsimbookstore.apiserver.coupons.coupon.mapper.CouponMapper;
 import com.simsimbookstore.apiserver.coupons.coupon.repository.CouponRepository;
 import com.simsimbookstore.apiserver.coupons.coupon.service.CouponService;
@@ -26,6 +22,10 @@ import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.CouponPolicy;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.DisCountType;
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponType;
 import com.simsimbookstore.apiserver.coupons.coupontype.repository.CouponTypeRepository;
+import com.simsimbookstore.apiserver.coupons.exception.AlreadyCouponDeadlinePassed;
+import com.simsimbookstore.apiserver.coupons.exception.AlreadyCouponUsed;
+import com.simsimbookstore.apiserver.coupons.exception.InapplicableCoupon;
+import com.simsimbookstore.apiserver.coupons.exception.InsufficientOrderAmountException;
 import com.simsimbookstore.apiserver.exception.AlreadyExistException;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.users.user.entity.User;
@@ -43,7 +43,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,18 +60,20 @@ public class CouponServiceImpl implements CouponService {
         Page<Coupon> totalCoupons = couponRepository.findAll(pageable);
         return totalCoupons.map(CouponMapper::toResponse);
     }
+
     /**
      * couponId로 쿠폰을 가져온다.
+     *
      * @param couponId
-     * @throws IllegalArgumentException id가 0이거나 null일 경우
      * @return 쿠폰
+     * @throws IllegalArgumentException id가 0이거나 null일 경우
      */
     @Override
     public CouponResponseDto getCouponById(Long couponId) {
         //couponId null 체크
         validateId(couponId);
 
-        Coupon coupon = couponRepository.findById(couponId).orElseThrow(() -> new NotFoundException("쿠폰(id:"+couponId+")이 존재하지 않습니다."));
+        Coupon coupon = couponRepository.findById(couponId).orElseThrow(() -> new NotFoundException("쿠폰(id:" + couponId + ")이 존재하지 않습니다."));
 
 
         return CouponMapper.toResponse(coupon);
@@ -82,11 +83,12 @@ public class CouponServiceImpl implements CouponService {
     /**
      * 유저가 가지고 있는 쿠폰 중 특정 쿠폰 타입이고 아직 미사용인 쿠폰을 가지고 온다.
      * 각 유저는 미사용된 특정 쿠폰 타입의 쿠폰을 하나씩만 가지고 있을 수 있음.
+     *
      * @param userId
      * @param couponTypeId
-     * @throws IllegalArgumentException id가 0이거나 null일 경우
-     * @throws NotFoundException 쿠폰, 회원이 존재하지 않을 경우
      * @return 미사용된 쿠폰
+     * @throws IllegalArgumentException id가 0이거나 null일 경우
+     * @throws NotFoundException        쿠폰, 회원이 존재하지 않을 경우
      */
     @Override
     public CouponResponseDto getUnusedCouponByCouponType(Long userId, Long couponTypeId) {
@@ -105,18 +107,19 @@ public class CouponServiceImpl implements CouponService {
     /**
      * 유저가 가진 쿠폰을 Page로 가지고 온다
      * 만료,미사용,사용된 쿠폰 상관없이 가져온다.
+     *
      * @param pageable
      * @param userId
-     * @throws IllegalArgumentException id가 0이거나 null일 경우
-     * @throws NotFoundException 회원이 존재하지 않을 경우
      * @return 유저의 쿠폰 페이지
+     * @throws IllegalArgumentException id가 0이거나 null일 경우
+     * @throws NotFoundException        회원이 존재하지 않을 경우
      */
     @Override
     public Page<CouponResponseDto> getCoupons(Pageable pageable, Long userId) {
         //userId null 체크
         validateId(userId);
         //유저 확인
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("회원(id:"+userId+")이 존재하지 않습니다."));
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")이 존재하지 않습니다."));
 
         Page<Coupon> couponPage = couponRepository.findByUserUserId(pageable, userId);
 
@@ -125,22 +128,23 @@ public class CouponServiceImpl implements CouponService {
 
     /**
      * 유저의 쿠폰 중 미사용된 쿠폰을 Page로 가져온다.
+     *
      * @param pageable
      * @param userId
-     * @throws IllegalArgumentException id가 0이거나 null일 경우
-     * @throws NotFoundException 회원이 존재하지 않을 경우
-
      * @return 미사용된 쿠폰 페이지
+     * @throws IllegalArgumentException id가 0이거나 null일 경우
+     * @throws NotFoundException        회원이 존재하지 않을 경우
      */
     @Override
     public Page<CouponResponseDto> getUnusedCoupons(Pageable pageable, Long userId) {
         //userId null 체크
         validateId(userId);
         //유저 확인
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("회원(id:"+userId+")이 존재하지 않습니다."));
-        Page<Coupon> couponPage = couponRepository.findByUserUserIdAndCouponStatusAndDeadlineBeforeNow(userId, CouponStatus.UNUSED, pageable);
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")이 존재하지 않습니다."));
+        Page<Coupon> couponPage = couponRepository.findByUserUserIdAndCouponStatusAndDeadlineAfterNow(userId, CouponStatus.UNUSED, pageable);
         return couponPage.map(CouponMapper::toResponse);
     }
+
     @Override
     public List<CouponResponseDto> getExpiredCoupons() {
         List<Coupon> coupons = couponRepository.findByCouponStatus(CouponStatus.EXPIRED);
@@ -155,11 +159,12 @@ public class CouponServiceImpl implements CouponService {
 
     /**
      * 유저가 가지고 있는 쿠폰 중 특정 책에 적용 가능한 쿠폰을 Page로 가져온다.
+     *
      * @param userId
      * @param bookId
-     * @throws IllegalArgumentException id가 0이거나 null일 경우
-     * @throws NotFoundException 회원, 도서가 존재하지 않을 경우
      * @return 적용가능한 쿠폰 패이지
+     * @throws IllegalArgumentException id가 0이거나 null일 경우
+     * @throws NotFoundException        회원, 도서가 존재하지 않을 경우
      */
     @Transactional
     @Override
@@ -172,7 +177,7 @@ public class CouponServiceImpl implements CouponService {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("회원(id:" + userId + ")이 존재하지 않습니다."));
         Book book = bookRepository.findByBookId(bookId).orElseThrow(() -> new NotFoundException("도서(id:" + bookId + ")이 존재하지 않습니다."));
         BigDecimal orderAmount = book.getSaleprice().multiply(BigDecimal.valueOf(quantity));
-        List<Coupon> coupons = couponRepository.findEligibleCouponToBook(userId, book.getBookId(),orderAmount); //유저의 모든 전체쿠폰, 모든 카테고리 쿠폰, 책에 적용가능한 책 쿠폰을 가져온다.
+        List<Coupon> coupons = couponRepository.findEligibleCouponToBook(userId, book.getBookId(), orderAmount); //유저의 모든 전체쿠폰, 모든 카테고리 쿠폰, 책에 적용가능한 책 쿠폰을 가져온다.
 
         //책의 정보를 가지고 와서 책이 속한 카테고리 Id를 모두 가지고 온다.
         BookResponseDto bookDetail = bookGetService.getBookDetail(null, book.getBookId());
@@ -212,12 +217,13 @@ public class CouponServiceImpl implements CouponService {
 
     /**
      * 유저들에게 쿠폰을 발행한다.
+     *
      * @param userIds
      * @param couponTypeId
-     * @throws IllegalArgumentException id가 0이거나 null일 경우
-     * @throws NotFoundException 회원,쿠폰타입이 존재하지 않을 경우
-     * @throws AlreadyExistException 유저가 미사용된 특정 쿠폰타입의 쿠폰 이미 가지고 있을 경우
      * @return 발행된 쿠폰들
+     * @throws IllegalArgumentException id가 0이거나 null일 경우
+     * @throws NotFoundException        회원,쿠폰타입이 존재하지 않을 경우
+     * @throws AlreadyExistException    유저가 미사용된 특정 쿠폰타입의 쿠폰 이미 가지고 있을 경우
      */
     @Override
     @Transactional
@@ -254,11 +260,12 @@ public class CouponServiceImpl implements CouponService {
 
     /**
      * 쿠폰을 만료시킨다.
+     *
      * @param userId
      * @param couponId
-     * @throws IllegalArgumentException id가 0이거나 null일 경우
-     * @throws NotFoundException 회원,쿠폰이 존재하지 않을 경우
      * @return 만료된 쿠폰
+     * @throws IllegalArgumentException id가 0이거나 null일 경우
+     * @throws NotFoundException        회원,쿠폰이 존재하지 않을 경우
      */
     @Override
     @Transactional
@@ -276,11 +283,12 @@ public class CouponServiceImpl implements CouponService {
 
     /**
      * 쿠폰을 사용합니다.
+     *
      * @param userId
      * @param couponId
-     * @throws IllegalArgumentException id가 0이거나 null일 경우
-     * @throws NotFoundException 회원,쿠폰이 존재하지 않을 경우
      * @return 사용한 쿠폰
+     * @throws IllegalArgumentException id가 0이거나 null일 경우
+     * @throws NotFoundException        회원,쿠폰이 존재하지 않을 경우
      */
     @Override
     @Transactional
@@ -304,10 +312,11 @@ public class CouponServiceImpl implements CouponService {
 
     /**
      * 쿠폰을 삭제합니다. (쿠폰 사용과 다름)
+     *
      * @param userId
      * @param couponId
      * @throws IllegalArgumentException id가 0이거나 null일 경우
-     * @throws NotFoundException 회원,쿠폰이 존재하지 않을 경우
+     * @throws NotFoundException        회원,쿠폰이 존재하지 않을 경우
      */
     @Override
     @Transactional
@@ -323,13 +332,14 @@ public class CouponServiceImpl implements CouponService {
 
     /**
      * 주문 금액에 대해 적용된 쿠폰 할인 금액을 반환한다.
+     *
      * @param bookId
      * @param quantity
      * @param couponId
-     * @throws IllegalArgumentException id,quantity가 0이거나 null일 경우
-     * @throws NotFoundException 책,쿠폰이 존재하지 않을 경우
-     * @throws InsufficientOrderAmountException 주문 금액(책 판매가 * 수량)이 쿠폰의 최소 주문 금액에 못 미칠 경우
      * @return 할인금액, 할인 전 금액, 할인 후 금액
+     * @throws IllegalArgumentException         id,quantity가 0이거나 null일 경우
+     * @throws NotFoundException                책,쿠폰이 존재하지 않을 경우
+     * @throws InsufficientOrderAmountException 주문 금액(책 판매가 * 수량)이 쿠폰의 최소 주문 금액에 못 미칠 경우
      */
     @Override
     @Transactional
@@ -344,7 +354,6 @@ public class CouponServiceImpl implements CouponService {
 //        BookResponseDto bookDetail = bookRepository.getBookDetail(null, book.getBookId());
 //        List<List<CategoryResponseDto>> categoryList = bookDetail.getCategoryList();
         List<BookCategory> bookCategoryList = bookCategoryRepository.findByBookId(book.getBookId());
-
 
 
         // 쿠폰 적용 가능한지 확인
@@ -409,7 +418,7 @@ public class CouponServiceImpl implements CouponService {
                     .build();
         } else {
             // 소수점 첫번째 자리에서 반올림
-            BigDecimal discountAmount = bookOrderPrice.multiply(couponPolicy.getDiscountRate()).divide(new BigDecimal(100),1, RoundingMode.HALF_UP);
+            BigDecimal discountAmount = bookOrderPrice.multiply(couponPolicy.getDiscountRate()).divide(new BigDecimal(100), 1, RoundingMode.HALF_UP);
             BigDecimal afterDiscount = bookOrderPrice.subtract(discountAmount);
 
             //만약 쿠폰을 적용한 할인금액이 최대 할인 금액보다 높다면
@@ -431,6 +440,7 @@ public class CouponServiceImpl implements CouponService {
 
     /**
      * Id값의 유효성을 체크한다.
+     *
      * @param id
      * @throws IllegalArgumentException id가 0이거나 null일 경우
      */
@@ -445,6 +455,7 @@ public class CouponServiceImpl implements CouponService {
 
     /**
      * 쿠폰의 마감일을 계산해 반환한다.
+     *
      * @param couponType
      * @return
      */

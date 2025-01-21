@@ -24,7 +24,7 @@ public class CouponTypeMapper {
             responseDto.setCouponTypes(CouponTargetType.BOOK);
             responseDto.setCouponTargetId(((BookCoupon) couponType).getBook().getBookId());
             responseDto.setCouponTargetName(((BookCoupon) couponType).getBook().getTitle());
-        } else if (couponType instanceof  CategoryCoupon) {
+        } else if (couponType instanceof CategoryCoupon) {
             responseDto.setCouponTypes(CouponTargetType.CATEGORY);
             responseDto.setCouponTargetId(((CategoryCoupon) couponType).getCategory().getCategoryId());
             responseDto.setCouponTargetName(((CategoryCoupon) couponType).getCategory().getCategoryName());
