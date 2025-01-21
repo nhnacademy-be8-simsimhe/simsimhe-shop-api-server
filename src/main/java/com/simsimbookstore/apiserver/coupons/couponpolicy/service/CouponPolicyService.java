@@ -15,8 +15,6 @@ public interface CouponPolicyService {
     //쿠폰 정책을 생성한다.
     CouponPolicyResponseDto createCouponPolicy(CouponPolicyRequestDto requestDto);
 
-    // 쿠폰 정책의 정보를 변경한다.
-//    CouponPolicyResponseDto updateCouponPolicy(Long couponPolicyId, CouponPolicyRequestDto requestDto);
     // 쿠폰 정책을 삭제한다.
     void deleteCouponPolicy(Long couponPolicyId);
 

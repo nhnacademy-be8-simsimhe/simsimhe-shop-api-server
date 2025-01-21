@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 public class RateCouponResponseDto extends CouponResponseDto {
 
     // 할인 형태
-    private final DisCountType disCountType = DisCountType.RATE;
+    private static final DisCountType disCountType = DisCountType.RATE;
     // 할인율
     private BigDecimal discountRate;
     // 최대 할인 금액

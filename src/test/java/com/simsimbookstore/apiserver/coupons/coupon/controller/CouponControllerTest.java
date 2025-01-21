@@ -263,7 +263,7 @@ class CouponControllerTest {
                         .build()
         );
 
-        when(couponService.getEligibleCoupons(eq(userId), eq(bookId),eq(quantity))).thenReturn(couponList);
+        when(couponService.getEligibleCoupons(userId, bookId,quantity)).thenReturn(couponList);
 
         mockMvc.perform(get("/api/shop/users/{userId}/coupons/unused", userId)
                         .param("bookId", String.valueOf(bookId))
