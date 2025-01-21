@@ -2,7 +2,6 @@ package com.simsimbookstore.apiserver.books.book.aladin;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
