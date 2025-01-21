@@ -27,7 +27,7 @@ public class UserController {
 
     // 유저 상태 업데이트
     @PutMapping("/{userId}/status")
-    public ResponseEntity<?> updateStatus(
+    public ResponseEntity<Void> updateStatus(
             @PathVariable Long userId,
             @RequestBody @Valid UserStatusUpdateRequestDto requestDto
     ) {
@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @PutMapping("/{userId}/grade")
-    public ResponseEntity<?> updateGrade(
+    public ResponseEntity<User> updateGrade(
             @PathVariable Long userId,
             @RequestBody @Valid UserGradeUpdateRequestDto requestDto
     ) {
@@ -45,7 +45,7 @@ public class UserController {
     }
 
     @PutMapping("/{userId}/latestLoginDate")
-    public ResponseEntity<?> updateLatestLoginDate(
+    public ResponseEntity<UserResponse> updateLatestLoginDate(
             @PathVariable Long userId,
             @RequestBody @Valid UserLatestLoginDateUpdateRequestDto requestDto
     ) {
@@ -55,7 +55,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<?> getUser(@PathVariable Long userId) {
+    public ResponseEntity<UserResponse> getUser(@PathVariable Long userId) {
         User user = userService.getUserWithGradeAndRoles(userId);
         UserResponse userResponse = UserMapper.toResponse(user);
 

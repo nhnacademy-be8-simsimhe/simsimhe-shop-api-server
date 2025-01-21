@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Objects;
 
 
-
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
@@ -56,7 +55,7 @@ public class GradeServiceImpl implements GradeService {
 
     @Transactional
     @Override
-    public Grade calculateGrade(Long userId){
+    public Grade calculateGrade(Long userId) {
         List<Order> orders = orderRepository.findAllByUserUserId(userId);
 
         BigDecimal userTotalPrice = BigDecimal.ZERO;
@@ -72,7 +71,7 @@ public class GradeServiceImpl implements GradeService {
 
         Grade newGrade = gradeAll.getFirst();
         for (Grade grade : gradeAll) {
-            if (userTotalPrice.compareTo(grade.getMinAmount())  > 0){
+            if (userTotalPrice.compareTo(grade.getMinAmount()) > 0) {
                 newGrade = grade;
             }
         }

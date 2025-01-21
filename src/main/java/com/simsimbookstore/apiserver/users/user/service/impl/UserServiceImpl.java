@@ -21,14 +21,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.text.ParsePosition;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static java.time.LocalDate.now;
 
@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         Optional<User> optionalSavedUser = userRepository.findUserWithGradeAndUserRoleListByUserId(user.getUserId());
 
-        return optionalSavedUser.orElseThrow(()->new NotFoundException(USER_NOT_FOUND_MESSAGE + userId));
+        return optionalSavedUser.orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_MESSAGE + userId));
     }
 
 
@@ -118,7 +118,7 @@ public class UserServiceImpl implements UserService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate localDate = null;
 
-        try{
+        try {
             localDate = LocalDate.parse(monthStr, formatter);
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException("옳바른 날짜 형식이 아닙니다: " + monthStr);
