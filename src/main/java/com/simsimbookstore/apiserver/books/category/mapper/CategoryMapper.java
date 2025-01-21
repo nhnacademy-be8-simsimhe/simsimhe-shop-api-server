@@ -56,7 +56,7 @@ public class CategoryMapper {
         }
         return categories.stream()
                 .map(CategoryMapper::toResponse)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()); //NOSONAR
     }
 
 }

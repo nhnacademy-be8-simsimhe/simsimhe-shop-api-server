@@ -75,7 +75,7 @@ public class ContributorServiceImpl implements ContributorService {
         // Convert Contributor to ContributorResponseDto
         List<ContributorResponseDto> responses = contributorPage.getContent().stream()
                 .map(ContributorMapper::toResponse)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()); //NOSONAR
 
         // Define pagination details
         int maxPageButtons = 5;
