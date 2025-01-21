@@ -38,7 +38,6 @@ public class CustomCouponRepositoryImpl implements CustomCouponRepository {
         QCategoryCoupon categoryCoupon = QCategoryCoupon.categoryCoupon;
         QBookCoupon bookCoupon = QBookCoupon.bookCoupon;
         QAllCoupon allCoupon = QAllCoupon.allCoupon;
-        QBookCategory bookCategory = QBookCategory.bookCategory;
         QCouponPolicy couponPolicy = QCouponPolicy.couponPolicy; // CouponPolicy Q타입
 
         JPAQuery<Coupon> query = jpaQueryFactory.selectFrom(coupon)

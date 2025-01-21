@@ -51,7 +51,7 @@ public class CouponPolicyController {
     }
 
     @DeleteMapping("/couponPolicies/{couponPolicyId}")
-    public ResponseEntity deleteCouponPolicy(@PathVariable Long couponPolicyId) {
+    public ResponseEntity<Void> deleteCouponPolicy(@PathVariable Long couponPolicyId) {
         couponPolicyService.deleteCouponPolicy(couponPolicyId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
