@@ -1,6 +1,7 @@
 package com.simsimbookstore.apiserver.orders.orderbook.service;
 
 import com.simsimbookstore.apiserver.orders.coupondiscount.dto.CouponDiscountResponseDto;
+import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookAdminResponseDto;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookResponseDto;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
@@ -31,4 +32,6 @@ public interface OrderBookService {
     OrderBookResponseDto toOrderBookResponseDto(OrderBook orderBook);
 
     List<OrderBook> getOrderBooks(Long orderId);
+
+    OrderBookAdminResponseDto toAdminResponseDto(OrderBook orderBook);
 }

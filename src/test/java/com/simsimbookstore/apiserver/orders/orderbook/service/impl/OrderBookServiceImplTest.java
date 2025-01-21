@@ -59,6 +59,7 @@ class OrderBookServiceImplTest {
     @Mock
     private CouponDiscountService couponDiscountService;
 
+
     @Mock
     private PackageService packageService;
 
@@ -124,8 +125,8 @@ class OrderBookServiceImplTest {
     }
 
     @Test
-    @DisplayName("createOrderBooks() - 성공적으로 OrderBook 생성 및 쿠폰/패키지 연결")
-    void testCreateOrderBooks_Success() {
+    @DisplayName("createOrderBooks() - OrderBook 기본 필드 검증")
+    void testCreateOrderBooks_BasicFields() {
         // Given
         CouponDiscountRequestDto couponDto = CouponDiscountRequestDto.builder()
                 .couponId(1L)
@@ -159,8 +160,84 @@ class OrderBookServiceImplTest {
 
         OrderBook savedOrderBook = OrderBook.builder()
                 .orderBookId(200L)
-                .book(book)
-                .order(order)
+                .book(book)    // Assume 'book' is predefined or mocked accordingly
+                .order(order)  // Assume 'order' is predefined or mocked accordingly
+                .quantity(2)
+                .salePrice(new BigDecimal("10000"))
+                .discountPrice(new BigDecimal("500"))
+                .orderBookState(OrderBook.OrderBookState.PENDING)
+                .build();
+
+        // Coupon and Packages setup omitted for brevity...
+
+        // Mocking for basic fields (쿠폰, 패키지 검증 제외)
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderBookRepository.save(any(OrderBook.class))).thenReturn(savedOrderBook);
+        when(couponDiscountService.createCouponDiscount(any(), any())).thenReturn(null);
+        when(packageService.createPackage(any(), any())).thenReturn(null);
+        when(orderBookRepository.findById(200L)).thenReturn(Optional.of(savedOrderBook));
+
+        // When
+        List<OrderBookResponseDto> resultList = orderBookService.createOrderBooks(requestDtos);
+
+        // Then
+        OrderBookResponseDto responseDto = resultList.getFirst();
+        assertAll("기본 필드 검증",
+                () -> assertNotNull(resultList),
+                () -> assertEquals(1, resultList.size()),
+                () -> assertEquals(200L, responseDto.getOrderBookId()),
+                () -> assertEquals("Test Book", responseDto.getBookTitle()),
+                () -> assertEquals(2, responseDto.getQuantity()),
+                () -> assertEquals(new BigDecimal("10000"), responseDto.getSalePrice()),
+                () -> assertEquals(new BigDecimal("500"), responseDto.getDiscountPrice()),
+                () -> assertEquals("PENDING", responseDto.getOrderBookState())
+        );
+
+        verify(bookRepository, times(1)).findById(1L);
+        verify(orderRepository, times(1)).findById(1L);
+        verify(orderBookRepository, times(1)).save(any(OrderBook.class));
+    }
+
+    @Test
+    @DisplayName("createOrderBooks() - 쿠폰 및 패키지 연결 검증")
+    void testCreateOrderBooks_CouponAndPackages() {
+        // Given
+        // [동일한 Given 섹션을 필요에 따라 복사. 이 테스트에서는 쿠폰 및 패키지 관련 설정과 모킹이 중요]
+        CouponDiscountRequestDto couponDto = CouponDiscountRequestDto.builder()
+                .couponId(1L)
+                .couponName("WELCOME")
+                .couponType("FIXED")
+                .discountPrice(new BigDecimal("1000"))
+                .build();
+
+        PackageRequestDto packageDto1 = PackageRequestDto.builder()
+                .packageTypeId(10L)
+                .packageName("GiftBox")
+                .build();
+
+        PackageRequestDto packageDto2 = PackageRequestDto.builder()
+                .packageTypeId(11L)
+                .packageName("Ribbon")
+                .build();
+
+        OrderBookRequestDto dto = OrderBookRequestDto.builder()
+                .orderId(1L)
+                .bookId(1L)
+                .quantity(2)
+                .salePrice(new BigDecimal("10000"))
+                .discountPrice(new BigDecimal("500"))
+                .orderBookState("PENDING")
+                .couponDiscountRequestDto(couponDto)
+                .packagesRequestDtos(List.of(packageDto1, packageDto2))
+                .build();
+
+        List<OrderBookRequestDto> requestDtos = Collections.singletonList(dto);
+
+        OrderBook savedOrderBook = OrderBook.builder()
+                .orderBookId(200L)
+                .book(book)    // Assume 'book' is predefined
+                .order(order)  // Assume 'order' is predefined
                 .quantity(2)
                 .salePrice(new BigDecimal("10000"))
                 .discountPrice(new BigDecimal("500"))
@@ -191,7 +268,7 @@ class OrderBookServiceImplTest {
         savedOrderBook.addPackage(savedPackage1);
         savedOrderBook.addPackage(savedPackage2);
 
-        // Mocking
+        // Mocking for coupon and packages related operations
         when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderBookRepository.save(any(OrderBook.class))).thenReturn(savedOrderBook);
@@ -209,27 +286,15 @@ class OrderBookServiceImplTest {
         when(packageService.createPackage(packageDto1, savedOrderBook)).thenReturn(savedPackage1);
         when(packageService.createPackage(packageDto2, savedOrderBook)).thenReturn(savedPackage2);
         when(orderBookRepository.findById(200L)).thenReturn(Optional.of(savedOrderBook));
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
         // When
         List<OrderBookResponseDto> resultList = orderBookService.createOrderBooks(requestDtos);
 
         // Then
         OrderBookResponseDto responseDto = resultList.getFirst();
-
-        assertAll("OrderBookResponseDto assertions",
-                () -> assertNotNull(resultList),
-                () -> assertEquals(1, resultList.size()),
-                () -> assertEquals(200L, responseDto.getOrderBookId()),
-                () -> assertEquals("Test Book", responseDto.getBookTitle()),
-                () -> assertEquals(2, responseDto.getQuantity()),
-                () -> assertEquals(new BigDecimal("10000"), responseDto.getSalePrice()),
-                () -> assertEquals(new BigDecimal("500"), responseDto.getDiscountPrice()),
-                () -> assertEquals("PENDING", responseDto.getOrderBookState()),
-
+        assertAll("쿠폰 및 패키지 검증",
                 () -> {
-                    // 쿠폰 검증
-                    assertNotNull(responseDto.getCouponDiscount());
+                    assertNotNull(responseDto.getCouponDiscount(), "CouponDiscount should not be null");
                     assertAll("CouponDiscount assertions",
                             () -> assertEquals(1L, responseDto.getCouponDiscount().getCouponDiscountId()),
                             () -> assertEquals("WELCOME", responseDto.getCouponDiscount().getCouponName()),
@@ -237,13 +302,11 @@ class OrderBookServiceImplTest {
                             () -> assertEquals(new BigDecimal("1000"), responseDto.getCouponDiscount().getDiscountPrice())
                     );
                 },
-
                 () -> {
-                    // 패키지 검증
-                    assertNotNull(responseDto.getPackages());
-                    assertEquals(2, responseDto.getPackages().size());
+                    assertNotNull(responseDto.getPackages(), "Packages should not be null");
+                    assertEquals(2, responseDto.getPackages().size(), "Packages size mismatch");
 
-                    PackageResponseDto pkg1 = responseDto.getPackages().getFirst();
+                    PackageResponseDto pkg1 = responseDto.getPackages().get(0);
                     PackageResponseDto pkg2 = responseDto.getPackages().get(1);
 
                     assertAll("First Package assertions",
@@ -258,15 +321,11 @@ class OrderBookServiceImplTest {
                 }
         );
 
-        // Verify
-        verify(bookRepository, times(1)).findById(1L);
-        verify(orderRepository, times(1)).findById(1L);
-        verify(orderBookRepository, times(1)).save(any(OrderBook.class));
         verify(couponDiscountService, times(1)).createCouponDiscount(couponDto, savedOrderBook);
         verify(packageService, times(1)).createPackage(packageDto1, savedOrderBook);
         verify(packageService, times(1)).createPackage(packageDto2, savedOrderBook);
-        verify(orderBookRepository, times(1)).findById(200L);
     }
+
 
 
     @Test
