@@ -41,7 +41,7 @@ public class CouponMapper {
         }
     }
 
-    private static FixCouponResponseDto toFixCouponResponse(Coupon coupon, CouponType couponType, CouponPolicy couponPolicy,CouponDetails couponDetails) {
+    private static FixCouponResponseDto toFixCouponResponse(Coupon coupon, CouponType couponType, CouponPolicy couponPolicy, CouponDetails couponDetails) {
 
         return FixCouponResponseDto.builder()
                 .userId(coupon.getUser().getUserId())
@@ -85,6 +85,7 @@ public class CouponMapper {
             this.couponTargetType = couponTargetType;
             this.targetId = targetId;
         }
+
         public CouponTargetType couponTargetType() {
             return couponTargetType;
         }

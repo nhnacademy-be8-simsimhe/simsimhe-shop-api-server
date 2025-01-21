@@ -44,6 +44,4 @@ public class CouponPolicy {
     private String policyDescription;
 
 
-
-
 }

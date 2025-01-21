@@ -3,8 +3,10 @@ POST http://localhost:8010/api/admin/coupons/issue
 Content-Type: application/json
 
 {
-  "userIds": [1,2,5,6],
-  "couponTypeId": 19
+  "userIds": [
+    91
+  ],
+  "couponTypeId": 1
 }
 
 ### POST issueCoupons - 유저들에게 쿠폰 발급(책)
@@ -12,7 +14,12 @@ POST http://localhost:8010/api/admin/coupons/issue
 Content-Type: application/json
 
 {
-  "userIds": [1,2,5,6],
+  "userIds": [
+    1,
+    2,
+    5,
+    6
+  ],
   "couponTypeId": 20
 }
 
@@ -21,7 +28,12 @@ POST http://localhost:8010/api/admin/coupons/issue
 Content-Type: application/json
 
 {
-  "userIds": [1,2,5,6],
+  "userIds": [
+    1,
+    2,
+    5,
+    6
+  ],
   "couponTypeId": 24
 }
 

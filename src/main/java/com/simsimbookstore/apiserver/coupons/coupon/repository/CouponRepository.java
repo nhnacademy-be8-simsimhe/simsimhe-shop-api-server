@@ -8,15 +8,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
-public interface CouponRepository extends JpaRepository<Coupon,Long>, CustomCouponRepository {
-    Page<Coupon> findByUserUserId(Pageable pageable,Long userId);
+public interface CouponRepository extends JpaRepository<Coupon, Long>, CustomCouponRepository {
+    Page<Coupon> findByUserUserId(Pageable pageable, Long userId);
 
-    @Query("SELECT c FROM Coupon c WHERE c.user.userId = :userId AND c.couponStatus = :couponStatus AND c.deadline < CURRENT_TIMESTAMP")
-    Page<Coupon> findByUserUserIdAndCouponStatusAndDeadlineBeforeNow(
+    @Query("SELECT c FROM Coupon c WHERE c.user.userId = :userId AND c.couponStatus = :couponStatus AND c.deadline > CURRENT_TIMESTAMP")
+    Page<Coupon> findByUserUserIdAndCouponStatusAndDeadlineAfterNow(
             @Param("userId") Long userId,
             @Param("couponStatus") CouponStatus couponStatus,
             Pageable pageable
