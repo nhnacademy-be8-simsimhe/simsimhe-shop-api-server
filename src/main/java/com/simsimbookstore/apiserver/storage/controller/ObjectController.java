@@ -33,7 +33,7 @@ public class ObjectController {
         - 업로드 성공 시 업로드된 파일 이름 리스트 반환
      */
     @PostMapping(value = "/upload-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<List<String>> uploadObjects(@RequestPart("file") List<MultipartFile> files) {
+    public ResponseEntity<List<String>> uploadObjects(@RequestPart(value = "file", required = false) List<MultipartFile> files) {
         log.info("uploadObjects in");
         if (files == null || files.isEmpty()) {
             // 오류 메시지를 리스트로 감싸서 반환

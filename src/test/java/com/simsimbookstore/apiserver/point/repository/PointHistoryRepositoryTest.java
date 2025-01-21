@@ -72,14 +72,14 @@ class PointHistoryRepositoryTest {
         PointHistory history1 = PointHistory.builder()
                 .amount(100)
                 .pointType(PointHistory.PointType.EARN)
-                .created_at(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .user(testUser)
                 .build();
 
         PointHistory history2 = PointHistory.builder()
                 .amount(200)
                 .pointType(PointHistory.PointType.EARN)
-                .created_at(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .user(testUser)
                 .build();
 
@@ -111,14 +111,14 @@ class PointHistoryRepositoryTest {
         PointHistory history1 = PointHistory.builder()
                 .amount(100)
                 .pointType(PointHistory.PointType.EARN)
-                .created_at(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .user(testUser)
                 .build();
 
         PointHistory history2 = PointHistory.builder()
                 .amount(200)
                 .pointType(PointHistory.PointType.EARN)
-                .created_at(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .user(testUser)
                 .build();
 
