@@ -2,6 +2,7 @@ package com.simsimbookstore.apiserver.storage.controller;
 
 import com.simsimbookstore.apiserver.storage.exception.ObjectStorageException;
 import com.simsimbookstore.apiserver.storage.service.ObjectServiceImpl;
+import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,21 +33,23 @@ public class ObjectController {
         - 업로드 성공 시 업로드된 파일 이름 리스트 반환
      */
     @PostMapping(value = "/upload-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadObjects(@RequestPart("file") List<MultipartFile> files) {
+    public ResponseEntity<List<String>> uploadObjects(@RequestPart("file") List<MultipartFile> files) {
         log.info("uploadObjects in");
         if (files == null || files.isEmpty()) {
-            return ResponseEntity.badRequest().body("No files provided for upload.");
+            // 오류 메시지를 리스트로 감싸서 반환
+            return ResponseEntity.badRequest()
+                    .body(Collections.singletonList("No files provided for upload."));
         }
 
         try {
             List<String> uploadedFileNames = objectService.uploadObjects(files);
-            return ResponseEntity.ok(uploadedFileNames); // string -> list<string>
+            return ResponseEntity.ok(uploadedFileNames);
         } catch (ObjectStorageException e) {
+            // 예외 메시지를 리스트로 감싸서 반환
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("File upload failed: " + e.getMessage());
+                    .body(Collections.singletonList("File upload failed: " + e.getMessage()));
         }
     }
-
     /*
         - 이미지 링크로 도서의 상세 이미지 업로드
         - @RequestParam("url")로 이미지링크를 받음

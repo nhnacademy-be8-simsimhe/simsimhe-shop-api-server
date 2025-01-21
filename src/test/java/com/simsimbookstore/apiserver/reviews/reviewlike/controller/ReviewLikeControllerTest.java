@@ -68,7 +68,7 @@ class ReviewLikeControllerTest {
         Long reviewId = 2L;
         Long expectedCount = 10L;
 
-        when(reviewLikeService.getReviewLikeCount(eq(reviewId))).thenReturn(expectedCount);
+        when(reviewLikeService.getReviewLikeCount(reviewId)).thenReturn(expectedCount);
 
         mockMvc.perform(get("/api/shop/reviews/{reviewId}/likes/count", reviewId)
                         .contentType(MediaType.APPLICATION_JSON)

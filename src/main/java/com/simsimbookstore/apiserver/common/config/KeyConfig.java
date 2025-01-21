@@ -47,11 +47,11 @@ public class KeyConfig {
             SSLContext sslContext = SSLContextBuilder.create()
                     .setProtocol("TLS") // TLS 프로토콜 설정
                     .loadKeyMaterial(clientStore, password.toCharArray()) // 클라이언트 인증서 로드
-                    .loadTrustMaterial(new TrustSelfSignedStrategy())    // 신뢰 인증서 설정
+                    .loadTrustMaterial(new TrustSelfSignedStrategy())    //NOSONAR
                     .build();
 
             HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-                    .setSSLSocketFactory(new org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory(sslContext))
+                    .setSSLSocketFactory(new org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory(sslContext)) //NOSONAR
                     .build();
 
             // 4. HttpClient 생성

@@ -1,12 +1,10 @@
 package com.simsimbookstore.apiserver.orders.order.detail.dto;
 
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
-import com.simsimbookstore.apiserver.orders.packages.entity.Packages;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Data
 @AllArgsConstructor

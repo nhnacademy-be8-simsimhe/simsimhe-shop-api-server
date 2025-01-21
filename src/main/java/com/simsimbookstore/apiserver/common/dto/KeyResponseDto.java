@@ -1,8 +1,9 @@
 package com.simsimbookstore.apiserver.common.dto;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+@Data
 @Getter
 public class KeyResponseDto {
     private Header header;

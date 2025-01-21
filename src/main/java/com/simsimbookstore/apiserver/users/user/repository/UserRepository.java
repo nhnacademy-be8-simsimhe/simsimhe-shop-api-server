@@ -35,5 +35,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE User u SET u.grade = :grade where u.userId = :userId")
-    int updateUserGrade(@Param("userId") Long userId,@Param("grade") Grade grade);
+    int updateUserGrade(@Param("userId") Long userId, @Param("grade") Grade grade);
 }

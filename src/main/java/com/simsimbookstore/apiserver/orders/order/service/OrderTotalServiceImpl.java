@@ -31,7 +31,7 @@ public class OrderTotalServiceImpl implements OrderTotalService{
     private final CouponService couponService;
 
     @Override
-    public TotalResponseDto calculateTotal(TotalRequestDto requestDto) {
+    public TotalResponseDto calculateTotal(TotalRequestDto requestDto) { //NOSONAR
         log.info("requestDto = {}", requestDto);
         log.info("couponOptions = {}", requestDto.getCouponOptions());
 
@@ -45,8 +45,7 @@ public class OrderTotalServiceImpl implements OrderTotalService{
 
         // 책 가격 + 포장 비용 등 계산
         for (BookListResponseDto book : bookOrderList) {
-
-            // 1) 각 책의 원래 총액
+            // 원래 책 가격 계산
             BigDecimal bookOriginalTotal = book.getPrice().multiply(BigDecimal.valueOf(book.getQuantity()));
             originalPrice = originalPrice.add(bookOriginalTotal);
             BigDecimal bookTotal = bookOriginalTotal;

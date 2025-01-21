@@ -18,6 +18,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -71,9 +73,12 @@ class ReviewImagePathServiceImplTest {
     void createReviewImage_reviewNotFound() {
         when(reviewRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reviewImagePathService.createReviewImage(1L, List.of("/images/review1/image1.jpg")))
+        List<String> imagePaths = List.of("/images/review1/image1.jpg");
+
+        assertThatThrownBy(() -> reviewImagePathService.createReviewImage(1L, imagePaths))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("존재하지 않는 리뷰입니다.");
+
         verify(reviewRepository, times(1)).findById(1L);
         verify(reviewImagePathRepository, never()).save(any(ReviewImagePath.class));
     }
