@@ -154,8 +154,8 @@ class UserControllerTest {
 
         UserResponse response = UserMapper.toResponse(testUser);
         mockMvc.perform(get("/api/users/{userId}",1L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(response)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(response)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(userId))
                 .andExpect(jsonPath("$.userName").value(testUser.getUserName()))
@@ -172,8 +172,8 @@ class UserControllerTest {
         when(userService.getAllActiveUser()).thenReturn(List.of(response));
 
         mockMvc.perform(get("/api/users/active")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(List.of(response))))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(List.of(response))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", Matchers.is(1)));
     }
@@ -185,8 +185,8 @@ class UserControllerTest {
         when(userService.getUserByBirthMonth(any())).thenReturn(List.of(response));
 
         mockMvc.perform(get("/api/users").param("birthMonth", "1995-03-09")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(List.of(List.of(response)))))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(List.of(List.of(response)))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", Matchers.is(1)));
 
