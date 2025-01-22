@@ -64,8 +64,8 @@ public class PaymentController {
     // 비회원의 환불 요청 및 회원의 결제 취소
     @PostMapping("/payment/canceled/{orderNumber}")
     public ResponseEntity<Void> canceledPayment(@PathVariable String orderNumber,
-                                             @RequestParam Long userId,
-                                             @Valid @RequestBody CancelRequestDto cancelRequestDto,
+                                                @RequestParam Long userId,
+                                                @Valid @RequestBody CancelRequestDto cancelRequestDto,
                                                 BindingResult bindingResult) {  //orderId = orderNumber  // 멱등키 : @RequestHeader("idempotentId") String idempotentId,
         if (bindingResult.hasErrors()) {
             throw new PaymentValidationFailException("결제 취소 입력값이 올바르지 않습니다.");
