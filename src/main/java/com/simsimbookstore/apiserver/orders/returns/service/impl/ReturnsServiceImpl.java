@@ -13,6 +13,8 @@ import com.simsimbookstore.apiserver.orders.orderbook.repository.OrderBookReposi
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ReturnsServiceImpl implements ReturnsService {
@@ -25,32 +27,44 @@ public class ReturnsServiceImpl implements ReturnsService {
      * 반품 생성
      */
     @Override
-    public ReturnsResponseDto createReturn(ReturnsRequestDto requestDto) {
-        // 배송 및 주문 확인
-        Delivery delivery = deliveryRepository.findById(requestDto.getDeliveryId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 배송 정보가 존재하지 않습니다."));
+    public void createReturn(ReturnsRequestDto requestDto) {
+        List<Long> deliveries = requestDto.getDeliveryId();
+        List<Long> orderBookIds = requestDto.getOrderBookId();
+        List<Integer> quantities = requestDto.getQuantity();
 
-        OrderBook orderBook = orderBookRepository.findById(requestDto.getOrderBookId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 주문 정보가 존재하지 않습니다."));
+        for (int i = 0; i < orderBookIds.size(); i++) {
+            Long deliveryId = deliveries.get(i);
+            Long orderBookId = orderBookIds.get(i);
+            Integer quantity = quantities.get(i);
 
-        // 반품 엔티티 생성
-        Returns returns = Returns.builder()
-                .returnReason(requestDto.getReturnReason())
-                .returnDate(requestDto.getReturnDate())
-                .returnState(requestDto.getReturnState())
-                .quantity(requestDto.getQuantity())
-                .refund(requestDto.getRefund())
-                .damaged(requestDto.getDamaged())
-                .delivery(delivery)
-                .orderBook(orderBook)
-                .build();
+                // 배송 및 주문 확인
+                Delivery delivery = deliveryRepository.findById(deliveryId)
+                        .orElseThrow(() -> new IllegalArgumentException("해당 배송 정보가 존재하지 않습니다."));
+                OrderBook orderBook = orderBookRepository.findById(orderBookId)
+                        .orElseThrow(() -> new IllegalArgumentException("해당 주문 정보가 존재하지 않습니다."));
 
-        // 반품 저장
-        returnsRepository.save(returns);
+                // 중복 확인: orderBook 기준
+                boolean exists = returnsRepository.existsByOrderBook(orderBook);
+                if (exists) {
+                    throw new IllegalArgumentException("해당 주문에 대한 반품 기록이 이미 존재합니다.");
+                }
 
-        // 저장된 엔티티를 ResponseDto로 변환
-        return returns.toResponseDto();
-    }
+                // 반품 엔티티 생성
+                Returns returns = Returns.builder()
+                        .returnReason(requestDto.getReturnReason())
+                        .returnDate(requestDto.getReturnDate())
+                        .returnState(requestDto.getReturnState())
+                        .quantity(quantity)
+                        .refund(requestDto.getRefund())
+                        .damaged(requestDto.getDamaged())
+                        .delivery(delivery)
+                        .orderBook(orderBook)
+                        .build();
+
+                // 반품 저장
+                returnsRepository.save(returns);
+            }
+        }
 
     /**
      * 반품 상태 업데이트

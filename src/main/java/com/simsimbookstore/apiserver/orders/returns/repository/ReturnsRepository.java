@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface ReturnsRepository extends JpaRepository<Returns, Long> {
     Optional<Returns> findByOrderBook(OrderBook orderBook);
+
+    boolean existsByOrderBook(OrderBook orderBook);
 }

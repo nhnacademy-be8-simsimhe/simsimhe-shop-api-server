@@ -5,7 +5,7 @@ import com.simsimbookstore.apiserver.orders.returns.dto.ReturnsResponseDto;
 import com.simsimbookstore.apiserver.orders.returns.entity.Returns;
 
 public interface ReturnsService {
-    ReturnsResponseDto createReturn(ReturnsRequestDto requestDto);
+    void createReturn(ReturnsRequestDto requestDto);
 
     ReturnsResponseDto updateReturnStatus(Long returnId, Returns.ReturnState newState);
 

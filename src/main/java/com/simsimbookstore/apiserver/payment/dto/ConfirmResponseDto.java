@@ -1,11 +1,13 @@
 package com.simsimbookstore.apiserver.payment.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 
 @Getter
+@AllArgsConstructor
 public class ConfirmResponseDto {
     @JsonProperty("orderId")
     private String orderId;

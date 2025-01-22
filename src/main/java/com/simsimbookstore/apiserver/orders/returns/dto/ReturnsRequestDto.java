@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,10 +20,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class ReturnsRequestDto {
 
     @NotNull(message = "배송은 필수입니다")
-    private Long deliveryId;
+    private List<Long> deliveryId;
 
     @NotNull(message = "책은 필수입니다.")
-    private Long orderBookId;
+    private List<Long> orderBookId;
 
     @NotBlank
     private String returnReason;
@@ -32,7 +34,7 @@ public class ReturnsRequestDto {
 
     @NotBlank
     @Min(value = 1, message = "수량은 1 이상이여야 합니다")
-    private Integer quantity;
+    private List<Integer> quantity;
 
     @NotBlank
     private Returns.ReturnState returnState;

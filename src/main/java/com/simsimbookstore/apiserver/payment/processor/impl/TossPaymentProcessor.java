@@ -37,6 +37,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -187,38 +188,40 @@ public class TossPaymentProcessor implements PaymentProcessor {
         Payment payment = paymentRepository.findPaymentByPaymentKey(paymentKey)
                 .orElseThrow(() -> new PaymentNotExistException("결제 내역이 존재하지 않습니다."));
 
-        OrderBook orderBook = orderBookRepository.findByOrderBookId(cancel.getOrderBookId())
-                .orElseThrow(() -> new NotFoundException("주문 도서를 찾을 수 없습니다."));
+        List<Long> orderBookIds = cancel.getOrderBookId();
+        for (Long orderBookId : orderBookIds) {
+            OrderBook orderBook = orderBookRepository.findByOrderBookId(orderBookId)
+                    .orElseThrow(() -> new NotFoundException("주문 도서를 찾을 수 없습니다."));
 
-        String cancelReason = cancel.getCancelReason();
+            String cancelReason = cancel.getCancelReason();
 
-        // 만약 부분 취소가 있다면 amount 추가 필요!
-        // 사용자가 요청한 취소 저장
-        PaymentCanceled canceled = PaymentCanceled.builder()
-                .paymentCanceledReason(cancelReason)
-                .userCanceledAt(cancel.getRefundedAt())
-                .payment(payment)
-                .build();
-        paymentCanceledRepository.save(canceled);
+            // 만약 부분 취소가 있다면 amount 추가 필요!
+            // 사용자가 요청한 취소 저장
+            PaymentCanceled canceled = PaymentCanceled.builder()
+                    .paymentCanceledReason(cancelReason)
+                    .userCanceledAt(cancel.getRefundedAt())
+                    .payment(payment)
+                    .build();
+            paymentCanceledRepository.save(canceled);
 
-        // 사용자가 요청한 정보 저장
-        ResponseEntity<CanceledResponseDto> canceledResponse = paymentRestTemplate.canceled(paymentKey, cancelReason);  //CanceledResponseDto 화면에 보여줄거면 필요
+            // 사용자가 요청한 정보 저장
+            ResponseEntity<CanceledResponseDto> canceledResponse = paymentRestTemplate.canceled(paymentKey, cancelReason);  //CanceledResponseDto 화면에 보여줄거면 필요
 
-        // 이미 취소된 건에 대한 처리 필요
-        if (canceledResponse.getStatusCode().is4xxClientError()) {
-            throw new PaymentAlreadyCanceled("이미 취소가 처리된 결제입니다.");
+            // 이미 취소된 건에 대한 처리 필요
+            if (canceledResponse.getStatusCode().is4xxClientError()) {
+                throw new PaymentAlreadyCanceled("이미 취소가 처리된 결제입니다.");
+            }
+
+            if (canceledResponse.getBody() != null) {
+                canceledSaveAndPaymentUpdateState(canceledResponse.getBody(), paymentKey, payment);
+            } else {
+                throw new NullPointerException("canceledResponse가 비어있습니다.");
+            }
+
+            // 취소에 따른 주문 상태 변경
+            order.setOrderState(Order.OrderState.PAYMENT_CANCELED);
+            orderBook.updateOrderBookState(OrderBook.OrderBookState.PAYMENT_CANCELED);
         }
-
-        if (canceledResponse.getBody() != null) {
-            canceledSaveAndPaymentUpdateState(canceledResponse.getBody(), paymentKey, payment);
-        } else {
-            throw new NullPointerException("canceledResponse가 비어있습니다.");
-        }
-
-        // 취소에 따른 주문 상태 변경
-        order.setOrderState(Order.OrderState.PAYMENT_CANCELED);
-        orderBook.updateOrderBookState(OrderBook.OrderBookState.PAYMENT_CANCELED);
-
     }
 
     @Transactional
