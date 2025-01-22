@@ -79,8 +79,8 @@ public class OrderDetailService {
             }
 
             // wrap
-            String packageName = null;
-            BigDecimal packagePrice = null;
+            String packageName ="-";
+            BigDecimal packagePrice = BigDecimal.ZERO;
 
             List<WrapType> wrapTypes = orderBookQueryRepository.findByPackage(orderBook);
             for (WrapType wrapType : wrapTypes) {

@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 public class LogAndCrashAppender extends AppenderBase<ILoggingEvent> {
+    @Setter
     private RestTemplate restTemplate;
     @Setter
     private String appKey;

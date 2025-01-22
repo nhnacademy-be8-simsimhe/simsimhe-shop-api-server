@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -122,7 +121,7 @@ class PointHistoryCustomRepositoryImplTest {
                 .viewCount(0L)
                 .build();
 
-        Book savedBook = bookRepository.save(book);
+        bookRepository.save(book);
 
         PointHistory pointHistory1 = PointHistory.builder()
                 .user(testUser)
@@ -155,7 +154,7 @@ class PointHistoryCustomRepositoryImplTest {
                 .roadAddress("Seoul City Center")
                 .detailedAddress("Apartment 101")
                 .build();
-        delivery = deliveryRepository.save(delivery);
+        deliveryRepository.save(delivery);
 
         Order mockOrder = Order.builder()
                 .user(testUser)

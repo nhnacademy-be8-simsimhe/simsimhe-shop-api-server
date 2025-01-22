@@ -1,12 +1,14 @@
 package com.simsimbookstore.apiserver.point.service.impl;
 
 
+import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
 import com.simsimbookstore.apiserver.point.dto.OrderPointCalculateRequestDto;
 import com.simsimbookstore.apiserver.point.dto.OrderPointRequestDto;
+import com.simsimbookstore.apiserver.point.dto.PointHistoryResponseDto;
 import com.simsimbookstore.apiserver.point.dto.PointPolicyResponseDto;
 import com.simsimbookstore.apiserver.point.dto.ReviewPointCalculateRequestDto;
 import com.simsimbookstore.apiserver.point.entity.OrderPointManage;
@@ -20,11 +22,14 @@ import com.simsimbookstore.apiserver.point.service.PointPolicyService;
 import com.simsimbookstore.apiserver.reviews.review.dto.ReviewRequestDTO;
 import com.simsimbookstore.apiserver.reviews.review.entity.Review;
 import com.simsimbookstore.apiserver.reviews.review.repository.ReviewRepository;
+import com.simsimbookstore.apiserver.reviews.reviewimage.entity.ReviewImagePath;
 import com.simsimbookstore.apiserver.reviews.reviewimage.repository.ReviewImagePathRepository;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.service.UserService;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +39,8 @@ import org.mockito.Mock;
 import java.math.BigDecimal;
 import java.util.Optional;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -443,6 +450,128 @@ class PointHistoryServiceImplTest {
         assertEquals("포인트 기록이 존재하지 않습니다.", exception.getMessage());
         verify(pointHistoryRepository).findById(pointHistoryId);
         verify(pointHistoryRepository, never()).save(any(PointHistory.class));
+    }
+    @Test
+    void testGetUserPointHistory() {
+        Long testUserId = 1L;
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // 샘플 데이터 준비
+        List<PointHistoryResponseDto> dtoList = Arrays.asList(
+                PointHistoryResponseDto.builder().description("Test1").build(),
+                PointHistoryResponseDto.builder().description("Test2").build()
+        );
+
+        when(pointHistoryRepository.getPointHistoriesByUserId(testUserId, pageable)).thenReturn(dtoList);
+        when(pointHistoryRepository.countByUserId(testUserId)).thenReturn((long) dtoList.size());
+
+        PageResponse<PointHistoryResponseDto> response = pointHistoryService.getUserPointHistory(testUserId, pageable);
+
+        assertNotNull(response);
+        assertEquals(2, response.getData().size());
+        assertEquals(1, response.getCurrentPage());
+        // 여기에 startPage, endPage 등의 추가 검증 가능
+        verify(pointHistoryRepository).getPointHistoriesByUserId(testUserId, pageable);
+        verify(pointHistoryRepository).countByUserId(testUserId);
+    }
+
+    @Test
+    void testOrderPoint_PointUsePositive() {
+        // given
+        BigDecimal pointUseValue = BigDecimal.valueOf(500);
+        order.setPointUse(pointUseValue);
+        order.setPointEarn(0);
+
+        // 추가: userService.getUserTier 설정
+        when(userService.getUserTier(userId)).thenReturn(Tier.STANDARD);
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(pointPolicyService.getPolicy(PointPolicy.EarningMethod.ORDER_STANDARD))
+                .thenReturn(PointPolicyResponseDto.builder()
+                        .earningMethod(PointPolicy.EarningMethod.ORDER_STANDARD)
+                        .earningType(PointPolicy.EarningType.RATE)
+                        .earningValue(BigDecimal.valueOf(0.01))
+                        .available(true)
+                        .description("Order points")
+                        .build());
+        when(pointHistoryRepository.save(any(PointHistory.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(orderPointManageRepository.save(any(OrderPointManage.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        OrderPointRequestDto requestDto = OrderPointRequestDto.builder()
+                .userId(userId)
+                .orderId(orderId)
+                .build();
+
+        // when
+        PointHistory result = pointHistoryService.orderPoint(requestDto);
+
+        // then
+        assertNotNull(result, "Resulting PointHistory should not be null");
+        assertEquals(PointHistory.PointType.EARN, result.getPointType(), "Point type should be EARN");
+        // 필요에 따라 추가 검증...
+
+        verify(userService).getUserTier(userId);
+        verify(userService).getUser(userId);
+        verify(orderRepository, times(2)).findById(orderId);
+        verify(pointHistoryRepository, times(2)).save(any(PointHistory.class));
+        verify(orderPointManageRepository, times(2)).save(any(OrderPointManage.class));
+    }
+
+
+    @Test
+    void testCalculateEarnReviewPoints_NoPhotos() {
+        // given
+        ReviewPointCalculateRequestDto dto = new ReviewPointCalculateRequestDto(userId, reviewId);
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+        when(reviewImagePathRepository.findByReview(review)).thenReturn(List.of()); // 빈 리스트
+        when(pointPolicyService.getPolicy(PointPolicy.EarningMethod.REVIEW))
+                .thenReturn(PointPolicyResponseDto.builder()
+                        .earningMethod(PointPolicy.EarningMethod.REVIEW)
+                        .earningType(PointPolicy.EarningType.FIX)
+                        .earningValue(BigDecimal.valueOf(100))
+                        .available(true)
+                        .description("Review points")
+                        .build());
+
+        BigDecimal result = pointHistoryService.calculateEarnReviewPoints(dto);
+
+        assertEquals(BigDecimal.valueOf(100), result);
+    }
+    @Test
+    void testCalculateEarnReviewPoints_WithPhotos() {
+        // given
+        ReviewPointCalculateRequestDto dto = new ReviewPointCalculateRequestDto(userId, reviewId);
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+        // 가짜 ReviewImagePath 목록 생성
+        List<ReviewImagePath> imagePaths = List.of(mock(ReviewImagePath.class));
+        when(reviewImagePathRepository.findByReview(review)).thenReturn(imagePaths);
+        when(pointPolicyService.getPolicy(PointPolicy.EarningMethod.PHOTOREVIEW))
+                .thenReturn(PointPolicyResponseDto.builder()
+                        .earningMethod(PointPolicy.EarningMethod.PHOTOREVIEW)
+                        .earningType(PointPolicy.EarningType.FIX)
+                        .earningValue(BigDecimal.valueOf(200))
+                        .available(true)
+                        .description("Photo review points")
+                        .build());
+
+        BigDecimal result = pointHistoryService.calculateEarnReviewPoints(dto);
+
+        assertEquals(BigDecimal.valueOf(200), result);
+    }
+
+    @Test
+    void testCalculateEarnReviewPoints_NoPolicyFound() {
+        // given
+        ReviewPointCalculateRequestDto dto = new ReviewPointCalculateRequestDto(userId, reviewId);
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+        when(reviewImagePathRepository.findByReview(review)).thenReturn(null); // imagePaths null
+        // 정책 반환 null 설정
+        when(pointPolicyService.getPolicy(any())).thenReturn(null);
+
+        // NullPointerException 발생 예상
+        NullPointerException exception = assertThrows(NullPointerException.class,
+                () -> pointHistoryService.calculateEarnReviewPoints(dto));
+        assertNotNull(exception);
     }
 
 }

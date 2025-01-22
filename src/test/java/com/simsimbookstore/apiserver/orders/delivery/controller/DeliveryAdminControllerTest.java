@@ -1,6 +1,7 @@
 package com.simsimbookstore.apiserver.orders.delivery.controller;
 
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -126,4 +127,91 @@ class DeliveryAdminControllerTest {
 
         Mockito.verify(deliveryService, Mockito.times(1)).updateTrackingNumber(1L, 67890);
     }
+
+    @Test
+    @DisplayName("특정 상태의 배송 조회 성공 테스트")
+    void getDeliveriesByStateSuccess() throws Exception {
+        // given
+        Delivery.DeliveryState state = Delivery.DeliveryState.READY;
+        PageResponse<DeliveryResponseDto> pageResponse = new PageResponse<>();
+        pageResponse.setTotalElements(1L);
+        pageResponse.setData(List.of(DeliveryResponseDto.builder()
+                .deliveryId(1L)
+                .deliveryState("READY")
+                .deliveryReceiver("홍길동")
+                .build()));
+        pageResponse.setCurrentPage(1);
+        pageResponse.setStartPage(1);
+        pageResponse.setEndPage(1);
+        pageResponse.setTotalPage(1);
+
+        Mockito.when(deliveryService.getDeliveriesByState(eq(state), Mockito.any(Pageable.class)))
+                .thenReturn(pageResponse);
+
+        // when & then
+        mockMvc.perform(get("/api/admin/deliveries/state")
+                        .param("state", state.name())
+                        .param("page", "1")
+                        .param("size", "15"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.data[0].deliveryReceiver").value("홍길동"))
+                .andExpect(jsonPath("$.data[0].deliveryState").value("READY"));
+
+        Mockito.verify(deliveryService, Mockito.times(1))
+                .getDeliveriesByState(eq(state), Mockito.any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("DeliveryRequestDto를 통한 상태 수정 성공 테스트 (eq 없이)")
+    void updateStateWithDeliveryRequestDtoSuccess_NoEq() throws Exception {
+        Long deliveryId = 1L;
+        Delivery.DeliveryState newState = Delivery.DeliveryState.COMPLETED;
+
+        // 요청 DTO에 포함될 JSON 예시
+        String requestBody = "{\"deliveryState\": \"" + newState.name() + "\"}";
+
+        DeliveryResponseDto responseDto = DeliveryResponseDto.builder()
+                .deliveryId(deliveryId)
+                .deliveryState(newState.name())
+                .build();
+
+        // eq() 없이 직접 값 전달
+        Mockito.when(deliveryService.updateDeliveryState(deliveryId, newState))
+                .thenReturn(responseDto);
+
+        mockMvc.perform(post("/api/admin/deliveries/{id}", deliveryId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deliveryId").value(deliveryId))
+                .andExpect(jsonPath("$.deliveryState").value(newState.name()));
+
+        // verify 시에도 eq() 없이 직접 값 전달
+        Mockito.verify(deliveryService, Mockito.times(1))
+                .updateDeliveryState(deliveryId, newState);
+    }
+
+
+    @Test
+    @DisplayName("트래킹 번호로 배송 조회 성공 테스트")
+    void findByTrackingNumberSuccess() throws Exception {
+        int trackingNumber = 123456;
+        DeliveryResponseDto responseDto = DeliveryResponseDto.builder()
+                .deliveryId(2L)
+                .trackingNumber(trackingNumber)
+                .deliveryState("IN_TRANSIT")
+                .build();
+
+        Mockito.when(deliveryService.findByTrackingNumber(trackingNumber)).thenReturn(responseDto);
+
+        mockMvc.perform(get("/api/admin/deliveries/tracking-numbers/{id}", trackingNumber))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deliveryId").value(2L))
+                .andExpect(jsonPath("$.trackingNumber").value(trackingNumber))
+                .andExpect(jsonPath("$.deliveryState").value("IN_TRANSIT"));
+
+        Mockito.verify(deliveryService, Mockito.times(1)).findByTrackingNumber(trackingNumber);
+    }
 }
+
