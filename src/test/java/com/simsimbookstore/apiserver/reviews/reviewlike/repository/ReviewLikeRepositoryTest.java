@@ -113,7 +113,7 @@ class ReviewLikeRepositoryTest {
 
     private void createReviewLike(Review review, User user) {
         reviewLikeRepository.save(ReviewLike.builder()
-                .created_at(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .review(review)
                 .user(user)
                 .build());
