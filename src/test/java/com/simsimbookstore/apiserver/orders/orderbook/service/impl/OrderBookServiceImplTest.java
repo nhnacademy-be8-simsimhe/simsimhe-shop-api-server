@@ -11,6 +11,7 @@ import com.simsimbookstore.apiserver.orders.coupondiscount.entity.CouponDiscount
 import com.simsimbookstore.apiserver.orders.coupondiscount.service.CouponDiscountService;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
+import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookAdminResponseDto;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookRequestDto;
 import com.simsimbookstore.apiserver.orders.orderbook.dto.OrderBookResponseDto;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
@@ -700,7 +701,31 @@ class OrderBookServiceImplTest {
         assertEquals("PENDING", responseDto.getOrderBookState());
         // 필요한 추가 검증...
     }
+    @Test
+    @DisplayName("toAdminResponseDto() - OrderBookAdminResponseDto 생성 검증")
+    void testToAdminResponseDto() {
+        // given: 테스트를 위한 OrderBook 객체 생성
+        OrderBook testOrderBook = OrderBook.builder()
+                .orderBookId(300L)
+                .book(book)  // setUp()에서 초기화한 "Test Book" 제목의 책 객체
+                .quantity(1)
+                .salePrice(new BigDecimal("15000"))
+                .discountPrice(new BigDecimal("1000"))
+                .orderBookState(OrderBook.OrderBookState.COMPLETED)
+                .build();
 
+        // when: toAdminResponseDto 메서드 호출
+        OrderBookAdminResponseDto adminResponse = orderBookService.toAdminResponseDto(testOrderBook);
+
+        // then: 반환된 DTO의 필드 검증
+        assertNotNull(adminResponse);
+        assertEquals(300L, adminResponse.getOrderBookId());
+        assertEquals("Test Book", adminResponse.getBookTitle());
+        assertEquals(1, adminResponse.getQuantity());
+        assertEquals(new BigDecimal("15000"), adminResponse.getSalePrice());
+        assertEquals(new BigDecimal("1000"), adminResponse.getDiscountPrice());
+        assertEquals(OrderBook.OrderBookState.COMPLETED, adminResponse.getOrderBookState());
+    }
 
 
 }

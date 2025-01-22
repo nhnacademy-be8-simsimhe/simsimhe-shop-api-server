@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -176,5 +175,37 @@ class PointPolicyAdminControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(pointPolicyService, times(1)).deletePolicy(policyId);
+    }
+    @Test
+    void testGetById() throws Exception {
+        Long policyId = 1L;
+
+        // 예상되는 응답 DTO 생성
+        PointPolicyResponseDto responseDto = PointPolicyResponseDto.builder()
+                .pointPolicyId(policyId)
+                .earningMethod(PointPolicy.EarningMethod.ORDER_STANDARD)
+                .earningType(PointPolicy.EarningType.FIX)
+                .earningValue(new BigDecimal("50"))
+                .description("Order standard policy")
+                .available(true)
+                .build();
+
+        // 서비스의 getPolicyById 호출 시 예상되는 응답 반환하도록 설정
+        when(pointPolicyService.getPolicyById(policyId)).thenReturn(responseDto);
+
+        // GET 요청 수행 및 결과 검증
+        mockMvc.perform(get("/api/admin/pointPolicies/{policyId}", policyId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pointPolicyId", is(policyId.intValue())))
+                .andExpect(jsonPath("$.earningMethod", is("ORDER_STANDARD")))
+                .andExpect(jsonPath("$.earningType", is("FIX")))
+                .andExpect(jsonPath("$.earningValue", is(50)))  // BigDecimal이므로 숫자 비교
+                .andExpect(jsonPath("$.description", is("Order standard policy")))
+                .andExpect(jsonPath("$.available", is(true)));
+
+        // 서비스 메서드가 한 번 호출되었는지 검증
+        verify(pointPolicyService, times(1)).getPolicyById(policyId);
     }
 }

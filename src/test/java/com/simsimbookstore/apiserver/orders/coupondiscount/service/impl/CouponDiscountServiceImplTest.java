@@ -157,6 +157,7 @@ class CouponDiscountServiceImplTest {
                 .orderBook(orderBook)
                 .couponName("WELCOME")
                 .couponType("FIXED")
+                .usage(true)
                 .discountPrice(new BigDecimal("1000"))
                 .build();
 
