@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.DisCountType;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 public enum CouponStatus {
@@ -23,6 +22,7 @@ public enum CouponStatus {
     public static DisCountType from(String value) {
         return DisCountType.valueOf(value.toUpperCase());
     }
+
     // 직렬화 : Enum -> JSON
     @JsonValue
     public String getName() {

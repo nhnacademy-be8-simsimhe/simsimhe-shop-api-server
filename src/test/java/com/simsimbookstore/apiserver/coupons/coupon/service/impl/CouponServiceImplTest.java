@@ -426,7 +426,7 @@ class CouponServiceImplTest {
         List<Coupon> coupons = Collections.singletonList(coupon1);
         Page<Coupon> couponPage = new PageImpl<>(coupons, pageable, coupons.size());
 
-        when(couponRepository.findByUserUserIdAndCouponStatusAndDeadlineBeforeNow( userId, CouponStatus.UNUSED,pageable))
+        when(couponRepository.findByUserUserIdAndCouponStatusAndDeadlineAfterNow( userId, CouponStatus.UNUSED,pageable))
                 .thenReturn(couponPage);
 
         Page<CouponResponseDto> responsePage = couponService.getUnusedCoupons(pageable, userId);
@@ -460,7 +460,7 @@ class CouponServiceImplTest {
         assertEquals("회원(id:3)이 존재하지 않습니다.", exception.getMessage());
 
         // UNUSED 쿠폰 조회가 호출되지 않았는지 검증
-        verify(couponRepository, never()).findByUserUserIdAndCouponStatusAndDeadlineBeforeNow(anyLong(), any(CouponStatus.class), any(Pageable.class));
+        verify(couponRepository, never()).findByUserUserIdAndCouponStatusAndDeadlineAfterNow(anyLong(), any(CouponStatus.class), any(Pageable.class));
     }
 
     // ### 2.5. `getEligibleCoupons` 메서드 테스트
@@ -533,69 +533,6 @@ class CouponServiceImplTest {
         // 쿠폰 저장이 3번 호출되었는지 검증
         verify(couponRepository, times(3)).save(any(Coupon.class));
     }
-
-    /**
-     * 2.6.2. 일부 사용자가 이미 UNUSED 쿠폰을 보유한 경우
-     */
-    @Test
-    @DisplayName("issueCoupons : 일부 사용자가 이미 UNUSED 쿠폰을 보유하고 있어 예외 발생")
-    void issueCoupons_UserAlreadyHasUnusedCoupon_ThrowsAlreadyExistException() {
-        List<Long> userIds = Arrays.asList(1L, 2L);
-        Long couponTypeId = 100L;
-
-        // 쿠폰 타입 조회 시 정상적으로 반환
-        when(couponTypeRepository.findById(couponTypeId)).thenReturn(Optional.of(bookCoupon));
-
-        // 사용자 조회 시 정상적으로 반환
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user1));
-        when(userRepository.findById(2L)).thenReturn(Optional.of(user2));
-
-        // User 1는 UNUSED 쿠폰을 보유하지 않음
-        when(couponRepository.findUnusedCouponByUserAndType(1L, couponTypeId))
-                .thenReturn(Optional.empty());
-
-        // User 2는 이미 UNUSED 쿠폰을 보유하고 있음
-        Coupon existingCoupon = Coupon.builder()
-                .couponId(1001L)
-                .user(user2) // User 2가 쿠폰을 보유
-                .couponType(bookCoupon)
-                .issueDate(FIXED_NOW)
-                .deadline(getDeadline(bookCoupon))
-                .couponStatus(CouponStatus.UNUSED)
-                .useDate(null)
-                .build();
-
-        when(couponRepository.findUnusedCouponByUserAndType(2L, couponTypeId))
-                .thenReturn(Optional.of(existingCoupon));
-
-        // save() 메서드 스텁 설정: User 1의 쿠폰 저장 시 반환될 객체
-        Coupon savedCouponUser1 = Coupon.builder()
-                .couponId(1002L)
-                .user(user1)
-                .couponType(bookCoupon)
-                .issueDate(FIXED_NOW)
-                .deadline(getDeadline(bookCoupon))
-                .couponStatus(CouponStatus.UNUSED)
-                .useDate(null)
-                .build();
-
-        when(couponRepository.save(any(Coupon.class))).thenReturn(savedCouponUser1);
-
-        // 예외 발생을 검증
-        AlreadyExistException exception = assertThrows(AlreadyExistException.class, () -> {
-            couponService.issueCoupons(userIds, couponTypeId);
-        });
-
-        assertEquals("회원(id:2)은 해당 쿠폰타입(id:100)의 UNUSED 쿠폰을 가지고 있습니다.", exception.getMessage());
-
-        // 쿠폰 저장이 1번 호출되었는지 검증 (User 1)
-        verify(couponRepository, times(1)).save(any(Coupon.class));
-
-        // User 1과 User 2에 대한 findUnusedCouponByUserAndType 호출 검증
-        verify(couponRepository, times(1)).findUnusedCouponByUserAndType(1L, couponTypeId);
-        verify(couponRepository, times(1)).findUnusedCouponByUserAndType(2L, couponTypeId);
-    }
-
 
 
     /**

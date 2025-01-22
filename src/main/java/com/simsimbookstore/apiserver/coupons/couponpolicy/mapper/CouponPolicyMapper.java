@@ -3,8 +3,12 @@ package com.simsimbookstore.apiserver.coupons.couponpolicy.mapper;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.dto.CouponPolicyRequestDto;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.dto.CouponPolicyResponseDto;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.CouponPolicy;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CouponPolicyMapper {
+
     public static CouponPolicyResponseDto toResponse(CouponPolicy couponPolicy) {
         return CouponPolicyResponseDto.builder()
                 .couponPolicyId(couponPolicy.getCouponPolicyId())

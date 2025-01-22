@@ -85,8 +85,23 @@ class ReviewControllerTest {
         String sort = "latest";
 
         var reviews = List.of(
-                new ReviewLikeCountDTO(1L, "good book", "I loved this book!", LocalDateTime.now(), "mingyeong", 4, 12L, 12L),
-                new ReviewLikeCountDTO(2L, "great book", "Interesting", LocalDateTime.now(), "hello", 3, 20L, 9L)
+                ReviewLikeCountDTO.builder().
+                        reviewId(1L)
+                        .title("good book")
+                        .content("I loved this book!")
+                        .createdAt(LocalDateTime.now())
+                        .userName("mingyeong")
+                        .score(4)
+                        .build(),
+
+                ReviewLikeCountDTO.builder().
+                        reviewId(2L)
+                        .title("great book")
+                        .content("Interesting")
+                        .createdAt(LocalDateTime.now())
+                        .userName("hello")
+                        .score(3)
+                        .build()
         );
 
         var pageable = PageRequest.of(page, size);

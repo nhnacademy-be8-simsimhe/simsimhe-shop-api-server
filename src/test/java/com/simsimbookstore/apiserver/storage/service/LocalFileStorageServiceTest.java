@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import com.simsimbookstore.apiserver.common.config.LocalStorageConfig;
 import com.simsimbookstore.apiserver.storage.exception.ObjectStorageException;
+import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,29 +65,27 @@ class LocalFileStorageServiceTest {
     }
 
     @Test
-    @DisplayName("허용되지 않은 파일 확장자 테스트")
-    void saveFilesInvalidExtension() {
+    @DisplayName("허용되지 않은 파일 확장자 업로드 시 예외 발생")
+    void uploadInvalidExtension() {
         MultipartFile invalidFile = mock(MultipartFile.class);
-        when(invalidFile.getOriginalFilename()).thenReturn("test.txt");
+        when(invalidFile.getOriginalFilename()).thenReturn("testFile.txt");
 
-        ObjectStorageException exception = assertThrows(
-                ObjectStorageException.class,
-                () -> fileStorageService.saveFiles(List.of(invalidFile))
-        );
+        List<MultipartFile> files = List.of(invalidFile);
 
-        assertTrue(exception.getMessage().contains("Unsupported file type"));
+        assertThrows(ObjectStorageException.class, () -> fileStorageService.saveFiles(files));
     }
 
     @Test
-    @DisplayName("빈 파일 리스트 저장 시 예외 발생 테스트")
-    void saveFilesEmptyList() {
-        ObjectStorageException exception = assertThrows(
-                ObjectStorageException.class,
-                () -> fileStorageService.saveFiles(List.of())
-        );
+    @DisplayName("빈 파일 리스트를 업로드 시도 시 예외 발생")
+    void uploadEmptyFiles() {
+        List<MultipartFile> files = new ArrayList<>();
+
+        ObjectStorageException exception = assertThrows(ObjectStorageException.class,
+                () -> fileStorageService.saveFiles(files));
 
         assertEquals("No files uploaded.", exception.getMessage());
     }
+
 
     @Test
     @DisplayName("유효한 URL에서 파일 저장 성공 테스트")

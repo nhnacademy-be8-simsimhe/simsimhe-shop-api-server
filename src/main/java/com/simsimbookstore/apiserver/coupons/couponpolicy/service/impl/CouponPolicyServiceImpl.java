@@ -1,6 +1,5 @@
 package com.simsimbookstore.apiserver.coupons.couponpolicy.service.impl;
 
-import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.dto.CouponPolicyRequestDto;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.dto.CouponPolicyResponseDto;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.CouponPolicy;
@@ -10,6 +9,7 @@ import com.simsimbookstore.apiserver.coupons.couponpolicy.service.CouponPolicySe
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponType;
 import com.simsimbookstore.apiserver.coupons.coupontype.repository.CouponTypeRepository;
 import com.simsimbookstore.apiserver.coupons.exception.AlreadyCouponPolicyUsed;
+import com.simsimbookstore.apiserver.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +28,7 @@ public class CouponPolicyServiceImpl implements CouponPolicyService {
 
     /**
      * 모든 쿠폰 정책을 Page로 가지고온다.
+     *
      * @param pageable
      * @return
      */
@@ -39,6 +40,7 @@ public class CouponPolicyServiceImpl implements CouponPolicyService {
 
     /**
      * 특정 쿠폰 정책(couponPolicyId)를 하나 가지고 온다.
+     *
      * @param couponPolicyId
      * @return
      */
@@ -52,6 +54,7 @@ public class CouponPolicyServiceImpl implements CouponPolicyService {
 
     /**
      * 쿠폰 정책을 생성한다.
+     *
      * @param requestDto
      * @return
      */
@@ -66,6 +69,7 @@ public class CouponPolicyServiceImpl implements CouponPolicyService {
     /**
      * 쿠폰 정책을 삭제한다.
      * 해당 쿠폰 정책으로 이미 쿠폰 타입이 만들어졌으면 삭제 불가능
+     *
      * @param couponPolicyId
      * @throws AlreadyCouponPolicyUsed
      */
@@ -89,12 +93,4 @@ public class CouponPolicyServiceImpl implements CouponPolicyService {
             throw new IllegalArgumentException("ID는 0보다 커야합니다.");
         }
     }
-//    @Override
-//    public CouponPolicyResponseDto updateCouponPolicy(Long couponPolicyId, CouponPolicyRequestDto requestDto) {
-//        validateId(couponPolicyId);
-//        CouponPolicy couponPolicy = couponPolicyRepository.findById(couponPolicyId).orElseThrow(() -> new NotFoundException("쿠폰정책(id:" + couponPolicyId + ")이 존재하지 않습니다."));
-//        couponPolicy.setCouponPolicyName(requestDto.getCouponPolicyName());
-//        couponPolicy.setDiscountType(requestDto.);
-//        return null;
-//    }
 }

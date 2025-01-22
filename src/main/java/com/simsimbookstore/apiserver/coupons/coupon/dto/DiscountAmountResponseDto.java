@@ -2,7 +2,6 @@ package com.simsimbookstore.apiserver.coupons.coupon.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 
 import java.math.BigDecimal;
 

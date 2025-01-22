@@ -22,6 +22,7 @@ public class CouponTypeController {
 
     /**
      * 모든 쿠폰 타입을 가져온다.
+     *
      * @param pageable
      * @return
      */
@@ -33,6 +34,7 @@ public class CouponTypeController {
 
     /**
      * 특정 쿠폰 타입(couponTypeId)을 가져온다.
+     *
      * @param couponTypeId
      * @return
      */
@@ -44,6 +46,7 @@ public class CouponTypeController {
 
     /**
      * 특정 쿠폰 정책(couponPolicyId)과 연결된 쿠폰 타입들을 가져온다.
+     *
      * @param couponPolicyId
      * @param pageable
      * @return
@@ -57,6 +60,7 @@ public class CouponTypeController {
 
     /**
      * 쿠폰 타입을 생성한다.
+     *
      * @param requestDto
      * @return
      */
@@ -69,11 +73,12 @@ public class CouponTypeController {
     /**
      * 특정 쿠폰 타입(couponTypeId)를 삭제한다.
      * 만약 이미 회원들에게 발급된 쿠폰 타입이면 삭제할 수 없다.
+     *
      * @param couponTypeId
      * @return
      */
     @DeleteMapping("/couponTypes/{couponTypeId}")
-    public ResponseEntity deleteCouponType(@PathVariable Long couponTypeId) {
+    public ResponseEntity<Void> deleteCouponType(@PathVariable Long couponTypeId) {
         couponTypeService.deleteCouponType(couponTypeId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

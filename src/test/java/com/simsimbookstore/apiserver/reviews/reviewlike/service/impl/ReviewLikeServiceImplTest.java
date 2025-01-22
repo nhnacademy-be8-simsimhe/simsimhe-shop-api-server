@@ -85,7 +85,7 @@ class ReviewLikeServiceImplTest {
         ReviewLike reviewLike = ReviewLike.builder()
                 .user(user)
                 .review(review)
-                .created_at(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .build();
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));

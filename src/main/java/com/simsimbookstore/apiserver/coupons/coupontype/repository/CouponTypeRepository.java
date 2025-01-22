@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface CouponTypeRepository extends JpaRepository<CouponType,Long> {
+public interface CouponTypeRepository extends JpaRepository<CouponType, Long> {
     Page<CouponType> findByCouponPolicyCouponPolicyId(Pageable pageable, Long couponPolicyId);
 
     List<CouponType> findByCouponPolicyCouponPolicyId(Long couponPolicyId);

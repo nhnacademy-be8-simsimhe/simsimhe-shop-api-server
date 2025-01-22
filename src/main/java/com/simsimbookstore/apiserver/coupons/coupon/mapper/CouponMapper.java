@@ -10,9 +10,11 @@ import com.simsimbookstore.apiserver.coupons.coupon.entity.Coupon;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.CouponPolicy;
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponTargetType;
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponType;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.Objects;
-
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CouponMapper {
     public static CouponResponseDto toResponse(Coupon coupon) {
         if (Objects.isNull(coupon)) {
@@ -41,7 +43,7 @@ public class CouponMapper {
         }
     }
 
-    private static FixCouponResponseDto toFixCouponResponse(Coupon coupon, CouponType couponType, CouponPolicy couponPolicy,CouponDetails couponDetails) {
+    private static FixCouponResponseDto toFixCouponResponse(Coupon coupon, CouponType couponType, CouponPolicy couponPolicy, CouponDetails couponDetails) {
 
         return FixCouponResponseDto.builder()
                 .userId(coupon.getUser().getUserId())
@@ -85,6 +87,7 @@ public class CouponMapper {
             this.couponTargetType = couponTargetType;
             this.targetId = targetId;
         }
+
         public CouponTargetType couponTargetType() {
             return couponTargetType;
         }

@@ -10,7 +10,9 @@ public enum DisCountType {
 
     private final String name;
 
-    DisCountType(String name) {this.name = name;}
+    DisCountType(String name) {
+        this.name = name;
+    }
 
     // 역직렬화 : JSON -> Enum
     @JsonCreator
@@ -22,6 +24,7 @@ public enum DisCountType {
         }
         throw new BadRequestException("잘못된 DiscountType입니다. '정률'과'정액'중 하나를 선택하세요");
     }
+
     // 직렬화 : Enum -> JSON
     @JsonValue
     public String getName() {

@@ -20,14 +20,14 @@ public class CouponTypeMapper {
                 .couponPolicyId(couponType.getCouponPolicy().getCouponPolicyId())
                 .build();
 
-        if (couponType instanceof BookCoupon) {
+        if (couponType instanceof BookCoupon bookCoupon) {
             responseDto.setCouponTypes(CouponTargetType.BOOK);
-            responseDto.setCouponTargetId(((BookCoupon) couponType).getBook().getBookId());
-            responseDto.setCouponTargetName(((BookCoupon) couponType).getBook().getTitle());
-        } else if (couponType instanceof  CategoryCoupon) {
+            responseDto.setCouponTargetId(bookCoupon.getBook().getBookId());
+            responseDto.setCouponTargetName(bookCoupon.getBook().getTitle());
+        } else if (couponType instanceof CategoryCoupon categoryCoupon) {
             responseDto.setCouponTypes(CouponTargetType.CATEGORY);
-            responseDto.setCouponTargetId(((CategoryCoupon) couponType).getCategory().getCategoryId());
-            responseDto.setCouponTargetName(((CategoryCoupon) couponType).getCategory().getCategoryName());
+            responseDto.setCouponTargetId(categoryCoupon.getCategory().getCategoryId());
+            responseDto.setCouponTargetName(categoryCoupon.getCategory().getCategoryName());
         } else {
             responseDto.setCouponTypes(CouponTargetType.ALL);
         }
