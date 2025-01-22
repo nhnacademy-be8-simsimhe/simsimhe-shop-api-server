@@ -1,12 +1,10 @@
 package com.simsimbookstore.apiserver.coupons.coupon.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.coupons.coupon.dto.*;
-import com.simsimbookstore.apiserver.common.exception.NotFoundException;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.CouponStatus;
 import com.simsimbookstore.apiserver.coupons.coupon.service.CouponService;
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponTargetType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +23,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.*;
