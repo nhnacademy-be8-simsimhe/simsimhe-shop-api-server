@@ -1,5 +1,7 @@
 package com.simsimbookstore.apiserver.payment.service;
 
+import com.simsimbookstore.apiserver.orders.facade.OrderFacadeRequestDto;
+import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
 import com.simsimbookstore.apiserver.payment.exception.PaymentMethodNotFoundException;
 import com.simsimbookstore.apiserver.payment.processor.PaymentProcessor;
 import com.simsimbookstore.apiserver.payment.repository.PaymentMethodRepository;
@@ -7,6 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,40 +27,50 @@ class PaymentServiceTest {
     @Mock
     private RedisTemplate<String, Object> redisTemplate;
 
+    @InjectMocks
     private PaymentService paymentService;
+
+
+    private PaymentProcessor validPaymentProcessor1;
+    private PaymentProcessor validPaymentProcessor2;
 
     @BeforeEach
     void setUp() {
+        validPaymentProcessor1 = Mockito.mock(PaymentProcessor.class);
+        validPaymentProcessor2 = Mockito.mock(PaymentProcessor.class);
 
+        List<PaymentProcessor> paymentProcessorList = List.of(validPaymentProcessor1, validPaymentProcessor2);
+        paymentService = new PaymentService(paymentProcessorList,paymentMethodRepository, redisTemplate);
     }
 
     @Test
     void getProcessor() {
-        PaymentProcessor validProcessor = Mockito.mock(PaymentProcessor.class);
-        PaymentProcessor anotherProcessor = Mockito.mock(PaymentProcessor.class);
-
-        List<PaymentProcessor> paymentProcessorList = List.of(validProcessor, anotherProcessor);
-        paymentService = new PaymentService(paymentProcessorList,paymentMethodRepository, redisTemplate);
-
-        when(validProcessor.checkPayMethod("validValue")).thenReturn(true);
+        when(validPaymentProcessor1.checkPayMethod(any())).thenReturn(true);
 
         paymentService.getProcessor("validValue");
-        verify(validProcessor, times(1)).checkPayMethod("validValue");
+        verify(validPaymentProcessor1, times(1)).checkPayMethod("validValue");
     }
 
     @Test
     void getProcessor_exception() {
         String paymentMethod = "invalidValue";
 
-        PaymentProcessor invalidProcessor1 = Mockito.mock(PaymentProcessor.class);
-        PaymentProcessor invalidProcessor2 = Mockito.mock(PaymentProcessor.class);
-
-        List<PaymentProcessor> paymentProcessorList = List.of(invalidProcessor1, invalidProcessor2);
-        paymentService = new PaymentService(paymentProcessorList,paymentMethodRepository, redisTemplate);
-
-        when(invalidProcessor1.checkPayMethod(paymentMethod)).thenReturn(false);
-        when(invalidProcessor2.checkPayMethod(paymentMethod)).thenReturn(false);
+        when(validPaymentProcessor1.checkPayMethod(paymentMethod)).thenReturn(false);
+        when(validPaymentProcessor2.checkPayMethod(paymentMethod)).thenReturn(false);
 
         Assertions.assertThrows(PaymentMethodNotFoundException.class, () -> paymentService.getProcessor(paymentMethod));
+
+        verify(validPaymentProcessor1, times(1)).checkPayMethod(paymentMethod);
+        verify(validPaymentProcessor2, times(1)).checkPayMethod(paymentMethod);
     }
+
+    @Test
+    void createPaymentRequest() {
+        when(validPaymentProcessor1.checkPayMethod(any())).thenReturn(true);
+
+        OrderFacadeResponseDto orderFacadeResponseDto = OrderFacadeResponseDto.builder()
+                .method("validMethod")
+                .build();
+        paymentService.createPaymentRequest(orderFacadeResponseDto);
+    };
 }
