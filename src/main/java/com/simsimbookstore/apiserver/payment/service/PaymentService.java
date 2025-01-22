@@ -8,12 +8,10 @@ import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
 import com.simsimbookstore.apiserver.payment.entity.PaymentMethod;
 import com.simsimbookstore.apiserver.payment.exception.PaymentMethodNotFoundException;
 import com.simsimbookstore.apiserver.payment.processor.PaymentProcessor;
-import com.simsimbookstore.apiserver.payment.repository.PaymentCanceledRepository;
 import com.simsimbookstore.apiserver.payment.repository.PaymentMethodRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

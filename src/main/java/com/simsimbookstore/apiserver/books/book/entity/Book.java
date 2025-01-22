@@ -22,7 +22,7 @@ public class Book {
     private Long bookId;
 
     @Lob
-    @Column(nullable = false,columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String title;
 
     @Lob

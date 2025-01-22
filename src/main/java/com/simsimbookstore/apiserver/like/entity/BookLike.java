@@ -16,7 +16,8 @@ import lombok.*;
 @Setter
 public class BookLike {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "book_like_id")
     private Long bookLikeId;
 

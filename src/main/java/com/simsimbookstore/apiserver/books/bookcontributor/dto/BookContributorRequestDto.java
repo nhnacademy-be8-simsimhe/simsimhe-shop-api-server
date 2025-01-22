@@ -3,7 +3,10 @@ package com.simsimbookstore.apiserver.books.bookcontributor.dto;
 
 import com.simsimbookstore.apiserver.books.book.entity.Book;
 import com.simsimbookstore.apiserver.books.contributor.entity.Contributor;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 
 @AllArgsConstructor

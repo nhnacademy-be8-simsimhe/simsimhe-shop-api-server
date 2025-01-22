@@ -20,7 +20,7 @@ public interface ContributorService {
 
     Contributor getContributer(Long contributorId);
 
-    ContributorResponseDto updateContributor(Long contributorId,ContributorRequestDto contributorRequestDto);
+    ContributorResponseDto updateContributor(Long contributorId, ContributorRequestDto contributorRequestDto);
 
 
 }

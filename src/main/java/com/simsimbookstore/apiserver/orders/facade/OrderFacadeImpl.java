@@ -22,12 +22,12 @@ import com.simsimbookstore.apiserver.orders.orderbook.repository.OrderBookReposi
 import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
 import com.simsimbookstore.apiserver.point.dto.OrderPointRequestDto;
 import com.simsimbookstore.apiserver.point.service.PointHistoryService;
-
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -136,7 +136,7 @@ public class OrderFacadeImpl implements OrderFacade {
         boolean isDeliveryPending = delivery.isPending();
         boolean areAllOrderBooksPending = orderBooks.stream().allMatch(OrderBook::isPending);
 
-        if ( !(isOrderPending && isDeliveryPending && areAllOrderBooksPending) ) {
+        if (!(isOrderPending && isDeliveryPending && areAllOrderBooksPending)) {
             throw new IllegalStateException("모든 주문 관련 항목이 pending 상태가 아닙니다.");
         }
 

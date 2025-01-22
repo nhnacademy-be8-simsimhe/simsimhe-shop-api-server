@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(name = "payment_methods")
@@ -21,7 +20,7 @@ public class PaymentMethod {
     @Column(nullable = false)
     private String paymentMethod;
 
-    public static PaymentMethod createPaymentMethod(PaymentMethodResponse paymentMethodResponse){
+    public static PaymentMethod createPaymentMethod(PaymentMethodResponse paymentMethodResponse) {
         return new PaymentMethod(
                 paymentMethodResponse.getPaymentMethodId(),
                 paymentMethodResponse.getPaymentMethod()

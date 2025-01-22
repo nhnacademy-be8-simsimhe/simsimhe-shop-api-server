@@ -85,10 +85,12 @@ public class RabbitMqConfig {
     public Queue couponIssueQueue() {
         return new Queue(CouponMqConsumer.COUPON_ISSUE_QUEUE_NAME, true);
     }
+
     @Bean
     public Queue couponExpireQueue() {
         return new Queue(CouponMqConsumer.COUPON_EXPIRE_QUEUE_NAME, true);
     }
+
     @Bean
     public Queue couponDeleteQueue() {
         return new Queue("simsimbooks.coupon.delete.queue", true);
@@ -110,6 +112,7 @@ public class RabbitMqConfig {
     public Binding bindingCouponExpireQueue(Queue couponExpireQueue, DirectExchange directExchange) {
         return BindingBuilder.bind(couponExpireQueue).to(directExchange).with(COUPON_EXPIRE_QUEUE_ROUTING_KEY);
     }
+
     @Bean
     public Binding bindingCouponDeleteQueue(Queue couponDeleteQueue, DirectExchange directExchange) {
         return BindingBuilder.bind(couponDeleteQueue).to(directExchange).with(COUPON_DELETE_QUEUE_ROUTING_KEY);

@@ -2,24 +2,14 @@ package com.simsimbookstore.apiserver.orders.delivery.controller;
 
 
 import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
-import com.simsimbookstore.apiserver.orders.delivery.dto.DeliveryDetailResponseDto;
-import com.simsimbookstore.apiserver.orders.delivery.dto.DeliveryRequestDto;
-import com.simsimbookstore.apiserver.orders.delivery.dto.DeliveryResponseDto;
-import com.simsimbookstore.apiserver.orders.delivery.dto.DeliveryStateUpdateRequestDto;
-import com.simsimbookstore.apiserver.orders.delivery.dto.DeliveryTrackingNumberRequestDto;
+import com.simsimbookstore.apiserver.orders.delivery.dto.*;
 import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
 import com.simsimbookstore.apiserver.orders.delivery.service.DeliveryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -68,7 +58,7 @@ public class DeliveryAdminController {
             (@RequestParam(defaultValue = "1") int page,
              @RequestParam(defaultValue = "15") int size) {
 
-        Pageable pageable = PageRequest.of(page-1, size);
+        Pageable pageable = PageRequest.of(page - 1, size);
 
         PageResponse<DeliveryResponseDto> deliveryPage = deliveryService.getAllDelivery(pageable);
         return ResponseEntity.ok(deliveryPage);

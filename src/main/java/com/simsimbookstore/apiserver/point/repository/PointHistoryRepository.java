@@ -2,11 +2,12 @@ package com.simsimbookstore.apiserver.point.repository;
 
 import com.simsimbookstore.apiserver.point.entity.PointHistory;
 import com.simsimbookstore.apiserver.point.repository.custom.PointHistoryCustomRepository;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface PointHistoryRepository extends JpaRepository<PointHistory, Long>, PointHistoryCustomRepository {
     List<PointHistory> findByUserUserId(Long userId);

@@ -4,7 +4,6 @@ import com.simsimbookstore.apiserver.books.tag.domain.Tag;
 import com.simsimbookstore.apiserver.books.tag.dto.TagRequestDto;
 import com.simsimbookstore.apiserver.books.tag.dto.TagResponseDto;
 
-
 import java.util.List;
 
 public interface TagService {
@@ -17,5 +16,5 @@ public interface TagService {
 
     void deleteTag(Long tagId);
 
-    TagResponseDto updateTag(Long tagId,TagRequestDto requestDto);
+    TagResponseDto updateTag(Long tagId, TagRequestDto requestDto);
 }

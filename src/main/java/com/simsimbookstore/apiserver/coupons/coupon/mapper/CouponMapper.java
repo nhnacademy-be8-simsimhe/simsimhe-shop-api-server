@@ -14,6 +14,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.Objects;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CouponMapper {
     public static CouponResponseDto toResponse(Coupon coupon) {

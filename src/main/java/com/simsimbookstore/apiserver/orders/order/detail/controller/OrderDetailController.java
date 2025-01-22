@@ -16,7 +16,7 @@ public class OrderDetailController {
 
     @GetMapping("/api/shop/users/{userId}/orders/{orderNumber}")
     public ResponseEntity<OrderDetailResponseDto> orderDetailHistory(@PathVariable Long userId,
-                                                @PathVariable String orderNumber) {
+                                                                     @PathVariable String orderNumber) {
         OrderDetailResponseDto detailResponseDto = orderDetailService.getOrderDetail(userId, orderNumber);
         return ResponseEntity.ok(detailResponseDto);
     }

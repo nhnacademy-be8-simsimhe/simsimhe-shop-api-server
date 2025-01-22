@@ -11,10 +11,11 @@ import com.simsimbookstore.apiserver.orders.order.service.OrderNumberService;
 import com.simsimbookstore.apiserver.orders.order.service.OrderTotalService;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +42,7 @@ public class MemberOrderServiceImpl implements MemberOrderService {
         //Order 엔티티 생성
         Order order = Order.builder()
                 .user(user)
-                .delivery(deliveryRepository.findById(requestDto.getDeliveryId()).orElseThrow(()-> new NotFoundException("delivery not found. ID=" + requestDto.getDeliveryId())))
+                .delivery(deliveryRepository.findById(requestDto.getDeliveryId()).orElseThrow(() -> new NotFoundException("delivery not found. ID=" + requestDto.getDeliveryId())))
                 .orderNumber(orderNumber)
                 .orderDate(LocalDateTime.now())
                 .originalPrice(requestDto.getOriginalPrice())

@@ -1,7 +1,7 @@
 package com.simsimbookstore.apiserver.books.book.entity;
 
 
-import lombok.*;
+import lombok.Getter;
 
 @Getter
 public enum BookStatus {

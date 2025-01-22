@@ -50,7 +50,6 @@ public class BookManagementService {
     private final BookImageRepoisotry bookImageRepoisotry;
 
 
-
     /**
      * 도서등록
      *

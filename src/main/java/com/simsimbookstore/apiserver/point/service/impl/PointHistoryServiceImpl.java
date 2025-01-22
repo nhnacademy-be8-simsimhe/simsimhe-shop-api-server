@@ -1,8 +1,6 @@
 package com.simsimbookstore.apiserver.point.service.impl;
 
 
-import static java.time.LocalDateTime.now;
-
 import com.simsimbookstore.apiserver.books.book.dto.PageResponse;
 import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
@@ -26,9 +24,6 @@ import com.simsimbookstore.apiserver.reviews.reviewimage.entity.ReviewImagePath;
 import com.simsimbookstore.apiserver.reviews.reviewimage.repository.ReviewImagePathRepository;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.service.UserService;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -36,6 +31,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+
+import static java.time.LocalDateTime.now;
 
 @Slf4j
 @Service
@@ -215,7 +216,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
         BigDecimal pointUse = order.getPointUse();
         BigDecimal totalPrice = order.getTotalPrice();
         BigDecimal save = pointUse.add(totalPrice);
-        pointHistoryRepository.save( PointHistory.builder()
+        pointHistoryRepository.save(PointHistory.builder()
                 .user(order.getUser())
                 .amount(save.intValue())
                 .created_at(now())

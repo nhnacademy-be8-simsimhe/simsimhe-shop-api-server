@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class CategoryMapper {
 
-    private CategoryMapper(){
+    private CategoryMapper() {
         throw new UnsupportedOperationException("CategoryMapper는 인스턴스화할수없음");
     }
 

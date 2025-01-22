@@ -1,12 +1,9 @@
 package com.simsimbookstore.apiserver.point.dto;
 
 import com.simsimbookstore.apiserver.point.entity.PointHistory;
+import lombok.*;
+
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @Builder

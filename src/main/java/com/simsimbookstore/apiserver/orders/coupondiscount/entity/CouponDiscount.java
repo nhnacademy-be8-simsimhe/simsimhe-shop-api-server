@@ -3,20 +3,10 @@ package com.simsimbookstore.apiserver.orders.coupondiscount.entity;
 
 import com.simsimbookstore.apiserver.coupons.coupon.entity.Coupon;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.math.BigDecimal;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 
 @Entity
@@ -45,7 +35,7 @@ public class CouponDiscount {
     @Column(name = "coupon_name", nullable = false, length = 40)
     private String couponName;
 
-    @Column(name = "coupon_type", nullable = false , length = 100)
+    @Column(name = "coupon_type", nullable = false, length = 100)
     private String couponType;
 
     @Column(name = "discount_price", nullable = false)

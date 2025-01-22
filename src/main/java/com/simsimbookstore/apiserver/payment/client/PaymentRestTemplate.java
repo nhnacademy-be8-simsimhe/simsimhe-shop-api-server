@@ -7,7 +7,6 @@ import com.simsimbookstore.apiserver.payment.config.TossPaymentProperties;
 import com.simsimbookstore.apiserver.payment.dto.CanceledResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -67,7 +66,7 @@ public class PaymentRestTemplate {
             throw new RuntimeException(e);
         }
 
-        ResponseEntity <String> responseEntity = restTemplate.exchange(
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
                 uri,
                 HttpMethod.POST,
                 request,
@@ -77,14 +76,14 @@ public class PaymentRestTemplate {
     }
 
     // 결제 승인 요청
-    public ResponseEntity<ConfirmResponseDto> confirm(SuccessRequestDto success){
+    public ResponseEntity<ConfirmResponseDto> confirm(SuccessRequestDto success) {
         URI uri = URI.create("https://api.tosspayments.com/v1/payments/confirm");
 
         headers.setBasicAuth(encodedAuth);
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-        Map<String, String > map = new HashMap<>();
+        Map<String, String> map = new HashMap<>();
         map.put("paymentKey", success.getPaymentKey());
         map.put("orderId", success.getOrderId());
         map.put("amount", String.valueOf(success.getAmount()));

@@ -10,19 +10,20 @@ import com.simsimbookstore.apiserver.orders.order.dto.TotalRequestDto;
 import com.simsimbookstore.apiserver.orders.order.dto.TotalResponseDto;
 import com.simsimbookstore.apiserver.orders.packages.service.WrapTypeService;
 import com.simsimbookstore.apiserver.point.service.PointHistoryService;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Slf4j
-public class OrderTotalServiceImpl implements OrderTotalService{
+public class OrderTotalServiceImpl implements OrderTotalService {
 
     private final WrapTypeService wrapTypeService;
     private final OrderListService orderListService;

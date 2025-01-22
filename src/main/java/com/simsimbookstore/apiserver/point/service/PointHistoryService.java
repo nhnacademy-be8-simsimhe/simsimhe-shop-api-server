@@ -7,8 +7,9 @@ import com.simsimbookstore.apiserver.point.dto.PointHistoryResponseDto;
 import com.simsimbookstore.apiserver.point.dto.ReviewPointCalculateRequestDto;
 import com.simsimbookstore.apiserver.point.entity.PointHistory;
 import com.simsimbookstore.apiserver.users.user.entity.User;
-import java.math.BigDecimal;
 import org.springframework.data.domain.Pageable;
+
+import java.math.BigDecimal;
 
 public interface PointHistoryService {
 

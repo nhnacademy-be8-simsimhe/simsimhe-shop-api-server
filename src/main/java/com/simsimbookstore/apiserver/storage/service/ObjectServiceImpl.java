@@ -5,6 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.storage.config.ObjectStorageConfig;
 import com.simsimbookstore.apiserver.storage.exception.ObjectStorageException;
 import com.simsimbookstore.apiserver.storage.exception.ObjectStorageTokenException;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RequestCallback;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -15,14 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RequestCallback;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 
 /*
     파일을 오브젝트 스토리지에 업로드 하는 서비스를 구현
@@ -216,8 +217,6 @@ public class ObjectServiceImpl {
             throw new ObjectStorageException("Failed to create InputStream from URL: " + fileUrl);
         }
     }
-
-
 
 
     /*

@@ -2,7 +2,6 @@ package com.simsimbookstore.apiserver.coupons.coupon.repository;
 
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.simsimbookstore.apiserver.books.bookcategory.entity.QBookCategory;
 import com.simsimbookstore.apiserver.coupons.allcoupon.entity.AllCoupon;
 import com.simsimbookstore.apiserver.coupons.allcoupon.entity.QAllCoupon;
 import com.simsimbookstore.apiserver.coupons.bookcoupon.entity.BookCoupon;

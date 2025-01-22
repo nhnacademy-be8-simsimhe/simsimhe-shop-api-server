@@ -2,13 +2,6 @@ package com.simsimbookstore.apiserver.common.config;
 
 import com.simsimbookstore.apiserver.common.dto.KeyResponseDto;
 import com.simsimbookstore.apiserver.common.exception.KeyMangerException;
-import java.io.InputStream;
-import java.net.URI;
-import java.security.KeyStore;
-
-import java.util.List;
-import java.util.Objects;
-import javax.net.ssl.SSLContext;
 import lombok.RequiredArgsConstructor;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -25,6 +18,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.net.ssl.SSLContext;
+import java.io.InputStream;
+import java.net.URI;
+import java.security.KeyStore;
+import java.util.List;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @ConfigurationProperties(prefix = "secure-key-manager")

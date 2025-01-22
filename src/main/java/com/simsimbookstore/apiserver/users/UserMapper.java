@@ -12,7 +12,7 @@ public class UserMapper {
 
     public static UserResponse toResponse(User user) {
         List<RoleName> roles = new ArrayList<>();
-        for (UserRole userRole : user.getUserRoleList()){
+        for (UserRole userRole : user.getUserRoleList()) {
             roles.add(userRole.getRole().getRoleName());
         }
 

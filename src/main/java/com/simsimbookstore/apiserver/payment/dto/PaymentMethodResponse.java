@@ -12,7 +12,7 @@ public class PaymentMethodResponse {
 
     private String paymentMethod;
 
-    public static PaymentMethodResponse changeEntityToDto(PaymentMethod paymentMethod){
+    public static PaymentMethodResponse changeEntityToDto(PaymentMethod paymentMethod) {
 
         return new PaymentMethodResponse(
                 paymentMethod.getPaymentMethodId(),

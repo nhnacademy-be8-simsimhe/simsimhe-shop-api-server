@@ -4,7 +4,6 @@ import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.Cancel;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
-import org.springframework.http.ResponseEntity;
 
 public interface PaymentProcessor {
     // 존재하는 결제 방법인지 확인

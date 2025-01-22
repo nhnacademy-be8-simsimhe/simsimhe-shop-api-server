@@ -15,7 +15,8 @@ import lombok.*;
 @Table(name = "book_tags")
 public class BookTag {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "book_tag_id")
     private Long bookTagId;
 

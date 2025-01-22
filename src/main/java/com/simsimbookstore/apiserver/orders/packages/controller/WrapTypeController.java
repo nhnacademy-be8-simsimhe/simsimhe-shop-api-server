@@ -4,16 +4,11 @@ import com.simsimbookstore.apiserver.orders.packages.dto.WrapTypeRequestDto;
 import com.simsimbookstore.apiserver.orders.packages.dto.WrapTypeResponseDto;
 import com.simsimbookstore.apiserver.orders.packages.service.WrapTypeService;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/wrap-types")
@@ -27,6 +22,7 @@ public class WrapTypeController {
 
     /**
      * wrapType 포장지 종류 조회
+     *
      * @param id WrapType의 PK
      * @return
      */
@@ -38,7 +34,6 @@ public class WrapTypeController {
     }
 
     /**
-     *
      * @param wrapTypeRequestDto 포장지를 저장 요청 dto
      * @return
      */
@@ -51,6 +46,7 @@ public class WrapTypeController {
 
     /**
      * 모든 포장지를 확인함
+     *
      * @return
      */
 
@@ -62,8 +58,7 @@ public class WrapTypeController {
     }
 
     /**
-     *
-     * @param id 판매가능여부를 수정할 포장지타입의 id
+     * @param id          판매가능여부를 수정할 포장지타입의 id
      * @param isAvailable 불, 가 를 바꿀 boolean
      * @return
      */

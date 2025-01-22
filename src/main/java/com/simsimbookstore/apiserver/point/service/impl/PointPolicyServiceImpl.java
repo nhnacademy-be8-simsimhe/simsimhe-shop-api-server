@@ -9,10 +9,11 @@ import com.simsimbookstore.apiserver.point.repository.PointPolicyRepository;
 import com.simsimbookstore.apiserver.point.service.PointPolicyService;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
 import com.simsimbookstore.apiserver.users.user.service.UserService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -74,6 +75,7 @@ public class PointPolicyServiceImpl implements PointPolicyService {
 
         return PointPolicyResponseDto.fromEntity(pointPolicy);
     }
+
     /**
      * 정책 삭제
      */
@@ -88,7 +90,7 @@ public class PointPolicyServiceImpl implements PointPolicyService {
     public PointPolicyResponseDto getUserPolicy(Long userId) {
         Tier tier = userService.getUserWithGradeAndRoles(userId).getGrade().getTier();
 
-        String orderTier = "ORDER_"+tier.name();
+        String orderTier = "ORDER_" + tier.name();
 
         return getPolicy(PointPolicy.EarningMethod.valueOf(orderTier));
     }

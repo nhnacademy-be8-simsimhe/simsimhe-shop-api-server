@@ -3,9 +3,7 @@ package com.simsimbookstore.apiserver.users.localuser.mapper;
 import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserRegisterRequestDto;
 import com.simsimbookstore.apiserver.users.localuser.dto.LocalUserResponseDto;
 import com.simsimbookstore.apiserver.users.localuser.entity.LocalUser;
-import com.simsimbookstore.apiserver.users.role.entity.Role;
 import com.simsimbookstore.apiserver.users.role.entity.RoleName;
-import com.simsimbookstore.apiserver.users.user.entity.UserStatus;
 import com.simsimbookstore.apiserver.users.userrole.entity.UserRole;
 
 import java.time.LocalDateTime;
@@ -36,7 +34,7 @@ public class LocalUserMapper {
     public static LocalUserResponseDto localUserResponseDtoTo(LocalUser localUser) {
         List<RoleName> roles = new ArrayList<>();
 
-        for (UserRole userRole : localUser.getUserRoleList()){
+        for (UserRole userRole : localUser.getUserRoleList()) {
             roles.add(userRole.getRole().getRoleName());
         }
 

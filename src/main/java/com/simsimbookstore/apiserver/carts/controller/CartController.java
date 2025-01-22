@@ -29,13 +29,14 @@ public class CartController {
 
     /**
      * 레디스에 있는 DB로 옮기기
+     *
      * @param userId
      * @param requestDtoList
      * @return
      */
     @PutMapping("/migrate/user/{userId}")
     public ResponseEntity<Void> cartToDb(@PathVariable(name = "userId") Long userId,
-                                   @RequestBody List<CartRequestDto> requestDtoList) {
+                                         @RequestBody List<CartRequestDto> requestDtoList) {
         cartService.cartToDb(userId, requestDtoList);
 
         return ResponseEntity.status(HttpStatus.OK).build();

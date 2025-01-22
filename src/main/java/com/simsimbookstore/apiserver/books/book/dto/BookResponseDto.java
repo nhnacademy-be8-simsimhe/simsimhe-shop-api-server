@@ -57,7 +57,6 @@ public class BookResponseDto {
     private Double scoreAverage; //리뷰 평점 없으면 0점
 
 
-
     private List<BookContributorResponsDto> contributorResponsDtos;
     private List<List<CategoryResponseDto>> categoryList;
     private List<TagResponseDto> tagList;

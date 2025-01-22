@@ -1,10 +1,8 @@
 package com.simsimbookstore.apiserver.orders.coupondiscount.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.simsimbookstore.apiserver.books.book.entity.QBook;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.CouponStatus;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.QCoupon;
-import com.simsimbookstore.apiserver.coupons.coupontype.entity.QCouponType;
 import com.simsimbookstore.apiserver.orders.coupondiscount.entity.CouponDiscount;
 import com.simsimbookstore.apiserver.orders.coupondiscount.entity.QCouponDiscount;
 import com.simsimbookstore.apiserver.orders.order.entity.QOrder;
@@ -19,8 +17,9 @@ import java.util.List;
 import java.util.Objects;
 
 @RequiredArgsConstructor
-public class CustomCouponDiscountRepositoryImpl implements CustomCouponDiscountRepository{
+public class CustomCouponDiscountRepositoryImpl implements CustomCouponDiscountRepository {
     private final JPAQueryFactory jpaQueryFactory;
+
     @Override
     public Page<CouponDiscount> getUserCouponDiscount(Long userId, Pageable pageable) {
         QUser user = QUser.user;

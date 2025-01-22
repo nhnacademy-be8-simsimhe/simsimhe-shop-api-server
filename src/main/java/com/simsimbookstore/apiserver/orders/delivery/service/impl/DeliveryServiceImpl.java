@@ -9,18 +9,18 @@ import com.simsimbookstore.apiserver.orders.delivery.exception.DeliveryNotFoundE
 import com.simsimbookstore.apiserver.orders.delivery.exception.DeliveryStateUpdateException;
 import com.simsimbookstore.apiserver.orders.delivery.repository.DeliveryRepository;
 import com.simsimbookstore.apiserver.orders.delivery.service.DeliveryService;
-import java.util.EnumSet;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.EnumSet;
 
 @Service
 @Transactional
 public class DeliveryServiceImpl implements DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
-    
 
 
     public DeliveryServiceImpl(DeliveryRepository deliveryRepository) {
@@ -86,7 +86,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
-    public PageResponse<DeliveryResponseDto> getDeliveriesByState (Delivery.DeliveryState state, Pageable pageable) {
+    public PageResponse<DeliveryResponseDto> getDeliveriesByState(Delivery.DeliveryState state, Pageable pageable) {
         Page<Delivery> deliveryPage = deliveryRepository.findByDeliveryState(state, pageable);
 
         Page<DeliveryResponseDto> dtoPage = deliveryPage.map(DeliveryResponseDto::fromEntity);

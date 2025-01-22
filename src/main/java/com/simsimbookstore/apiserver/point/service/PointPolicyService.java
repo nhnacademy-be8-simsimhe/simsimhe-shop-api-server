@@ -3,8 +3,9 @@ package com.simsimbookstore.apiserver.point.service;
 import com.simsimbookstore.apiserver.point.dto.PointPolicyRequestDto;
 import com.simsimbookstore.apiserver.point.dto.PointPolicyResponseDto;
 import com.simsimbookstore.apiserver.point.entity.PointPolicy;
-import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 public interface PointPolicyService {
 

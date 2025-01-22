@@ -1,7 +1,10 @@
 package com.simsimbookstore.apiserver.books.book.dto;
 
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 
 @AllArgsConstructor

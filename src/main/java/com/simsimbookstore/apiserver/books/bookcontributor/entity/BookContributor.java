@@ -16,7 +16,8 @@ import lombok.*;
 @Table(name = "book_contributors")
 public class BookContributor {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "book_contributor_id")
     private Long bookContributorId;
 

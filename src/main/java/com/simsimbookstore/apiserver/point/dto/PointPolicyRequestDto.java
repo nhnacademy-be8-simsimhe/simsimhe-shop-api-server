@@ -1,11 +1,12 @@
 package com.simsimbookstore.apiserver.point.dto;
 
 import com.simsimbookstore.apiserver.point.entity.PointPolicy;
-import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 
 @Getter
 @Builder

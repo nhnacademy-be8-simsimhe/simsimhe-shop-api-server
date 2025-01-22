@@ -31,8 +31,8 @@ public class BookImagePath {
     @Enumerated(EnumType.STRING)
     private ImageType imageType;
 
-    public enum ImageType{
-         THUMBNAIL, DETAIL;
+    public enum ImageType {
+        THUMBNAIL, DETAIL;
 
     }
 

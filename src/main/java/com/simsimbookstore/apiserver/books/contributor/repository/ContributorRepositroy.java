@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface ContributorRepositroy extends JpaRepository<Contributor,Long> {
+public interface ContributorRepositroy extends JpaRepository<Contributor, Long> {
 
     @Query("select c from Contributor as c where c.contributorName = :contributorName")
     Optional<Contributor> findByContributorName(@Param("contributorName") String contributorName);

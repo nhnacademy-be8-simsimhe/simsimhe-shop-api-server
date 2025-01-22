@@ -75,7 +75,7 @@ public class ReturnsServiceImpl implements ReturnsService {
     @Override
     public ReturnsResponseDto getReturnById(Long returnId) {
         Returns returns = returnsRepository.findById(returnId).orElseThrow(
-                ()-> new ReturnsNotFoundException("return not found")
+                () -> new ReturnsNotFoundException("return not found")
         );
 
         // 엔티티를 DTO로 변환하여 반환

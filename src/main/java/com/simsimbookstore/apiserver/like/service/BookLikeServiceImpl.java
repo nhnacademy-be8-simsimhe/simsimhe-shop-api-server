@@ -28,6 +28,7 @@ public class BookLikeServiceImpl implements BookLikeService {
 
     /**
      * 책의 좋아요를 설정하는 메서드
+     *
      * @param requestDto
      * @return
      */
@@ -43,7 +44,7 @@ public class BookLikeServiceImpl implements BookLikeService {
         Optional<BookLike> optionalBookLike = bookLikeRepository.findBookLike(book.getBookId(), user.getUserId());
 
         //회원이 도서에 좋아요를 안눌렀으면 눌렀다고 생성
-        if(optionalBookLike.isEmpty()){
+        if (optionalBookLike.isEmpty()) {
             BookLike bookLike = BookLike.builder()
                     .book(book)
                     .user(user)
@@ -56,7 +57,7 @@ public class BookLikeServiceImpl implements BookLikeService {
                     .userName(saveBookLike.getUser().getUserName())
                     .isLiked(true)
                     .build();
-        }else {
+        } else {
             // 이미 눌러져있으면 좋아요취소
             BookLike bookLike = optionalBookLike.get();
             bookLikeRepository.deleteById(bookLike.getBookLikeId());
@@ -71,6 +72,7 @@ public class BookLikeServiceImpl implements BookLikeService {
 
     /**
      * 회원이 누른 좋아요 총 개수 반환
+     *
      * @param userId
      * @return
      */

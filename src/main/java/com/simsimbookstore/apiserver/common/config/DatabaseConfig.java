@@ -1,11 +1,12 @@
 package com.simsimbookstore.apiserver.common.config;
 
 import com.simsimbookstore.apiserver.common.dto.DatabaseProperty;
-import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.sql.DataSource;
 
 @Configuration
 @RequiredArgsConstructor
