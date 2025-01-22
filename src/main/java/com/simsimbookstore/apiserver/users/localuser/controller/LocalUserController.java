@@ -37,7 +37,7 @@ public class LocalUserController {
     public ResponseEntity<LocalUserResponseDto> getLocalUser(@PathVariable String loginId) {
         LocalUser localUser = localUserService.findByLoginId(loginId);
         if (Objects.isNull(localUser)) {
-            return ResponseEntity.ok(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         LocalUserResponseDto response = LocalUserMapper.localUserResponseDtoTo(localUser);
