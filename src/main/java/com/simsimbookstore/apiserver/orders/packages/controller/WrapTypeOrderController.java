@@ -22,7 +22,4 @@ public class WrapTypeOrderController {
         List<WrapTypeResponseDto> allWarp = wrapTypeService.getAllWarpTypeIsAvailable();
         return ResponseEntity.ok(allWarp);
     }
-
-
-
 }
