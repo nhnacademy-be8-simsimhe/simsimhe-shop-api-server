@@ -5,10 +5,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
 public class IssueCouponsRequestDto {
     @NotEmpty(message = "회원 ID 목록은 필수이며 최소 하나 이상의 값이 필요합니다.")

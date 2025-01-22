@@ -91,7 +91,7 @@ public class RabbitMqConfig {
     }
     @Bean
     public Queue couponDeleteQueue() {
-        return new Queue("simsimbooks.coupon.delete.queue", true);
+        return new Queue(CouponMqConsumer.COUPON_DELETE_QUEUE_NAME, true);
     }
 
     @Bean

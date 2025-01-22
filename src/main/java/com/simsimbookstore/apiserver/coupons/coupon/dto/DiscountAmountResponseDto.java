@@ -3,11 +3,13 @@ package com.simsimbookstore.apiserver.coupons.coupon.dto;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Builder
-@Data
+@Getter
+@Setter
 public class DiscountAmountResponseDto {
     private Long bookId;
     private Integer quantity;

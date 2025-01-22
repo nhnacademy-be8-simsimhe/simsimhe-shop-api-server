@@ -5,13 +5,16 @@ import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.DisCountType;
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponTargetType;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-@Data
+@Getter
+@Setter
 @SuperBuilder
 public class RateCouponResponseDto extends CouponResponseDto{
 

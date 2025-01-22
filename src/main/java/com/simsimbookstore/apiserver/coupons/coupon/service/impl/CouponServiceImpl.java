@@ -138,7 +138,7 @@ public class CouponServiceImpl implements CouponService {
         validateId(userId);
         //유저 확인
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("회원(id:"+userId+")이 존재하지 않습니다."));
-        Page<Coupon> couponPage = couponRepository.findByUserUserIdAndCouponStatusAndDeadlineBeforeNow(userId, CouponStatus.UNUSED, pageable);
+        Page<Coupon> couponPage = couponRepository.findByUserUserIdAndCouponStatusAndDeadlineAfterNow(userId, CouponStatus.UNUSED, pageable);
         return couponPage.map(CouponMapper::toResponse);
     }
     @Override
@@ -233,10 +233,8 @@ public class CouponServiceImpl implements CouponService {
 
             Optional<Coupon> unusedCoupon = couponRepository.findUnusedCouponByUserAndType(userId, couponTypeId);
 
-            //회원이 해당 쿠폰타입의 UNUSED쿠폰을 가지고 있는지 확인
-            if (unusedCoupon.isPresent()) {
-                throw new AlreadyExistException("회원(id:" + userId + ")은 해당 쿠폰타입(id:" + couponTypeId + ")의 UNUSED 쿠폰을 가지고 있습니다.");
-            }
+            //회원이 해당 쿠폰타입의 UNUSED쿠폰을 가지고 있는지 확인 후 있으면 삭제 후 새로 발급
+            unusedCoupon.ifPresent(couponRepository::delete);
 
             Coupon coupon = Coupon.builder()
                     .issueDate(LocalDateTime.now())

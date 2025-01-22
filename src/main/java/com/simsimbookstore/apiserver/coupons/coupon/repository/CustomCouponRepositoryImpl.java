@@ -1,12 +1,8 @@
 package com.simsimbookstore.apiserver.coupons.coupon.repository;
 
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.dsl.*;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.simsimbookstore.apiserver.books.bookcategory.entity.QBookCategory;
-import com.simsimbookstore.apiserver.books.category.entity.QCategory;
 import com.simsimbookstore.apiserver.coupons.allcoupon.entity.AllCoupon;
 import com.simsimbookstore.apiserver.coupons.allcoupon.entity.QAllCoupon;
 import com.simsimbookstore.apiserver.coupons.bookcoupon.entity.BookCoupon;
@@ -19,9 +15,6 @@ import com.simsimbookstore.apiserver.coupons.coupon.entity.QCoupon;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.QCouponPolicy;
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.QCouponType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
