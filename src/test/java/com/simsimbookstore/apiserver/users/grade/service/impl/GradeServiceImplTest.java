@@ -95,6 +95,9 @@ class GradeServiceImplTest {
         gradeService.findByTier(Tier.STANDARD);
 
         verify(gradeRepository, times(1)).findByTier(Tier.STANDARD);
+
+        when(gradeRepository.findByTier(Tier.ROYAL)).thenReturn(null);
+        assertThrows(NotFoundException.class, () -> gradeService.findByTier(Tier.ROYAL));
     }
 
     @Test
@@ -104,6 +107,9 @@ class GradeServiceImplTest {
         gradeService.findByGradeId(standardGrade.getGradeId());
 
         verify(gradeRepository, times(1)).findByGradeId(standardGrade.getGradeId());
+
+        when(gradeRepository.findByGradeId(any())).thenReturn(null);
+        assertThrows(NotFoundException.class, () -> gradeService.findByGradeId(1L));
     }
 
     @ParameterizedTest

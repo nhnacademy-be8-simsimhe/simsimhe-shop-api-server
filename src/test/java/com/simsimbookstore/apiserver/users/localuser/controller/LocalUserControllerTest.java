@@ -138,4 +138,13 @@ class LocalUserControllerTest {
                 .andExpect(jsonPath("$.userStatus").value(responseDto.getUserStatus().toString()))
                 .andExpect(jsonPath("$.latestLoginDate").exists()); // Nullable
     }
+
+    @Test
+    void getLocalUser_notFound() throws Exception {
+        when(localUserService.findByLoginId(anyString())).thenReturn(null);
+
+        mockMvc.perform(get("/api/users/localUsers/{loginId}", testLocalUser.getLoginId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
 }

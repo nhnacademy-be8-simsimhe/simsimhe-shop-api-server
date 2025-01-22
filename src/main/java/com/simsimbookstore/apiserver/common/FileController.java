@@ -2,6 +2,7 @@ package com.simsimbookstore.apiserver.common;
 
 import com.simsimbookstore.apiserver.storage.exception.ObjectStorageException;
 import com.simsimbookstore.apiserver.storage.service.LocalFileStorageService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,14 +10,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/files")
 public class FileController {
 
     private final LocalFileStorageService fileStorageService;
-
-    public FileController(LocalFileStorageService fileStorageService) {
-        this.fileStorageService = fileStorageService;
-    }
 
     @PostMapping("/upload")
     public ResponseEntity<List<String>> uploadFiles(@RequestParam("file") List<MultipartFile> files) {
