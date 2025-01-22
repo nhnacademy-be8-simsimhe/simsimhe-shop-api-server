@@ -81,7 +81,7 @@ class ReviewCommentServiceImplTest {
 
         ReviewComment expectedComment = ReviewComment.builder()
                 .content(requestDTO.getContent())
-                .createdAt(LocalDateTime.now())
+                .created_at(LocalDateTime.now())
                 .review(review)
                 .user(user)
                 .build();
@@ -235,8 +235,8 @@ class ReviewCommentServiceImplTest {
                 .review(review)
                 .user(user)
                 .content("리뷰 댓글입니다")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .created_at(LocalDateTime.now())
+                .update_at(LocalDateTime.now())
                 .build();
 
         when(reviewCommentRepository.findById(commentId)).thenReturn(Optional.of(comment));

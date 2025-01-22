@@ -162,8 +162,7 @@ class CouponTypeServiceImplTest {
         Long invalidPolicyId = 0L;
 
         // When & Then
-        PageRequest pageRequest = PageRequest.of(0, 10);
-        assertThrows(IllegalArgumentException.class, () -> couponTypeService.getCouponByCouponPolicy(pageRequest, invalidPolicyId));
+        assertThrows(IllegalArgumentException.class, () -> couponTypeService.getCouponByCouponPolicy(PageRequest.of(0, 10), invalidPolicyId));
         verify(couponTypeRepository, never()).findByCouponPolicyCouponPolicyId(any(), any());
     }
 

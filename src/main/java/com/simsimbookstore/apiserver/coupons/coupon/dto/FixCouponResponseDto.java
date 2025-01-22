@@ -1,17 +1,19 @@
 package com.simsimbookstore.apiserver.coupons.coupon.dto;
 
+import com.simsimbookstore.apiserver.coupons.coupon.entity.CouponStatus;
 import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.DisCountType;
+import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponTargetType;
+import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Map;
 
-@Getter
-@Setter
+@Data
 @SuperBuilder
-public class FixCouponResponseDto extends CouponResponseDto {
+public class FixCouponResponseDto extends CouponResponseDto{
 
     // 할인 형태
     private final DisCountType disCountType = DisCountType.FIX;

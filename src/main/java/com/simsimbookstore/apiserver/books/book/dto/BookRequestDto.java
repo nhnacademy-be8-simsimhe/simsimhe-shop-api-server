@@ -20,15 +20,15 @@ import java.util.List;
 public class BookRequestDto {
 
     @NotBlank(message = "책 이름을 공백 없이 입력해주세요")
-   // @Length(max = 1000, message = "책 이름은 1000자를 초과할 수 없습니다")
+    @Length(max = 1000, message = "책 이름은 1000자를 초과할 수 없습니다")
     private String title;
 
     @NotBlank(message = "책 설명을 공백 없이 입력해주세요")
-    //@Length(max = 1000, message = "책 설명은 최대 1000자까지 입력 가능합니다")
+    @Length(max = 1000, message = "책 설명은 최대 1000자까지 입력 가능합니다")
     private String description;
 
     @NotBlank(message = "목차를 공백 없이 입력해주세요")
-   // @Length(max = 1000, message = "목차는 최대 1000자까지 입력 가능합니다")
+    @Length(max = 1000, message = "목차는 최대 1000자까지 입력 가능합니다")
     private String bookIndex;
 
     @NotBlank(message = "출판사를 공백 없이 입력해주세요")

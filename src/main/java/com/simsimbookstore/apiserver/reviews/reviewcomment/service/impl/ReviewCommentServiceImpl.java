@@ -26,7 +26,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ReviewCommentServiceImpl implements ReviewCommentService {
 
-    private static final String REVIEW_COMMENT_NOT_FOUND = "존재하지 않는 리뷰 댓글입니다.";
 
     private final ReviewCommentRepository reviewCommentRepository;
     private final ReviewRepository reviewRepository;
@@ -45,8 +44,8 @@ public class ReviewCommentServiceImpl implements ReviewCommentService {
 
         ReviewComment createComment = ReviewComment.builder()
                 .content(requestDTO.getContent())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .created_at(LocalDateTime.now())
+                .update_at(LocalDateTime.now())
                 .review(review)
                 .user(user)
                 .build();
@@ -55,17 +54,17 @@ public class ReviewCommentServiceImpl implements ReviewCommentService {
         reviewCommentRepository.save(createComment);
 
 
-        return new ReviewCommentResponseDTO(createComment.getReviewCommentId(), createComment.getContent(), createComment.getCreatedAt(), createComment.getUpdatedAt(), user.getUserName(), user.getUserId());
+        return new ReviewCommentResponseDTO(createComment.getReviewCommentId(), createComment.getContent(), createComment.getCreated_at(), createComment.getUpdate_at(), user.getUserName(), user.getUserId());
 
     }
 
     @Override
     public ReviewComment updateReviewComment(Long reviewId, Long commentId, ReviewCommentRequestDTO dto) {
         ReviewComment existingReviewComment = reviewCommentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException(REVIEW_COMMENT_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰 댓글입니다."));
 
         existingReviewComment.setContent(dto.getContent());
-        existingReviewComment.setUpdatedAt(LocalDateTime.now());
+        existingReviewComment.setUpdate_at(LocalDateTime.now());
 
         return reviewCommentRepository.save(existingReviewComment);
     }
@@ -77,7 +76,7 @@ public class ReviewCommentServiceImpl implements ReviewCommentService {
         if (reviewCommentOptional.isPresent())
             return reviewCommentOptional.get();
 
-        throw new NotFoundException(REVIEW_COMMENT_NOT_FOUND);
+        throw new NotFoundException("존재하지 않는 리뷰 댓글입니다.");
     }
 
     @Transactional
@@ -98,7 +97,7 @@ public class ReviewCommentServiceImpl implements ReviewCommentService {
     @Override
     public void deleteReviewComment(Long commentId) {
         ReviewComment existingReviewComment = reviewCommentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException(REVIEW_COMMENT_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 리뷰 댓글입니다."));
         reviewCommentRepository.delete(existingReviewComment);
     }
 
@@ -106,6 +105,6 @@ public class ReviewCommentServiceImpl implements ReviewCommentService {
         log.info("dto comment id : {}", reviewComment.getReviewCommentId());
         log.info("dto comment content : {}", reviewComment.getContent());
         log.info("dto comment userId : {}", reviewComment.getUser().getUserId());
-        return new ReviewCommentResponseDTO(reviewComment.getReviewCommentId(), reviewComment.getContent(), reviewComment.getCreatedAt(), reviewComment.getUpdatedAt(), reviewComment.getUser().getUserName(), reviewComment.getUser().getUserId());
+        return new ReviewCommentResponseDTO(reviewComment.getReviewCommentId(), reviewComment.getContent(), reviewComment.getCreated_at(), reviewComment.getUpdate_at(), reviewComment.getUser().getUserName(), reviewComment.getUser().getUserId());
     }
 }

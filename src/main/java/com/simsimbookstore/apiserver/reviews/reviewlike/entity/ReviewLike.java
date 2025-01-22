@@ -28,7 +28,7 @@ public class ReviewLike {
     private Long reviewLikeId;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime created_at;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "review_id")
