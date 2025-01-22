@@ -1,10 +1,12 @@
-package com.simsimbookstore.apiserver.orders.delivery.dto;
+package com.simsimbookstore.apiserver.orders.returns.dto;
 
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -22,4 +24,9 @@ public class ReturnsResponseDto {
 
     private Long bookId;           // 책 ID
     private String bookTitle;      // 책 제목
+
+    private String orderName;
+    private BigDecimal salePrice;
+    private LocalDateTime confirmDate;  // 승인 날짜
+    private Long orderBookId;
 }

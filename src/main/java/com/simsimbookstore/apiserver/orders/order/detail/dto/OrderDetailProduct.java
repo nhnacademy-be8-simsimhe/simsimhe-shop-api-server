@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 public class OrderDetailProduct {
+    private Long orderBookId;
     private String bookTitle;
     private String couponName;
     private BigDecimal couponPrice;
@@ -21,6 +22,7 @@ public class OrderDetailProduct {
 
     //String packageName, BigDecimal packagePrice
     public OrderDetailProduct(OrderBook orderBooks, String bookTitle, String couponName, BigDecimal couponPrice, String packageName, BigDecimal packagePrice, OrderBook.OrderBookState orderBookState) {
+        this.orderBookId = orderBooks.getOrderBookId();
         this.bookTitle = bookTitle;
         this.couponName = couponName;
         this.couponPrice = couponPrice;

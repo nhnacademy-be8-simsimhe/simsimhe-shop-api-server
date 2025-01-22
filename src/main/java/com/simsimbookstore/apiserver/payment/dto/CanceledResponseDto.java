@@ -1,6 +1,5 @@
 package com.simsimbookstore.apiserver.payment.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,8 +12,6 @@ import java.util.List;
 public class CanceledResponseDto {
     @JsonProperty("canceledAt")
     private String canceledAt;
-    @JsonProperty("cancelReason")
-    private String paymentCanceledReason;
     @JsonProperty("cancelAmount")
     private BigDecimal paymentCanceledAmount;
     @JsonProperty("transactionKey")
@@ -24,7 +21,6 @@ public class CanceledResponseDto {
     private void cancels(List<CanceledResponseDto> cancelData) {
         for (CanceledResponseDto canceledResponseDto : cancelData) {
             this.canceledAt = canceledResponseDto.canceledAt;
-            this.paymentCanceledReason = canceledResponseDto.paymentCanceledReason;
             this.paymentCanceledAmount = canceledResponseDto.paymentCanceledAmount;
             this.paymentCanceledTransactionKey = canceledResponseDto.paymentCanceledTransactionKey;
         }

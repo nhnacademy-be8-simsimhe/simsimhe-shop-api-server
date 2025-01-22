@@ -1,8 +1,8 @@
-package com.simsimbookstore.apiserver.orders.delivery.service;
+package com.simsimbookstore.apiserver.orders.returns.service;
 
-import com.simsimbookstore.apiserver.orders.delivery.dto.ReturnsRequestDto;
-import com.simsimbookstore.apiserver.orders.delivery.dto.ReturnsResponseDto;
-import com.simsimbookstore.apiserver.orders.delivery.entity.Returns;
+import com.simsimbookstore.apiserver.orders.returns.dto.ReturnsRequestDto;
+import com.simsimbookstore.apiserver.orders.returns.dto.ReturnsResponseDto;
+import com.simsimbookstore.apiserver.orders.returns.entity.Returns;
 
 public interface ReturnsService {
     ReturnsResponseDto createReturn(ReturnsRequestDto requestDto);

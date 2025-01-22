@@ -209,6 +209,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
     }
 
     @Override
+    @Transactional
     public BigDecimal refundPoint(Long orderId) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new NotFoundException("order Not Found"));
         //total+point use

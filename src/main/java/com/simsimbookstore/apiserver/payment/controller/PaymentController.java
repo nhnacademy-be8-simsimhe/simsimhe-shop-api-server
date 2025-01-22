@@ -3,10 +3,11 @@ package com.simsimbookstore.apiserver.payment.controller;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeImpl;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeRequestDto;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
-import com.simsimbookstore.apiserver.payment.dto.Cancel;
 import com.simsimbookstore.apiserver.orders.order.dto.RetryOrderRequestDto;
+import com.simsimbookstore.apiserver.payment.dto.CancelRequestDto;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmResponseDto;
 import com.simsimbookstore.apiserver.payment.exception.InvalidPaymentDataException;
+import com.simsimbookstore.apiserver.payment.exception.PaymentValidationFailException;
 import com.simsimbookstore.apiserver.payment.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public class PaymentController {
     public ResponseEntity<String> paymentInitiate(@Valid @RequestBody OrderFacadeRequestDto dto,
                                                   BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            throw new InvalidPaymentDataException("필드의 값이 잘못되었습니다.");
+            throw new InvalidPaymentDataException("결제 요청 값이 잘못되었습니다.");
         }
         OrderFacadeResponseDto facadeResponseDto = orderFacade.createPrepareOrder(dto);
         String result = paymentService.createPaymentRequest(facadeResponseDto);
@@ -58,18 +59,21 @@ public class PaymentController {
         OrderFacadeResponseDto responseDto = orderFacade.retryOrder(dto);
         String result = paymentService.createPaymentRequest(responseDto);
         return ResponseEntity.ok(result);
-    } 
+    }
 
     // 비회원의 환불 요청 및 회원의 결제 취소
     @PostMapping("/payment/canceled/{orderNumber}")
-    public ResponseEntity<?> canceledPayment(@PathVariable String orderNumber,
+    public ResponseEntity<Void> canceledPayment(@PathVariable String orderNumber,
                                              @RequestParam Long userId,
-                                             @RequestParam String canceledReason) {  //orderId = orderNumber  // 멱등키 : @RequestHeader("idempotentId") String idempotentId,
-        Cancel cancel = new Cancel();
-        cancel.setCanceledReason(canceledReason);
-        cancel.setOrderNumber(orderNumber);
-        paymentService.canceledPayment(cancel);
+                                             @Valid @RequestBody CancelRequestDto cancelRequestDto,
+                                                BindingResult bindingResult) {  //orderId = orderNumber  // 멱등키 : @RequestHeader("idempotentId") String idempotentId,
+        if (bindingResult.hasErrors()) {
+            throw new PaymentValidationFailException("결제 취소 입력값이 올바르지 않습니다.");
+        }
+        cancelRequestDto.setOrderNumber(orderNumber);
+        cancelRequestDto.setUserId(userId);
+        paymentService.canceledPayment(cancelRequestDto);
 
-        return ResponseEntity.ok(cancel);
+        return ResponseEntity.ok().build();
     }
 }
