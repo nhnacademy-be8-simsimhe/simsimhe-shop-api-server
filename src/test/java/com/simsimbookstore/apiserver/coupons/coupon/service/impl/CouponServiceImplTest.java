@@ -184,6 +184,12 @@ class CouponServiceImplTest {
         verify(couponRepository, times(1)).findAll(any(Pageable.class));
     }
 
+    //    @Override
+//    public Page<CouponResponseDto> getTotalCoupons(Pageable pageable) {
+//        Page<Coupon> totalCoupons = couponRepository.findAll(pageable);
+//        return totalCoupons.map(CouponMapper::toResponse);
+//    }
+
     @Test
     @DisplayName("getCouponById : 유효하지 않은 ID로 조회 시 NotFoundException")
     void getCouponById_InvalidId_ThrowsNotFoundException() {
@@ -452,27 +458,6 @@ class CouponServiceImplTest {
         assertEquals(new BigDecimal("5000"), fixDto.getDiscountPrice());
         assertEquals(new BigDecimal("20000"), fixDto.getMinOrderAmount());
     }
-
-    @Test
-    void getExpiredCoupons() {
-        List<Coupon> expiredCoupons = List.of();
-        when(couponRepository.findByCouponStatus(any(CouponStatus.class))).thenReturn(expiredCoupons);
-        couponService.getExpiredCoupons();
-        verify(couponRepository, times(1)).findByCouponStatus(any(CouponStatus.class));
-    }
-
-    @Test
-    void getUnusedButDeadlinePassedCoupon() {
-        List<Coupon> coupons = List.of();
-        when(couponRepository.findUnusedAndExpiredCoupons()).thenReturn(coupons);
-        couponService.getUnusedButDeadlinePassedCoupon();
-        verify(couponRepository, times(1)).findUnusedAndExpiredCoupons();
-    }
-//    @Override
-//    public List<CouponResponseDto> getUnusedButDeadlinePassedCoupon() {
-//        List<Coupon> coupons = couponRepository.findUnusedAndExpiredCoupons();
-//        return coupons.stream().map(CouponMapper::toResponse).toList();
-//    }
 
     @Test
     @DisplayName("getUnusedCoupons : 유효하지 않은 유저 ID로 조회 시 NotFoundException 발생")
