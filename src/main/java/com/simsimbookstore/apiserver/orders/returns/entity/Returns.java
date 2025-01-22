@@ -1,7 +1,8 @@
-package com.simsimbookstore.apiserver.orders.delivery.entity;
+package com.simsimbookstore.apiserver.orders.returns.entity;
 
 
-import com.simsimbookstore.apiserver.orders.delivery.dto.ReturnsResponseDto;
+import com.simsimbookstore.apiserver.orders.returns.dto.ReturnsResponseDto;
+import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,7 +35,9 @@ public class Returns {
     private String returnReason;
 
     @Column(name = "return_date")
-    private LocalDateTime returnDate;
+    private LocalDateTime returnDate;  // 반품 요청일
+
+    private LocalDateTime confirmDate;  // 반품 승인일
 
     @Column(name = "return_state", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -84,4 +87,11 @@ public class Returns {
         this.returnState = ReturnState.valueOf(newState.name());
     }
 
+    public void updateReturn(boolean refund, int quantity, boolean damaged, ReturnState returnState, LocalDateTime confirmDate) {
+        this.refund = refund;
+        this.quantity = quantity;
+        this.damaged = damaged;
+        this.returnState = returnState;
+        this.confirmDate = confirmDate;
+    }
 }

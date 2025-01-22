@@ -22,14 +22,8 @@ import com.simsimbookstore.apiserver.orders.orderbook.repository.OrderBookReposi
 import com.simsimbookstore.apiserver.orders.orderbook.service.OrderBookService;
 import com.simsimbookstore.apiserver.point.dto.OrderPointRequestDto;
 import com.simsimbookstore.apiserver.point.service.PointHistoryService;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Objects;
-
 import com.simsimbookstore.apiserver.users.grade.entity.Grade;
 import com.simsimbookstore.apiserver.users.grade.entity.Tier;
-import com.simsimbookstore.apiserver.users.grade.repository.GradeRepository;
 import com.simsimbookstore.apiserver.users.grade.service.GradeService;
 import com.simsimbookstore.apiserver.users.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.simsimbookstore.apiserver.users.grade.entity.QGrade.grade;
+import java.util.List;
 
 @Slf4j
 @Service

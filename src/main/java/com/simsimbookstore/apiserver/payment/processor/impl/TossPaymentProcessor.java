@@ -6,8 +6,10 @@ import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
 import com.simsimbookstore.apiserver.orders.order.repository.OrderRepository;
+import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
+import com.simsimbookstore.apiserver.orders.orderbook.repository.OrderBookRepository;
 import com.simsimbookstore.apiserver.payment.client.PaymentRestTemplate;
-import com.simsimbookstore.apiserver.payment.dto.Cancel;
+import com.simsimbookstore.apiserver.payment.dto.CancelRequestDto;
 import com.simsimbookstore.apiserver.payment.dto.CanceledResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
@@ -15,6 +17,7 @@ import com.simsimbookstore.apiserver.payment.entity.Payment;
 import com.simsimbookstore.apiserver.payment.entity.PaymentCanceled;
 import com.simsimbookstore.apiserver.payment.entity.PaymentMethod;
 import com.simsimbookstore.apiserver.payment.entity.PaymentStatus;
+import com.simsimbookstore.apiserver.payment.exception.JsonFailedParsingException;
 import com.simsimbookstore.apiserver.payment.exception.PaymentAlreadyCanceled;
 import com.simsimbookstore.apiserver.payment.exception.PaymentNotExistException;
 import com.simsimbookstore.apiserver.payment.exception.PaymentValidationFailException;
@@ -46,10 +49,13 @@ public class TossPaymentProcessor implements PaymentProcessor {
     private final OrderRepository orderRepository;
     private final PaymentMethodRepository paymentMethodRepository;
     private final PaymentCanceledRepository paymentCanceledRepository;
+    private final OrderBookRepository orderBookRepository;
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    private final String HASH_NAME = "Payment";
+    private static final String HASH_NAME = "Payment";
+    private static final String ORDER_ID = "orderId";
+    private static final String TOTAL_AMOUNT = "totalAmount";
 
     // method DB에 있는지 확인
     @Override
@@ -61,8 +67,8 @@ public class TossPaymentProcessor implements PaymentProcessor {
     @Override
     public String createPaymentRequest(OrderFacadeResponseDto facadeResponseDto) {
         // 임시 저장
-        redisTemplate.opsForHash().put(HASH_NAME, "orderId", facadeResponseDto.getOrderNumber());
-        redisTemplate.opsForHash().put(HASH_NAME, "totalAmount", facadeResponseDto.getTotalPrice());
+        redisTemplate.opsForHash().put(HASH_NAME, ORDER_ID, facadeResponseDto.getOrderNumber());
+        redisTemplate.opsForHash().put(HASH_NAME, TOTAL_AMOUNT, facadeResponseDto.getTotalPrice());
         redisTemplate.opsForHash().put(HASH_NAME, "method", facadeResponseDto.getMethod());
 
         String response = paymentRestTemplate.requestPayment(facadeResponseDto);
@@ -72,7 +78,7 @@ public class TossPaymentProcessor implements PaymentProcessor {
         try {
             url = objectMapper.readTree(response).get("checkout").get("url").asText();
         } catch (JsonProcessingException e) {
-            throw new RuntimeException();
+            throw new JsonFailedParsingException("Failed to parse JSON response", e);
         }
 
         return url;
@@ -80,14 +86,14 @@ public class TossPaymentProcessor implements PaymentProcessor {
 
     public boolean validation(SuccessRequestDto successDto) {  // SuccessRequestDto successRequestDto
         // redis에 임시 저장해둔 값과 같은지 검증
-        String redisOrderId = (String) redisTemplate.opsForHash().get(HASH_NAME, "orderId");
-        BigDecimal redisAmount = (BigDecimal) redisTemplate.opsForHash().get(HASH_NAME, "totalAmount");
+        String redisOrderId = (String) redisTemplate.opsForHash().get(HASH_NAME, ORDER_ID);
+        BigDecimal redisAmount = (BigDecimal) redisTemplate.opsForHash().get(HASH_NAME, TOTAL_AMOUNT);
 
         if ((Objects.equals(successDto.getOrderId(), redisOrderId))
                 && (Objects.equals(successDto.getAmount(), redisAmount))) {
             // 같으면 임시 저장 데이터 삭제 > 달라도 삭제가 되야할듯??
-            redisTemplate.opsForHash().delete(HASH_NAME, "orderId");
-            redisTemplate.opsForHash().delete(HASH_NAME, "totalAmount");
+            redisTemplate.opsForHash().delete(HASH_NAME, ORDER_ID);
+            redisTemplate.opsForHash().delete(HASH_NAME, TOTAL_AMOUNT);
             return true;
         }
         return false;
@@ -102,6 +108,7 @@ public class TossPaymentProcessor implements PaymentProcessor {
             boolean isSuccess = response.getStatusCode().is2xxSuccessful();
 
             // 승인 성공
+            if (response.getBody() != null) {
             if (isSuccess) {
                 savePayment(response.getBody(), PaymentMethod.createPaymentMethod(successDto.getPaymentMethod()));
             }
@@ -124,6 +131,9 @@ public class TossPaymentProcessor implements PaymentProcessor {
                         .build();
 
                 paymentRepository.save(payment);
+                }
+            } else {
+                throw new NullPointerException("successResponse가 비어있습니다.");
             }
             return response.getBody();
         } else {
@@ -167,21 +177,52 @@ public class TossPaymentProcessor implements PaymentProcessor {
     // 결제 취소
     @Transactional
     @Override
-    public void canceledPayment(Cancel cancel) {
+    public void canceledPayment(CancelRequestDto cancel) {
         String orderNumber = cancel.getOrderNumber();
         String paymentKey = getPaymentKey(orderNumber);
-        ResponseEntity<CanceledResponseDto> canceledResponse = paymentRestTemplate.canceled(paymentKey, cancel.getCanceledReason());  //CanceledResponseDto 화면에 보여줄거면 필요
-        canceledSaveAndPaymentUpdateState(canceledResponse.getBody(), paymentKey);
+
+        Order order = orderRepository.findByOrderNumber(cancel.getOrderNumber())
+                .orElseThrow(() -> new NotFoundException("주문이 존재하지 않습니다."));
+
+        Payment payment = paymentRepository.findPaymentByPaymentKey(paymentKey)
+                .orElseThrow(() -> new PaymentNotExistException("결제 내역이 존재하지 않습니다."));
+
+        OrderBook orderBook = orderBookRepository.findByOrderBookId(cancel.getOrderBookId())
+                .orElseThrow(() -> new NotFoundException("주문 도서를 찾을 수 없습니다."));
+
+        String cancelReason = cancel.getCancelReason();
+
+        // 만약 부분 취소가 있다면 amount 추가 필요!
+        // 사용자가 요청한 취소 저장
+        PaymentCanceled canceled = PaymentCanceled.builder()
+                .paymentCanceledReason(cancelReason)
+                .userCanceledAt(cancel.getRefundedAt())
+                .payment(payment)
+                .build();
+        paymentCanceledRepository.save(canceled);
+
+        // 사용자가 요청한 정보 저장
+        ResponseEntity<CanceledResponseDto> canceledResponse = paymentRestTemplate.canceled(paymentKey, cancelReason);  //CanceledResponseDto 화면에 보여줄거면 필요
 
         // 이미 취소된 건에 대한 처리 필요
         if (canceledResponse.getStatusCode().is4xxClientError()) {
             throw new PaymentAlreadyCanceled("이미 취소가 처리된 결제입니다.");
         }
+
+        if (canceledResponse.getBody() != null) {
+            canceledSaveAndPaymentUpdateState(canceledResponse.getBody(), paymentKey, payment);
+        } else {
+            throw new NullPointerException("canceledResponse가 비어있습니다.");
+        }
+
+        // 취소에 따른 주문 상태 변경
+        order.setOrderState(Order.OrderState.PAYMENT_CANCELED);
+        orderBook.updateOrderBookState(OrderBook.OrderBookState.PAYMENT_CANCELED);
+
     }
 
-    public void canceledSaveAndPaymentUpdateState(CanceledResponseDto canceledResponseDto, String paymentKey) {
-        Payment payment = paymentRepository.findPaymentByPaymentKey(paymentKey)
-                .orElseThrow(() -> new PaymentNotExistException("결제 내역이 존재하지 않습니다."));
+    @Transactional
+    public void canceledSaveAndPaymentUpdateState(CanceledResponseDto canceledResponseDto, String paymentKey, Payment payment) {
         PaymentStatus status = paymentStatusRepository.findByPaymentStatusName("CANCEL")
                 .orElseThrow(() -> new NotFoundException("CANCEL 상태가 존재하지 않습니다."));
 
@@ -189,15 +230,11 @@ public class TossPaymentProcessor implements PaymentProcessor {
         ZonedDateTime zonedDateTime = ZonedDateTime.parse(canceledResponseDto.getCanceledAt());
         LocalDateTime dateTime = zonedDateTime.withZoneSameInstant(seoulZone).toLocalDateTime();
 
-        // 결제 취소 저장
-        PaymentCanceled canceled = PaymentCanceled.builder()
-                .paymentCanceledReason(canceledResponseDto.getPaymentCanceledReason())
-                .paymentCanceledTransactionKey(canceledResponseDto.getPaymentCanceledTransactionKey())
-                .canceledAt(dateTime)
-                .payment(payment)
-                .build();
+        // 토스에게 돌아온 결제 취소 저장
+        PaymentCanceled canceled = paymentCanceledRepository.
+                findByPayment(payment).orElseThrow(() -> new NotFoundException("결제 내역을 찾을 수 없습니다."));
 
-        paymentCanceledRepository.save(canceled);
+        canceled.confirmPaymentCancel(canceledResponseDto.getPaymentCanceledTransactionKey(), dateTime);
 
         // 취소에 따른 payment status 상태 변경
         payment.setPaymentStatus(status);

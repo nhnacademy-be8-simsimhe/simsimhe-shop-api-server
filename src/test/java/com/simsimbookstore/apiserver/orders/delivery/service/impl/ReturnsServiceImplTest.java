@@ -6,17 +6,19 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.simsimbookstore.apiserver.orders.delivery.dto.ReturnsRequestDto;
-import com.simsimbookstore.apiserver.orders.delivery.dto.ReturnsResponseDto;
+import com.simsimbookstore.apiserver.orders.returns.dto.ReturnsRequestDto;
+import com.simsimbookstore.apiserver.orders.returns.dto.ReturnsResponseDto;
 import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
-import com.simsimbookstore.apiserver.orders.delivery.entity.Returns;
+import com.simsimbookstore.apiserver.orders.returns.entity.Returns;
 import com.simsimbookstore.apiserver.orders.delivery.exception.ReturnsNotFoundException;
 import com.simsimbookstore.apiserver.orders.delivery.repository.DeliveryRepository;
-import com.simsimbookstore.apiserver.orders.delivery.repository.ReturnsRepository;
+import com.simsimbookstore.apiserver.orders.returns.repository.ReturnsRepository;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
 import com.simsimbookstore.apiserver.orders.orderbook.repository.OrderBookRepository;
 import java.time.LocalDateTime;
 import java.util.Optional;
+
+import com.simsimbookstore.apiserver.orders.returns.service.impl.ReturnsServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -77,7 +79,7 @@ class ReturnsServiceImplTest {
                 .orderBookId(orderBook.getOrderBookId())
                 .returnReason("Damaged")
                 .returnDate(LocalDateTime.now())
-                .returnStatus("RETURN_REQUESTED")
+                .returnState(Returns.ReturnState.valueOf("RETURN_REQUESTED"))
                 .quantity(1)
                 .refund(true)
                 .damaged(true)
@@ -140,7 +142,7 @@ class ReturnsServiceImplTest {
                 .orderBookId(orderBook.getOrderBookId())
                 .returnReason("Damaged")
                 .returnDate(LocalDateTime.now())
-                .returnStatus("RETURN_REQUESTED")
+                .returnState(Returns.ReturnState.valueOf("RETURN_REQUESTED"))
                 .quantity(1)
                 .refund(true)
                 .damaged(true)

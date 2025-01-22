@@ -79,7 +79,9 @@ public class OrderBook {
         IN_DELIVERY,      // 배송중
         COMPLETED,        // 완료
         RETURNED,         // 반품
-        CANCELED          // 결제취소
+        CANCELED,
+        ORDER_CANCELED,          // 결제취소
+        PAYMENT_CANCELED
     }
 
     public void updateOrderBookState(OrderBookState newOrderBookState) {

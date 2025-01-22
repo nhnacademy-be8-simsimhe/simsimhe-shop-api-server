@@ -7,6 +7,7 @@ import com.simsimbookstore.apiserver.payment.config.TossPaymentProperties;
 import com.simsimbookstore.apiserver.payment.dto.CanceledResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
+import com.simsimbookstore.apiserver.payment.exception.JsonSerializationException;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -63,10 +64,10 @@ public class PaymentRestTemplate {
         try {
             request = new HttpEntity<>(objectMapper.writeValueAsString(map), headers);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new JsonSerializationException("Failed to serialize map to JSON", e);
         }
 
-        ResponseEntity <String> responseEntity = restTemplate.exchange(
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
                 uri,
                 HttpMethod.POST,
                 request,
@@ -92,16 +93,15 @@ public class PaymentRestTemplate {
         try {
             request = new HttpEntity<>(objectMapper.writeValueAsString(map), headers);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new JsonSerializationException("Failed to serialize map to JSON", e);
         }
-        ResponseEntity<ConfirmResponseDto> responseEntity = restTemplate.exchange(
+
+        return restTemplate.exchange(
                 uri,
                 HttpMethod.POST,
                 request,
                 ConfirmResponseDto.class
         );
-
-        return responseEntity;
     }
 
     // 나중에 멱등키를 사용한다면 키 redis에 15일 저장
@@ -119,15 +119,14 @@ public class PaymentRestTemplate {
         try {
             request = new HttpEntity<>(objectMapper.writeValueAsString(cancelReasonMap), headers);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new JsonSerializationException("Failed to serialize map to JSON", e);
         }
 
-        ResponseEntity<CanceledResponseDto> responseEntity = restTemplate.exchange(
+        return restTemplate.exchange(
                 uri,
                 HttpMethod.POST,
                 request,
                 CanceledResponseDto.class
         );
-        return responseEntity;
     }
 }
