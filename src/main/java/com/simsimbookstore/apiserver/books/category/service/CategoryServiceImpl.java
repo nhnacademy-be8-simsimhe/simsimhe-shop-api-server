@@ -82,7 +82,7 @@ public class CategoryServiceImpl implements CategoryService {
         // Convert Category to CategoryResponseDto
         List<CategoryResponseDto> responses = categoryPage.getContent().stream()
                 .map(CategoryMapper::toResponse)
-                .collect(Collectors.toList()); //NOSONAR
+                .collect(Collectors.toList());
 
         // Define pagination details
         int maxPageButtons = 5;

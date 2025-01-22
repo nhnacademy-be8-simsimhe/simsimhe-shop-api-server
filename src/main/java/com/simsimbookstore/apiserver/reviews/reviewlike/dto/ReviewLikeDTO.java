@@ -11,7 +11,7 @@ public class ReviewLikeDTO {
 
     private Long reviewLikeId;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime created_at;
 
     private Long reviewId;
 

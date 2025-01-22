@@ -1,9 +1,9 @@
 package com.simsimbookstore.apiserver.coupons.coupontype.entity;
 
 
-import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.CouponPolicy;
 import jakarta.persistence.*;
 import lombok.*;
+import com.simsimbookstore.apiserver.coupons.couponpolicy.entity.CouponPolicy;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;

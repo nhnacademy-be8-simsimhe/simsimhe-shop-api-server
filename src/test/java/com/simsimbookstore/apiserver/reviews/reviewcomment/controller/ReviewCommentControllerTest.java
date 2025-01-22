@@ -73,7 +73,7 @@ class ReviewCommentControllerTest {
         ReviewComment updatedComment = ReviewComment.builder()
                 .reviewCommentId(commentId)
                 .content("Updated comment")
-                .updatedAt(LocalDateTime.now())
+                .update_at(LocalDateTime.now())
                 .build();
 
         when(reviewCommentService.updateReviewComment(eq(reviewId), eq(commentId), any(ReviewCommentRequestDTO.class)))
@@ -98,7 +98,7 @@ class ReviewCommentControllerTest {
         ReviewComment reviewComment = ReviewComment.builder()
                 .reviewCommentId(commentId)
                 .content("This is a comment")
-                .createdAt(LocalDateTime.now())
+                .created_at(LocalDateTime.now())
                 .build();
 
         when(reviewCommentService.getReviewCommentById(commentId)).thenReturn(reviewComment);

@@ -143,7 +143,8 @@ class CategoryServiceImplTest {
                 .thenReturn(List.of(mockChildCategory));
 
         // Act & Assert
-        assertThrows(NotFoundException.class,() -> categoryService.deleteCategory(mockParentCategory.getCategoryId())); //NOSONAR
+        assertThrows(NotFoundException.class,
+                () -> categoryService.deleteCategory(mockParentCategory.getCategoryId()));
 
         verify(categoryRepository, times(1)).findById(mockParentCategory.getCategoryId());
         verify(categoryRepository, times(1)).findAllByParent(mockParentCategory);

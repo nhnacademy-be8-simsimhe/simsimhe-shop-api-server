@@ -1,7 +1,7 @@
 package com.simsimbookstore.apiserver.common.config;
 
 import com.simsimbookstore.apiserver.common.dto.RabbitmqProperty;
-import com.simsimbookstore.apiserver.coupons.mqconsumer.CouponMqConsumer;
+import com.simsimbookstore.apiserver.coupons.mqConsumer.CouponMqConsumer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;

@@ -28,10 +28,10 @@ public class ReviewComment {
     private String content;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime created_at;
 
     @Setter
-    private LocalDateTime updatedAt;
+    private LocalDateTime update_at;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "review_id")

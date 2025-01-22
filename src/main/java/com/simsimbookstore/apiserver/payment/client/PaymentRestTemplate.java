@@ -7,6 +7,7 @@ import com.simsimbookstore.apiserver.payment.config.TossPaymentProperties;
 import com.simsimbookstore.apiserver.payment.dto.CanceledResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;

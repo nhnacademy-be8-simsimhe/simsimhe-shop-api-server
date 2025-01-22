@@ -22,7 +22,6 @@ public class CouponPolicyController {
 
     /**
      * 모든 쿠폰 정책을 Page로 가지고온다.
-     *
      * @param pageable
      * @return
      */
@@ -34,7 +33,6 @@ public class CouponPolicyController {
 
     /**
      * 쿠폰 정책을 하나 가지고 온다.
-     *
      * @param couponPolicyId
      * @return
      */
@@ -51,7 +49,7 @@ public class CouponPolicyController {
     }
 
     @DeleteMapping("/couponPolicies/{couponPolicyId}")
-    public ResponseEntity<Void> deleteCouponPolicy(@PathVariable Long couponPolicyId) {
+    public ResponseEntity deleteCouponPolicy(@PathVariable Long couponPolicyId) {
         couponPolicyService.deleteCouponPolicy(couponPolicyId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

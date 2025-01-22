@@ -26,4 +26,31 @@ public class ReviewLikeCountDTO {
     private boolean deletable;
     private boolean userLiked;
 
+
+    public ReviewLikeCountDTO(Long reviewId, String title, String content, LocalDateTime createdAt, String userName, int score, long likeCount, long commentCount) {
+        this.reviewId = reviewId;
+        this.title = title;
+        this.content = content;
+        this.createdAt = createdAt;
+        this.userName = userName;
+        this.score = score;
+        this.likeCount = likeCount;
+        this.commentCount = commentCount;
+    }
+
+
+    public ReviewLikeCountDTO(Long reviewId, String title, String content, LocalDateTime createdAt,
+                              String userName, int score, long likeCount, long commentCount, String imagePaths) {
+        this.reviewId = reviewId;
+        this.title = title;
+        this.content = content;
+        this.createdAt = createdAt;
+        this.userName = userName;
+        this.score = score;
+        this.likeCount = likeCount;
+        this.commentCount = commentCount;
+        this.imagePaths = imagePaths != null ? Arrays.asList(imagePaths.split(",")) : null;
+    }
+
+
 }

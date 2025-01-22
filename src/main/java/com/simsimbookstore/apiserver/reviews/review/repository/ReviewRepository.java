@@ -101,14 +101,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Object[]> findAllByBookOrderByScoreDesc(Long userId, Long bookId, Pageable pageable);
 
 
-
-    @Query(value = """
-        select count(o.order_id)
-        from orders as o
-        LEFT JOIN order_books as ob ON o.order_id = ob.order_id
-        LEFT JOIN reviews AS r ON ob.book_id = r.book_id AND o.user_id = r.user_id
-        WHERE o.user_id = :userId AND ob.book_id = :bookId
-        """,
+    @Query(value = "select count(o.order_id) " +
+            "from orders as o " +
+            "LEFT JOIN order_books as ob ON o.order_id = ob.order_id\n" +
+            "LEFT JOIN reviews AS r ON ob.book_id = r.book_id AND o.user_id = r.user_id\n" +
+            "WHERE o.user_id=:userId AND ob.book_id =:bookId",
             nativeQuery = true)
     long bookOrderCheck(Long userId, Long bookId);
 
