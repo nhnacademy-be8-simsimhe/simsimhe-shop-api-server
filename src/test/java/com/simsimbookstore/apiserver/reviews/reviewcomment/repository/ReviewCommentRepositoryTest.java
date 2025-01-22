@@ -38,14 +38,12 @@ class ReviewCommentRepositoryTest {
                 .title("Review 1")
                 .content("This is the first review")
                 .createdAt(LocalDateTime.now())
-                .updateAt(LocalDateTime.now())
                 .build();
 
         review2 = Review.builder()
                 .title("Review 2")
                 .content("This is the second review")
                 .createdAt(LocalDateTime.now())
-                .updateAt(LocalDateTime.now())
                 .build();
 
         reviewRepository.saveAll(List.of(review1, review2));
@@ -53,22 +51,19 @@ class ReviewCommentRepositoryTest {
 
         ReviewComment comment1 = ReviewComment.builder()
                 .content("Comment 1 for Review 1")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .created_at(LocalDateTime.now())
                 .review(review1)
                 .build();
 
         ReviewComment comment2 = ReviewComment.builder()
                 .content("Comment 2 for Review 1")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .created_at(LocalDateTime.now())
                 .review(review1)
                 .build();
 
         ReviewComment comment3 = ReviewComment.builder()
                 .content("Comment 1 for Review 2")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .created_at(LocalDateTime.now())
                 .review(review2)
                 .build();
 
@@ -115,8 +110,7 @@ class ReviewCommentRepositoryTest {
     void saveAndFindById() {
         ReviewComment newComment = ReviewComment.builder()
                 .content("New Comment")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .created_at(LocalDateTime.now())
                 .review(review1)
                 .build();
 

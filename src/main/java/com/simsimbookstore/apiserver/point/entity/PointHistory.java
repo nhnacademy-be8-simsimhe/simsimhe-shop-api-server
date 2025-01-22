@@ -42,7 +42,7 @@ public class PointHistory {
     private Integer amount;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime created_at;
 
     @Column(name = "point_description", nullable = true)
     private String pointDescription;

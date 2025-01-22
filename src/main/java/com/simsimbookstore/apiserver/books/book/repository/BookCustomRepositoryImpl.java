@@ -1,12 +1,7 @@
 package com.simsimbookstore.apiserver.books.book.repository;
 
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.*;
+import com.querydsl.core.types.dsl.*;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.simsimbookstore.apiserver.books.book.dto.BookListResponse;
 import com.simsimbookstore.apiserver.books.book.dto.BookResponseDto;
@@ -301,7 +296,7 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
     /**
      * 정렬 조건 생성 메서드
      */
-    private List<OrderSpecifier<?>> createOrderSpecifiers(Pageable pageable) { //NOSONAR
+    private List<OrderSpecifier<?>> createOrderSpecifiers(Pageable pageable) {
         List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
 
         if (pageable.getSort().isSorted()) {
@@ -395,6 +390,26 @@ public class BookCustomRepositoryImpl implements BookCustomRepository {
         this.addViewCount(book, bookId);
 
         return this.toResponse(bookId, bookResponse);
+    }
+
+
+    /**
+     * 받은 카테고리 아이디에서 최하위 카테고리만 얻는 메서드
+     *
+     * @param categoryIdList
+     * @return
+     */
+    @Override
+    public List<Long> getLowestCategoryId(List<Long> categoryIdList) {
+
+        // 자식 카테고리가 없는 조건
+        return queryFactory
+                .select(category.categoryId)
+                .from(category)
+                .where(category.categoryId.in(categoryIdList)
+                        .and(category.children.isEmpty())) // 자식 카테고리가 없는 조건
+                .fetch();
+
     }
 
 

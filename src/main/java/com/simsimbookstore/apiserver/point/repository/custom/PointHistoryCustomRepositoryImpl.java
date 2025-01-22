@@ -29,7 +29,7 @@ public class PointHistoryCustomRepositoryImpl implements PointHistoryCustomRepos
                         qPointHistory.pointHistoryId.as("pointHistoryId"),
                         qPointHistory.pointType.as("pointType"),
                         qPointHistory.amount.as("amount"),
-                        qPointHistory.createdAt.as("createdAt"),
+                        qPointHistory.created_at.as("createdAt"),
                         // 주문 ID
                         qPointHistory.pointDescription.as("description"),
                         qOrderPointManage.order.orderId.as("orderId"),
@@ -44,7 +44,7 @@ public class PointHistoryCustomRepositoryImpl implements PointHistoryCustomRepos
                 .where(qPointHistory.user.userId.eq(userId))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(qPointHistory.createdAt.desc())
+                .orderBy(qPointHistory.created_at.desc())
                 .fetch();
 
         // 추가: orderId, reviewId 를 보고 "origin" 필드 세팅

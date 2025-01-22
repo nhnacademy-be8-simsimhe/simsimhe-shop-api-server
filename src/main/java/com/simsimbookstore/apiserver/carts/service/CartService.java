@@ -6,9 +6,8 @@ import com.simsimbookstore.apiserver.carts.entity.Cart;
 import com.simsimbookstore.apiserver.carts.dto.CartRequestDto;
 import com.simsimbookstore.apiserver.carts.dto.CartResponseDto;
 import com.simsimbookstore.apiserver.carts.repository.CartRepository;
-
+import com.simsimbookstore.apiserver.common.exception.NotFoundException;
 import com.simsimbookstore.apiserver.exception.BadRequestException;
-import com.simsimbookstore.apiserver.exception.NotFoundException;
 import com.simsimbookstore.apiserver.users.user.entity.User;
 import com.simsimbookstore.apiserver.users.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service

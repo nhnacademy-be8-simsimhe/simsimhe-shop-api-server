@@ -1,4 +1,4 @@
-package com.simsimbookstore.apiserver.coupons.mqconsumer;
+package com.simsimbookstore.apiserver.coupons.mqConsumer;
 
 import com.simsimbookstore.apiserver.coupons.coupon.dto.IssueCouponsRequestDto;
 import com.simsimbookstore.apiserver.coupons.coupon.service.CouponService;

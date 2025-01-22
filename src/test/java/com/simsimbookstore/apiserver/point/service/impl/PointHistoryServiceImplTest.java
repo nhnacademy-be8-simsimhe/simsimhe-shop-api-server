@@ -192,7 +192,7 @@ class PointHistoryServiceImplTest {
         PointHistory pointHistory = PointHistory.builder()
                 .pointType(PointHistory.PointType.EARN)
                 .amount(earnPoints.intValue())
-                .createdAt(LocalDateTime.now())
+                .created_at(LocalDateTime.now())
                 .user(user)
                 .build();
 
@@ -247,7 +247,7 @@ class PointHistoryServiceImplTest {
         PointHistory expectedPointHistory = PointHistory.builder()
                 .pointType(PointHistory.PointType.EARN)
                 .amount(signPointValue.intValue())
-                .createdAt(LocalDateTime.now())
+                .created_at(LocalDateTime.now())
                 .user(user)
                 .build();
 
@@ -277,7 +277,7 @@ class PointHistoryServiceImplTest {
         PointHistory expectedEarnPointHistory = PointHistory.builder()
                 .pointType(PointHistory.PointType.EARN)
                 .amount(earnPoints.intValue())
-                .createdAt(LocalDateTime.now())
+                .created_at(LocalDateTime.now())
                 .user(user)
                 .build();
 
