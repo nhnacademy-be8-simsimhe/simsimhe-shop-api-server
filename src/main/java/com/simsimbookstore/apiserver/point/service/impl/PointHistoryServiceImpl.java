@@ -86,7 +86,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
             PointHistory use = pointHistoryRepository.save(PointHistory.builder()
                     .pointType(PointHistory.PointType.DEDUCT)
                     .amount(-order.getPointUse().intValue())
-                    .created_at(now())
+                    .createdAt(now())
                     .user(user)
                     .build());
 
@@ -101,7 +101,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
         PointHistory save = pointHistoryRepository.save(PointHistory.builder()
                 .pointType(PointHistory.PointType.EARN)
                 .amount(earnPoints.intValue())
-                .created_at(now())
+                .createdAt(now())
                 .user(user)
                 .build());
         // 2. OrderPointManage 엔티티 생성
@@ -130,7 +130,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
         PointHistory save = pointHistoryRepository.save(PointHistory.builder()
                 .pointType(PointHistory.PointType.EARN)
                 .amount(earnPoints.intValue())
-                .created_at(now())
+                .createdAt(now())
                 .user(user)
                 .build());
 
@@ -150,7 +150,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
                 .pointType(PointHistory.PointType.EARN)
                 .amount(signPointValue.intValue())
                 .pointDescription("SIGNUP POINT")
-                .created_at(now())
+                .createdAt(now())
                 .user(user)
                 .build());
     }
@@ -219,7 +219,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
         pointHistoryRepository.save( PointHistory.builder()
                 .user(order.getUser())
                 .amount(save.intValue())
-                .created_at(now())
+                .createdAt(now())
                 .pointType(PointHistory.PointType.EARN)
                 .build());
         return save;

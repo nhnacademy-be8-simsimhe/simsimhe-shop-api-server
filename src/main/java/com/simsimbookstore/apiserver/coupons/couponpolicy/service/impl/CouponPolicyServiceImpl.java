@@ -93,12 +93,4 @@ public class CouponPolicyServiceImpl implements CouponPolicyService {
             throw new IllegalArgumentException("ID는 0보다 커야합니다.");
         }
     }
-//    @Override
-//    public CouponPolicyResponseDto updateCouponPolicy(Long couponPolicyId, CouponPolicyRequestDto requestDto) {
-//        validateId(couponPolicyId);
-//        CouponPolicy couponPolicy = couponPolicyRepository.findById(couponPolicyId).orElseThrow(() -> new NotFoundException("쿠폰정책(id:" + couponPolicyId + ")이 존재하지 않습니다."));
-//        couponPolicy.setCouponPolicyName(requestDto.getCouponPolicyName());
-//        couponPolicy.setDiscountType(requestDto.);
-//        return null;
-//    }
 }

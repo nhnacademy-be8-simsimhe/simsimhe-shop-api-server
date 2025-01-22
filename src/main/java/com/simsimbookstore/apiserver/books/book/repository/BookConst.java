@@ -1,6 +1,9 @@
 package com.simsimbookstore.apiserver.books.book.repository;
 
 public abstract class BookConst {
+    private BookConst() {
+    }
+
     public static final String BOOK_ID = "bookId";
     public static final String IMAGE_PATH = "imagePath";
     public static final String TITLE = "title";

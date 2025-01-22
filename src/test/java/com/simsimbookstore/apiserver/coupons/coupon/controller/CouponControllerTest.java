@@ -1,12 +1,12 @@
 package com.simsimbookstore.apiserver.coupons.coupon.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simsimbookstore.apiserver.coupons.coupon.dto.*;
-import com.simsimbookstore.apiserver.common.exception.NotFoundException;
+
 import com.simsimbookstore.apiserver.coupons.coupon.entity.CouponStatus;
 import com.simsimbookstore.apiserver.coupons.coupon.service.CouponService;
 import com.simsimbookstore.apiserver.coupons.coupontype.entity.CouponTargetType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -263,7 +263,7 @@ class CouponControllerTest {
                         .build()
         );
 
-        when(couponService.getEligibleCoupons(eq(userId), eq(bookId),eq(quantity))).thenReturn(couponList);
+        when(couponService.getEligibleCoupons(userId, bookId,quantity)).thenReturn(couponList);
 
         mockMvc.perform(get("/api/shop/users/{userId}/coupons/unused", userId)
                         .param("bookId", String.valueOf(bookId))

@@ -50,7 +50,6 @@ public class BookManagementService {
     private final BookImageRepoisotry bookImageRepoisotry;
 
 
-
     /**
      * 도서등록
      *
@@ -69,15 +68,14 @@ public class BookManagementService {
 
         Book saveBook = bookRepository.save(book);
 
-        //도서 카테고리 연관관계 매핑(가장 하위 카테고리만 가져옴)
-        //List<Long> lowestCategoryId = bookRepository.getLowestCategoryId(bookRequestDto.getCategoryIdList());
-        this.saveBookCategory(bookRequestDto.getCategoryIdList(), book);
+
+        this.saveBookCategory(bookRequestDto.getCategoryIdList(), book); //NOSONAR
 
         //도서 태그 연관관계 매핑
-        this.saveBookTag(book, bookRequestDto.getTagIdList());
+        this.saveBookTag(book, bookRequestDto.getTagIdList()); //NOSONAR
 
         //도서기여자 연관관계 매핑
-        this.saveBookContributor(book, bookRequestDto.getContributoridList());
+        this.saveBookContributor(book, bookRequestDto.getContributoridList()); //NOSONAR
 
         //이미지등록
         BookImagePath bookImagePath = BookImagePath.builder().imageType(BookImagePath.ImageType.THUMBNAIL)
@@ -120,22 +118,21 @@ public class BookManagementService {
             if (!requestDto.getContributoridList().isEmpty()) {
                 Optional.of(requestDto.getContributoridList()).ifPresent(contributoridList -> {
                     bookContributorRepository.deleteByBookId(bookId);
-                    this.saveBookContributor(book, contributoridList);
+                    this.saveBookContributor(book, contributoridList); //NOSONAR
                 });
             }
 
             if (!requestDto.getCategoryIdList().isEmpty()) {
                 Optional.of(requestDto.getCategoryIdList()).ifPresent(categoryIdList -> {
                     bookCategoryRepository.deleteByBookId(bookId);
-                    //List<Long> lowestCategoryId = bookRepository.getLowestCategoryId(categoryIdList);
-                    this.saveBookCategory(categoryIdList, book);
+                    this.saveBookCategory(categoryIdList, book); //NOSONAR
                 });
             }
 
             if (!requestDto.getTagIdList().isEmpty()) {
                 Optional.of(requestDto.getTagIdList()).ifPresent(tagIdList -> {
                     bookTagRepository.deleteByBookId(bookId);
-                    this.saveBookTag(book, tagIdList);
+                    this.saveBookTag(book, tagIdList); //NOSONAR
                 });
             }
 
@@ -208,7 +205,7 @@ public class BookManagementService {
     @Transactional
     public void saveBookContributor(Book book, List<Long> contributorIdList) {
 
-        // contributorIdList가 null이거나 비어 있으면 작업하지 않습니다.
+
         if (contributorIdList == null || contributorIdList.isEmpty()) {
             return;
         }

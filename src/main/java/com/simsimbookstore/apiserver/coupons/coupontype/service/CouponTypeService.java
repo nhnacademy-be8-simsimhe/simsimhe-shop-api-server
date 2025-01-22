@@ -18,5 +18,5 @@ public interface CouponTypeService {
     CouponTypeResponseDto createCouponType(CouponTypeRequestDto requestDto);
 
     //쿠폰 타입을 삭제한다.
-    void deleteCouponType(Long CouponTypeId);
+    void deleteCouponType(Long couponTypeId);
 }

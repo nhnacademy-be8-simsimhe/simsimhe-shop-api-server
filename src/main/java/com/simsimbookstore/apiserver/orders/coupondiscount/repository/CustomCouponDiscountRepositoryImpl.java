@@ -1,6 +1,5 @@
 package com.simsimbookstore.apiserver.orders.coupondiscount.repository;
 
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.simsimbookstore.apiserver.books.book.entity.QBook;
 import com.simsimbookstore.apiserver.coupons.coupon.entity.CouponStatus;
@@ -28,9 +27,7 @@ public class CustomCouponDiscountRepositoryImpl implements CustomCouponDiscountR
         QOrder order = QOrder.order;
         QOrderBook orderBook = QOrderBook.orderBook;
         QCouponDiscount couponDiscount = QCouponDiscount.couponDiscount;
-        QBook book = QBook.book;
         QCoupon coupon = QCoupon.coupon;
-        QCouponType couponType = QCouponType.couponType;
 
         List<CouponDiscount> content = jpaQueryFactory.selectFrom(couponDiscount)
                 .join(couponDiscount.coupon, coupon)

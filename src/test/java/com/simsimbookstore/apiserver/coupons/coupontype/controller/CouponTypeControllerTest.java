@@ -92,7 +92,7 @@ class CouponTypeControllerTest {
     void getCouponType_ReturnSingle() throws Exception {
         // given
         long couponTypeId = 1L;
-        when(couponTypeService.getCouponType(eq(couponTypeId)))
+        when(couponTypeService.getCouponType(couponTypeId))
                 .thenReturn(couponTypeResponseDto1);
 
         // when & then
@@ -101,7 +101,7 @@ class CouponTypeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.couponTypeName").value("Book Discount"));
 
-        verify(couponTypeService, times(1)).getCouponType(eq(couponTypeId));
+        verify(couponTypeService, times(1)).getCouponType(couponTypeId);
     }
 
     @Test

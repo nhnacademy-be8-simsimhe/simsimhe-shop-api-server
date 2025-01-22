@@ -93,14 +93,14 @@ public class CouponTypeServiceImpl implements CouponTypeService {
     @Transactional
     public CouponTypeResponseDto createCouponType(CouponTypeRequestDto requestDto) {
         CouponType couponType = CouponTypeMapper.toCouponType(requestDto);
-        if (couponType instanceof BookCoupon) {
+        if (couponType instanceof BookCoupon bookCoupon) {
             validateId(requestDto.getTargetId());
             Book book = bookRepository.findByBookId(requestDto.getTargetId()).orElseThrow(() -> new NotFoundException("책(id:" + requestDto.getTargetId() + ")이 존재하지 않습니다."));
-            ((BookCoupon) couponType).setBook(book);
-        } else if (couponType instanceof CategoryCoupon) {
+            bookCoupon.setBook(book);
+        } else if (couponType instanceof CategoryCoupon categoryCoupon) {
             validateId(requestDto.getTargetId());
             Category category = categoryRepository.findById(requestDto.getTargetId()).orElseThrow(() -> new NotFoundException("카테고리(id:" + requestDto.getTargetId() + ")이 존재하지 않습니다."));
-            ((CategoryCoupon) couponType).setCategory(category);
+            categoryCoupon.setCategory(category);
         }
         validateId(requestDto.getCouponPolicyId());
         CouponPolicy couponPolicy = couponPolicyRepository.findById(requestDto.getCouponPolicyId()).orElseThrow(() -> new NotFoundException("쿠폰 정책(id:" + requestDto.getCouponPolicyId() + ")이 존재하지 않습니다."));
