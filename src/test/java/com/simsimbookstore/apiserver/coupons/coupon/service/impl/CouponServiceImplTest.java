@@ -176,6 +176,21 @@ class CouponServiceImplTest {
     }
 
     @Test
+    void getTotalCoupons() {
+        Page<Coupon> page = Page.empty();
+        Pageable pageable = PageRequest.of(0,10);
+        when(couponRepository.findAll(any(Pageable.class))).thenReturn(page);
+        couponService.getTotalCoupons(pageable);
+        verify(couponRepository, times(1)).findAll(any(Pageable.class));
+    }
+
+    //    @Override
+//    public Page<CouponResponseDto> getTotalCoupons(Pageable pageable) {
+//        Page<Coupon> totalCoupons = couponRepository.findAll(pageable);
+//        return totalCoupons.map(CouponMapper::toResponse);
+//    }
+
+    @Test
     @DisplayName("getCouponById : 유효하지 않은 ID로 조회 시 NotFoundException")
     void getCouponById_InvalidId_ThrowsNotFoundException() {
         Long couponId = 9999L;
