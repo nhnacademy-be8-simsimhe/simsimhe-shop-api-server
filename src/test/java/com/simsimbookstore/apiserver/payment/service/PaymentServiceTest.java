@@ -1,6 +1,5 @@
 package com.simsimbookstore.apiserver.payment.service;
 
-import com.simsimbookstore.apiserver.orders.facade.OrderFacadeRequestDto;
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
 import com.simsimbookstore.apiserver.payment.exception.PaymentMethodNotFoundException;
 import com.simsimbookstore.apiserver.payment.processor.PaymentProcessor;
@@ -40,7 +39,7 @@ class PaymentServiceTest {
         validPaymentProcessor2 = Mockito.mock(PaymentProcessor.class);
 
         List<PaymentProcessor> paymentProcessorList = List.of(validPaymentProcessor1, validPaymentProcessor2);
-        paymentService = new PaymentService(paymentProcessorList,paymentMethodRepository, redisTemplate);
+        paymentService = new PaymentService(paymentProcessorList, paymentMethodRepository, redisTemplate);
     }
 
     @Test
@@ -72,5 +71,7 @@ class PaymentServiceTest {
                 .method("validMethod")
                 .build();
         paymentService.createPaymentRequest(orderFacadeResponseDto);
-    };
+
+        verify(validPaymentProcessor1, times(1)).checkPayMethod("validMethod");
+    }
 }
