@@ -1,9 +1,7 @@
 package com.simsimbookstore.apiserver.payment.entity;
 
 import com.simsimbookstore.apiserver.orders.order.entity.Order;
-import com.simsimbookstore.apiserver.payment.dto.ConfirmResponseDto;
 import jakarta.persistence.*;
-import java.time.OffsetDateTime;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -18,7 +16,7 @@ import java.time.LocalDateTime;
 public class Payment {
 
     @Id
-    @Column(nullable = false)
+    @Column(nullable = false, name = "payment_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long paymentId;
 

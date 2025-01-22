@@ -52,9 +52,8 @@ public class SocialUserServiceImpl implements SocialUserService {
                     .build();
             socialUser.addUserRole(userRole);
             socialUser.updateLatestLoginDate(LocalDateTime.now());
-            SocialUser savedSocialUser = socialUserRepository.save(socialUser);
 
-            return savedSocialUser;
+            return socialUserRepository.save(socialUser);
         }
     }
 }

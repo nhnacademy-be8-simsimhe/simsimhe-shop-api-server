@@ -84,7 +84,7 @@ class UserRepositoryTest {
         testUser.updateUserStatus(UserStatus.INACTIVE);
         User updatedUser = userRepository.save(testUser);
 
-        assertEquals(updatedUser.getUserStatus(), UserStatus.INACTIVE);
+        assertEquals(UserStatus.INACTIVE,updatedUser.getUserStatus());
     }
 
     @Test
@@ -93,7 +93,7 @@ class UserRepositoryTest {
         testUser.updateGrade(newGrade);
 
         User updatedUser = userRepository.save(testUser);
-        assertEquals(updatedUser.getGrade().getTier(), Tier.ROYAL);
+        assertEquals(Tier.ROYAL,updatedUser.getGrade().getTier());
     }
 
     @Test
@@ -109,7 +109,7 @@ class UserRepositoryTest {
         Optional<User> user = userRepository.findById(testUser.getUserId());
         assertTrue(user.isPresent());
 
-        assertEquals(user.get().getGrade().getTier(), Tier.STANDARD);
+        assertEquals(Tier.STANDARD,user.get().getGrade().getTier());
     }
 
     @Test
@@ -142,7 +142,7 @@ class UserRepositoryTest {
         userRepository.save(testUser2);
 
         int count = userRepository.updateUserStateInactive(LocalDateTime.now().minusDays(30));
-        assertEquals(count, 2);
+        assertEquals(2,count);
 
         Optional<User> optionalUser = userRepository.findById(testUser.getUserId());
         assertTrue(optionalUser.isPresent());

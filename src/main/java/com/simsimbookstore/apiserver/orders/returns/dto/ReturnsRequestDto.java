@@ -1,5 +1,6 @@
-package com.simsimbookstore.apiserver.orders.delivery.dto;
+package com.simsimbookstore.apiserver.orders.returns.dto;
 
+import com.simsimbookstore.apiserver.orders.returns.entity.Returns;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -30,16 +31,15 @@ public class ReturnsRequestDto {
     private LocalDateTime returnDate;
 
     @NotBlank
+    @Min(value = 1, message = "수량은 1 이상이여야 합니다")
     private Integer quantity;
 
     @NotBlank
-    @Min(value = 1, message = "수량은 1 이상이여야 합니다")
-    private String returnStatus;
+    private Returns.ReturnState returnState;
 
     @NotNull
     private Boolean refund;
 
     @NotNull
     private Boolean damaged;
-
 }

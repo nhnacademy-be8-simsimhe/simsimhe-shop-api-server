@@ -83,6 +83,6 @@ class GradeRepositoryTest {
     @Test
     void findAll() {
         List<Grade> allGrade = gradeRepository.findAll();
-        assertEquals(allGrade.size(), 3);
+        assertEquals(3, allGrade.size());
     }
 }

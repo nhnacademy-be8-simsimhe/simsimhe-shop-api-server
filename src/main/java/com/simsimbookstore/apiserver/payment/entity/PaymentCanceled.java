@@ -23,16 +23,24 @@ public class PaymentCanceled {
     @Column(nullable = false, name = "payment_canceled_reason")
     private String paymentCanceledReason;
 
+    @Column(nullable = false, name = "payment_user_canceled_at")
+    private LocalDateTime userCanceledAt;
+
     @Column(name = "payment_canceled_amount")
     private BigDecimal paymentCanceledAmount;
 
-    @Column(nullable = false, name = "payment_canceled_transaction_key")
+    @Column(name = "payment_canceled_transaction_key")
     private String paymentCanceledTransactionKey;
 
-    @Column(nullable = false, name = "payment_canceled_at")
-    private LocalDateTime canceledAt;
+    @Column(name = "payment_toss_canceled_at")
+    private LocalDateTime tossCanceledAt;
 
     @ManyToOne
     @JoinColumn(name = "payment_id", nullable = false)
     private Payment payment;
+
+    public void confirmPaymentCancel(String paymentCanceledTransactionKey, LocalDateTime tossCanceledAt){
+        this.paymentCanceledTransactionKey = paymentCanceledTransactionKey;
+        this.tossCanceledAt = tossCanceledAt;
+    }
 }

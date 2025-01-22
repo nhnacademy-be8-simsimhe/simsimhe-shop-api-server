@@ -18,7 +18,7 @@ public class SocialUserMapper {
     }
 
     public static SocialUser toSocialUser(SocialUserRequestDto socialUserRequestDto) {
-        return SocialUser.builder()
+        return SocialUser.builder() //NOSONAR
                 .userName(socialUserRequestDto.getName())
                 .mobileNumber(socialUserRequestDto.getMobile())
                 .email(socialUserRequestDto.getEmail())

@@ -26,6 +26,7 @@ public class OrderDetailInfoDto {
     private BigDecimal originalTotalPrice;
 
     // delivery
+    private Long deliveryId;
     private String receiverName;
     private String receiverPhoneNumber;
     private Integer trackingNumber;
@@ -51,6 +52,7 @@ public class OrderDetailInfoDto {
         this.deliveryPrice = order.getDeliveryPrice();
         this.originalTotalPrice = order.getOriginalPrice();
 
+        this.deliveryId = delivery.getDeliveryId();
         this.receiverName = delivery.getDeliveryReceiver();
         this.receiverPhoneNumber = delivery.getReceiverPhoneNumber();
         this.trackingNumber = delivery.getTrackingNumber();

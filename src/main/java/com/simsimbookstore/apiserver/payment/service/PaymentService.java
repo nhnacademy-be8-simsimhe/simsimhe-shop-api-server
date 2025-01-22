@@ -1,19 +1,17 @@
 package com.simsimbookstore.apiserver.payment.service;
 
 import com.simsimbookstore.apiserver.orders.facade.OrderFacadeResponseDto;
-import com.simsimbookstore.apiserver.payment.dto.Cancel;
+import com.simsimbookstore.apiserver.payment.dto.CancelRequestDto;
 import com.simsimbookstore.apiserver.payment.dto.ConfirmResponseDto;
 import com.simsimbookstore.apiserver.payment.dto.PaymentMethodResponse;
 import com.simsimbookstore.apiserver.payment.dto.SuccessRequestDto;
 import com.simsimbookstore.apiserver.payment.entity.PaymentMethod;
 import com.simsimbookstore.apiserver.payment.exception.PaymentMethodNotFoundException;
 import com.simsimbookstore.apiserver.payment.processor.PaymentProcessor;
-import com.simsimbookstore.apiserver.payment.repository.PaymentCanceledRepository;
 import com.simsimbookstore.apiserver.payment.repository.PaymentMethodRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +28,7 @@ public class PaymentService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    private final String HASH_NAME = "Payment";
+    private static final String HASH_NAME = "Payment";
 
     // 사용자가 선택한 결제 방법이 존재하는지 확인 후, 해당 processor에 맞는 결제 진행
     public PaymentProcessor getProcessor(String paymentMethod) {
@@ -63,7 +61,7 @@ public class PaymentService {
     }
 
     // 결제 취소
-    public void canceledPayment(Cancel cancel) {
+    public void canceledPayment(CancelRequestDto cancel) {
         String userPayMethod = (String) redisTemplate.opsForHash().get(HASH_NAME, "method");
         PaymentProcessor paymentProcessor = getProcessor(userPayMethod);
         paymentProcessor.canceledPayment(cancel);

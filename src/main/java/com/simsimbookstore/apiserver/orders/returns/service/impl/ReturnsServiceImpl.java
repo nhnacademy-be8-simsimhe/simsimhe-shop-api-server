@@ -1,13 +1,13 @@
-package com.simsimbookstore.apiserver.orders.delivery.service.impl;
+package com.simsimbookstore.apiserver.orders.returns.service.impl;
 
-import com.simsimbookstore.apiserver.orders.delivery.dto.ReturnsRequestDto;
-import com.simsimbookstore.apiserver.orders.delivery.dto.ReturnsResponseDto;
+import com.simsimbookstore.apiserver.orders.returns.dto.ReturnsRequestDto;
+import com.simsimbookstore.apiserver.orders.returns.dto.ReturnsResponseDto;
 import com.simsimbookstore.apiserver.orders.delivery.entity.Delivery;
-import com.simsimbookstore.apiserver.orders.delivery.entity.Returns;
+import com.simsimbookstore.apiserver.orders.returns.entity.Returns;
 import com.simsimbookstore.apiserver.orders.delivery.exception.ReturnsNotFoundException;
 import com.simsimbookstore.apiserver.orders.delivery.repository.DeliveryRepository;
-import com.simsimbookstore.apiserver.orders.delivery.repository.ReturnsRepository;
-import com.simsimbookstore.apiserver.orders.delivery.service.ReturnsService;
+import com.simsimbookstore.apiserver.orders.returns.repository.ReturnsRepository;
+import com.simsimbookstore.apiserver.orders.returns.service.ReturnsService;
 import com.simsimbookstore.apiserver.orders.orderbook.entity.OrderBook;
 import com.simsimbookstore.apiserver.orders.orderbook.repository.OrderBookRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class ReturnsServiceImpl implements ReturnsService {
         Returns returns = Returns.builder()
                 .returnReason(requestDto.getReturnReason())
                 .returnDate(requestDto.getReturnDate())
-                .returnState(Returns.ReturnState.valueOf(requestDto.getReturnStatus()))
+                .returnState(requestDto.getReturnState())
                 .quantity(requestDto.getQuantity())
                 .refund(requestDto.getRefund())
                 .damaged(requestDto.getDamaged())
@@ -93,5 +93,3 @@ public class ReturnsServiceImpl implements ReturnsService {
         returnsRepository.delete(returns);
     }
 }
-
-

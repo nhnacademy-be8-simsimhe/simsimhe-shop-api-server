@@ -185,7 +185,8 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).findUserWithGradeAndUserRoleListByUserId(1L);
         verify(userRepository, times(1)).save(testUser);
 
-        Assertions.assertThrows(NotFoundException.class, () -> userService.updateUserLatestLoginDate(99L, LocalDateTime.now()));
+        LocalDateTime localDateTime = LocalDateTime.now();
+        Assertions.assertThrows(NotFoundException.class, () -> userService.updateUserLatestLoginDate(99L, localDateTime));
     }
 
     @Test
