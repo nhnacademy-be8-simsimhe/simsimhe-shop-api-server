@@ -14,6 +14,8 @@ import com.simsimbookstore.apiserver.payment.exception.PaymentNotExistException;
 import com.simsimbookstore.apiserver.payment.repository.PaymentStatusRepository;
 import com.simsimbookstore.apiserver.point.service.PointHistoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,31 +32,28 @@ public class AdminReturnsServiceImpl implements AdminReturnsService {
     private final OrderBookRepository orderBookRepository;
 
     @Override
-    public List<ReturnsResponseDto> findReturnList() {
-        List<Returns> returns = returnsRepository.findAll();
+    @Transactional(readOnly = true)
+    public Page<ReturnsResponseDto> findReturnList(Pageable pageable) {
+        Page<Returns> returns = returnsRepository.findAll(pageable);
 
-        return returns.stream().map(returns1 -> {
-                    OrderBook orderBook = returns1.getOrderBook();
-                    return ReturnsResponseDto.builder()
-                            .bookId(orderBook.getOrderBookId())
-                            .bookTitle(orderBook.getBook().getTitle())
-                            .damaged(returns1.getDamaged())
-                            .quantity(returns1.getQuantity())
-                            .refund(returns1.getRefund())
-                            .returnDate(returns1.getReturnDate())
-                            .returnReason(returns1.getReturnReason())
-                            .returnState(String.valueOf(returns1.getReturnState()))
-                            .returnId(returns1.getReturnId())
-                            .salePrice(orderBook.getSalePrice())
-                            .orderBookId(orderBook.getOrderBookId())
-                            .build();
-                })
-                .collect((Collectors.toList()));
+        return returns.map(returns1 -> {
+            OrderBook orderBook = returns1.getOrderBook();
+            return ReturnsResponseDto.builder()
+                    .bookId(orderBook.getOrderBookId())
+                    .bookTitle(orderBook.getBook().getTitle())
+                    .damaged(returns1.getDamaged())
+                    .quantity(returns1.getQuantity())
+                    .refund(returns1.getRefund())
+                    .returnDate(returns1.getReturnDate())
+                    .returnReason(returns1.getReturnReason())
+                    .returnState(String.valueOf(returns1.getReturnState()))
+                    .returnId(returns1.getReturnId())
+                    .salePrice(orderBook.getSalePrice())
+                    .orderBookId(orderBook.getOrderBookId())
+                    .build();
+        });
     }
 
-    // 승인 버튼 > 상태 update
-    // 상태, 시간, 포인트 메서드 가져와서 여기서 주는건지??
-    // -> 상태 업데이트 및 refund(boolean)는 포인트 환불 메서드 마지막에 추가??? + 환불 시간도
     @Override
     @Transactional
     public void confirmReturn(Long orderBookId) {
@@ -63,13 +62,11 @@ public class AdminReturnsServiceImpl implements AdminReturnsService {
         Long orderId = orderBook.getOrder().getOrderId();
         pointHistoryService.refundPoint(orderId);
 
-        // orderBook.status 상태 > CANCELED
         orderBook.updateOrderBookState(OrderBook.OrderBookState.ORDER_CANCELED);
 
-        // paymentRepository 상태 cancel update
         Payment payment = new Payment();
         PaymentStatus paymentStatus = paymentStatusRepository.findByPaymentStatusName("CANCEL")
-                        .orElseThrow(() -> new PaymentNotExistException("CANCEL 상태가 존재하지 않습니다."));
+                .orElseThrow(() -> new PaymentNotExistException("CANCEL 상태가 존재하지 않습니다."));
 
         payment.setPaymentStatus(paymentStatus);
 
@@ -93,7 +90,6 @@ public class AdminReturnsServiceImpl implements AdminReturnsService {
         Returns returns = returnsRepository.findByOrderBook(orderBook)
                 .orElseThrow(() -> new NotFoundException("해당 주문 내역을 찾을 수 없습니다."));
 
-        // order state ORDER_CANCELED
         returns.updateReturn(true, returns.getQuantity(), returns.getDamaged(), Returns.ReturnState.RETURN_REJECTED, LocalDateTime.now());
     }
 }

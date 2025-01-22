@@ -43,8 +43,8 @@ public class PaymentController {
     // Toss에게 받은 결제 인증 성공시 검증 후 결제 승인 요청 -> 결제 완료 -> DB 저장
     @GetMapping("/payment/success")
     public ResponseEntity<ConfirmResponseDto> paymentSuccess(@RequestParam String paymentKey,
-                                            @RequestParam String orderId,
-                                            @RequestParam BigDecimal amount) {
+                                                @RequestParam String orderId,
+                                                @RequestParam BigDecimal amount) {
         // 결제 승인 요청
         ConfirmResponseDto confirmResponseDto = paymentService.confirm(paymentKey, orderId, amount);
             
@@ -64,8 +64,8 @@ public class PaymentController {
     // 비회원의 환불 요청 및 회원의 결제 취소
     @PostMapping("/payment/canceled/{orderNumber}")
     public ResponseEntity<Void> canceledPayment(@PathVariable String orderNumber,
-                                             @RequestParam Long userId,
-                                             @Valid @RequestBody CancelRequestDto cancelRequestDto,
+                                                @RequestParam Long userId,
+                                                @Valid @RequestBody CancelRequestDto cancelRequestDto,
                                                 BindingResult bindingResult) {  //orderId = orderNumber  // 멱등키 : @RequestHeader("idempotentId") String idempotentId,
         if (bindingResult.hasErrors()) {
             throw new PaymentValidationFailException("결제 취소 입력값이 올바르지 않습니다.");
