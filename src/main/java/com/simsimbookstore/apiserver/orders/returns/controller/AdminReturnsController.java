@@ -22,7 +22,6 @@ public class AdminReturnsController {
     public ResponseEntity<Page<ReturnsResponseDto>> canceledList(
             @PageableDefault(size = 10, sort = "returnDate", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<ReturnsResponseDto> returnsResponseDto = adminReturnsService.findReturnList(pageable);
-
         return ResponseEntity.ok(returnsResponseDto);
     }
 
