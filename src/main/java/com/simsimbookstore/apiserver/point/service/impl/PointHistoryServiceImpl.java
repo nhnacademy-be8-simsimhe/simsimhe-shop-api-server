@@ -220,6 +220,7 @@ public class PointHistoryServiceImpl implements PointHistoryService {
                 .amount(save.intValue())
                 .createdAt(now())
                 .pointType(PointHistory.PointType.EARN)
+                .pointDescription("REFUND")
                 .build());
         return save;
     }
