@@ -90,8 +90,7 @@ public class TossPaymentProcessor implements PaymentProcessor {
         BigDecimal redisAmount = (BigDecimal) redisTemplate.opsForHash().get(HASH_NAME, TOTAL_AMOUNT);
 
         if ((Objects.equals(successDto.getOrderId(), redisOrderId))
-                && (Objects.equals(successDto.getAmount(), redisAmount))) {
-            // 같으면 임시 저장 데이터 삭제 > 달라도 삭제가 되야할듯??
+                && (redisAmount.compareTo(successDto.getAmount())) == 0) {
             redisTemplate.opsForHash().delete(HASH_NAME, ORDER_ID);
             redisTemplate.opsForHash().delete(HASH_NAME, TOTAL_AMOUNT);
             return true;
