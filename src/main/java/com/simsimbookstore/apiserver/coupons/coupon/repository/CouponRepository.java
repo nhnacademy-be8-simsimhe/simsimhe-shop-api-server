@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface CouponRepository extends JpaRepository<Coupon,Long>, CustomCouponRepository {
     Page<Coupon> findByUserUserId(Pageable pageable,Long userId);
 
-    @Query("SELECT c FROM Coupon c WHERE c.user.userId = :userId AND c.couponStatus = :couponStatus AND c.deadline < CURRENT_TIMESTAMP")
+    @Query("SELECT c FROM Coupon c WHERE c.user.userId = :userId AND c.couponStatus = :couponStatus AND c.deadline > CURRENT_TIMESTAMP")
     Page<Coupon> findByUserUserIdAndCouponStatusAndDeadlineAfterNow(
             @Param("userId") Long userId,
             @Param("couponStatus") CouponStatus couponStatus,
