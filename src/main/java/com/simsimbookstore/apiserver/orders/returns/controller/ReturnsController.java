@@ -15,7 +15,7 @@ public class ReturnsController {
 
     @PostMapping("/users/{userId}/orders/{orderNumber}/return")
     public ResponseEntity<Void> totalReturn(@PathVariable Long userId,
-                                      @PathVariable String orderNumber,
+                                            @PathVariable String orderNumber,
                                             @RequestBody ReturnsRequestDto returnsRequestDto) {
         returnsService.createReturn(returnsRequestDto);
         return ResponseEntity.ok().build();
